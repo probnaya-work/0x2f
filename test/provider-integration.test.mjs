@@ -132,14 +132,14 @@ test("API: configured providers appear in /api/providers with their integration 
       const providers = await fetch(handle.url + "/api/providers", { headers: authHeaders() }).then(r => r.json());
       assert.deepEqual(
         providers.map(p => p.id),
-        ["claude-code", "codex", "deepseek-harness", "gemini", "hello"]
+        ["claude-code", "codex", "deepseek-harness", "gemini", "opencode", "hello"]
       );
       const hello = providers.find(p => p.id === "hello");
       assert.equal(hello.displayName, "Hello Agent");
       assert.equal(hello.integrationType, "command");
       assert.equal(hello.available, true);
       assert.equal(hello.capabilities.supportsStructuredEvents, false);
-      // Natives keep their descriptor too.
+      // Built-ins keep their descriptor too.
       assert.equal(providers[0].integrationType, "native");
       assert.equal(typeof providers[0].available, "boolean");
     } finally {
@@ -153,7 +153,7 @@ test("API: configured providers appear in /api/providers with their integration 
 
 // --- CLI --------------------------------------------------------------------
 
-test("CLI: `2f providers` lists natives and configured providers with availability", async () => {
+test("CLI: `2f providers` lists built-in and configured providers with availability", async () => {
   const bins = await fs.mkdtemp(path.join(os.tmpdir(), "work-int-bins-"));
   const agent = await fakeCommandAgent(bins);
   const base = await makeProject({
@@ -179,6 +179,7 @@ test("CLI: `2f providers` lists natives and configured providers with availabili
     assert.match(res.out, /codex\s+native\s+(yes|no)/);
     assert.match(res.out, /deepseek-harness\s+native\s+(yes|no)/);
     assert.match(res.out, /gemini\s+native\s+(yes|no)/);
+    assert.match(res.out, /opencode\s+acp\s+(yes|no)/);
     assert.match(res.out, /hello\s+command\s+yes/);
     assert.match(res.out, /ghost\s+command\s+no/);
   } finally {
@@ -283,11 +284,11 @@ test("E2E: native + ACP + command providers coexist in one workspace", async () 
     // before hello.json).
     assert.deepEqual(
       runtime.providers.listProviders().map(p => p.integrationType),
-      ["native", "native", "native", "native", "acp", "command"]
+      ["native", "native", "native", "native", "acp", "acp", "command"]
     );
     assert.equal(runtime.providers.defaultProviderId, "claude-code");
     const ids = runtime.providers.listProviders().map(p => p.id);
-    for (const id of ["claude-code", "codex", "deepseek-harness", "gemini", "hello", "acp-agent"]) {
+    for (const id of ["claude-code", "codex", "deepseek-harness", "gemini", "opencode", "hello", "acp-agent"]) {
       assert.ok(ids.includes(id), `${id} present`);
     }
   } finally {

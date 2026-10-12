@@ -465,14 +465,52 @@ test("the human record is read from the event log, so NOTE, ANSWER and CORRECTIO
   ]);
 });
 
-test("provider identity is derived, so a configured provider is not a blank column", () => {
+test("provider identity covers built-ins and derives configured providers", () => {
   assert.equal(providerSignature("claude-code"), "CC");
   assert.equal(providerSignature("deepseek-harness"), "DS");
   assert.equal(providerSignature("codex"), "CX");
   assert.equal(providerSignature("gemini"), "GM");
+  assert.equal(providerSignature("opencode"), "OC");
   assert.equal(providerSignature("acme-agent", "Acme Agent"), "AA");
   assert.equal(providerSignature("zed", "Zed"), "ZE");
   assert.equal(providerSignature(null), "??");
+});
+
+test("a READY rerun shows its persisted result and only its own execution trace", async () => {
+  const { runtime } = await makeRuntime();
+  const task = await runtime.actions.createWork({ brief: "OpenCode smoke" });
+  await runtime.store.updateTask(applyOutcome(task, { status: "failed", error: "run 1 failed" }));
+  await runtime.store.appendEvent(task.slug, {
+    type: "run.failed",
+    taskId: task.id,
+    run: 1,
+    at: "2026-01-01T10:00:01.000Z",
+    error: "run 1 failed"
+  });
+
+  const rerun = await runtime.actions.rerunWork(task.id);
+  await runtime.store.updateTask(applyOutcome(rerun, { status: "ready", result: "RUN 2 RESULT" }));
+  await runtime.store.appendEvent(task.slug, {
+    type: "progress",
+    taskId: task.id,
+    run: 2,
+    at: "2026-01-01T10:01:01.000Z",
+    text: "run 2 progress"
+  });
+  await fs.writeFile(
+    path.join(runtime.store.taskDir(task.slug), "result.md"),
+    "## Result\nRUN 2 RESULT\n",
+    "utf8"
+  );
+
+  const model = await snapshot(runtime);
+  const projected = model.tasks[0];
+  assert.equal(projected.result, "## Result\nRUN 2 RESULT\n");
+  assert.equal(projected.activity, "run 2 progress");
+  assert.ok(!projected.steps.some(step => step.kind === "fail"), "run 1 failure is history, not run 2 trace");
+
+  const rendered = await frameFor(runtime, initialState({ selectedId: task.id }));
+  assert.match(rendered.text.join("\n"), /RUN 2 RESULT/);
 });
 
 // --- the frame -------------------------------------------------------------------

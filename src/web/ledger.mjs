@@ -970,7 +970,9 @@ export function projectRow(task, events, opts = {}) {
   const providerDisplayName =
     providers[task.execution?.provider]?.displayName ?? task.execution?.provider ?? "";
 
-  const { origin, lastAt, steps, activity, sessionId } = toSteps(task, events, { base });
+  const runNumber = task.runs?.at(-1)?.run ?? 1;
+  const runEvents = eventsForRun(events, runNumber);
+  const { origin, lastAt, steps, activity, sessionId } = toSteps(task, runEvents, { base });
 
   const halted = task.status === "needs_you";
   const running = task.status === "working";

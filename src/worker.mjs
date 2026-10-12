@@ -42,7 +42,7 @@ const promptPath = path.join(dir, "prompt.md");
 const runPromptPath = path.join(dir, "runs", String(runNumber), "prompt.md");
 const resultPath = path.join(dir, "result.md");
 
-// The provider registry for THIS workspace: native providers plus any
+// The provider registry for THIS workspace: built-in providers plus any
 // manifests under .work/providers/. A malformed manifest fails loudly here,
 // exactly as it does for the CLI/API — never silently.
 const providers = createProviderRegistry({ base });

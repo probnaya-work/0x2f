@@ -63,11 +63,11 @@ Requires **Node.js ≥ 20** and at least one coding harness on your PATH:
 [Claude Code](https://code.claude.com/docs) (`claude`) is the built-in
 default, [Codex](https://github.com/openai/codex) (`codex`),
 [DeepSeek Harness](https://github.com/deepseek-ai/DeepSeek-Harness) (`dsh`)
-and [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`)
-are also built in, and any ACP-compatible agent or headless executable
-can be added per project (see [Providers](#providers)). 0x2F itself is one
-small package — `ws` is its only dependency, no build step, no accounts, no
-daemon.
+[Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`), and
+[OpenCode](https://opencode.ai/) (`opencode`, through ACP) are also built in.
+Any other ACP-compatible agent or headless executable can be added per project
+(see [Providers](#providers)). 0x2F itself is one small package — `ws` is its
+only dependency, no build step, no accounts, no daemon.
 
 ```bash
 npm install -g 0x2f        # the `2f` command lands on your PATH
@@ -118,6 +118,19 @@ file edits (`--approval-mode auto_edit`; override with `GEMINI_APPROVAL_MODE`),
 and supports same-session resume by UUID. Its structured-event, permission
 and resume boundaries are documented in
 [`docs/gemini-capability-map.md`](docs/gemini-capability-map.md).
+
+OpenCode uses its built-in ACP server and is available in every workspace
+without a provider manifest:
+
+```bash
+opencode                            # authenticate/configure OpenCode itself
+2f providers                       # confirm: opencode  acp  yes
+2f new "Audit the auth flow" --provider opencode
+```
+
+0x2F starts `opencode acp` in the project directory. OpenCode resolves its
+normal global and project configuration there, including models, agents,
+commands, skills, plugins, permissions, rules, and MCP servers.
 
 `2f init` creates `.work/` with `project.md`, `rules.md`, `knowledge.md`,
 `decisions.md` and `providers/` — edit `project.md` and `rules.md` once;
@@ -348,10 +361,10 @@ to the install.
 | Integration | What it is | Use |
 | --- | --- | --- |
 | **Native** | Deep adapter for one harness's specific capabilities | `claude-code` (permissions → `needs_you` → same-session resume), `codex` (structured exec events + thread resume), `deepseek-harness`, `gemini` (structured stream events + UUID session resume) |
-| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Any ACP-compatible agent — Cursor, OpenCode — configured by manifest |
+| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Built-in OpenCode; any other ACP-compatible agent configured by manifest |
 | **Command** | One generic provider for headless executables | Any CLI that takes a prompt and prints a result — configured by manifest |
 
-`claude-code`, `codex`, `deepseek-harness` and `gemini` are built in.
+`claude-code`, `codex`, `deepseek-harness`, `gemini`, and `opencode` are built in.
 Everything else is added **declaratively**: drop one JSON manifest into
 `.work/providers/` and it becomes a provider — no source changes:
 
@@ -413,7 +426,7 @@ Execution node     local machine (spawns the detached worker)
 Provider           native · ACP · command
     │
     ▼
-Coding harness     claude-code · codex · dsh · gemini · cursor · any command
+Coding harness     claude-code · codex · dsh · gemini · opencode · cursor · any command
 ```
 
 No surface implements lifecycle or provider logic — the CLI, the terminal

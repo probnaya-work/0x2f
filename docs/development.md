@@ -40,12 +40,13 @@ src/
     store.mjs         persistence under .work/
     errors.mjs        WorkError — one error type for CLI and API
   providers/
-    index.mjs         provider registry (native + manifest providers)
+    index.mjs         provider registry (built-in + manifest providers)
     claude-code.mjs   native adapter
     codex.mjs         native adapter (exec --json + thread resume)
     deepseek-harness.mjs  native adapter
     gemini.mjs        native adapter (stream-json + UUID session resume)
     acp.mjs           generic ACP provider
+    opencode.mjs      built-in OpenCode descriptor (uses generic ACP)
     command.mjs       generic command provider
     manifests.mjs     provider manifest loading + validation
   nodes/
@@ -62,8 +63,8 @@ src/
     sound-policy.mjs  when 0x2F may make a sound (pure, testable)
     sound.mjs         the slash — Web Audio, no assets
 relay/                 the standalone relay service (see relay/README.md)
-examples/providers/    verified manifests (Cursor, OpenCode, command; removed:
-                       Codex and Gemini CLI are now built-in native providers)
+examples/providers/    verified manifests (Cursor, command; OpenCode uses the
+                       built-in ACP provider; Codex/Gemini use native providers)
 test/                  node --test suite
 ```
 
@@ -235,7 +236,7 @@ produces the full PASS/findings report — an AI reviewer is strictly optional.
 Validation (`src/providers/manifests.mjs`) is strict: `id` lowercase
 alphanumeric, `command` a non-empty argv array, only `{prompt}` and
 `{workspace}` placeholders, and built-ins (`claude-code`, `codex`,
-`deepseek-harness`, `gemini`) cannot be redefined. For ACP
+`deepseek-harness`, `gemini`, `opencode`) cannot be redefined. For ACP
 agents, `"permissions"` may be `"interactive"` (default), `"deny"`, or
 `"approve"`. See [`examples/providers/`](../examples/providers/README.md).
 

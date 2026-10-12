@@ -36,10 +36,10 @@ harness that 0x2F did not ship — an ACP-compatible agent or a headless
 command — so adding a new harness needs no source changes:
 
   {
-    "id": "gemini",
-    "displayName": "Gemini CLI",
+    "id": "cursor",
+    "displayName": "Cursor",
     "transport": "acp",
-    "command": ["gemini", "--acp"]
+    "command": ["agent", "acp"]
   }
 
   {
@@ -52,7 +52,7 @@ command — so adding a new harness needs no source changes:
 Rules: id must be unique and lowercase; transport is "acp" or "command";
 command is an argv array (never a shell string); the only placeholders are
 {prompt} and {workspace}; built-in providers (claude-code, codex,
-deepseek-harness, gemini) cannot be redefined. For ACP agents, "permissions" ("interactive" default,
+deepseek-harness, gemini, opencode) cannot be redefined. For ACP agents, "permissions" ("interactive" default,
 "deny" / "approve" for headless auto-resolution) controls how tool permission
 requests are handled.
 Adding a provider grants 0x2F permission to execute that local command in

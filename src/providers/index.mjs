@@ -2,7 +2,7 @@
 // exist. It now holds three integration types behind ONE contract:
 //
 //   Native    claude-code, codex, deepseek-harness, gemini   (deep provider adapters)
-//   ACP       any agent exposing the Agent Client Protocol (manifests)
+//   ACP       OpenCode (built in) + manifest-configured ACP agents
 //   Command   any headless executable                (manifests)
 //
 // Work Core, the worker, and every client consume providers through a
@@ -28,6 +28,7 @@ import { claudeCodeProvider } from "./claude-code.mjs";
 import { codexProvider } from "./codex.mjs";
 import { deepseekHarnessProvider } from "./deepseek-harness.mjs";
 import { geminiProvider } from "./gemini.mjs";
+import { opencodeProvider } from "./opencode.mjs";
 import { loadManifestProviders } from "./manifests.mjs";
 
 export const defaultProviderId = "claude-code";
@@ -37,11 +38,12 @@ for (const provider of [claudeCodeProvider, codexProvider, deepseekHarnessProvid
   provider.integrationType ??= "native";
 }
 
-const NATIVE_PROVIDERS = {
+const BUILT_IN_PROVIDERS = {
   [claudeCodeProvider.id]: claudeCodeProvider,
   [codexProvider.id]: codexProvider,
   [deepseekHarnessProvider.id]: deepseekHarnessProvider,
-  [geminiProvider.id]: geminiProvider
+  [geminiProvider.id]: geminiProvider,
+  [opencodeProvider.id]: opencodeProvider
 };
 
 // Deterministic, cheap availability: resolve the executable WITHOUT spawning
@@ -111,10 +113,10 @@ export function unavailableMessage(id, providers) {
 // <base>/.work/providers/ (throwing loudly on invalid configuration),
 // then merges any `extra` providers (the plugin seam).
 export function createProviderRegistry({ base = process.cwd(), extra = [], env = process.env } = {}) {
-  const providers = { ...NATIVE_PROVIDERS };
+  const providers = { ...BUILT_IN_PROVIDERS };
 
   for (const provider of loadManifestProviders(base, {
-    nativeIds: Object.keys(NATIVE_PROVIDERS)
+    nativeIds: Object.keys(BUILT_IN_PROVIDERS)
   })) {
     if (providers[provider.id]) {
       throw new Error(`Provider "${provider.id}" is already registered.`);
@@ -166,13 +168,13 @@ export function createProviderRegistry({ base = process.cwd(), extra = [], env =
   };
 }
 
-// Legacy module-level view: NATIVE providers only (pre-manifest behavior).
+// Legacy module-level view: built-in providers only (pre-manifest behavior).
 // New code should use createProviderRegistry() so configured providers are
 // visible; these are kept for backward compatibility.
 export function getProvider(id) {
-  return NATIVE_PROVIDERS[id] ?? null;
+  return BUILT_IN_PROVIDERS[id] ?? null;
 }
 
 export function listProviders() {
-  return Object.values(NATIVE_PROVIDERS);
+  return Object.values(BUILT_IN_PROVIDERS);
 }

@@ -27,7 +27,8 @@ import {
   inferFailureKind,
   authFailureCopy,
   fidelity,
-  progressPercent
+  progressPercent,
+  eventsForRun
 } from "../web/ledger.mjs";
 import { deriveWorkspace } from "../project.mjs";
 import { currentRunNumber } from "../core/runs.mjs";
@@ -189,9 +190,11 @@ function failOf(task, steps, files, provider, node) {
 
 // One task, fully projected. `events` is the task's normalized event log.
 export function projectTask(task, events, opts = {}) {
-  const { base = "", providers = {}, lookup, node = "", now = Date.now() } = opts;
+  const { base = "", providers = {}, lookup, node = "", now = Date.now(), result = "" } = opts;
   const provider = lookup(task.execution?.provider);
-  const { origin, lastAt, steps, files, activity, sessionId } = toSteps(task, events, { base });
+  const run = currentRunNumber(task);
+  const runEvents = eventsForRun(events, run);
+  const { origin, lastAt, steps, files, activity, sessionId } = toSteps(task, runEvents, { base });
 
   const state = STATE_KEY[task.status] ?? "working";
   const running = state === "working";
@@ -211,7 +214,6 @@ export function projectTask(task, events, opts = {}) {
     : elapsed;
   const progress = progressPercent(task, runElapsed);
 
-  const run = currentRunNumber(task);
   const runs = projectRuns(task.runs ?? [], {
     providers: Object.fromEntries(
       Object.entries(providers).map(([id, p]) => [id, p.displayName])
@@ -226,6 +228,7 @@ export function projectTask(task, events, opts = {}) {
     slug: task.slug,
     title: task.title ?? "",
     brief: task.brief ?? task.title ?? "",
+    result,
     status: task.status,
     state,
     provider: task.execution?.provider ?? null,
@@ -276,9 +279,12 @@ export async function snapshot(runtime, opts = {}) {
   const lookup = providerLookup(runtime.providers);
   const projected = [];
   for (const task of tasks) {
-    const events = await runtime.store.readEvents(task.slug);
+    const [events, result] = await Promise.all([
+      runtime.store.readEvents(task.slug),
+      runtime.store.readTaskResult(task)
+    ]);
     projected.push(
-      projectTask(task, events, { base: runtime.base, providers, lookup, node, now })
+      projectTask(task, events, { base: runtime.base, providers, lookup, node, now, result })
     );
   }
   return {

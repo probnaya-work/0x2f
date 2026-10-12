@@ -492,7 +492,7 @@ test("GET /api/providers lists the registry (default first) with normalized desc
     const providers = await apiFetch(handle.url + "/api/providers").then(r => r.json());
     assert.deepEqual(
       providers.map(p => p.id),
-      ["claude-code", "codex", "deepseek-harness", "gemini"]
+      ["claude-code", "codex", "deepseek-harness", "gemini", "opencode"]
     );
     const dsh = providers.find(p => p.id === "deepseek-harness");
     assert.equal(dsh.displayName, "DeepSeek Harness");
@@ -510,6 +510,11 @@ test("GET /api/providers lists the registry (default first) with normalized desc
     assert.equal(codex.capabilities.supportsStructuredEvents, true);
     assert.equal(codex.capabilities.supportsFileChanges, false);
     assert.equal(codex.capabilities.supportsPermissionRequests, false);
+    const opencode = providers.find(p => p.id === "opencode");
+    assert.equal(opencode.displayName, "OpenCode");
+    assert.equal(opencode.integrationType, "acp");
+    assert.equal(opencode.capabilities.supportsResume, true);
+    assert.equal(opencode.capabilities.supportsStreaming, true);
     // No vendor internals leak through the API.
     for (const p of providers) {
       assert.deepEqual(

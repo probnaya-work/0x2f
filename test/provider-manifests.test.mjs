@@ -1,6 +1,6 @@
 // Provider manifests + registry — declarative configuration that adds ACP or
 // command providers without source changes, and the single registry that
-// holds native + configured providers behind one contract.
+// holds built-in + configured providers behind one contract.
 
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -79,7 +79,7 @@ test("manifests: every failure mode fails loudly, naming the file", () => {
 });
 
 test("manifests: a manifest cannot shadow a built-in provider", () => {
-  const nativeIds = ["claude-code", "codex", "deepseek-harness", "gemini"];
+  const nativeIds = ["claude-code", "codex", "deepseek-harness", "gemini", "opencode"];
   assert.throws(
     () => validateManifest({ ...CMD_MANIFEST, id: "claude-code" }, "x.json", { nativeIds }),
     /built-in provider and cannot be redefined/
@@ -94,6 +94,10 @@ test("manifests: a manifest cannot shadow a built-in provider", () => {
   );
   assert.throws(
     () => validateManifest({ ...CMD_MANIFEST, id: "gemini" }, "x.json", { nativeIds }),
+    /built-in provider/
+  );
+  assert.throws(
+    () => validateManifest({ ...CMD_MANIFEST, id: "opencode" }, "x.json", { nativeIds }),
     /built-in provider/
   );
 });
@@ -114,7 +118,7 @@ test("loadManifestProviders: builds acp + command providers from files; duplicat
   });
   try {
     const providers = loadManifestProviders(base, {
-      nativeIds: ["claude-code", "codex", "deepseek-harness", "gemini"]
+      nativeIds: ["claude-code", "codex", "deepseek-harness", "gemini", "opencode"]
     });
     assert.deepEqual(providers.map(p => p.id), ["cursor", "my-agent"]);
     assert.equal(providers[0].integrationType, "acp");
@@ -148,7 +152,7 @@ test("loadManifestProviders: invalid JSON fails clearly", async () => {
 
 // --- the registry -----------------------------------------------------------
 
-test("registry: native + configured providers coexist behind one contract", async () => {
+test("registry: built-in + configured providers coexist behind one contract", async () => {
   const base = await makeBase({
     "cursor.json": ACP_MANIFEST,
     "my-agent.json": CMD_MANIFEST
@@ -161,6 +165,7 @@ test("registry: native + configured providers coexist behind one contract", asyn
       "codex",
       "deepseek-harness",
       "gemini",
+      "opencode",
       "cursor",
       "my-agent"
     ]);
@@ -186,6 +191,11 @@ test("registry: native + configured providers coexist behind one contract", asyn
     // Gemini is a first-class NATIVE provider — a manifest cannot redefine it.
     assert.equal(registry.getProvider("gemini").integrationType, "native");
     assert.equal(registry.getProvider("gemini").displayName, "Gemini CLI");
+    // OpenCode is globally available through the generic ACP adapter.
+    assert.equal(registry.getProvider("opencode").integrationType, "acp");
+    assert.equal(registry.getProvider("opencode").displayName, "OpenCode");
+    assert.deepEqual(registry.getProvider("opencode").command, ["opencode", "acp"]);
+    assert.equal(registry.getProvider("opencode").capabilities.supportsResume, true);
     assert.equal(registry.getProvider("nope"), null);
     assert.equal(registry.defaultProviderId, "claude-code");
   } finally {

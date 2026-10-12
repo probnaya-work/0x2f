@@ -534,6 +534,19 @@ function stateBlock(task, w, p, T) {
           : "no file changes reported"), p.ghost)]
       });
     }
+    if (typeof task.result === "string" && task.result.trim()) {
+      lines.push({ cells: [T("")] });
+      lines.push({ cells: [T(" RESULT", p.ghost, 600)] });
+      for (const rawLine of task.result.trim().split(/\r?\n/)) {
+        if (!rawLine.trim()) {
+          lines.push({ cells: [T("")] });
+          continue;
+        }
+        for (const rowText of wrap(rawLine, Math.max(10, w - 6))) {
+          lines.push({ cells: [T("   " + rowText, p.fg)] });
+        }
+      }
+    }
   } else if (task.state === "working") {
     const last = [...task.steps].reverse().find(s => s.kind === "tool" || s.kind === "command");
     const ruleW = Math.min(28, Math.max(6, w - 22));

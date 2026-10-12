@@ -35,19 +35,12 @@ Notes:
   them, equivalent to DSH headless semantics). A Cursor agent that needs
   tool approval will otherwise see its requests surface as NEEDS YOU.
 
-## `opencode.json` — OpenCode (ACP)
+## `opencode.json` — (removed: OpenCode is now a built-in ACP provider)
 
-Verified: `opencode acp` starts OpenCode as an ACP-compatible subprocess
-(`opencode.ai/docs/acp`).
-
-```json
-{
-  "id": "opencode",
-  "displayName": "OpenCode",
-  "transport": "acp",
-  "command": ["opencode", "acp"]
-}
-```
+OpenCode no longer needs a per-workspace manifest. `opencode` is registered
+globally by 0x2F and uses the same generic ACP adapter with `opencode acp`.
+A `.work/providers/*.json` manifest with `"id": "opencode"` is rejected as
+a redefinition of a built-in provider.
 
 ## `codex-acp.json` — (removed: Codex is now a built-in native provider)
 
@@ -98,3 +91,5 @@ never a shell) with the workspace as its working directory.
 - **Gemini CLI** is a built-in native provider (`gemini -p --skip-trust -o
   stream-json` + `--resume <uuid>`) — no manifest needed; see
   `docs/gemini-capability-map.md` for its verified capability boundaries.
+- **OpenCode** is a built-in ACP provider (`opencode acp`) — no manifest
+  needed. It keeps OpenCode's normal global and project configuration.

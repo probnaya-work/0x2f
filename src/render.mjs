@@ -14,7 +14,7 @@ export function blockedReasonLabel(task) {
   return "Needs you";
 }
 
-// `lookup` is the runtime's provider registry lookup (native + configured);
+// `lookup` is the runtime's provider registry lookup (built-in + configured);
 // it defaults to the native-only module view for backward compatibility.
 export function providerName(task, lookup = nativeGetProvider) {
   const provider = lookup(task.execution?.provider);

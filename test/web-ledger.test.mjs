@@ -603,6 +603,29 @@ test("ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never A
   assert.equal(row.trace, null);
 });
 
+test("a rerun's Web trace excludes events from previous runs", () => {
+  const events = log([
+    ["file.changed", 1, { run: 1, path: "old-run.ts" }],
+    ["run.failed", 2, { run: 1, error: "run 1 failed" }],
+    ["file.changed", 3, { run: 2, path: "current-run.ts" }],
+    ["run.completed", 4, { run: 2, status: "ready" }]
+  ]);
+  const row = projectRow(
+    task({
+      status: "ready",
+      runs: [
+        { run: 1, provider: "claude-code", outcome: "failed" },
+        { run: 2, provider: "claude-code", outcome: "ready" }
+      ]
+    }),
+    events,
+    { open: true, providers: RICH }
+  );
+
+  assert.deepEqual(row.files, ["current-run.ts"]);
+  assert.ok(!row.provenance.cells.some(cell => cell.arg.includes("old-run")));
+});
+
 test("failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop", () => {
   const events = log([
     ["tool.started", 1, { name: "Edit", input: { file_path: "a.ts" } }],

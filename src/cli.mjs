@@ -55,7 +55,7 @@ Commands:
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
                           pair through a hosted relay instead; --lan forces LAN;
                           --off revokes remote access and disables the connection)
-  2f providers      list execution providers (native + configured)
+  2f providers      list execution providers (built-in + configured)
   2f ui [port]      open the Web UI (start the runtime if needed; --no-browser
                     starts it without opening a browser)
   2f serve [port]   run the runtime in the FOREGROUND (for launchd/systemd
@@ -65,7 +65,7 @@ Commands:
                     full, and the action it is waiting for — the same runtime
                     the Web UI and the phone speak to
 
-Providers: auto (routing), claude-code (default), codex, deepseek-harness, gemini
+Providers: auto (routing), claude-code (default), codex, deepseek-harness, gemini, opencode
 Configured: ACP/command providers from .work/providers/*.json
 Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 `);

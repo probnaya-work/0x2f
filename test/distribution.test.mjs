@@ -140,11 +140,15 @@ test("the packed artifact supports the full first-install journey", async t => {
   const cli = path.join(prefix, "bin", "2f");
   assert.ok(fs.existsSync(cli), "no 2f bin shim in the global prefix");
 
-  // Deterministic provider availability: natives must look missing regardless
-  // of the machine's installed harnesses; the fake manifest provider carries
-  // the real task.
+  // Deterministic provider availability: every built-in must look missing
+  // regardless of the machine's installed harnesses; the fake manifest
+  // provider carries the real task.
+  const providerlessPath = path.join(work, "providerless-path");
+  await fsp.mkdir(providerlessPath);
+  await fsp.symlink(process.execPath, path.join(providerlessPath, "node"));
   const env = {
     ...process.env,
+    PATH: providerlessPath,
     CLAUDE_BIN: path.join(work, "missing-claude"),
     CODEX_BIN: path.join(work, "missing-codex"),
     DSH_BIN: path.join(work, "missing-dsh"),

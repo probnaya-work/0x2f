@@ -39,7 +39,7 @@ export function palette(theme) {
 // --- provider identity -------------------------------------------------------
 //
 // The ledger row has room for two characters of provider, not twelve. The
-// design fixes signatures for the four native providers; a configured
+// design fixes signatures for the built-in providers; a configured
 // (ACP/command manifest) provider gets a derived one, because the TUI must
 // be provider-agnostic — it may not have a table of every provider that can
 // ever exist.
@@ -47,7 +47,8 @@ const NATIVE_SIGNATURES = {
   "claude-code": "CC",
   "deepseek-harness": "DS",
   codex: "CX",
-  gemini: "GM"
+  gemini: "GM",
+  opencode: "OC"
 };
 
 // Initials of a two-word name ("Acme Agent" -> "AA"), else the first two
