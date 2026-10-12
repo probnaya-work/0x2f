@@ -70,8 +70,9 @@ through another supported harness without manually assembling the handoff.
 Requires **Node.js ≥ 20** and at least one coding harness on your PATH:
 [Claude Code](https://code.claude.com/docs) (`claude`) is the built-in
 default, [Codex](https://github.com/openai/codex) (`codex`),
-[DeepSeek Harness](https://github.com/deepseek-ai/DeepSeek-Harness) (`dsh`)
-and [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`)
+[DeepSeek Harness](https://github.com/deepseek-ai/DeepSeek-Harness) (`dsh`),
+[Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`), and
+[OpenCode](https://opencode.ai/) (`opencode`, through ACP)
 are also built in, and any ACP-compatible agent or headless executable
 can be added per project (see [Providers](#providers)). 0x2F itself is one
 small package with WebSocket and cryptography dependencies, no build step,
@@ -414,7 +415,7 @@ to the install.
 | Integration | What it is | Use |
 | --- | --- | --- |
 | **Native** | Deep adapter for one harness's specific capabilities | `claude-code` (permissions → `needs_you` → same-session resume), `codex` (structured exec events + thread resume), `deepseek-harness`, `gemini` (structured stream events + UUID session resume) |
-| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Any ACP-compatible agent — Cursor, OpenCode — configured by manifest |
+| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Built-in OpenCode; any other ACP-compatible agent configured by manifest |
 | **Command** | One generic provider for headless executables | Any CLI that takes a prompt and prints a result — configured by manifest |
 
 `claude-code`, `codex`, `deepseek-harness`, `gemini`, and `opencode` are built in.
@@ -482,7 +483,7 @@ Execution node     local machine (spawns the detached worker)
 Provider           native · ACP · command
     │
     ▼
-Coding harness     claude-code · codex · dsh · gemini · cursor · any command
+Coding harness     claude-code · codex · dsh · gemini · opencode · cursor · any command
 ```
 
 No surface implements lifecycle or provider logic — the CLI, the terminal

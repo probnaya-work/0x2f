@@ -27,7 +27,7 @@ export function createRuntime(base = process.cwd(), opts = {}) {
   const store = createStore(base);
   const node = opts.node ?? createLocalNode({ workspace: base });
   const events = createBus();
-  // The provider registry for THIS workspace: native providers plus any
+  // The provider registry for THIS workspace: built-in providers plus any
   // manifests under .work/providers/. `opts.providers` is the plugin seam —
   // a future external/native provider package passes its providers here.
   const providers = createProviderRegistry({

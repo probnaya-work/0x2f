@@ -191,7 +191,7 @@ function failOf(task, steps, files, provider, node) {
 
 // One task, fully projected. `events` is the task's normalized event log.
 export function projectTask(task, events, opts = {}) {
-  const { base = "", providers = {}, lookup, node = "", now = Date.now() } = opts;
+  const { base = "", providers = {}, lookup, node = "", now = Date.now(), result = "" } = opts;
   const provider = lookup(task.execution?.provider);
   const run = currentRunNumber(task);
   const current = task.runs?.at(-1);
@@ -236,6 +236,7 @@ export function projectTask(task, events, opts = {}) {
     slug: task.slug,
     title: task.title ?? "",
     brief: task.brief ?? task.title ?? "",
+    result,
     status: task.status,
     state,
     provider: task.execution?.provider ?? null,
@@ -287,9 +288,12 @@ export async function snapshot(runtime, opts = {}) {
   const lookup = providerLookup(runtime.providers);
   const projected = [];
   for (const task of tasks) {
-    const events = await runtime.store.readEvents(task.slug);
+    const [events, result] = await Promise.all([
+      runtime.store.readEvents(task.slug),
+      runtime.store.readTaskResult(task)
+    ]);
     projected.push(
-      projectTask(task, events, { base: runtime.base, providers, lookup, node, now })
+      projectTask(task, events, { base: runtime.base, providers, lookup, node, now, result })
     );
   }
   return {
