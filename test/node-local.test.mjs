@@ -75,6 +75,17 @@ test("resolveWorkspace maps the logical 'local' workspace to the local path", ()
   assert.throws(() => node.resolveWorkspace("mini-pc"), /cannot resolve workspace "mini-pc"/);
 });
 
+test("startExecution forwards the runtime environment to the worker", async () => {
+  const spawner = recordingSpawn();
+  const env = { ...process.env, OPENCODE_CONFIG_CONTENT: '{"model":"opencode/muse-spark-1.3-contributor-free"}' };
+  const node = createLocalNode({ workspace: "/tmp/proj", spawn: spawner.spawn, env });
+  await node.startExecution({ task: task("003-x") });
+  assert.equal(
+    spawner.calls[0].opts.env.OPENCODE_CONFIG_CONTENT,
+    env.OPENCODE_CONFIG_CONTENT
+  );
+});
+
 test("cancelExecution is a best-effort stop of the recorded pid", async () => {
   const killed = [];
   const node = createLocalNode({

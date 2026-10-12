@@ -696,6 +696,12 @@ const sendBack = id => {
 // YOU, a finished run the user no longer wants).
 const close = id => accept(id);
 
+// CANCEL stops the active run through the same action the CLI and TUI use.
+const cancelRun = id => {
+  if (remoteBlocked()) return Promise.resolve(false);
+  return act(() => post("/api/tasks/" + id + "/cancel"));
+};
+
 // ANSWER responds to a needs_you/decision block. A decision is answered,
 // never allowed/rejected; the answer is persisted with the task.
 async function answerDecision(id) {
@@ -1395,7 +1401,12 @@ function renderResult(row, detail) {
       : null;
 
   return el("div", { class: "result" }, [
-    el("div", {}, [el("div", { class: "result-k", text: row.failed ? "FAILURE" : "RESULT" })]),
+    el("div", {}, [
+      el("div", {
+        class: "result-k",
+        text: row.failureKind === "cancelled" ? "CANCELLED" : row.failed ? "FAILURE" : "RESULT"
+      })
+    ]),
     el("div", { class: "band-right" }, [body, acts].filter(Boolean))
   ]);
 }
@@ -1533,6 +1544,15 @@ function renderRow(row, accent) {
       renderCapabilityNote(row),
       row.halted ? renderHalt(row, accent) : null,
       row.ready || row.failed || row.done ? renderResult(row, detail) : null,
+      row.running
+        ? el("div", { class: "acts" }, [
+            actionButton("CANCEL", "X", "act-quiet", e => {
+              e.stopPropagation();
+              e.currentTarget.disabled = true;
+              cancelRun(row.id);
+            }, "cancel-" + row.id)
+          ])
+        : null,
       renderSections(row),
       renderProvenance(row, accent),
       renderNoteLine(row),
@@ -2303,8 +2323,10 @@ function onKeyDown(event) {
   } else if (event.key === "s" || event.key === "S") {
     if (row?.ready || row?.failed) sendBack(row.id);
   } else if (event.key === "x" || event.key === "X") {
-    // CLOSE: remove the Work from active attention — never a provider call.
-    if (row?.halted || row?.ready || row?.failed) accept(row.id);
+    // A working run cancels through the shared action. Every other state
+    // uses CLOSE — removing the Work from active attention, never a provider call.
+    if (row?.running) cancelRun(row.id);
+    else if (row?.halted || row?.ready || row?.failed) accept(row.id);
   }
 }
 
@@ -3058,7 +3080,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
     parts.push(el("div", { class: "m-dmeta", style: { marginTop: "14px", fontSize: "12.5px" }, text: "Run stopped. The Task is still open — nothing was reverted." }));
     parts.push(
       el("div", { class: "m-dsection first" }, [
-        el("div", { class: "m-dsection-k strong", text: "STOPPED AT" }),
+        el("div", { class: "m-dsection-k strong", text: row.failureKind === "cancelled" ? "CANCELLED" : "STOPPED AT" }),
         el("div", { class: "m-dpre", text: row.error || "Execution failed" })
       ])
     );
@@ -3122,9 +3144,14 @@ function renderMobileActionBar(row, frozen) {
     ]);
   }
   if (row.running) {
-    const btn = el("button", { class: "m-abar-btn m-abar-single", style: { flex: "1" }, text: "ADD A CONSTRAINT" });
+    const cancelBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "CANCEL" });
+    cancelBtn.addEventListener("click", () => {
+      cancelBtn.disabled = true;
+      cancelRun(row.id);
+    });
+    const btn = el("button", { class: "m-abar-btn m-abar-primary", style: { flex: "1" }, text: "ADD A CONSTRAINT" });
     btn.addEventListener("click", () => openCorrection(row.id));
-    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn])]);
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [cancelBtn, btn])]);
   }
   if (row.ready) {
     const acceptBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ACCEPT" });

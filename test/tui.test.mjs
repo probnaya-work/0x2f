@@ -179,8 +179,30 @@ test("Enter and x resolve to the action each Work state is actually waiting for"
   assert.equal(
     primaryAction({ state: "working", halt: null }, state, CTX),
     null,
-    "a working run wants nothing from you"
+    "a working run has no primary action"
   );
+  assert.equal(secondary({ state: "working", id: 7, halt: null }), "CANCEL");
+});
+
+test("cancel on a working run confirms once, and a second press does not emit another cancel", () => {
+  const working = { ...TASKS[0], id: 7, state: "working", halt: null };
+  const ctx = { ...CTX, tasks: [working] };
+  const armed = apply(initialState(), KEY("x"), ctx);
+  assert.equal(armed.intent, null);
+  assert.equal(armed.state.confirm?.type, "cancel");
+  assert.equal(armed.state.confirm.id, 7);
+
+  const again = apply(armed.state, KEY("x"), ctx);
+  assert.equal(again.intent, null);
+  assert.equal(again.state.confirm?.type, "cancel");
+
+  const confirmed = apply(armed.state, { name: "enter" }, ctx);
+  assert.deepEqual(confirmed.intent, { type: "cancel", id: 7 });
+  assert.equal(confirmed.state.confirm, null);
+
+  const backed = apply(armed.state, { name: "escape" }, ctx);
+  assert.equal(backed.intent, null);
+  assert.equal(backed.state.confirm, null);
 });
 
 test("Enter on a permission fires immediately; Enter on a decision asks for text first", () => {

@@ -925,7 +925,10 @@ export function projectRuns(runs = [], opts = {}) {
       duration: durationMs !== null ? fmtDuration(durationMs / 1000) : null,
       outcome: r.outcome ?? "working",
       state:
-        RUN_STATE_LABELS[r.outcome] ?? String(r.outcome ?? "?").toUpperCase(),
+        r.failure?.kind === "cancelled" ||
+        (r.outcome === "failed" && String(r.error ?? "").startsWith("Cancelled."))
+          ? "CANCELLED"
+          : RUN_STATE_LABELS[r.outcome] ?? String(r.outcome ?? "?").toUpperCase(),
       stateColor:
         r.outcome === "failed"
           ? COLORS.fail
@@ -1070,15 +1073,17 @@ export function projectRow(task, events, opts = {}) {
   // would then render a "body" repeating the heading verbatim.
   const body = briefBody(brief);
 
-  const stateLabel = STATE_LABELS[task.status] ?? String(task.status).toUpperCase();
-  const stateColor = halted ? accent : failedStatus ? COLORS.fail : done ? COLORS.muted : COLORS.ink;
-
   // §01: a provider-not-authenticated stop is not a task breakage — 0x2F
   // shows what it knows (which provider, where to fix it, what survives)
   // instead of the vendor's error string standing in as the whole story.
   // Only "auth" changes anything below; every other/absent kind renders
-  // exactly as before.
+  // exactly as before. "cancelled" is the user's stop, not a crash.
   const failureKind = failedStatus ? inferFailureKind(task) : null;
+  const cancelled = failureKind === "cancelled";
+  const stateLabel = cancelled
+    ? "CANCELLED"
+    : STATE_LABELS[task.status] ?? String(task.status).toUpperCase();
+  const stateColor = halted ? accent : failedStatus ? COLORS.fail : done ? COLORS.muted : COLORS.ink;
   const failureRemedy = failedStatus ? task.failure?.remedy ?? null : null;
   const failureCopy =
     failedStatus && failureKind === "auth"
@@ -1101,7 +1106,7 @@ export function projectRow(task, events, opts = {}) {
     phaseLabel = "CLOSED";
     arg = task.error ?? "";
   } else if (failedStatus) {
-    phaseLabel = failureLine ? "STOPPED AT" : "FAILED AT";
+    phaseLabel = cancelled ? "CANCELLED" : failureLine ? "STOPPED AT" : "FAILED AT";
     arg = failureLine || task.error || "Execution failed";
   } else {
     // No phase to report — the current activity line (or the last observed
@@ -1119,6 +1124,7 @@ export function projectRow(task, events, opts = {}) {
   // padding must be non-breaking: CSS collapses plain spaces (white-space:
   // nowrap still collapses), which would silently undo the fixed width.
   if (done) sub = "closed · " + fmtDuration(elapsed / 1000).padStart(7, " ");
+  else if (cancelled) sub = "cancelled";
   else if (failedStatus) sub = failureLine || task.error || "failed";
   else if (ready) {
     sub = filesSection

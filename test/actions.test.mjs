@@ -33,7 +33,9 @@ function fakeNode() {
       calls.push(["resume", task.slug, grant]);
       return 5678;
     },
-    async cancelExecution() {},
+    async cancelExecution({ task }) {
+      calls.push(["cancel", task.slug]);
+    },
     calls
   };
 }
@@ -558,6 +560,62 @@ test("correctWork validates: a correction is required and bounded", async () => 
       () => runtime.actions.correctWork(task.id, { correction: "x".repeat(20_000) }),
       /Correction is too long/
     );
+  } finally {
+    await fs.rm(runtime.base, { recursive: true, force: true });
+  }
+});
+
+test("cancelWork signals the active run once and leaves a finished run unchanged", async () => {
+  const runtime = await makeRuntime();
+  try {
+    const task = await runtime.actions.createWork({ brief: "Keep going" });
+    await runtime.store.updateTask({ ...task, pid: process.pid });
+    const first = await runtime.actions.cancelWork(task.id);
+    const second = await runtime.actions.cancelWork(task.id);
+    assert.equal(first.status, "working");
+    assert.equal(second.status, "working");
+    assert.deepEqual(
+      runtime.node.calls.filter(call => call[0] === "cancel"),
+      [["cancel", task.slug]]
+    );
+
+    const ready = applyOutcome(await runtime.store.findTask(task.id), {
+      status: "ready"
+    });
+    ready.result = "done";
+    await runtime.store.writeJson(
+      path.join(runtime.store.taskDir(task.slug), "task.json"),
+      { ...ready, result: "done" }
+    );
+    const before = await runtime.store.findTask(task.id);
+    await assert.rejects(
+      () => runtime.actions.cancelWork(task.id),
+      /not working/
+    );
+    const after = await runtime.store.findTask(task.id);
+    assert.equal(after.status, "ready");
+    assert.equal(after.updatedAt, before.updatedAt);
+    assert.equal(runtime.node.calls.filter(call => call[0] === "cancel").length, 1);
+  } finally {
+    await fs.rm(runtime.base, { recursive: true, force: true });
+  }
+});
+
+test("cancelWork records a cancellation when the worker is already gone", async () => {
+  const runtime = await makeRuntime();
+  try {
+    const task = await runtime.actions.createWork({ brief: "Already stopped" });
+    await runtime.store.updateTask({ ...task, pid: null });
+    const cancelled = await runtime.actions.cancelWork(task.id);
+    assert.equal(cancelled.status, "failed");
+    assert.equal(cancelled.failure.kind, "cancelled");
+    assert.match(cancelled.error, /^Cancelled\./);
+    assert.equal(cancelled.runs.at(-1).outcome, "failed");
+    assert.equal(cancelled.runs.at(-1).failure.kind, "cancelled");
+    const events = (await runtime.store.readEventLog(task.slug)).trim().split("\n").map(line => JSON.parse(line));
+    assert.equal(events.at(-2).type, "run.failed");
+    assert.match(events.at(-2).error, /^Cancelled\./);
+    assert.equal(runtime.node.calls.filter(call => call[0] === "cancel").length, 0);
   } finally {
     await fs.rm(runtime.base, { recursive: true, force: true });
   }

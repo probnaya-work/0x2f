@@ -14,7 +14,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
-import { applyOutcome, beginResume } from "./core/lifecycle.mjs";
+import { applyOutcome, beginResume, cancelledOutcome, outcomeAfterCancel } from "./core/lifecycle.mjs";
 import { workEvent } from "./core/events.mjs";
 import { updateRun } from "./core/runs.mjs";
 import { createProviderRegistry } from "./providers/index.mjs";
@@ -53,27 +53,36 @@ const providers = createProviderRegistry({ base });
 // same session/execution continues. A stale file from an interrupted run is
 // cleared before we start.
 const permissionDecisionFile = path.join(dir, "permission.json");
+
+// Installed before the first await. A SIGTERM that arrives while the task
+// file is still being read must not take the default action and die, or the
+// run would stay `working` with no outcome.
+let currentProvider = null;
+let cancelRequested = false;
+let cancelDeliveryError = null;
+let outcomeOwned = false;
+let cancelTimer = null;
+let cancelInFlight = Promise.resolve();
+
+process.on("SIGTERM", () => {
+  if (cancelRequested) return;
+  cancelRequested = true;
+  if (outcomeOwned) return;
+  armCancel();
+});
+
 await fs.rm(permissionDecisionFile, { force: true }).catch(() => {});
 
 const task = await store.readJson(metaPath);
 
-// Best-effort cancellation seam: the node's cancelExecution kills this
-// process; give the provider a chance to cancel its own run first (ACP sends
-// session/cancel, command providers just die with us).
-let currentProvider = null;
+// The node's cancelExecution sends SIGTERM. This process asks the provider
+// to cancel, then records the terminal state. It does not exit before that
+// write: a completion that already won is left as-is.
 let runSessionId = null; // the provider-surfaced session id, persisted on pause
 // Git baseline captured before the run starts, so the worker can observe
 // which files the run changed (see recordObservedChanges). Null when the
 // workspace has no git baseline (observation is impossible, honestly).
 let worktreeBefore = null;
-process.on("SIGTERM", () => {
-  try {
-    currentProvider?.cancel?.();
-  } catch {
-    /* best-effort */
-  }
-  process.exit(0);
-});
 
 function log(line) {
   process.stdout.write(`[${new Date().toISOString().slice(11, 19)}] ${line}\n`);
@@ -126,6 +135,7 @@ function finalizeRun(current) {
     externalSessionId: current.execution?.externalSessionId,
     attempts: current.execution?.attempts ?? record.attempts ?? 1,
     error: current.status === "failed" ? current.error : undefined,
+    ...(current.status === "failed" && current.failure ? { failure: current.failure } : {}),
     blockedOn: current.status === "needs_you" ? current.blockedOn : undefined
   });
 }
@@ -280,6 +290,77 @@ async function recordObservedChanges() {
   }
 }
 
+const TERMINAL = new Set(["ready", "failed", "done"]);
+
+// Persist one outcome unless a terminal state is already on disk. Ready and
+// needs_you keep their result text; a cancellation does not invent one.
+// The state lock covers only the read-and-result step. finish() takes the
+// same lock to write task.json, so calling it inside this critical section
+// would wait on itself and the process would exit with the run still working.
+async function commitOutcome(outcome) {
+  let next = null;
+  await withState(async () => {
+    const fresh = await store.readJson(metaPath);
+    if (TERMINAL.has(fresh.status)) return;
+    next = applyOutcome(fresh, outcome);
+    if (outcome.externalSessionId) {
+      next.execution = {
+        ...(next.execution ?? {}),
+        externalSessionId: outcome.externalSessionId
+      };
+    }
+    if (outcome.status === "ready" || outcome.status === "needs_you") {
+      await fs.writeFile(resultPath, outcome.result ?? "", { encoding: "utf8", mode: 0o600 });
+      await fs.chmod(resultPath, 0o600).catch(() => {});
+      if (Array.isArray(next.runs)) {
+        const runDir = path.join(dir, "runs", String(runNumber));
+        await fs.mkdir(runDir, { recursive: true });
+        const runResultPath = path.join(runDir, "result.md");
+        await fs.writeFile(runResultPath, outcome.result ?? "", {
+          encoding: "utf8",
+          mode: 0o600
+        });
+        await fs.chmod(runResultPath, 0o600).catch(() => {});
+      }
+    }
+  });
+  if (!next) return;
+  await recordObservedChanges();
+  await finish(next, outcome);
+}
+
+function noteCancelDelivery(result) {
+  if (result && result.delivered === false) {
+    cancelDeliveryError = result.error || "the provider did not accept the cancellation";
+  }
+}
+
+function armCancel() {
+  // cancel() may confirm delivery on a later tick (a closed ACP pipe reports
+  // EPIPE asynchronously). The outcome waits for that confirmation.
+  cancelInFlight = Promise.resolve()
+    .then(() => currentProvider?.cancel?.())
+    .then(result => noteCancelDelivery(result))
+    .catch(error => {
+      cancelDeliveryError = error instanceof Error ? error.message : String(error);
+    });
+  // The provider is expected to settle after session/cancel or the child
+  // signal. If it does not, record the cancellation anyway.
+  cancelTimer = setTimeout(() => {
+    const pending = cancelInFlight;
+    pending.finally(() => {
+      if (outcomeOwned) return;
+      outcomeOwned = true;
+      commitOutcome(cancelledOutcome(
+        cancelDeliveryError
+          ? `The provider did not accept the cancellation: ${cancelDeliveryError}`
+          : ""
+      )).finally(() => process.exit(0));
+    });
+  }, 2000);
+  cancelTimer.unref?.();
+}
+
 try {
   const provider = providers.getProvider(
     task.execution?.provider ?? providers.defaultProviderId
@@ -375,45 +456,35 @@ try {
     });
   }
 
-  current = applyOutcome(current, outcome);
-
-  if (outcome.externalSessionId) {
-    current.execution = {
-      ...(current.execution ?? {}),
-      provider: provider.id,
-      externalSessionId: outcome.externalSessionId
-    };
-  }
-
-  if (outcome.status === "ready" || outcome.status === "needs_you") {
-    await fs.writeFile(resultPath, outcome.result ?? "", { encoding: "utf8", mode: 0o600 });
-    await fs.chmod(resultPath, 0o600).catch(() => {});
-    // This run's own result, so the previous run's result is preserved when
-    // a later run overwrites result.md. Runs with no written result (failed)
-    // leave no per-run file — the absence is the honest record.
-    if (Array.isArray(current.runs)) {
-      const runDir = path.join(dir, "runs", String(runNumber));
-      await fs.mkdir(runDir, { recursive: true });
-      const runResultPath = path.join(runDir, "result.md");
-      await fs.writeFile(runResultPath, outcome.result ?? "", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(runResultPath, 0o600).catch(() => {});
-    }
-  }
-
-  await recordObservedChanges();
-  await finish(current, outcome);
-} catch (error) {
-  let failed = applyOutcome(task, {
-    status: "failed",
-    error: error instanceof Error ? error.message : String(error)
+  if (cancelRequested) await cancelInFlight;
+  const settled = outcomeAfterCancel({
+    cancelRequested,
+    deliveryError: cancelDeliveryError,
+    outcome
   });
-  failed = finalizeRun(failed);
-  await store.writeJson(metaPath, failed);
-  await record("run.failed", { error: failed.error });
-  await record("task.updated", { status: failed.status });
-  log(`outcome: failed (${failed.error})`);
-  process.exitCode = 1;
-}
+  if (!outcomeOwned) {
+    outcomeOwned = true;
+    if (cancelTimer) clearTimeout(cancelTimer);
+    await commitOutcome(settled);
+  }
+} catch (error) {
+    if (!outcomeOwned) {
+      outcomeOwned = true;
+      if (cancelTimer) clearTimeout(cancelTimer);
+      if (cancelRequested) await cancelInFlight;
+      const settled = outcomeAfterCancel({
+        cancelRequested,
+        deliveryError: cancelDeliveryError,
+        outcome: {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error)
+        }
+      });
+      try {
+        await commitOutcome(settled);
+      } catch (writeError) {
+        log(`outcome: failed (${writeError instanceof Error ? writeError.message : writeError})`);
+      }
+    }
+    process.exitCode = cancelRequested ? 0 : 1;
+  }

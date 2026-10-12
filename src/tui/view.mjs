@@ -336,6 +336,7 @@ export function buildRight(model, state, w, p, T) {
     T(
       task.state === "needs" ? "halted on you"
         : task.state === "working" ? "executing"
+          : task.fail?.kind === "cancelled" ? "cancelled"
           : task.state === "failed" ? "stopped"
             : task.state === "ready" ? "complete · awaiting you"
               : "closed",
@@ -486,7 +487,7 @@ function stateBlock(task, w, p, T) {
   } else if (task.state === "failed") {
     lines.push({
       cells: [
-        T(" FAILED", p.bad, 600),
+        T(task.fail?.kind === "cancelled" ? " CANCELLED" : " FAILED", p.bad, 600),
         T("   run " + task.run + " on " + task.providerName + " stopped at " + fmtDuration(task.elapsed), p.dim)
       ]
     });
@@ -786,7 +787,7 @@ const KEYS = [
   ["tab", "filter the ledger — all · needs you · failed · ready · working"],
   ["/", "search by title, brief or number"],
   ["↵", "the one action this task is waiting for (shown bottom-left)"],
-  ["x", "the alternative — reject · save only · send back · drop"],
+  ["x", "the alternative — reject · save only · send back · drop · cancel a working run (↵ confirms)"],
   ["d", "changes — the real diff of the working tree, or the planned write"],
   ["c", "note or correct — kept on the task, carried into every later run"],
   ["p", "point the next run at another provider"],
@@ -1017,6 +1018,14 @@ export function frame(model, state, opts = {}) {
           model.tasks.length + " tasks match", p.dim)
       ]
     });
+  } else if (state.confirm?.type === "cancel") {
+    lines.push({
+      cells: [
+        T(" cancel this run? ", p.bad, 600),
+        T("the task, its notes and its history stay", p.dim)
+      ]
+    });
+    lines.push({ cells: [T(" ↵ confirm   esc back", p.dim)] });
   } else {
     const flash = state.flash;
     lines.push({

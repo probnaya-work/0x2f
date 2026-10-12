@@ -63,7 +63,7 @@ test("projectTask: failure.remedy is bounded like any other adapter-authored fie
 });
 
 test("the closed vocabulary the relay checks against is the same one core/lifecycle.mjs owns", () => {
-  assert.deepEqual(FAILURE_KINDS, ["auth", "unavailable", "crashed", "blocked", "resume"]);
+  assert.deepEqual(FAILURE_KINDS, ["auth", "unavailable", "crashed", "blocked", "resume", "cancelled"]);
   for (const kind of FAILURE_KINDS) {
     const p = projectTask(baseTask({ failure: { kind } }));
     assert.equal(p.failure.kind, kind);

@@ -44,6 +44,9 @@
 
 import { spawn } from "node:child_process";
 import { classifyResult } from "../core/lifecycle.mjs";
+import { createChildCancel } from "./child-cancel.mjs";
+
+const activeChild = createChildCancel();
 
 // Injectable for tests and non-PATH installs; defaults to `dsh` on PATH.
 export function dshBin() {
@@ -70,6 +73,10 @@ export const deepseekHarnessProvider = {
 
   async start({ cwd, prompt, onEvent = () => {} }) {
     return runDsh({ cwd, prompt, onEvent });
+  },
+
+  cancel() {
+    return activeChild.cancel();
   }
 
   // resume() is deliberately absent: supportsResume is false, and the worker
@@ -91,6 +98,7 @@ function runDsh({ cwd, prompt, onEvent }) {
         cwd,
         stdio: ["ignore", "pipe", "pipe"]
       });
+      activeChild.bind(child);
     } catch (error) {
       resolve({
         status: "failed",

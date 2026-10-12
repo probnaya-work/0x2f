@@ -21,8 +21,10 @@
 import { spawn } from "node:child_process";
 import { decisionSection } from "../core/lifecycle.mjs";
 import { substituteCommand } from "./manifests.mjs";
+import { createChildCancel } from "./child-cancel.mjs";
 
 export function createCommandProvider(manifest) {
+  const activeChild = createChildCancel();
   return {
     id: manifest.id,
     displayName: manifest.displayName,
@@ -44,7 +46,11 @@ export function createCommandProvider(manifest) {
 
     async start({ cwd, prompt, onEvent = () => {} }) {
       const argv = substituteCommand(manifest.command, { prompt, workspace: cwd });
-      return runCommand({ id: manifest.id, cwd, argv, onEvent });
+      return runCommand({ id: manifest.id, cwd, argv, onEvent, activeChild });
+    },
+
+    cancel() {
+      return activeChild.cancel();
     }
     // resume() is deliberately absent: supportsResume is false, and the worker
     // + actions refuse to resume a provider that cannot continue a session.
@@ -57,7 +63,7 @@ export function createCommandProvider(manifest) {
 // callers that import the provider module directly.)
 export { substituteCommand } from "./manifests.mjs";
 
-function runCommand({ id, cwd, argv, onEvent }) {
+function runCommand({ id, cwd, argv, onEvent, activeChild }) {
   return new Promise(resolve => {
     let child;
     try {
@@ -65,6 +71,7 @@ function runCommand({ id, cwd, argv, onEvent }) {
         cwd,
         stdio: ["ignore", "pipe", "pipe"]
       });
+      activeChild?.bind(child);
     } catch (error) {
       resolve({
         status: "failed",

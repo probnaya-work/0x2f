@@ -19,14 +19,15 @@
 //   }
 
 import path from "node:path";
-import { closeTask } from "./lifecycle.mjs";
+import { closeTask, applyOutcome, cancelledOutcome } from "./lifecycle.mjs";
 import { WorkError } from "./errors.mjs";
 import { workEvent } from "./events.mjs";
-import { makeRunRecord, taskRuns, legacyRun } from "./runs.mjs";
+import { makeRunRecord, taskRuns, legacyRun, currentRunNumber, updateRun } from "./runs.mjs";
 import { MAX_BRIEF, MAX_TITLE, MAX_NOTE, MAX_ANSWER, MAX_SELECTOR } from "./limits.mjs";
 import { deriveTitle } from "./title.mjs";
 import { taskDiff } from "./diff.mjs";
 import { unavailableMessage } from "../providers/index.mjs";
+import { pidAlive } from "../recover.mjs";
 
 export function createActions(ctx) {
   const { store, node, providers, router } = ctx;
@@ -467,6 +468,73 @@ export function createActions(ctx) {
     return taskDiff({ base: store.base, files });
   }
 
+  // Write a cancelled terminal state only while the run is still working.
+  // A completion that landed first is left untouched.
+  async function finalizeCancelled(task, detail) {
+    const fresh = await store.findTask(task.id);
+    if (fresh.status !== "working") return fresh;
+    const outcome = cancelledOutcome(detail);
+    const runNumber = currentRunNumber(fresh);
+    let next = applyOutcome(fresh, outcome);
+    if (Array.isArray(next.runs)) {
+      const record = next.runs.find(r => r.run === runNumber);
+      const startedMs = record ? Date.parse(record.startedAt) : NaN;
+      const completedAt = new Date().toISOString();
+      next = updateRun(next, runNumber, {
+        outcome: "failed",
+        completedAt,
+        ...(Number.isFinite(startedMs)
+          ? { durationMs: Date.parse(completedAt) - startedMs }
+          : {}),
+        error: outcome.error,
+        failure: outcome.failure,
+        blockedOn: undefined
+      });
+    }
+    await store.updateTask(next);
+    await record(next, "run.failed", { error: outcome.error, run: runNumber });
+    await record(next, "task.updated", { status: next.status, run: runNumber });
+    return next;
+  }
+
+  // cancelWork(id): stop the active run through the execution node. The
+  // worker receives SIGTERM, asks its provider to cancel, and records the
+  // terminal state. A finished run is refused and not rewritten. A second
+  // cancel of the same live run does not signal again.
+  async function cancelWork(id) {
+    const task = await store.findTask(id);
+    if (task.status !== "working") {
+      throw new WorkError(
+        `Task #${id} is ${task.status}, not working — nothing to cancel.`
+      );
+    }
+    const runNumber = currentRunNumber(task);
+    const request = await store.readCancelRequest(task);
+    if (request?.run === runNumber) {
+      if (pidAlive(task.pid)) return task;
+      return finalizeCancelled(task, "The worker was no longer running.");
+    }
+    await store.writeCancelRequest(task, {
+      at: new Date().toISOString(),
+      run: runNumber
+    });
+    if (!pidAlive(task.pid)) {
+      return finalizeCancelled(task, "The worker was no longer running.");
+    }
+    try {
+      await node.cancelExecution({ task });
+    } catch (error) {
+      const fresh = await store.findTask(id);
+      if (fresh.status !== "working") return fresh;
+      if (!pidAlive(fresh.pid)) {
+        return finalizeCancelled(fresh, "The worker was no longer running.");
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new WorkError(`Could not cancel task #${id}: ${message}`);
+    }
+    return store.findTask(id);
+  }
+
   // closeWork(id): user closes the task (any status -> done).
   async function closeWork(id) {
     const task = await store.findTask(id);
@@ -487,6 +555,7 @@ export function createActions(ctx) {
     answerWork,
     noteWork,
     correctWork,
+    cancelWork,
     closeWork,
     allowWork: id => resumeWork(id, "allow"),
     rejectWork: id => resumeWork(id, "reject")

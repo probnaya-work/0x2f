@@ -160,12 +160,19 @@ export function createAcpProvider(manifest) {
       }
     },
 
-    // Best-effort cancellation of the active run: send session/cancel and
-    // terminate the agent process. The node currently stops a run by killing
-    // the worker process; this method exists for the provider contract and
-    // for the worker's SIGTERM handler.
+    // Ask the agent to stop the turn, then terminate its process. Returns
+    // whether session/cancel was delivered; the child is still stopped when
+    // the notification cannot be written.
     cancel() {
-      if (active) active.cancel();
+      if (!active) return { delivered: false, error: "no active run" };
+      try {
+        return active.cancel() ?? { delivered: true };
+      } catch (error) {
+        return {
+          delivered: false,
+          error: error instanceof Error ? error.message : String(error)
+        };
+      }
     }
   };
 
@@ -200,6 +207,12 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       return;
     }
     handles.child = child;
+    // A dead agent makes the next write fail with EPIPE. That must surface as
+    // a failed cancel delivery, not as an unhandled error that drops the run.
+    let pipeError = null;
+    child.stdin.on("error", error => {
+      pipeError = error instanceof Error ? error.message : String(error);
+    });
 
     let stdout = "";
     let stderr = "";
@@ -251,21 +264,54 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       }
     };
 
-    handles.cancel = () => {
+    handles.cancel = () => new Promise(resolve => {
       // Per spec, respond cancelled to any pending permission request, then
-      // notify the agent; the prompt turn should end with stopReason
-      // "cancelled", which the normal completion path maps to a failure.
-      // Give the agent a moment to honour the cancel before killing it.
-      try {
-        if (rpc) {
-          rpc.cancelPendingPermissions();
-          rpc.notify("session/cancel", { sessionId });
-        }
-      } catch {
-        /* best-effort */
-      }
+      // notify the agent. The prompt turn should end with stopReason
+      // "cancelled". If the notification cannot be written, still kill the
+      // agent so the run cannot continue, and report the delivery failure.
+      // The write failure is often an asynchronous EPIPE, so delivery is
+      // reported from the write callback rather than from the return tick.
+      let settled = false;
+      const finish = (delivered, error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(giveUp);
+        resolve({ delivered, ...(error ? { error } : {}) });
+      };
+      const giveUp = setTimeout(
+        () => finish(false, "ACP session did not confirm the cancellation"),
+        500
+      );
       setTimeout(forceStop, 300);
-    };
+      try {
+        if (!rpc) {
+          finish(false, "ACP session is not ready");
+          return;
+        }
+        rpc.cancelPendingPermissions();
+        if (!child.stdin?.writable) {
+          finish(false, "ACP session is not writable");
+          return;
+        }
+        child.stdin.write(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            method: "session/cancel",
+            params: { sessionId }
+          }) + "\n",
+          error => {
+            // EPIPE often arrives as an 'error' event just after the callback
+            // reports that the bytes were queued. Look again on the next turn.
+            setTimeout(() => {
+              if (error || pipeError) finish(false, (error && error.message) || pipeError);
+              else finish(true);
+            }, 30);
+          }
+        );
+      } catch (err) {
+        finish(false, err instanceof Error ? err.message : String(err));
+      }
+    });
 
     // --- JSON-RPC client ----------------------------------------------------
     let nextId = 0;
@@ -299,6 +345,9 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       },
 
       notify(method, params) {
+        if (!child.stdin?.writable) {
+          throw new Error("ACP session is not writable");
+        }
         child.stdin.write(
           JSON.stringify({ jsonrpc: "2.0", method, params }) + "\n"
         );

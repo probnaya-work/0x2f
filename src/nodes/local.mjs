@@ -29,7 +29,12 @@ import fsSync from "node:fs";
 import path from "node:path";
 import { currentRunNumber } from "../core/runs.mjs";
 
-export function createLocalNode({ workspace, spawn = defaultSpawn, kill = process.kill } = {}) {
+export function createLocalNode({
+  workspace,
+  spawn = defaultSpawn,
+  kill = process.kill,
+  env = process.env
+} = {}) {
   if (!workspace) throw new Error("createLocalNode requires a workspace path.");
 
   function resolveWorkspace(workspaceId) {
@@ -53,9 +58,13 @@ export function createLocalNode({ workspace, spawn = defaultSpawn, kill = proces
     const args = [worker.pathname, base, slug, String(run)];
     if (mode === "resume") args.push("resume", grant);
 
+    // The worker inherits this runtime's environment, including a temporary
+    // OpenCode model override on the process that started the run. A Core
+    // started earlier does not replace it: each runtime spawns its own worker.
     const child = spawn(process.execPath, args, {
       detached: true,
-      stdio: ["ignore", logFd, logFd]
+      stdio: ["ignore", logFd, logFd],
+      env
     });
     child.unref();
     return child.pid;
@@ -82,11 +91,12 @@ export function createLocalNode({ workspace, spawn = defaultSpawn, kill = proces
       });
     },
 
-    // Best-effort stop of the detached worker process. v0.3 does not expose
-    // cancellation in the CLI/API; the method exists so the node contract is
-    // complete and a future surface can use it.
+    // SIGTERM asks the worker to cancel the provider run and record the
+    // terminal state. The signal is the node's stop; the worker owns the
+    // outcome. No pid is a no-op (nothing was launched).
     async cancelExecution({ task }) {
-      if (task.pid) kill(task.pid);
+      if (!task.pid) return;
+      kill(task.pid, "SIGTERM");
     }
   };
 }

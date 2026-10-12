@@ -44,7 +44,38 @@ export const BLOCKED_REASONS = ["permission", "decision", "question"];
 // `resume` means a permission grant was recorded but the provider could not
 // continue the session (a vendor resume limitation) — the run fails honestly
 // rather than pretending the granted work continued.
-export const FAILURE_KINDS = ["auth", "unavailable", "crashed", "blocked", "resume"];
+export const FAILURE_KINDS = ["auth", "unavailable", "crashed", "blocked", "resume", "cancelled"];
+
+// A run the user stopped. `detail` is a short reason (a provider that did
+// not accept session/cancel, or a worker that was already gone). Absent
+// detail is a clean cancel.
+export const CANCELLED_ERROR = "Cancelled.";
+
+export function cancelledOutcome(detail) {
+  const extra = typeof detail === "string" ? detail.trim() : "";
+  return {
+    status: "failed",
+    error: extra ? `Cancelled. ${extra}` : CANCELLED_ERROR,
+    failure: { kind: "cancelled" }
+  };
+}
+
+// A turn that already finished (ready, or parked on the human) keeps that
+// result when cancel arrives in the same moment. A killed or failed process
+// does not — that outcome becomes a cancellation.
+export function cancellationKeepsOutcome(outcome) {
+  return outcome?.status === "ready" || outcome?.status === "needs_you";
+}
+
+export function outcomeAfterCancel({ cancelRequested, deliveryError, outcome }) {
+  if (!cancelRequested || !outcome) return outcome;
+  if (cancellationKeepsOutcome(outcome)) return outcome;
+  const detail =
+    typeof deliveryError === "string" && deliveryError.trim()
+      ? `The provider did not accept the cancellation: ${deliveryError.trim()}`
+      : "";
+  return cancelledOutcome(detail);
+}
 
 // Work's shared prompt (project.mjs) asks every agent to end with a
 // `## Needs human decision` section. This parser is a Work convention — not a

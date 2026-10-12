@@ -17,6 +17,7 @@
 //   POST /api/tasks/:id/allow      -> allowWork(id)
 //   POST /api/tasks/:id/reject     -> rejectWork(id)
 //   POST /api/tasks/:id/answer     -> answerWork(id, { answer })
+//   POST /api/tasks/:id/cancel     -> cancelWork(id)
 //   POST /api/tasks/:id/note       -> noteWork(id, { note })   (task context
 //                                      only — no execution is started)
 //   POST /api/tasks/:id/close      -> closeWork(id)
@@ -801,6 +802,12 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           correction: body.correction
         });
         json(res, task, 202);
+        return;
+      }
+
+      const cancelMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/cancel$/);
+      if (req.method === "POST" && cancelMatch) {
+        json(res, await actions.cancelWork(Number(cancelMatch[1])), 202);
         return;
       }
 

@@ -243,7 +243,7 @@ The keymap is the surface's own, not a file manager's:
 | `tab` | filter — all · needs you · failed · ready · working |
 | `/` | search by title, brief or number |
 | `↵` | the one action this task is waiting for (shown bottom-left) |
-| `x` | the alternative — reject · save only · send back · drop |
+| `x` | the alternative — reject · save only · send back · drop · cancel a working run (`↵` confirms) |
 | `d` | changes — the real diff of the working tree, or the planned write |
 | `c` | note or correct — kept on the task, carried into every later run |
 | `p` | point the next run at another provider |

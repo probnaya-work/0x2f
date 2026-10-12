@@ -280,6 +280,27 @@ export function createStore(base = process.cwd()) {
   // The interactive-permission channel: the human's ALLOW/REJECT for a live
   // permission request. The running worker's provider polls this file and
   // answers the outstanding request in place (the task dir's permission.json).
+  // Cross-process cancel token. The action writes it; a second cancel of the
+  // same run sees it and does not signal the worker again. It is not task
+  // state — the worker's terminal write remains the run's outcome.
+  async function cancelRequestPath(task) {
+    return path.join(taskDir(task.slug), "cancel.json");
+  }
+
+  async function readCancelRequest(task) {
+    const p = await cancelRequestPath(task);
+    if (!(await exists(p))) return null;
+    try {
+      return await readJson(p);
+    } catch {
+      return null;
+    }
+  }
+
+  async function writeCancelRequest(task, request) {
+    await writeJson(await cancelRequestPath(task), request);
+  }
+
   async function writePermissionDecision(task, decision) {
     await writeJson(
       path.join(taskDir(task.slug), "permission.json"),
@@ -319,6 +340,8 @@ export function createStore(base = process.cwd()) {
     readEventLogs,
     readEvents,
     appendEvent,
+    readCancelRequest,
+    writeCancelRequest,
     writePermissionDecision,
     writeDecisionAnswer
   };

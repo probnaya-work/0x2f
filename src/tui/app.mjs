@@ -10,6 +10,7 @@
 //   SAVE ONLY             answerWork                 — answer, stay NEEDS YOU
 //   SEND BACK             noteWork + rerunWork       — correction, next run
 //   ACCEPT / DROP         closeWork
+//   CANCEL                cancelWork                 — stop the active run
 //   RETRY / REOPEN        rerunWork({ provider })
 //   NOTE                  noteWork
 //   NEW TASK              createWork({ brief, provider })
@@ -149,6 +150,11 @@ export function createApp(runtime, opts = {}) {
         case "drop": {
           await actions.closeWork(intent.id);
           setFlash("dropped " + ref(intent.id) + " · kept in closed with its whole run history", "warn");
+          break;
+        }
+        case "cancel": {
+          await actions.cancelWork(intent.id);
+          setFlash("cancelling " + ref(intent.id) + " · the run stops, the task stays", "warn");
           break;
         }
         case "rerun": {

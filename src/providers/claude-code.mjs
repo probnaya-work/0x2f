@@ -31,6 +31,9 @@
 
 import { spawn } from "node:child_process";
 import { classifyResult } from "../core/lifecycle.mjs";
+import { createChildCancel } from "./child-cancel.mjs";
+
+const activeChild = createChildCancel();
 
 // ---------------------------------------------------------------------------
 // Claude Code provider (native adapter — the boundary where Claude-specific
@@ -157,6 +160,10 @@ export const claudeCodeProvider = {
     }
     args.push(prompt);
     return runClaude({ cwd, args, onEvent, resuming: true });
+  },
+
+  cancel() {
+    return activeChild.cancel();
   }
 };
 
@@ -198,6 +205,7 @@ function runClaude({ cwd, args, onEvent, resuming = false }) {
     let child;
     try {
       child = spawn(claudeBin(), args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+      activeChild.bind(child);
     } catch (error) {
       reject(error);
       return;

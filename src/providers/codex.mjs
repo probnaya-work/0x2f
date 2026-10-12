@@ -48,6 +48,9 @@
 
 import { spawn } from "node:child_process";
 import { classifyResult } from "../core/lifecycle.mjs";
+import { createChildCancel } from "./child-cancel.mjs";
+
+const activeChild = createChildCancel();
 
 // Injectable for tests and non-PATH installs; defaults to `codex` on PATH.
 export function codexBin() {
@@ -147,6 +150,10 @@ export const codexProvider = {
     if (model) args.push("-m", model);
     args.push(prompt);
     return runCodex({ cwd, args, onEvent });
+  },
+
+  cancel() {
+    return activeChild.cancel();
   }
 };
 
@@ -258,6 +265,7 @@ function runCodex({ cwd, args, onEvent }) {
     let child;
     try {
       child = spawn(codexBin(), args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+      activeChild.bind(child);
     } catch (error) {
       resolve({
         status: "failed",

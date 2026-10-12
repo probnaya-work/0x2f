@@ -49,6 +49,7 @@ Commands:
   2f allow <id>     grant the permission a task is blocked on
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
+  2f cancel <id>    stop the active run; the task and its history stay
   2f close <id>      stop working on a task; moves it to DONE
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
@@ -420,6 +421,15 @@ async function main() {
     const task = await createRuntime(base).actions.noteWork(id, { note });
     console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
     console.log("Note recorded on the task — it will be included in the next run's context.");
+    return;
+  }
+
+  if (command === "cancel") {
+    await requireProject(base);
+    const id = Number(args[0]);
+    if (!Number.isFinite(id)) throw new Error("Usage: 2f cancel <id>");
+    await createRuntime(base).actions.cancelWork(id);
+    console.log(`Cancelling #${id}. The run will stop; the task stays.`);
     return;
   }
 

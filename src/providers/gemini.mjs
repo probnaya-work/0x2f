@@ -61,6 +61,9 @@
 
 import { spawn } from "node:child_process";
 import { classifyResult } from "../core/lifecycle.mjs";
+import { createChildCancel } from "./child-cancel.mjs";
+
+const activeChild = createChildCancel();
 
 // Injectable for tests and non-PATH installs; defaults to `gemini` on PATH.
 export function geminiBin() {
@@ -183,6 +186,10 @@ export const geminiProvider = {
     ];
     if (model) args.push("-m", model);
     return runGemini({ cwd, args, onEvent });
+  },
+
+  cancel() {
+    return activeChild.cancel();
   }
 };
 
@@ -263,6 +270,7 @@ function runGemini({ cwd, args, onEvent }) {
     let child;
     try {
       child = spawn(geminiBin(), args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+      activeChild.bind(child);
     } catch (error) {
       resolve({
         status: "failed",

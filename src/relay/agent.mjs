@@ -619,6 +619,8 @@ export function createRelayAgent({
           return ok(202, await runtime.actions.answerWork(taskId, { answer: body?.answer }));
         case "note":
           return ok(202, await runtime.actions.noteWork(taskId, { note: body?.note }));
+        case "cancel":
+          return ok(202, await runtime.actions.cancelWork(taskId));
         case "close":
           return ok(200, await runtime.actions.closeWork(taskId));
         case "refine":

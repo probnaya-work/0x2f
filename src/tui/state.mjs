@@ -33,6 +33,7 @@ export function initialState(opts = {}) {
     // on a git walk.
     diff: null,
     composer: { text: "", original: null, provider: opts.provider ?? null },
+    confirm: null,
     busy: false
   };
 }
@@ -107,6 +108,7 @@ export function secondaryAction(task) {
   }
   if (task.state === "ready") return { label: "SEND BACK", input: "sendback" };
   if (task.state === "failed") return { label: "DROP", intent: { type: "drop", id: task.id } };
+  if (task.state === "working") return { label: "CANCEL", intent: { type: "cancel", id: task.id } };
   return null;
 }
 
@@ -222,6 +224,17 @@ export function apply(state, key, ctx = {}) {
     return none;
   }
 
+  // Cancel confirms the same way an input does: ↵ commits, esc backs out.
+  // A second x while the confirmation is up does not emit another intent.
+  if (state.confirm?.type === "cancel") {
+    if (key.name === "enter") {
+      const id = state.confirm.id;
+      return { state: { ...state, confirm: null }, intent: { type: "cancel", id } };
+    }
+    if (key.name === "escape") return { state: { ...state, confirm: null }, intent: null };
+    return none;
+  }
+
   const move = d => ({
     state: {
       ...state,
@@ -286,6 +299,12 @@ export function apply(state, key, ctx = {}) {
     case "c":
       return task ? { state: { ...state, input: "note", draft: "" }, intent: null } : none;
     case "x": {
+      if (task?.state === "working") {
+        return {
+          state: { ...state, confirm: { type: "cancel", id: task.id } },
+          intent: null
+        };
+      }
       const secondary = secondaryAction(task);
       if (!secondary) return none;
       if (secondary.input) return { state: { ...state, input: secondary.input, draft: "" }, intent: null };

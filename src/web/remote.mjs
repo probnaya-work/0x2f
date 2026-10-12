@@ -67,7 +67,7 @@ function mapPath(path, method) {
   if (m) return { op: "get", taskId: Number(m[1]) };
   m = p.match(/^\/tasks\/(\d+)\/runs\/(\d+)$/);
   if (m) return { op: "getRun", taskId: Number(m[1]), body: { run: Number(m[2]) } };
-  m = p.match(/^\/tasks\/(\d+)\/(rerun|allow|reject|answer|note|close)$/);
+  m = p.match(/^\/tasks\/(\d+)\/(rerun|allow|reject|answer|note|cancel|close)$/);
   if (m) return { op: m[2], taskId: Number(m[1]) };
   if (p === "/refine" && method === "POST") return { op: "refine" };
   if (p === "/providers") return { op: "providers" };
