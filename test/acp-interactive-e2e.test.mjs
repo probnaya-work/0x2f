@@ -20,6 +20,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { createRuntime } from "../src/runtime.mjs";
+import { pidAlive } from "../src/recover.mjs";
 
 const FAKE_AGENT = `#!/usr/bin/env node
 import readline from "node:readline";
@@ -80,14 +81,22 @@ async function waitForStatus(runtime, id, expected, opts = {}) {
     try {
       task = await runtime.store.findTask(id);
     } catch {
-      // The worker writes task.json non-atomically; a poll that lands mid-
-      // write can transiently read an unparseable file (findTask -> 404).
-      // Retry — never treat a mid-write read as a missing task.
+      // Retry startup reads within the deadline; a persistent read failure
+      // still fails the test rather than being treated as a missing task.
       if (Date.now() - start > timeout) throw new Error("timed out waiting for task " + id);
       await new Promise(r => setTimeout(r, 60));
       continue;
     }
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      // A live permission pause must remain live. Terminal state, however,
+      // can precede final events/worker exit: keep its fixture until drained.
+      if (["ready", "failed", "done"].includes(expected)) {
+        const deadline = Date.now() + 3000;
+        while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+        assert.equal(pidAlive(task.pid), false, "Terminal fixture worker must exit before cleanup.");
+      }
+      return task;
+    }
     if (!ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }
