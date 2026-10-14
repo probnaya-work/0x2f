@@ -16,10 +16,42 @@ const exec = promisify(execFile);
 export const cli = new URL('../src/cli.mjs', import.meta.url).pathname;
 export const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// Optional private diagnostics captured before cleanup, without task contents,
+// adapter stdout, environment values or broad process argv collection.
+export async function captureFixtureEvidence(store, phase = 'fixture') {
+  const destination = process.env.WORKFLOW_TEST_EVIDENCE_DIR;
+  if (!destination) return;
+  const files = [], receipts = [], locks = [], errors = [], pids = new Set();
+  async function walk(dir) {
+    for (const entry of await fs.readdir(dir, {withFileTypes:true})) {
+      const file = path.join(dir, entry.name), stat = await fs.lstat(file);
+      files.push({path:path.relative(store.base,file),type:entry.isDirectory()?'directory':entry.isSymbolicLink()?'symlink':'file',bytes:stat.size});
+      if (entry.isDirectory()) await walk(file);
+      else if (entry.isFile() && ['receipt.json','owner.json'].includes(entry.name)) {
+        const value = await store.readJson(file);
+        if (entry.name==='receipt.json' && value.request?.worker) {
+          receipts.push({id:value.request.id,state:value.state,reason:value.reason,worker:value.request.worker,owner:value.owner,adapter:value.adapterIdentity,pgid:value.pgid});
+          for (const identity of [value.request.worker,value.owner,value.adapterIdentity]) if(identity?.pid)pids.add(identity.pid);
+        } else if (entry.name==='owner.json') {
+          locks.push({path:path.relative(store.base,file),pid:value.pid,helperPid:value.helperPid});
+          if(value.pid)pids.add(value.pid);if(value.helperPid)pids.add(value.helperPid);
+        }
+      }
+    }
+  }
+  await walk(store.workDir()).catch(error=>errors.push({code:error.code,message:error.message}));
+  const tasks = (await store.listTasks()).map(t=>({id:t.id,status:t.status,error:t.error,pid:t.pid,workerIdentity:t.workerIdentity}));
+  for(const task of tasks)if(task.pid)pids.add(task.pid);
+  const processes = pids.size ? await exec('/bin/ps',['-p',[...pids].join(','),'-o','pid=,pgid=,comm=']).then(r=>r.stdout,e=>e.stdout??'') : '';
+  await fs.mkdir(destination,{recursive:true,mode:0o700});
+  await fs.writeFile(path.join(destination,`${path.basename(store.base)}-${phase}.json`),JSON.stringify({tasks,receipts,locks,files,processes,errors},null,2),{mode:0o600});
+}
+
 export async function fixture(t, { adapter = 'okay', duration = 30000, sleepMs = 5000, generated = false } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), '2f-workflow-'));
   t.after(async () => {
     const runtime = createRuntime(base);
+    await captureFixtureEvidence(runtime.store);
     for (const task of await runtime.store.listTasks()) if (task.status === 'working') await runtime.actions.cancelWork(task.id).catch(() => {});
     for (const task of await runtime.store.listTasks()) {
       for (let n=0; n<300 && await identityMatches(task.workerIdentity); n++) await pause(25);

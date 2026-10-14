@@ -18,7 +18,7 @@ export function validateEditorialDefinition(d) {
   for (const key of ['commandAdapters','imageGeneration','unattendedAdapters']) if(d.permissions[key]!==undefined&&typeof d.permissions[key]!=='boolean')throw new WorkError(`Invalid permission ${key}.`);
   if(d.previewFirstTopic!==undefined&&typeof d.previewFirstTopic!=='boolean')throw new WorkError('previewFirstTopic must be boolean.');
   fields(d.adapters, ['python','image','supervision'], 'adapters');
-  if(d.adapters.supervision)validateAdapterPolicy(d.adapters.supervision);
+  if(d.adapters.supervision || d.permissions.unattendedAdapters===true)validateAdapterPolicy(d.adapters.supervision);
   if (typeof d.adapters.python !== 'string' || !d.adapters.python.trim()) throw new WorkError('Specify a Python/visual command adapter executable.');
   if (d.adapters.image) {
     fields(d.adapters.image, ['argv','credentialEnv'], 'image adapter');

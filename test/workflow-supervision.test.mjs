@@ -10,9 +10,9 @@ import {createStore} from '../src/core/store.mjs';
 import {readDefinition} from '../src/core/workflows.mjs';
 import {executableIdentity} from '../src/core/workflow-adapters.mjs';
 import {loadedRuntimeFingerprint,stopLaunchAgent} from '../src/core/workflow-scheduler.mjs';
-import {manageSupervision,supervisionStatus,readInstallation,listAttempts,readAttempt,prepareAttempt,supervisedRun,promoteAttempt,attemptDir,attemptLock,writeAttempt,stopAttemptJob,reconcileAttempt,cleanupAttempt,groupMembers,jobState,attemptIdentity,attemptIdentityMatches,validateAdapterPolicy,digestAttempt} from '../src/core/workflow-supervision.mjs';
+import {manageSupervision,supervisionStatus,readInstallation,listAttempts,readAttempt,prepareAttempt,supervisedRun,promoteAttempt,attemptDir,attemptLock,writeAttempt,stopAttemptJob,reconcileAttempt,cleanupAttempt,groupMembers,jobState,attemptIdentity,attemptIdentityMatches,observeAttemptIdentity,validateAdapterPolicy,digestAttempt} from '../src/core/workflow-supervision.mjs';
 import {recoverWorkflow,workflowDoctor} from '../src/core/workflow-doctor.mjs';
-import {fixture,pause,settled} from './workflow-fixture.mjs';
+import {fixture,pause,settled,captureFixtureEvidence} from './workflow-fixture.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 const exec=promisify(execFile),workerFile=new URL('./supervision-fixture-worker.mjs',import.meta.url).pathname;
 const policy={processGroup:'inherit',daemonizes:false,unattended:true,network:false,paid:false};
@@ -45,10 +45,28 @@ else {fs.writeFileSync(path.join(output,'result.txt'),'known-result');}
   const ledger=path.join(f.base,'ledger'),command=mode==='native-python'?'python3':script,argv=mode==='native-python'?[command,'-c',"import sys;open(sys.argv[1],'w').write('known-result');open(sys.argv[2],'a').write('call\\n')",'{outputDir}/result.txt',ledger]:[script,mode,'{outputDir}',ledger],options={operationId:'operation-1',argv,pin:await executableIdentity(command),policy:{...policy,credentialEnv},outputs:['result.txt'],outputRules,timeoutMs,maxBytes,testCrashAt,provider:{requestIdentity:'fixture-operation-1',idempotencyKey:'fixture-operation-1',statusLookup:'local-ledger'}};
   const file=path.join(f.base,'request.json');await store.writeJson(file,options);
   const child=spawn(process.execPath,[workerFile,f.base,String(task.id),file],{env:{...process.env,WORKFLOW_TEST_MODE:'1'},stdio:'ignore'});
-  t.after(async()=>{const identity=await attemptIdentity(child.pid);if(identity&&!identity.unknown)process.kill(child.pid,'SIGKILL');await new Promise(resolve=>{if(child.exitCode!==null||child.signalCode)resolve();else child.once('exit',resolve);});await store.updateTask({...await store.findTask(task.id),status:'failed'});for(const fn of cleanup)await fn();});
+  t.after(async()=>{await captureFixtureEvidence(store,'harness');const identity=await attemptIdentity(child.pid);if(identity&&!identity.unknown)process.kill(child.pid,'SIGKILL');await new Promise(resolve=>{if(child.exitCode!==null||child.signalCode)resolve();else child.once('exit',resolve);});await store.updateTask({...await store.findTask(task.id),status:'failed'});for(const fn of cleanup)await fn();});
   return {...f,store,task,options,file,child,ledger,attempt:()=>listAttempts(store).then(x=>x[0])};
 }
 const native={skip:process.platform!=='darwin'};
+
+test('real inspector timeout is unknown rather than proof of worker death',native,async t=>{
+  const identity=await attemptIdentity(process.pid);assert.equal(identity.native,true);
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'2f-identity-observation-'));
+  const wrapper=path.join(dir,'delayed-python');
+  await fs.writeFile(wrapper,"#!/usr/bin/python3\nimport time,os,sys\ntime.sleep(3)\nos.execv('/usr/bin/python3',['/usr/bin/python3']+sys.argv[1:])\n");await fs.chmod(wrapper,0o700);
+  const prior=process.env.WORKFLOW_LOCK_PYTHON;
+  try{
+    process.env.WORKFLOW_LOCK_PYTHON=wrapper;
+    assert.equal(await observeAttemptIdentity(identity),'unknown');
+    assert.doesNotThrow(()=>process.kill(identity.pid,0));
+  }finally{
+    if(prior===undefined)delete process.env.WORKFLOW_LOCK_PYTHON;else process.env.WORKFLOW_LOCK_PYTHON=prior;
+    await fs.rm(dir,{recursive:true,force:true});
+  }
+  assert.equal(await observeAttemptIdentity(identity),'alive');
+  assert.equal(await attemptIdentity(2147483647),null);
+});
 
 test('policy rejects escape/network/paid/environment injection contracts',()=>{
   for(const patch of [{daemonizes:true},{processGroup:'detached'},{network:true},{paid:true},{unattended:false},{credentialEnv:['NODE_OPTIONS']},{credentialEnv:['PATH']},{credentialEnv:Array.from({length:33},(_,n)=>'KEY'+n)}])assert.throws(()=>validateAdapterPolicy({...policy,...patch}));
@@ -65,11 +83,22 @@ test('successful real launchd attempt closes group, seals archive and deduplicat
 
 for(const death of ['worker-kill','runner-kill','both','worker-term','runner-term'])test(`real child/grandchild/open output descriptors / ${death}`,native,async t=>{
   const h=await harness(t,'tree',{timeoutMs:12000});
-  await wait(()=>h.store.exists(h.ledger+'.grandchild.pid'),'grandchild');
-  const r=await h.attempt(),ids=[];
-  for(const mode of ['tree','child','grandchild']){const identity=await attemptIdentity(Number(await fs.readFile(h.ledger+'.'+mode+'.pid','utf8')));assert.equal(identity.pgid,r.pgid);ids.push(identity);}
+  // PID files announce startup, not a successful birth observation. Capture the
+  // complete real identities while the processes are alive, before faulting them.
+  const {r,ids}=await wait(async()=>{
+    if(!await h.store.exists(h.ledger+'.grandchild.pid'))return false;
+    const r=await h.attempt(),ids=[];
+    if(r?.state!=='running')return false;
+    for(const mode of ['tree','child','grandchild'])ids.push(await attemptIdentity(Number(await fs.readFile(h.ledger+'.'+mode+'.pid','utf8'))));
+    return ids.every(i=>i?.native&&!i.unknown)?{r,ids}:false;
+  },'grandchild');
+  for(const identity of ids)assert.equal(identity.pgid,r.pgid);
+  // Check authority before either fault. Once worker loss is injected the
+  // watchdog is entitled to close the runner, so a later "still alive" assertion
+  // contradicts the behavior this test is meant to verify.
+  if(death.startsWith('runner')||death==='both')assert.equal(await attemptIdentityMatches(r.owner),true);
   if(death.startsWith('worker')||death==='both')process.kill(h.child.pid,death==='worker-term'?'SIGTERM':'SIGKILL');
-  if(death.startsWith('runner')||death==='both'){assert.equal(await attemptIdentityMatches(r.owner),true);process.kill(r.owner.pid,death==='runner-term'?'SIGTERM':'SIGKILL');}
+  if(death.startsWith('runner')||death==='both')process.kill(r.owner.pid,death==='runner-term'?'SIGTERM':'SIGKILL');
   const end=await wait(async()=>{const x=await h.attempt();return ['needs_reconciliation','uncertain','cancelled'].includes(x?.state)&&x;},'reconciliation');
   await wait(async()=>!(await groupMembers(r.pgid)).length,'closed group');
   for(const identity of ids)assert.equal(await attemptIdentityMatches(identity),false);
@@ -150,6 +179,9 @@ test('scheduled external definition fails closed without supervisor; built-in co
   const f=await fixture(t);await manageSupervision(f.runtime.store,'uninstall');
   await f.runtime.actions.scheduleWorkflow('probnaya-editorial','enable',{now:new Date('2026-10-14T09:00:00Z')});
   const blocked=await f.runtime.actions.tickWorkflows({now:new Date('2026-10-16T09:00:00Z')});assert.ok(blocked.some(r=>/supervisor/i.test(r.error??'')));assert.equal((await f.runtime.store.listTasks()).length,0);
+  const contract=f.cfg.adapters.supervision;delete f.cfg.adapters.supervision;await fs.writeFile(f.configPath,JSON.stringify(f.cfg));
+  await assert.rejects(readDefinition(f.runtime.store,'probnaya-editorial'),/reviewed inherited-group/);
+  f.cfg.adapters.supervision=contract;
   f.cfg.adapters.python='python3';await fs.writeFile(f.configPath,JSON.stringify(f.cfg));await assert.rejects(f.runtime.actions.startWorkflow('probnaya-editorial'),/supervisor/);
   f.cfg.previewFirstTopic=false;f.cfg.adapters.python='python3';delete f.cfg.adapters.supervision;delete f.cfg.permissions.unattendedAdapters;await fs.writeFile(f.configPath,JSON.stringify(f.cfg));
   const results=await f.runtime.actions.tickWorkflows({now:new Date('2026-10-16T09:00:00Z')});assert.ok(results.some(r=>r.taskId));assert.equal((await settled(f.runtime,1,'needs_you')).workflow.packageComplete,false);

@@ -9,7 +9,7 @@ import { promisify } from 'node:util';
 import { durableWrite, readBounded, safePath, syncDirectory } from './durable.mjs';
 import { withLock } from './lock.mjs';
 import { executableIdentity, verifyExecutable } from './workflow-adapters.mjs';
-import { processIdentity as fallbackIdentity, identityMatches as fallbackMatches } from './process-identity.mjs';
+import { processIdentity as fallbackIdentity } from './process-identity.mjs';
 import { runtimeFingerprint, loadedRuntimeFingerprint, stopLaunchAgent } from './workflow-scheduler.mjs';
 import { validateSnapshot } from './workflow-schema.mjs';
 import { currentRunNumber } from './runs.mjs';
@@ -40,13 +40,25 @@ export async function attemptIdentity(pid) {
     const value = JSON.parse(stdout);
     if (value.pid !== pid || value.native !== true || !/^\d+:\d+$/.test(value.birth)) throw new Error('Unknown birth');
     return value;
-  } catch { return { pid, unknown: true }; }
+  } catch {
+    // A failed inspector is not evidence of process death. ESRCH proves absence;
+    // a live or inaccessible PID remains unknown and cannot authorize a signal.
+    try { process.kill(pid, 0); }
+    catch (error) { if (error.code === 'ESRCH') return null; }
+    return { pid, unknown: true };
+  }
+}
+export async function observeAttemptIdentity(expected) {
+  if (!expected || expected.unknown) return 'unknown';
+  const actual = await attemptIdentity(expected.pid);
+  if (!actual) return 'gone';
+  if (actual.unknown) return 'unknown';
+  const matching = actual.birth === expected.birth && actual.boot === expected.boot &&
+    (process.platform === 'darwin' ? actual.native === true : actual.commandHash === expected.commandHash);
+  return matching ? 'alive' : 'mismatch';
 }
 export async function attemptIdentityMatches(expected) {
-  if (!expected || expected.unknown) return false;
-  if (process.platform !== 'darwin') return fallbackMatches(expected);
-  const actual = await attemptIdentity(expected.pid);
-  return actual?.native === true && actual.birth === expected.birth && actual.boot === expected.boot;
+  return await observeAttemptIdentity(expected) === 'alive';
 }
 const integrity = r => { const { integrity: ignored, ...body } = r; return digestAttempt(body); };
 const transitions = {

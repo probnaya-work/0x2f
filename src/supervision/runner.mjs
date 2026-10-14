@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import { createStore } from '../core/store.mjs';
 import { verifyExecutable } from '../core/workflow-adapters.mjs';
 import { loadedRuntimeFingerprint, runtimeFingerprint } from '../core/workflow-scheduler.mjs';
-import { attemptDir, channelPath, readAttempt, readInstallation, jobState, groupMembers, attemptLock, writeAttempt, validateAttemptOutputs, digestAttempt, ensureChannel, attemptIdentity as processIdentity, attemptIdentityMatches as identityMatches } from '../core/workflow-supervision.mjs';
+import { attemptDir, channelPath, readAttempt, readInstallation, jobState, groupMembers, attemptLock, writeAttempt, validateAttemptOutputs, digestAttempt, ensureChannel, observeAttemptIdentity, attemptIdentity as processIdentity, attemptIdentityMatches as identityMatches } from '../core/workflow-supervision.mjs';
 const exec=promisify(execFile),[, ,base,id]=process.argv,store=createStore(base);
 let receipt=await readAttempt(store,id);
 if(receipt.state!=='prepared')process.exit(0); // restart is inspection, never another invocation
@@ -60,7 +60,7 @@ await fault('after-owned');
 const deadline=Date.now()+request.timeoutMs;
 try{
  while(true){
-   if(!await identityMatches(request.worker)){await stop('worker_lost');break;}
+   if(['gone','mismatch'].includes(await observeAttemptIdentity(request.worker))){await stop('worker_lost');break;}
    if(Date.now()>deadline){await stop('timeout');break;}
    const r=await readAttempt(store,id);if(r.state==='cancelling'){await stop(r.reason??'user_cancel');break;}
    if(mainExit!==null){

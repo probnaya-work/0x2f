@@ -4,7 +4,7 @@ import { loadedRuntimeFingerprint, runtimeFingerprint } from '../core/workflow-s
 import {
   supervisionDir, readInstallation, listAttempts, readAttempt, attemptLock,
   writeAttempt, jobState, groupMembers, stopAttemptJob,
-  attemptIdentity, attemptIdentityMatches
+  attemptIdentity, attemptIdentityMatches, observeAttemptIdentity
 } from '../core/workflow-supervision.mjs';
 
 const store = createStore(process.argv[2]);
@@ -30,7 +30,9 @@ while (!stopped) {
         if (settled.includes(r.state)) return;
         const job = await jobState(r.request.label);
         if (job.pid) {
-          if (r.owner && (job.pid !== r.owner.pid || !await attemptIdentityMatches(r.owner))) {
+          const ownerState = r.owner ? await observeAttemptIdentity(r.owner) : null;
+          if (ownerState === 'unknown') return;
+          if (r.owner && (job.pid !== r.owner.pid || ownerState !== 'alive')) {
             await writeAttempt(store, r, { state: 'uncertain', reason: 'owner_identity_mismatch' });
             return;
           }
@@ -41,7 +43,8 @@ while (!stopped) {
             const task = await store.findTask(r.request.taskId);
             const cancelled = (await store.readCancelRequest(task))?.run === r.request.run;
             let reason;
-            if (!await attemptIdentityMatches(r.request.worker)) reason = 'worker_lost';
+            const workerState = await observeAttemptIdentity(r.request.worker);
+            if (['gone', 'mismatch'].includes(workerState)) reason = 'worker_lost';
             else if (cancelled) reason = 'user_cancel';
             else if (!matching) reason = 'runtime_drift';
             else if (Date.now() - started > r.request.timeoutMs) reason = 'timeout';
@@ -50,7 +53,7 @@ while (!stopped) {
           return;
         }
         if (r.state === 'validated') {
-          if (!await attemptIdentityMatches(r.request.worker)) {
+          if (['gone', 'mismatch'].includes(await observeAttemptIdentity(r.request.worker))) {
             await writeAttempt(store, r, { state: 'needs_reconciliation', reason: 'worker_lost_after_validation' });
           }
           return;

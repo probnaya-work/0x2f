@@ -37,6 +37,10 @@ Ownership inspection uses libproc birth seconds **and microseconds**, boot
 identity, a unique native job label, and group membership. The ABI comes from
 Apple's [proc_bsdinfo definition](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h).
 PID alone, second-resolution `ps lstart`, and a process name are insufficient.
+Inspection distinguishes a verified live birth, proven absence, birth mismatch
+and unknown observation. A failed inspector of a live/inaccessible PID is unknown,
+not worker death. Unknown cannot authorize GO, promotion or signalling; watchdogs
+retain the existing deadlines and require verified native ownership for signals.
 Production signals target the validated native job; they never use a raw PID
 or PGID. Unknown identity, reused groups, corrupt receipts, or uninspectable
 native state block signals/promotion and require explicit investigation.
@@ -160,3 +164,5 @@ and isolated native Python execution. No independent reviewer-agent was run
 without explicit user authorization; a separate manual invariant review and
 black-box native verification were performed. This is not an external peer
 review attestation. The final report identifies this review provenance explicitly.
+The bounded follow-up, stable scheduler/runtime separation and historical evidence
+limits are recorded in [workflow-supervision-stabilization.md](workflow-supervision-stabilization.md).
