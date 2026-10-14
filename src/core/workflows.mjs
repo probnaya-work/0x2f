@@ -1,3 +1,4 @@
+import { assertDefinitionSupervised } from './workflow-supervision.mjs';
 import { validateDefinition, validateSchedule, schema } from './workflow-schema.mjs';
 import { workflowKind } from '../workflows/registry.mjs';
 import { pinAdapters, rejectCredentials } from './workflow-adapters.mjs';
@@ -97,6 +98,7 @@ export function createWorkflowActions({ store, actions }) {
     if (existing) return existing;
     await assertRuntimeCompatible();
     const definition = await readDefinition(store, id);
+    await assertDefinitionSupervised(store,definition);
     await assertWorkflowSlot(store);
     return actions.createWork({
       brief: `${definition.name ?? id}: prepare evidence and a review package.`,

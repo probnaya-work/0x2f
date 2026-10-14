@@ -496,3 +496,21 @@ never committed.
 - **No cancellation surface in the CLI/API.** The node's
   `cancelExecution` and providers' `cancel()` exist as the contract seam; no
   client exposes them yet.
+
+## External workflow attempts
+
+On macOS, reviewed external workflow commands use the native execution boundary
+in `core/workflow-supervision.mjs` and `supervision/`. A KeepAlive inspection
+service reconciles durable receipts; one launchd job owns each attempt's inherited
+process group. A blocked gate is already OS-owned before GO. Outputs are staged
+per attempt, validated after group closure, and promoted with run/token/runtime
+fences by atomic rename. Uncertain outcomes require explicit reconciliation and
+are never retried automatically. Network/paid providers remain disabled.
+
+Attempt receipts and archives live under `.work/supervision/attempts/<id>/`.
+The published `tasks/<slug>/task.json` layout and atomic-write interface are
+unchanged. `externalAttempts` is an additive read-only action projection for
+CLI/TUI/Web, not a new persisted task field. The default editorial collection
+mode remains independent of the service. See
+[workflow-supervision.md](workflow-supervision.md) for contracts, failure modes,
+limits and recovery commands.

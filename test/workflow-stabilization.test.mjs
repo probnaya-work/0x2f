@@ -1,4 +1,5 @@
-import test from 'node:test';
+import nodeTest from 'node:test';
+const test=process.platform==='darwin'?nodeTest:nodeTest.skip;
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -126,15 +127,17 @@ test('one mismatched schedule does not prevent other schedules or persisted tick
 });
 
 for (const action of ['timeout', 'cancel']) test(`${action} terminates the real adapter process group`, async t => {
-  const f = await fixture(t, { adapter: 'slow', duration: action === 'timeout' ? 1200 : 10000 });
+  const f = await fixture(t, { adapter: 'slow', duration: action === 'timeout' ? 6000 : 20000, sleepMs:10000 });
   const executable = f.cfg.adapters.python, marker = path.join(f.base, 'adapter-pid');
   await fs.writeFile(executable, (await fs.readFile(executable, 'utf8')).replace('else { const spec=', `else { fs.writeFileSync(${JSON.stringify(marker)}, String(process.pid)); const spec=`));
   const task = await f.runtime.actions.startWorkflow('probnaya-editorial');
-  for (let n = 0; n < 100 && !await f.runtime.store.exists(marker); n++) await pause(20);
+  for (let n = 0; n < 500 && !await f.runtime.store.exists(marker); n++) await pause(20);
   const pid = Number(await fs.readFile(marker, 'utf8'));
   const { processIdentity } = await import('../src/core/process-identity.mjs'); const identity = await processIdentity(pid);
   assert.ok(identity && !identity.unknown);
-  t.after(async () => { if (await identityMatches(identity)) process.kill(-pid, 'SIGKILL'); });
+  t.after(async () => {
+    if(await identityMatches(identity)){const {listAttempts,attemptAction}=await import('../src/core/workflow-supervision.mjs');for(const r of await listAttempts(f.runtime.store))if(r.request.pin.realPath===executable)await attemptAction(f.runtime.store,'cancel',r.request.id);}
+  });
   if (action === 'cancel') await f.runtime.actions.cancelWork(task.id);
   const done = await settled(f.runtime, 1, 'failed');
   assert.match(done.error, action === 'timeout' ? /duration limit/ : /Cancelled/);

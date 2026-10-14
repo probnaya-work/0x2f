@@ -1,3 +1,4 @@
+import { supervisedRun } from '../core/workflow-supervision.mjs';
 import { durableWrite, readBounded } from '../core/durable.mjs';
 import { archiveArtifacts } from '../core/workflow-artifacts.mjs';
 import { schema, validateReceipt, parseWorkflowJson } from '../core/workflow-schema.mjs';
@@ -9,7 +10,7 @@ import { readSourceFile } from '../core/workflow-sources.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { digest, localParts } from '../core/workflows.mjs';
-import { gitRead, runArgv } from './adapters.mjs';
+import { gitRead } from './adapters.mjs';
 
 const STATUSES = ['experiment', 'implemented_locally', 'published', 'available_to_users'];
 function relativeFile(value) {
@@ -99,7 +100,7 @@ function renderTemplate(template, topic, date) {
   return template.replace(/\{\{(date|title|description|detail|link)\}\}/g, (_, key) => values[key]).trim() + '\n';
 }
 
-async function prepareVisual({ topic, def, dir, signal, store, date }) {
+async function prepareVisual({ topic, def, dir, signal, store, date, task, onEvent }) {
   const final = path.join(dir, 'visual.png');
   const receipt = path.join(dir, 'visual-receipt.json');
   const visualKey = digest(JSON.stringify({ visual: topic.visual, title: topic.title, date, settings: def.visual }));
@@ -127,8 +128,9 @@ async function prepareVisual({ topic, def, dir, signal, store, date }) {
       await store.writeJson(attempt, { schemaVersion: 1, operationId, state: 'pending', key: visualKey, at: new Date().toISOString() });
       crashPoint('external.intent-durable');
       try {
-        const argv = generator.argv.map(arg => arg.replaceAll('{output}', asset).replaceAll('{prompt}', visual.prompt));
-        await runArgv(argv, { cwd: dir, signal, timeoutMs: def.maxDurationMs, definition: def, pin: def.adapterPins?.image });
+        const argv = generator.argv.map(arg => arg.replaceAll('{output}', '{outputDir}/generated.png').replaceAll('{prompt}', visual.prompt));
+        const external = await supervisedRun(store,task,{operationId,argv,pin:def.adapterPins.image,policy:{...def.adapters.supervision,credentialEnv:credentialNames},outputs:['generated.png'],outputRules:{'generated.png':{kind:'png'}},timeoutMs:def.maxDurationMs,testCrashAt:process.env.WORKFLOW_TEST_RUNNER_CRASH_AT},{signal,onState:a=>onEvent({type:'progress',text:`External attempt ${a.id.slice(0,12)}: ${a.state}.`})});
+        await durableWrite(asset,await readBounded(path.join(external.directory,'generated.png'),64_000_000));
         const assetBytes = rejectCredentials(await readBounded(asset, 64_000_000), def);
         await durableWrite(asset, assetBytes);
         crashPoint('external.output-durable');
@@ -153,7 +155,15 @@ async function prepareVisual({ topic, def, dir, signal, store, date }) {
   if (!['diagram', 'image'].includes(visual.kind)) return { complete: false, reason: visual.reason ?? 'No factual visual source configured.' };
   const spec = { ...def.visual, title: topic.title, date, status: topic.status, visual, output: final };
   await store.writeJson(path.join(dir, 'visual-spec.json'), spec);
-  await runArgv([def.adapters?.python ?? 'python3', new URL('./visual.py', import.meta.url).pathname, path.join(dir, 'visual-spec.json')], { cwd: dir, signal, definition: def, pin: def.adapterPins?.python });
+  {
+    // Every output-producing process uses the same boundary, including the built-in compositor.
+    const inputSpec={...spec,output:'{outputDir}/visual.png',visual:{...visual}};
+    const inputs={};
+    if(visual.kind==='image'){inputs['source.png']=await readBounded(visual.file,64_000_000);inputSpec.visual.file='{inputDir}/source.png';}
+    inputs['spec.json']=JSON.stringify(inputSpec);
+    const external=await supervisedRun(store,task,{operationId:`visual-${task.runs.at(-1).run}-${visualKey}`,argv:[def.adapters.python,new URL('./visual.py',import.meta.url).pathname,'{inputDir}/spec.json'],pin:def.adapterPins.python,policy:def.adapters.supervision,outputs:['visual.png'],outputRules:{'visual.png':{kind:'png',width:def.visual.width??1200,height:def.visual.height??630}},inputs,timeoutMs:def.maxDurationMs,testCrashAt:process.env.WORKFLOW_TEST_RUNNER_CRASH_AT},{signal,onState:a=>onEvent({type:'progress',text:`External attempt ${a.id.slice(0,12)}: ${a.state}.`})});
+    await durableWrite(final,await readBounded(path.join(external.directory,'visual.png'),64_000_000));
+  }
   const png = rejectCredentials(await readBounded(final, 64_000_000), def);
   await durableWrite(final, png);
   const width = def.visual.width ?? 1200, height = def.visual.height ?? 630;
@@ -200,7 +210,7 @@ export async function runEditorial({ task, store, signal, onEvent }) {
   let visual = { complete: false, reason: 'Select one topic before preparing the final visual and personal repost.' };
   if (selected) {
     await onEvent({ type: 'progress', text: `Preparing local visual for topic ${selected}.` });
-    visual = await prepareVisual({ topic: topics[selected - 1], def, dir, signal, store, date });
+    visual = await prepareVisual({ topic: topics[selected - 1], def, dir, signal, store, date, task, onEvent });
     await store.writeText(path.join(dir, 'personal-repost.txt'), `A recent piece of work at PROBNAYA: ${topics[selected - 1].title.toLowerCase()}.\n${topics[selected - 1].description}\n${topics[selected - 1].link}\n`);
   }
   const corrections = (await store.listTasks()).filter(t => t.workflow?.id === task.workflow.id).flatMap(t => t.workflow.decisions ?? []);

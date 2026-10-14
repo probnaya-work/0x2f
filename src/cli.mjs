@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { manageSupervision, attemptAction } from './core/workflow-supervision.mjs';
 // 0x2F CLI — one client of the Work Runtime.
 //
 // The CLI renders state and invokes the SAME shared actions the Web API
@@ -291,6 +292,8 @@ async function main() {
     else if (args[0] === "refresh" && args[1]) result = await runtime.actions.refreshWorkflow(Number(args[1]));
     else if (args[0] === "schedule" && args[1]) result = await runtime.actions.scheduleWorkflow(args[1], args[2] ?? "status");
     else if (args[0] === "bindings" && args[1]) result = await runtime.actions.bindWorkflow(args[1], args[2]);
+    else if(args[0] === 'supervisor')result=await manageSupervision(runtime.store,args[1]??'status');
+    else if(args[0] === 'attempt')result=await attemptAction(runtime.store,args[1]??'status',args[2],args[3]);
     else if (args[0] === "doctor") result = await workflowDoctor(runtime.store);
     else if (args[0] === "recover" && args[1]) result = await recoverWorkflow(runtime.store, Number(args[1]));
     else if (args[0] === "repair") result = await repairWorkflow(runtime.store, args[1], Number(args[2]));

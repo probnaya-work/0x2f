@@ -1,3 +1,4 @@
+import { validateAdapterPolicy } from '../core/workflow-supervision.mjs';
 import path from 'node:path';
 import { sourceRootIdentity, validateSourcePath } from '../core/workflow-sources.mjs';
 import { createHash } from 'node:crypto';
@@ -11,12 +12,13 @@ export function validateEditorialDefinition(d) {
   if (!Number.isInteger(d.maxDurationMs) || d.maxDurationMs < 100 || d.maxDurationMs > 3600000) throw new WorkError('Workflow maxDurationMs must be 100..3600000.');
   if (d.maxAdapterCalls !== 1 || (d.maxCostUsd !== undefined && (typeof d.maxCostUsd !== 'number' || d.maxCostUsd < 0))) throw new WorkError('Invalid workflow adapter/cost limit.');
   if (d.lookbackDays !== undefined && (!Number.isInteger(d.lookbackDays) || d.lookbackDays < 1 || d.lookbackDays > 3660)) throw new WorkError('Invalid lookbackDays.');
-  fields(d.permissions, ['localArtifacts','externalChanges','imageGeneration','readSources','commandAdapters','network'], 'permissions');
+  fields(d.permissions, ['localArtifacts','externalChanges','imageGeneration','readSources','commandAdapters','network','unattendedAdapters'], 'permissions');
   if (d.permissions.externalChanges !== false || d.permissions.localArtifacts !== true || !Array.isArray(d.permissions.readSources)) throw new WorkError('Workflow requires localArtifacts:true, externalChanges:false and readSources.');
   if (d.permissions.network !== undefined && d.permissions.network !== false) throw new WorkError('Network adapters are not supported.');
-  for (const key of ['commandAdapters','imageGeneration']) if(d.permissions[key]!==undefined&&typeof d.permissions[key]!=='boolean')throw new WorkError(`Invalid permission ${key}.`);
+  for (const key of ['commandAdapters','imageGeneration','unattendedAdapters']) if(d.permissions[key]!==undefined&&typeof d.permissions[key]!=='boolean')throw new WorkError(`Invalid permission ${key}.`);
   if(d.previewFirstTopic!==undefined&&typeof d.previewFirstTopic!=='boolean')throw new WorkError('previewFirstTopic must be boolean.');
-  fields(d.adapters, ['python','image'], 'adapters');
+  fields(d.adapters, ['python','image','supervision'], 'adapters');
+  if(d.adapters.supervision)validateAdapterPolicy(d.adapters.supervision);
   if (typeof d.adapters.python !== 'string' || !d.adapters.python.trim()) throw new WorkError('Specify a Python/visual command adapter executable.');
   if (d.adapters.image) {
     fields(d.adapters.image, ['argv','credentialEnv'], 'image adapter');

@@ -1,3 +1,4 @@
+import { attemptProjection } from './workflow-supervision.mjs';
 // Shared Work actions — the SINGLE implementation of Work's business rules.
 //
 // Both the CLI and the HTTP API call these actions; neither implements its
@@ -150,7 +151,8 @@ export function createActions(ctx) {
 
   // listWork(): Promise<Task[]> — all tasks, newest first.
   async function listWork() {
-    return store.listTasks();
+    const tasks=await store.listTasks();
+    return Promise.all(tasks.map(async task=>task.workflow?{...task,externalAttempts:await attemptProjection(store,task)}:task));
   }
 
   // getWork(id): Promise<{ ...task, runs, result }> — task plus its projected
@@ -161,7 +163,7 @@ export function createActions(ctx) {
       store.readTaskResult(task),
       store.readEvents(task.slug)
     ]);
-    return { ...task, runs: taskRuns(task, { events }), result };
+    return { ...task, ...(task.workflow?{externalAttempts:await attemptProjection(store,task)}:{}), runs: taskRuns(task, { events }), result };
   }
 
   // getRun(id, run): Promise<{ ...runRecord, result }> — one run's factual

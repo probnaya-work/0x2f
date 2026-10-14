@@ -1,4 +1,5 @@
-import test from 'node:test';
+import nodeTest from 'node:test';
+const test=process.platform==='darwin'?nodeTest:nodeTest.skip;
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';

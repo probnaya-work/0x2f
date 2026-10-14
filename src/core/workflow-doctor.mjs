@@ -1,3 +1,4 @@
+import { supervisionStatus, supervisionDir, readAttempt, jobState, groupMembers, attemptIdentityMatches, externalDefinition, assertDefinitionSupervised, verifyAttemptArchive } from './workflow-supervision.mjs';
 import { workflowKind } from '../workflows/registry.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -33,7 +34,10 @@ export async function workflowDoctor(store, { now = new Date() } = {}) {
   for (const entry of await entries(path.join(store.workDir(),'workflows'))) {
     if (!entry.isDirectory()) { if (entry.isSymbolicLink()) problem('HIGH','SYMLINK',entry.name,'Symlink definition directory','Restore a regular directory from trusted backup.'); continue; }
     try {
-      const d = await readDefinition(store,entry.name); definitions.push({id:d.id,version:d.version,schemaVersion:d.schemaVersion});
+      const d = await readDefinition(store,entry.name); const safety={external:externalDefinition(d),unattended:true};
+      try{await assertDefinitionSupervised(store,d);}catch{safety.unattended=false;safety.reason='External adapter requires reviewed policy, explicit permission and healthy matching supervisor.';}
+      definitions.push({id:d.id,version:d.version,schemaVersion:d.schemaVersion,safety});
+      if(!safety.unattended)problem('HIGH','UNATTENDED_ADAPTER',d.id,safety.reason,'workflow supervisor install|repair; review permissions/policy. Network/paid adapters remain blocked.');
       for (const source of d.sources) {
         for (const file of source.files) {
           await readSourceFile(source.sourcePin, file);
@@ -97,7 +101,23 @@ export async function workflowDoctor(store, { now = new Date() } = {}) {
   }
   let scheduler; try { scheduler=await schedulerStatus(store); if((scheduler.configured||scheduler.installed)&&!scheduler.matching) problem('HIGH','SCHEDULER_DRIFT','LaunchAgent',scheduler.drift.join('; '),'workflow agent repair after compatibility checks.'); }
   catch(error) { problem('HIGH','SCHEDULER_STATE','LaunchAgent',error,'Restore installation record from backup or explicit reinstall.'); }
-  return {schemaVersion:1,checkedAt:now.toISOString(),healthy:!issues.some(i=>['BLOCKER','HIGH'].includes(i.severity)),definitions,schedules,tasks,locks,scheduler,issues};
+  let supervisor;
+  try{supervisor=await supervisionStatus(store);}catch{supervisor={installed:true,healthy:false,error:'INVALID_SUPERVISOR_STATE'};problem('HIGH','SUPERVISOR_STATE','supervision','Supervisor cannot be inspected','Restore trusted installation state explicitly.');}
+  const attempts=[];
+  for(const entry of await entries(path.join(supervisionDir(store),'attempts'))) {
+    if(!entry.isDirectory())continue;
+    try {
+      const r=await readAttempt(store,entry.name), job=await jobState(r.request.label);
+      const members=r.pgid?await groupMembers(r.pgid):[];
+      const mismatch=Boolean(job.pid&&r.owner&&(job.pid!==r.owner.pid||!await attemptIdentityMatches(r.owner)));
+      if(['validated','promoted'].includes(r.state))await verifyAttemptArchive(store,r);
+      const staging=await store.exists(path.join(supervisionDir(store),'attempts',entry.name,'output'));
+      attempts.push({id:entry.name,taskId:r.request.taskId,run:r.request.run,state:r.state,reason:r.reason??null,active:Boolean(job.pid),identityMismatch:mismatch,survivingGroup:!job.pid&&members.length>0,incompleteHandshake:['prepared','owned'].includes(r.state),unpromotedStaging:staging,pendingReconciliation:!job.pid&&!['promoted','reconciled'].includes(r.state)});
+      if(mismatch||(!job.pid&&members.length)||['uncertain','needs_reconciliation'].includes(r.state)||!job.pid&&!['promoted','reconciled','validated','cancelled','failed'].includes(r.state))problem('HIGH','ATTEMPT_UNCERTAIN',entry.name,'External ownership/outcome requires reconciliation','workflow attempt status <id>; cancel only verified native job; reconcile <id> <decision>; cleanup <id>. No automatic retry.');
+      else if(staging&&!job.pid&&r.state!=='reconciled')problem('MEDIUM','UNPROMOTED_STAGING',entry.name,r.state,'Reconcile explicitly before cleanup.');
+    }catch{problem('HIGH','ATTEMPT_RECEIPT',entry.name,'Corrupt/incomplete attempt; no signal or promotion allowed','Restore exact receipt from trusted backup; never fabricate ownership.');}
+  }
+  return {schemaVersion:1,supervisor,attempts,checkedAt:now.toISOString(),healthy:!issues.some(i=>['BLOCKER','HIGH'].includes(i.severity)),definitions,schedules,tasks,locks,scheduler,issues};
 }
 export async function recoverWorkflow(store,id) {
   return workflowLock(store,async()=>{

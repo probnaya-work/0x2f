@@ -1,4 +1,6 @@
-import test from 'node:test';
+import {readInstallation,jobState,attemptIdentity,attemptIdentityMatches} from '../src/core/workflow-supervision.mjs';
+import nodeTest from 'node:test';
+const test=process.platform==='darwin'?nodeTest:nodeTest.skip;
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -33,7 +35,7 @@ for(const point of ['create.id-reserved','create.inputs-durable','create.visible
 for(const point of ['worker.before-gate','worker.gate-open','sources.json.durable','artifact.file-synced','artifact.renamed','artifact.durable','result.artifacts-durable','result.md.file-synced','result.intent-durable','result.state-durable','result.complete']) test(`crash consistency / worker / ${point}`,async t=>{
   const f=await fixture(t);await crashCLI(f.base,point,['workflow','run','probnaya-editorial','worker-crash']);
   let task=await f.runtime.store.findTask(1);
-  for(let n=0;n<100;n++){if(!await identityMatches(task.workerIdentity))break;await pause(30);task=await f.runtime.store.findTask(1);}
+  for(let n=0;n<400;n++){if(!await identityMatches(task.workerIdentity))break;await pause(30);task=await f.runtime.store.findTask(1);}
   task=await recoverWorkflow(f.runtime.store,1);
   if(['result.state-durable','result.complete','result.intent-durable'].includes(point)) {assert.equal(task.status,'needs_you');assert.ok(task.workflow.manifest);}
   else {assert.equal(task.status,'failed');await f.runtime.actions.rerunWork(1);await settled(f.runtime,1,'needs_you');}
@@ -50,7 +52,7 @@ for(const point of ['decision.intent-durable','decision.state-durable','decision
 
 for(const point of ['external.intent-durable','external.output-durable']) test(`uncertain external effect never retries / ${point}`,async t=>{
   const f=await fixture(t,{generated:true});await crashCLI(f.base,point,['workflow','run','probnaya-editorial','external']);
-  for(let n=0;n<100 && await identityMatches((await f.runtime.store.findTask(1)).workerIdentity);n++)await pause(30);
+  for(let n=0;n<400 && await identityMatches((await f.runtime.store.findTask(1)).workerIdentity);n++)await pause(30);
   await recoverWorkflow(f.runtime.store,1);await f.runtime.actions.rerunWork(1);const task=await settled(f.runtime,1,'needs_you');
   assert.equal(task.workflow.packageComplete,false);const calls=await fs.readFile(path.join(f.base,'calls'),'utf8').catch(()=> '');assert.equal(calls,point==='external.intent-durable'?'':'call\n');
   const report=await workflowDoctor(f.runtime.store);assert.ok(report.issues.some(i=>i.code==='UNCERTAIN_EXTERNAL'));
@@ -91,9 +93,15 @@ test('missing source, outside symlink, oversized source and changed executable a
 
 test('doctor is read-only; torn JSONL tail requires explicit backed-up repair',async t=>{
   const f=await fixture(t);const task=await f.runtime.actions.startWorkflow('probnaya-editorial');await settled(f.runtime,1,'needs_you');
-  for(let n=0;n<100 && await identityMatches((await f.runtime.store.findTask(1)).workerIdentity);n++)await pause(25);
-  const log=f.runtime.store.eventLogPath(task.slug);await fs.appendFile(log,'{"torn":');const before=await filesHash(path.join(f.base,'.work'));
-  const report=await workflowDoctor(f.runtime.store);assert.ok(report.issues.some(i=>i.code==='EVENT_LOG'));assert.deepEqual(await filesHash(path.join(f.base,'.work')),before);
+  for(let n=0;n<400 && await identityMatches((await f.runtime.store.findTask(1)).workerIdentity);n++)await pause(25);
+  const log=f.runtime.store.eventLogPath(task.slug);await fs.appendFile(log,'{"torn":');
+  // Quiesce only the fixture inspection service: heartbeat is an independent writer.
+  const installation=await readInstallation(f.runtime.store),pid=(await jobState(installation.label)).pid,birth=await attemptIdentity(pid);
+  assert.equal(await attemptIdentityMatches(birth),true);process.kill(pid,'SIGSTOP');await pause(100);
+  try{
+    const before=await filesHash(path.join(f.base,'.work'));
+    const report=await workflowDoctor(f.runtime.store);assert.ok(report.issues.some(i=>i.code==='EVENT_LOG'));assert.deepEqual(await filesHash(path.join(f.base,'.work')),before);
+  }finally{if(await attemptIdentityMatches(birth))process.kill(pid,'SIGCONT');}
   const repair=await repairWorkflow(f.runtime.store,'events',1);assert.ok(await fs.readFile(repair.backup));await f.runtime.store.readEvents(task.slug);
 });
 

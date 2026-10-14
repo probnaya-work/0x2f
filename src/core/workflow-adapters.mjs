@@ -22,12 +22,12 @@ export async function verifyExecutable(pin) {
 export async function pinAdapters(def) {
   const pins = { git: await executableIdentity('git'), python: await executableIdentity(def.adapters.python) };
   if (def.adapters.image) pins.image = await executableIdentity(def.adapters.image.argv[0]);
-  const secrets = (def.adapters.image?.credentialEnv ?? []).map(k => process.env[k]).filter(Boolean);
+  const secrets = [...(def.adapters.image?.credentialEnv ?? []),...(def.adapters.supervision?.credentialEnv ?? [])].map(k => process.env[k]).filter(Boolean);
   if (secrets.some(secret => JSON.stringify(def).includes(secret))) throw new Error('Workflow config contains credential values; use credentialEnv names only.');
   return pins;
 }
 export function rejectCredentials(bytes, def) {
   const value = Buffer.isBuffer(bytes) ? bytes.toString('utf8') : String(bytes);
-  for (const name of def.adapters.image?.credentialEnv ?? []) if (process.env[name] && value.includes(process.env[name])) throw new Error('Credential-bearing adapter/source output refused.');
+  for (const name of [...(def.adapters.image?.credentialEnv??[]),...(def.adapters.supervision?.credentialEnv??[])]) if (process.env[name] && value.includes(process.env[name])) throw new Error('Credential-bearing adapter/source output refused.');
   return bytes;
 }

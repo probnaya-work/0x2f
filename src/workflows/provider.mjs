@@ -1,3 +1,4 @@
+import { assertDefinitionSupervised } from '../core/workflow-supervision.mjs';
 import { validateSnapshot } from '../core/workflow-schema.mjs';
 import { rejectCredentials } from '../core/workflow-adapters.mjs';
 import { workflowKind } from './registry.mjs';
@@ -14,6 +15,7 @@ export function createWorkflowProvider() {
       supportsSandbox: false, supportsStreaming: true, resultOnCompletion: true },
     async start({ cwd, task, store, onEvent }) {
       validateSnapshot(task.workflow.definition);
+      await assertDefinitionSupervised(store,{...task.workflow.definition,previewFirstTopic:task.workflow.selected?true:task.workflow.definition.previewFirstTopic});
       const handler = workflowKind(task.workflow?.definition.kind).start;
       if (!handler) throw new Error('Unknown workflow kind.');
       let timedOut = false;

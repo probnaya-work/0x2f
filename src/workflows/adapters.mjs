@@ -9,7 +9,7 @@ export async function runArgv(argv, { pin, definition, cwd, signal, maxBytes = 5
   if (definition) argv = [await verifyExecutable(pin), ...argv.slice(1)];
   return new Promise((resolve, reject) => {
     signal?.throwIfAborted();
-    const child = spawn(argv[0], argv.slice(1), { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(argv[0], argv.slice(1), { cwd, env:{PATH:process.env.PATH??'/usr/bin:/bin',LANG:'C.UTF-8'}, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '', bytes = 0, failure;
     const stop = reason => {
       failure ??= reason;
