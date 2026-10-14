@@ -654,3 +654,61 @@ LaunchAgent plists and zero fixture adapter/supervision processes. The real
 collection schedule remains restored. The remaining tracked modifications are
 the two protected, pre-existing package files; no generated test evidence is
 included in Git.
+
+### Bounded stabilization follow-up, 2026-10-15
+
+The current evidence and historical failure classifications are in
+[workflow-supervision-stabilization.md](workflow-supervision-stabilization.md).
+The actual scheduler has been separated from development: a detached worktree
+at verified checkpoint `4e568b7c5d063720a5296fe4730c7cbf06892125` supplies the CLI,
+while WorkingDirectory retains the sole existing workflow state. No `.work` or
+task #2 copy was made. The schedule is active, next run **2026-10-16 10:00
+Europe/Lisbon (09:00 UTC)**. Stable-runtime no-due tick returned `[]`; final doctor
+was healthy with zero issues and a loaded/matching LaunchAgent.
+
+Fix commit: `8ee6804eab69f7c90c020ff8b9ec9c303df25371`
+(`fix(workflow): distinguish unknown identity and stabilize process observations`).
+It distinguishes unknown observation from proven process loss, captures actual
+native tree identities before fault injection, corrects the `both` test's runner
+liveness assertion order, and requires/displays the trusted supervised contract.
+The exact staged diff was 33687 bytes, SHA-256
+`7629afe42ae0ccea298ed9f5ff8a06c072228aebd85e43e8940186f8b896010b`.
+This closure is a separate documentation-only commit, without amend.
+
+Verification: five targeted baseline passes per selected scenario; five
+consecutive targeted passes after confirmed fixes (8 scenarios each); focused
+native suite **41/41**; two consecutive unchanged full suites **773/773 +
+773/773**, with no skips or per-test retries between runs. `npm run check` and
+both new Python AST checks passed. One additional disposable CLI/worker/launchd
+flow promoted a sealed archive after group closure and removed its workspace.
+No third full-suite run was performed. Before cleanup, private diagnostics were
+retained outside Git. Final inventory found zero fixture processes, jobs/plists,
+active kernel locks, temp fixture workspaces or private IPC directories; 58 old
+inactive fixture residues were archived privately and removed, and 72 stale IPC
+directories with no open handles were removed. Operational logs/recovery evidence
+are intentionally retained outside Git.
+
+All **105 task #2 files remain byte-exact**, without extra/missing files and with
+seven runs. The two pre-existing package modifications remain byte-exact,
+unstaged and uncommitted. No real external adapter/provider was activated; no
+push, PR, merge, deploy, release, topic selection or publication occurred.
+
+Scoped verdicts: **GO for scheduled collection on the isolated stable runtime**;
+**NO-GO for trusted supervised local adapter rollout pending independent review
+and classification of the remaining historical lock/health evidence**;
+**NO-GO for arbitrary/untrusted commands without OS isolation**;
+**NO-GO for network/provider adapters without idempotency/status lookup,
+credential boundaries and provider-side spending limits**. Two green full runs
+do not retroactively identify the root cause of uninstrumented historical errors.
+The surviving-adapter HIGH remains outside the trusted inherited-group/staging
+contract. Arbitrary external adapters are not considered safe after arbitrary
+worker SIGKILL.
+
+The author inspected the exact `4e568b7c5d06..8ee6804` diff and the ownership,
+restart, fencing, immutable promotion, uncertainty, scheduler and credential
+invariants; the saved range contains only source/tests/docs and no absolute user
+paths or runtime data. **Independent fresh-context review remains outstanding**:
+the session requires explicit reviewer-agent authorization, the question was
+sent, and no authorization was received. This is not represented as peer review.
+The next step is that independent review and any evidence-backed corrections,
+not an architecture expansion or real provider integration.
