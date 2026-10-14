@@ -1,6 +1,6 @@
 # Local workflow hardening — completion evidence
 
-Date: 2026-10-14. Checkout: `/Users/bogart/Dev/PROBNAYA/work-cli-v0`.
+Date: 2026-10-14. Checkout: `work-cli-v0` (local repository).
 Scope: common 0x2F workflow mechanics; PROBNAYA topic selection, new visuals,
 publication and further editorial intelligence are outside this phase.
 
@@ -252,3 +252,191 @@ additional persistence, integrity, source, diagnostic, scheduler lifecycle and
 test-teardown defects. Corrections, current verification and the unresolved
 worker-SIGKILL execution-supervision boundary are recorded in
 [workflow-independent-review.md](workflow-independent-review.md).
+
+
+## Final stabilization closure — scoped GO / NO-GO
+
+This section supersedes the earlier uncommitted inventory and operational
+snapshot above. It closes the review on `feat/opencode-acp-tui`; it does not
+implement execution supervision or activate another adapter.
+
+### GO: the current scheduled PROBNAYA editorial collection
+
+**GO only for the current configured local collection stage:** collect explicitly
+allowed local/public evidence, save topic drafts, and stop at `needs_you` for a
+human decision. The verified configuration has `previewFirstTopic:false`, no
+configured image adapter, `imageGeneration:false`, `network:false`, and
+`externalChanges:false`. No selection, rendering, generated asset, repost,
+publication, external mutation or paid call is part of this scheduled scope.
+
+`commandAdapters:true` remains necessary for the existing trusted local Git and
+Python helpers. Here, “without external adapters” means that no separately
+configured command/image/network service is enabled; it does not mean that the
+implementation never launches a local helper process. This GO accepts the
+reviewed cooperative local persistence limits. A helper crash can fail collection
+and require explicit recovery; it does not authorize an automatic external retry.
+
+The GO is conditional on those configuration restrictions remaining in force,
+valid explicit source permissions/bindings, a matching loaded runtime/LaunchAgent,
+healthy doctor state, and the existing source/schema/integrity checks. Pausing
+schedules and restarting/rebinding after runtime changes remains required.
+Changing scope or enabling an external adapter requires a new verdict.
+
+### NO-GO: unattended command / image / network adapters
+
+**NO-GO for unattended workflows with separately configured command, image or
+network adapters.** The surviving-adapter issue remains **HIGH**: a real probe
+confirmed that an independently detached adapter survives its worker's SIGKILL.
+Its continued activity can escape cancellation and race later mutable output.
+A pending receipt prevents another uncertain invocation but cannot stop an
+already running process, establish a remote outcome or prevent provider charges.
+
+External unattended adapters are **not considered safe after arbitrary worker
+SIGKILL**. Passing normal timeout/SIGTERM tests or enabling a permission flag does
+not change this verdict. Network adapters are currently refused by the supported
+configuration contract; this report does not introduce or enable them.
+
+The second verdict can become GO only for a specifically reviewed adapter and
+scope after all of these acceptance conditions are met:
+
+1. **Supervision/watchdog and durable ownership:** a supervisor independent of
+   the worker owns and tracks the adapter and its process tree, with durable
+   attempt/launch identity and a launch handshake that closes the unowned-spawn
+   window. Worker death cannot leave a silently unmanaged attempt. A surviving
+   attempt is stopped or remains under verified independent ownership, and the
+   affected task/slot fails closed until reconciliation. Supervisor failure has
+   a tested OS supervision/containment or equivalent fail-closed policy too;
+   arbitrary adapter daemonization is not assumed safe.
+2. **Isolated attempt output ownership:** each attempt writes into its own
+   contained directory. Late or orphaned writers cannot mutate another attempt,
+   the current package, task metadata, evidence or completed run archives.
+   Promotion occurs atomically under the task/workflow lock only after current
+   ownership/run/token and size/SHA-256 validation; an expired owner cannot commit.
+3. **Uncertain external effects stay uncertain:** durable invocation intent and
+   receipts survive restart; a lost response never causes automatic replay of
+   an external call. Use provider idempotency/reconciliation where available,
+   otherwise require explicit operator reconciliation. GO must state its
+   at-most-once/uncertainty boundary, never claim remote exactly-once completion.
+4. **Explicit capability and resource review:** the particular command/image/
+   network capability is implemented and separately authorized, with executable
+   identity, scoped source/output permissions, bounded environment/credentials,
+   output/duration limits and credential-safe diagnostics. A paid provider needs
+   a provider-enforced hard spending limit; the present command interface cannot
+   enforce a dollar budget. Publication or another irreversible action retains
+   its separate permission and receipt boundary.
+5. **Independent process-level verification:** new-process disk-state tests kill
+   the worker at spawn/ownership, invocation, output and promotion boundaries;
+   exercise supervisor failure, SIGTERM, timeout, restart/recovery and concurrent
+   cancel/rerun. They prove no unmanaged local adapter/process tree, no late
+   output promotion/history corruption and no duplicated external invocation by
+   counting the actual side effect. A real disposable launchd lifecycle, clean
+   read-only doctor, full suite/check and scoped independent review must pass.
+
+The next implementation phase is **supervision/watchdog and isolated attempt
+output ownership**, followed by that verification and a new scoped review. It is
+explicitly outside this stabilization phase. No LLM/image adapter, topic choice
+or publication was added here.
+
+### Existing local commits and provenance boundaries
+
+Both implementation commits already exist; neither was amended or rewritten.
+Two additional test-only corrections were needed during post-commit verification:
+
+| Commit | Scope |
+|---|---|
+| `4411eb70d9d8ba21c4a3fee231de2d6ac46dd2dd` | Workflow runtime/durability/scheduler/recovery, surface integration, tests/docs **and** the statically required editorial kind/compositor/public fixtures; 75 files. |
+| `ea434ab9f94f2890e9e8ed9731e62b3784467caa` | Adjacent relay durability/projection and its tests; 8 files. |
+| `592dd6848ed12ef3b34fb73dcda9fe10b8126bca` | Test-only closure correction: bounded retries deleting the disposable Codex fixture home; one file, five cleanup calls. |
+| `c307c91fa520c28372c2d96aaa76b60217da91c4` | Test-only closure correction: verify terminal ACP worker exit before fixture deletion while preserving the live permission pause; one file. |
+
+The provenance categories remain distinct even though the first commit is one
+coherent dependency unit:
+
+* Runtime/durability/scheduler/recovery: `src/core/workflow-*`, locks/durable/source
+  helpers, shared actions/store/runs, worker/node/recovery/runtime and CLI/TUI/Web
+  integration, scheduler installer, workflow/hardening/stabilization tests and
+  operational documentation.
+* PROBNAYA editorial/compositor/public fixtures: `src/workflows/`,
+  `examples/workflows/probnaya-editorial/`, the setup script, local visual
+  compositor and nine public reference PNGs. Workflow fixtures/integration tests
+  exercise this kind alongside the generic persistence contract. Engineering
+  examples remain inactive proposals.
+* Adjacent relay: `src/relay/agent.mjs`, `src/relay/project.mjs` and the six
+  relay/LAN/security/projection/teardown test files in the second commit.
+
+A runtime-only first commit would be inconsistent: `workflow-schema.mjs` imports
+`src/workflows/registry.mjs`, the static registry immediately imports the editorial
+implementation, and the workflow suites use the editorial example fixtures.
+Splitting those file sets without changing code would leave missing imports or
+missing fixtures. Introducing placeholder kinds or reworking these dependencies
+just for commit splitting would expand this phase. The existing coherent commit
+is retained; no reset, rebase, amend or history rewrite is used. The subsequent
+report-finalization commit changes only this document. The test-only closure
+commits do not change production runtime, adapter behavior or scheduling.
+The first post-commit full run had 730 passes and one `ENOTEMPTY` teardown
+failure in a disposable Codex home during background plugin-clone writes.
+Bounded filesystem cleanup retries address that fixture race; they do not
+implement supervision or change the HIGH adapter verdict. A subsequent run
+also had 730 passes and one ACP fixture `ENOTEMPTY` failure: terminal state
+preceded the worker's final write/exit. Its terminal-status wait now observes
+and asserts worker exit before deletion; live permission waits are unchanged.
+
+### Exact staged evidence for report finalization
+
+Before each new commit, the exact staged bytes are inspected and archived.
+For `592dd6848ed12ef3b34fb73dcda9fe10b8126bca`, the staged allowlist was exactly
+`test/codex-integration.test.mjs`, and its binary staged diff SHA-256 was
+`e6c6c097d7cf58a81940ab4d5955f59bd05e7da2e17523c10d959c18eb84f389`.
+
+For `c307c91fa520c28372c2d96aaa76b60217da91c4`, the staged allowlist was exactly
+`test/acp-interactive-e2e.test.mjs`, and its binary staged diff SHA-256 was
+`a767517e9d8cc1c431a7409753f12c6d8ea0bd0d1667b73d28fcc70883e36075`.
+
+Before the new documentation commit, the complete binary-capable staged diff,
+its path list/stat and SHA-256 are saved in the private recovery directory.
+The staged allowlist is exactly `docs/workflow-hardening-report.md`; `git diff
+--cached --check` must pass. Added lines are checked for machine-specific absolute
+user paths and credential/runtime data. The old machine-specific checkout path
+in this report is removed. Package/lock and ignored `.work`, recovery archives,
+operational logs and generated runtime outputs are excluded.
+
+Existing implementation commit diffs are immutable and can be reconstructed
+exactly with `git show --binary`. Their archived diffs are identified separately
+as retrospective commit evidence; they are not misrepresented as pre-commit
+captures. The report-finalization commit identity is supplied in the final chat
+and Git history (`git log -1 --format=%H -- docs/workflow-hardening-report.md`),
+so no self-referential commit hash is embedded in its own contents.
+
+### Post-implementation-commit verification and final working tree
+
+Verification of committed implementation/test HEAD
+`c307c91fa520c28372c2d96aaa76b60217da91c4` completed on 2026-10-14:
+
+* Full `npm test -- --test-timeout=30000`: **731 passed, 0 failed, 0 skipped**,
+  98.00 seconds. The earlier two teardown failures and their corrective commits
+  are recorded above; they are not counted as successful verification.
+* `npm run check`: **passed** after the test-only commits.
+* Actual workspace doctor: **healthy**; workspace LaunchAgent **loaded/matching**,
+  schedule **unpaused**, next due **2026-10-16 at 10:00 Europe/Lisbon**.
+* Task #2: **all 105 files have the original size/SHA-256 and exact path set**,
+  including all seven runs. Actual task IDs remain **1 and 2**. No topic was
+  selected and no real editorial task/publication was created by verification.
+* Original package/lock bytes and original schedule bytes remain unchanged.
+
+The documentation-only finalization commit is followed by another full suite,
+check and read-only state verification. Its evidence and commit identity are
+saved privately and reported in the final chat; a failed repeat would keep this
+phase open rather than being hidden by the successful run above.
+
+Final Git state after this documentation commit:
+
+```text
+ M package-lock.json
+ M package.json
+```
+
+The remaining `package.json` modification is the pre-existing `0x2f` dependency
+entry; `package-lock.json` contains its pre-existing dependency resolution.
+Both files retain their protected pre-review bytes and remain unstaged. There
+are no other modified files, untracked files or staged changes at completion.
+Ignored private runtime and recovery evidence are retained locally.
