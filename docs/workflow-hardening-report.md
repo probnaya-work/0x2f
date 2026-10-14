@@ -340,7 +340,8 @@ or publication was added here.
 ### Existing local commits and provenance boundaries
 
 Both implementation commits already exist; neither was amended or rewritten.
-Two additional test-only corrections were needed during post-commit verification:
+Two additional test-only corrections and a small adjacent relay startup fix
+were needed during post-commit verification:
 
 | Commit | Scope |
 |---|---|
@@ -348,6 +349,8 @@ Two additional test-only corrections were needed during post-commit verification
 | `ea434ab9f94f2890e9e8ed9731e62b3784467caa` | Adjacent relay durability/projection and its tests; 8 files. |
 | `592dd6848ed12ef3b34fb73dcda9fe10b8126bca` | Test-only closure correction: bounded retries deleting the disposable Codex fixture home; one file, five cleanup calls. |
 | `c307c91fa520c28372c2d96aaa76b60217da91c4` | Test-only closure correction: verify terminal ACP worker exit before fixture deletion while preserving the live permission pause; one file. |
+| `184d49d7b22851e996e54b94bbb0c55a865bef40` | Documentation-only initial closure: scoped verdicts, ownership requirements, Git state and staged evidence. |
+| `4eda77dc13a663986d8bd5b670f8536541fb7f40` | Adjacent relay startup fix and regression: serialize config polls through pairing-key preparation; 2 files. |
 
 The provenance categories remain distinct even though the first commit is one
 coherent dependency unit:
@@ -381,6 +384,15 @@ also had 730 passes and one ACP fixture `ENOTEMPTY` failure: terminal state
 preceded the worker's final write/exit. Its terminal-status wait now observes
 and asserts worker exit before deletion; live permission waits are unchanged.
 
+The full repeat after the initial documentation closure had one further relay
+pairing regression (730 passes): overlapping config polls connected the transport
+before the first poll had derived its pairing key. A dedicated real relay/agent
+test held the KDF promise and reproduced `online` before key readiness. Eight
+production lines serialize config polling, with a stopped-state recheck after
+reading configuration. The targeted pairing/race suite then passed all six tests.
+This adjacent availability fix adds no adapter/capability or supervision. Scheduling
+was paused for the production runtime update, then restored after verification.
+
 ### Exact staged evidence for report finalization
 
 Before each new commit, the exact staged bytes are inspected and archived.
@@ -392,7 +404,14 @@ For `c307c91fa520c28372c2d96aaa76b60217da91c4`, the staged allowlist was exactly
 `test/acp-interactive-e2e.test.mjs`, and its binary staged diff SHA-256 was
 `a767517e9d8cc1c431a7409753f12c6d8ea0bd0d1667b73d28fcc70883e36075`.
 
-Before the new documentation commit, the complete binary-capable staged diff,
+For `4eda77dc13a663986d8bd5b670f8536541fb7f40`, the staged allowlist was exactly
+`src/relay/agent.mjs` and `test/relay-config-race.test.mjs`; its staged diff SHA-256
+was `1b8f844e5e5679b48fd267f0357268592a3582f2c4e1ac18c82fadabe16baaae`.
+For the initial report commit `184d49d7b22851e996e54b94bbb0c55a865bef40`, it was
+exactly this document, with staged SHA-256
+`e91c6ee0b1464ac8852c461087f83bd73d5e53f2101a866e41e1a434abd3fb27`.
+
+Before the final documentation follow-up commit, the complete binary-capable staged diff,
 its path list/stat and SHA-256 are saved in the private recovery directory.
 The staged allowlist is exactly `docs/workflow-hardening-report.md`; `git diff
 --cached --check` must pass. Added lines are checked for machine-specific absolute
@@ -409,24 +428,28 @@ so no self-referential commit hash is embedded in its own contents.
 
 ### Post-implementation-commit verification and final working tree
 
-Verification of committed implementation/test HEAD
-`c307c91fa520c28372c2d96aaa76b60217da91c4` completed on 2026-10-14:
+Post-implementation verification of committed HEAD
+`4eda77dc13a663986d8bd5b670f8536541fb7f40` completed on 2026-10-14:
 
-* Full `npm test -- --test-timeout=30000`: **731 passed, 0 failed, 0 skipped**,
-  98.00 seconds. The earlier two teardown failures and their corrective commits
-  are recorded above; they are not counted as successful verification.
-* `npm run check`: **passed** after the test-only commits.
-* Actual workspace doctor: **healthy**; workspace LaunchAgent **loaded/matching**,
-  schedule **unpaused**, next due **2026-10-16 at 10:00 Europe/Lisbon**.
-* Task #2: **all 105 files have the original size/SHA-256 and exact path set**,
+* Full `npm test -- --test-timeout=30000`: **732 passed, 0 failed, 0 skipped**,
+  100.44 seconds, including the new pairing-key readiness regression.
+* `npm run check`: **passed** after the adjacent relay commit.
+* Actual workspace doctor: **healthy**; existing UUID LaunchAgent
+  **loaded/matching**, schedule **unpaused**, next due **2026-10-16 at 10:00
+  Europe/Lisbon**. Runtime binding was repaired after the relay source change;
+  original schedule bytes were restored and a no-due tick created no task.
+* Task #2: **all 105 original file sizes/SHA-256 and exact paths match**,
   including all seven runs. Actual task IDs remain **1 and 2**. No topic was
   selected and no real editorial task/publication was created by verification.
-* Original package/lock bytes and original schedule bytes remain unchanged.
+* Original `package.json` and `package-lock.json` bytes match their pre-review
+  backups and remain excluded from every new commit.
 
-The documentation-only finalization commit is followed by another full suite,
-check and read-only state verification. Its evidence and commit identity are
-saved privately and reported in the final chat; a failed repeat would keep this
-phase open rather than being hidden by the successful run above.
+The final documentation-only follow-up is followed by a full suite, check and
+read-only state verification once more. Its own commit identity and post-commit
+results are recorded in private staged/evidence metadata and the final chat,
+rather than embedding a self-referential commit hash. Any failed repeat keeps
+this phase open. All scoped GO conditions and the external-adapter NO-GO remain
+as stated above.
 
 Final Git state after this documentation commit:
 
