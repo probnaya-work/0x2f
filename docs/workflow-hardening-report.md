@@ -604,3 +604,53 @@ Expected final tracked working-tree remainder is only the original unstaged
 committed. No `.work`, recovery archives, operational logs, runtime outputs,
 credentials or absolute user paths are included in these commits. No push, PR,
 merge, deploy, release or publication was performed.
+
+### Post-commit verification: rollout verdict supersedes provisional local GO
+
+**GO** remains scoped to the existing scheduled PROBNAYA editorial collection,
+with preview/image/network adapters disabled and no external mutations.
+**NO-GO** for unattended command/image adapters, including the reviewed local
+inherited-group contract, until the failures below are resolved and the final
+implementation receives independent review. This supersedes the provisional
+technical local GO above. **NO-GO** also remains for network/paid adapters.
+
+The pre-commit full suite passed 772/772. Post-commit `npm test` passed 768/772
+and failed four cases: creation lock-helper timeout, acceptance replay blocked
+by an unhealthy supervisor, grandchild startup timeout, and real CLI/package
+lock-helper timeout. A complete repeat with `--test-concurrency=4` passed
+769/772 and failed three cases: creation after `task.json.renamed` reported
+"Only validated attempts can be promoted", successful attempt promotion timed
+out, and the child/grandchild case did not observe its expected running identity.
+Both repeats had zero cancellations/skips. `npm run check` and Python AST checks
+passed after the implementation commits. The failures are unresolved; load or
+timing is not established as their root cause. No safety threshold was relaxed
+to obtain a passing result. The final change after these runs is documentation.
+
+Local commits already created, without amend:
+
+- `9d08d3a146031240eb7d4e33f0b597fce42566fa`: execution boundary and adoption.
+- `dcf784e68db362c1d6304f918d3db4f70762ab33`: scoped report and preservation.
+- This documentation correction is a separate local commit; its hash and exact
+  staged-diff digest are recorded in the final verification evidence/chat.
+
+Conditions for local unattended GO: diagnose and fix the observed allocation,
+startup/health and promotion failures; obtain repeatable full-suite passes and
+the native fault-injection guarantees under representative load; independently
+review the final diff; approve each pinned executable against the inherited-group,
+no-daemonize, staging-only contract. Network GO additionally requires a reviewed
+provider contract with durable idempotency/status lookup, reconciliation of
+unknown effects, explicit account/credential/permission and spending limits.
+
+The surviving-adapter **HIGH** remains for group/session escape, daemonization,
+descriptor/work handoff and writes outside attempt staging. External unattended
+adapters are not considered safe after arbitrary worker SIGKILL across this wider
+contract. Supervision/watchdog and isolated attempt output ownership are now
+implemented as a candidate; their next phase is stabilization and independent
+review before rollout, followed by stronger isolation/provider contracts. No real
+provider integration or production external adapter activation occurred.
+
+After the final repeat, native inventory contained zero temporary supervision
+LaunchAgent plists and zero fixture adapter/supervision processes. The real
+collection schedule remains restored. The remaining tracked modifications are
+the two protected, pre-existing package files; no generated test evidence is
+included in Git.
