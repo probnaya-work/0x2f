@@ -319,6 +319,7 @@ export function buildRight(model, state, w, p, T) {
   const field = (label, cells) =>
     lines.push({ cells: [T(" " + pad(label, 9), p.ghost, 500)].concat(cells) });
 
+  for (const line of task.workflowLines ?? []) field("", [T(line, p.dim)]);
   const runCount = task.runs.length || 1;
   const noteCount = task.notes.length;
   field("TASK", [

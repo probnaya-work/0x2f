@@ -460,6 +460,14 @@ control layer, not remote execution.
 
 ## Current limitations
 
+Local, versioned workflows can now run as ordinary 0x2F tasks. The first
+workflow prepares PROBNAYA editorial review packages from explicit local sources;
+it records content decisions separately from publication and supports a persisted
+Europe/Lisbon schedule through a user LaunchAgent. It does not publish to LinkedIn.
+See [Local workflows](docs/workflows.md) for setup, review commands, limits and
+the inactive engineering extension proposal. Use the checkout CLI for these
+changes; the published npm release has not been updated.
+
 - **Execution is local-only.** There is no remote/mini-PC node yet. Remote
   control is an outbound control layer, not remote execution.
 - **Remote control is v1.** No push notifications (the phone works while the
@@ -491,3 +499,10 @@ traces a task through the whole system.
 ## License
 
 [MIT](LICENSE)
+
+
+Workflow operations and recovery: [docs/workflow-recovery.md](docs/workflow-recovery.md).
+Local mutations now require Python 3 with POSIX `fcntl` (macOS/Linux); visual
+rendering additionally requires Pillow. Use the checkout CLI for workflow commands.
+`workflow doctor` is read-only; `workflow agent status` reports scheduler bindings
+separately from schedule configuration. Existing tasks are not mass-migrated.

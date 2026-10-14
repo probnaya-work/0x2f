@@ -1,0 +1,207 @@
+{
+  "id": "probnaya-editorial",
+  "kind": "editorial",
+  "version": "1.1.1",
+  "name": "PROBNAYA editorial",
+  "templateProvenance": "Caption structure from user request, 2026-10-14. Nine past visual publications supplied by user; exact caption texts still not supplied.",
+  "maxDurationMs": 120000,
+  "maxCostUsd": 0,
+  "maxAdapterCalls": 1,
+  "lookbackDays": 14,
+  "permissions": {
+    "localArtifacts": true,
+    "externalChanges": false,
+    "imageGeneration": false,
+    "readSources": [
+      "0x2f",
+      "fieldwork",
+      "surface-investigations",
+      "observation-001",
+      "observation-002"
+    ],
+    "commandAdapters": true,
+    "network": false
+  },
+  "adapters": {
+    "python": "python3",
+    "image": null
+  },
+  "visual": {
+    "titleFont": "../fieldwork-release/identity/fonts/archivo.ttf",
+    "monoFont": "../fieldwork-release/identity/fonts/geist-mono.ttf",
+    "provenance": "User-supplied past publications FIG 004–008 and HEARD, 2026-10-14. 4:5 plate composition derived from these references; new plate awaits review.",
+    "layout": "probnaya-plate-v1",
+    "width": 2160,
+    "height": 2700,
+    "surface": "0x2f.space",
+    "referenceHashes": [
+      "b218002eca6d36656dc47825a5d259d7a93c77e6542cf1446f4231604233ca66",
+      "7e91f80e343579832e33edd9a25d87c80ff0e0e5de3e91e7a7ff24a043c51c10",
+      "b32f7b9c6420ccd865913b0e092d73bdfb4b201e9b21c5e945e8112d3bf33996",
+      "77db45d3ffcc59a29db3d285e677326cbf0699a02472bc3aaf0f02861f736c76",
+      "b4c908ab55bf3037b3e8a1e0c0f1f38212bdbb73a3275035775a3aa70748e021",
+      "433e7fea840744e18c287d05af8b19ef08651690e2e1db6202faf0eaee3ef7af",
+      "e6ef7fd7865e55e81c9ddf582b34b4498393d2534d3939f84583cb4a7308efb0",
+      "4f29ed32d631a821e7ff64a142aba3b44748abbcc61c9c232ac3b186a5fea8d8",
+      "4c8e88392e4808ffa8bb39a5649458b1368d067a08eefe6ca69bc076bdccafb1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "0x2f",
+      "name": "0x2F",
+      "repo": ".",
+      "status": "implemented_locally",
+      "repositoryUrl": "https://github.com/probnaya-work/0x2f",
+      "files": [
+        "README.md",
+        "src/providers/opencode.mjs",
+        "src/providers/acp.mjs",
+        "src/core/actions.mjs",
+        "src/core/lifecycle.mjs",
+        "src/worker.mjs"
+      ],
+      "onlyConfiguredTopics": false,
+      "topics": [
+        {
+          "id": "cancellation",
+          "match": "cancel an active run",
+          "title": "Stopping a run, keeping the task",
+          "description": "0x2F can now stop an active agent run through its shared lifecycle.",
+          "detail": "The local implementation exposes cancellation in the CLI, TUI and Web. The worker asks the adapter to stop and records the outcome while preserving the task and its run history. This change has not been verified in a public release.",
+          "visual": {
+            "kind": "diagram",
+            "nodes": [
+              "STOP REQUEST",
+              "ADAPTER CANCEL",
+              "RUN HISTORY"
+            ],
+            "caption": "IMPLEMENTATION DIAGRAM / TASK AND RUN HISTORY PERSIST",
+            "layout": "cancellation",
+            "heading": "0x2F",
+            "subheading": "STOPPING A RUN · KEEPING THE TASK",
+            "stateLabel": "IMPLEMENTED LOCALLY",
+            "stateDetail": "RUN CANCELLATION / 0x2F",
+            "specimen": "IMPLEMENTATION DIAGRAM · NO MEASUREMENT CLAIMED",
+            "statement": "The run stops. The task and its history remain.",
+            "rows": [
+              [
+                "SCOPE",
+                "ACTIVE RUN · FINISHED RESULT PRESERVED"
+              ],
+              [
+                "OUTCOME",
+                "FAILED · KIND CANCELLED"
+              ],
+              [
+                "RETENTION",
+                "TASK · CONTEXT · RUN HISTORY"
+              ],
+              [
+                "RELEASE",
+                "PUBLIC RELEASE NOT VERIFIED"
+              ],
+              [
+                "SURFACE",
+                "0x2F.SPACE"
+              ]
+            ]
+          }
+        },
+        {
+          "id": "opencode-acp",
+          "match": "OpenCode.*ACP",
+          "title": "OpenCode joins the work router",
+          "description": "0x2F now includes an OpenCode adapter through ACP.",
+          "detail": "The local implementation starts opencode acp in the project directory. OpenCode uses its own project configuration while 0x2F retains the task, run history and permission decisions. This change has not been verified in a public release.",
+          "visual": {
+            "kind": "diagram",
+            "nodes": [
+              "0x2F TASK",
+              "ACP",
+              "OPENCODE"
+            ],
+            "caption": "IMPLEMENTATION DIAGRAM / ONE TASK, DISPOSABLE AGENT SESSIONS"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fieldwork",
+      "name": "FIELDWORK",
+      "repo": "../fieldwork-release",
+      "status": "implemented_locally",
+      "repositoryUrl": "https://github.com/probnaya-work/fieldwork",
+      "files": [
+        "README.md",
+        "build.py",
+        "tests/test_content.py"
+      ],
+      "onlyConfiguredTopics": false,
+      "topics": [
+        {
+          "id": "isolated-renderer",
+          "match": "isolated renderer workspaces",
+          "title": "An isolated workspace for FIELDWORK",
+          "description": "FIELDWORK's renderer can work from an isolated content workspace.",
+          "detail": "The local change separates the renderer repository from the workspace it builds. Tests cover the workspace path. FIELDWORK is a PROBNAYA practice; TRÁS-OS-MONTES is its first project. Public availability of this change has not been verified.",
+          "visual": {
+            "kind": "diagram",
+            "nodes": [
+              "CONTENT WORKSPACE",
+              "RENDERER",
+              "LOCAL OUTPUT"
+            ],
+            "caption": "IMPLEMENTATION DIAGRAM / PUBLIC AVAILABILITY UNVERIFIED"
+          }
+        }
+      ]
+    },
+    {
+      "id": "surface-investigations",
+      "name": "Surface investigations",
+      "repo": "../surface",
+      "status": "experiment",
+      "repositoryUrl": "https://github.com/probnaya-work/surface",
+      "files": [
+        "js/records.js",
+        "docs/social-image-identity.md",
+        "docs/observations-publishing.md"
+      ],
+      "onlyConfiguredTopics": true,
+      "topics": []
+    },
+    {
+      "id": "observation-001",
+      "type": "observation",
+      "repo": "../surface",
+      "record": "observations/001/observation.json",
+      "files": [
+        "observations/001/observation.json",
+        "observations/001/body.md"
+      ],
+      "status": "published",
+      "publicEvidence": {
+        "url": "https://probnaya.work/observations/001",
+        "basis": "Public record in Surface; live URL not rechecked by v1"
+      }
+    },
+    {
+      "id": "observation-002",
+      "type": "observation",
+      "repo": "../surface",
+      "record": "observations/002/observation.json",
+      "files": [
+        "observations/002/observation.json",
+        "observations/002/body.txt"
+      ],
+      "status": "published",
+      "publicEvidence": {
+        "url": "https://probnaya.work/observations/002",
+        "basis": "Public record in Surface; live URL not rechecked by v1"
+      }
+    }
+  ],
+  "previewFirstTopic": false,
+  "schemaVersion": 1
+}

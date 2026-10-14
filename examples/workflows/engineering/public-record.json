@@ -1,0 +1,11 @@
+{
+  "id": "example-change-001",
+  "status": "completed",
+  "title": "An example of a completed public change",
+  "summary": "Replace this example with a factual description of the change.",
+  "checks": "Name the targeted checks and independent review actually performed.",
+  "verification": "passed", "independentReview": "passed", "userDecision": "accepted",
+  "publicEligible": false,
+  "projectStatus": "implemented_locally",
+  "publicEvidence": null
+}

@@ -10,6 +10,10 @@
 // trusted mini-PC) or the provider (claude-code -> codex) changes
 // `createRuntime` wiring, not Work Core and not the clients.
 
+import fsSync from "node:fs";
+import path from "node:path";
+import { createWorkflowActions } from "./core/workflows.mjs";
+import { createWorkflowProvider } from "./workflows/provider.mjs";
 import { createStore } from "./core/store.mjs";
 import { createActions } from "./core/actions.mjs";
 import { createBus } from "./core/events.mjs";
@@ -35,6 +39,7 @@ export function createRuntime(base = process.cwd(), opts = {}) {
     extra: opts.providers ?? [],
     env: opts.env ?? process.env
   });
+  if (fsSync.existsSync(path.join(base, ".work", "workflows"))) providers.register(createWorkflowProvider());
   // The AUTO router: deterministic capability/policy routing. Node-aware in
   // its result (provider + node), even though the node is "local" today.
   const router = createRouter({
@@ -57,6 +62,7 @@ export function createRuntime(base = process.cwd(), opts = {}) {
     // the same persistence the task lives in.
     buildRunPrompt: opts => buildRunPrompt({ ...opts, base })
   });
+  Object.assign(actions, createWorkflowActions({ store, actions }));
   // Task prompt refinement — a pure text transform, independent of the Task
   // lifecycle by design: it never creates a task, starts an execution, or
   // persists anything. The refiner picks its model path by availability, so

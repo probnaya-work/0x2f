@@ -11,6 +11,14 @@
 // connected client can observe the run. Provider behavior stays inside the
 // provider; state meaning stays inside the core; this file only wires them.
 
+import { createWorkflowProvider } from "./workflows/provider.mjs";
+import { assertRuntimeCompatible, loadedRuntimeFingerprint } from "./core/workflow-scheduler.mjs";
+import { identityMatches } from "./core/process-identity.mjs";
+import { workflowLock } from "./core/workflows.mjs";
+import { currentRunNumber } from "./core/runs.mjs";
+import { commitWorkflow } from "./core/workflow-transaction.mjs";
+import { verifyArtifacts } from "./core/workflow-artifacts.mjs";
+import { crashPoint } from "./core/faults.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
@@ -111,7 +119,7 @@ function record(type, data = {}) {
 // would leave the task stuck in an intermediate state.
 let stateChain = Promise.resolve();
 const withState = fn => {
-  stateChain = stateChain.then(fn);
+  stateChain = stateChain.then(() => task.workflow ? workflowLock(store, fn) : fn());
   return stateChain;
 };
 
@@ -252,12 +260,6 @@ const onEvent = async event => {
 // Record the terminal run events + the resulting task state.
 async function finish(current, outcome) {
   current = finalizeRun(current);
-  // Write through the state chain: any interactive permission handler write
-  // (fire-and-forget from the event stream) must land BEFORE the terminal
-  // state, or a lost update could leave the task stuck mid-transition.
-  await withState(async () => {
-    await store.writeJson(metaPath, current);
-  });
 
   if (outcome.status === "failed") {
     await record("run.failed", { error: outcome.error ?? "Execution failed" });
@@ -269,6 +271,7 @@ async function finish(current, outcome) {
   } else {
     await record("run.completed", { status: outcome.status });
   }
+  await withState(async () => { await store.writeJson(metaPath, current); });
   await record("task.updated", { status: current.status });
   log(
     `outcome: ${outcome.status}${outcome.reason ? ` (${outcome.reason})` : ""}`
@@ -298,6 +301,22 @@ const TERMINAL = new Set(["ready", "failed", "done"]);
 // same lock to write task.json, so calling it inside this critical section
 // would wait on itself and the process would exit with the run still working.
 async function commitOutcome(outcome) {
+  if (task.workflow) {
+    await withState(async () => {
+      const fresh = await store.findTask(task.id);
+      if (fresh.pid !== process.pid || mode !== "workflow" || grant !== task.execution.launchToken || !(await identityMatches(fresh.workerIdentity)) || currentRunNumber(fresh) !== runNumber || fresh.execution.launchToken !== task.execution.launchToken || TERMINAL.has(fresh.status)) return;
+      const cancel = await store.readCancelRequest(fresh);
+      if (cancel?.run === runNumber) outcome = cancelledOutcome();
+      let next = applyOutcome(fresh, outcome);
+      if (outcome.workflowPatch && outcome.status !== "failed") next.workflow = { ...fresh.workflow, ...outcome.workflowPatch };
+      if (outcome.status === "needs_you") await verifyArtifacts(store, next);
+      const files = ["ready", "needs_you"].includes(outcome.status) ? [resultPath, path.join(dir, "runs", String(runNumber), "result.md")].map(path => ({ path, bytes: outcome.result ?? "" })) : [];
+      next = finalizeRun(next);
+      await commitWorkflow(store, fresh, next, { operationId: `outcome-${runNumber}`, kind: "result", payload: { status: outcome.status }, files,
+        events: [{ type: outcome.status === "failed" ? "run.failed" : outcome.status === "needs_you" ? "needs_user" : "run.completed", data: { run: runNumber, status: outcome.status, error: outcome.error, reason: outcome.reason, blockedOn: outcome.blockedOn } }, { type: "task.updated", data: { run: runNumber, status: outcome.status } }] });
+    });
+    log(`outcome: ${outcome.status}`); return;
+  }
   let next = null;
   await withState(async () => {
     const fresh = await store.readJson(metaPath);
@@ -310,16 +329,13 @@ async function commitOutcome(outcome) {
       };
     }
     if (outcome.status === "ready" || outcome.status === "needs_you") {
-      await fs.writeFile(resultPath, outcome.result ?? "", { encoding: "utf8", mode: 0o600 });
+      await store.writeText(resultPath, outcome.result ?? "");
       await fs.chmod(resultPath, 0o600).catch(() => {});
       if (Array.isArray(next.runs)) {
         const runDir = path.join(dir, "runs", String(runNumber));
         await fs.mkdir(runDir, { recursive: true });
         const runResultPath = path.join(runDir, "result.md");
-        await fs.writeFile(runResultPath, outcome.result ?? "", {
-          encoding: "utf8",
-          mode: 0o600
-        });
+        await store.writeText(runResultPath, outcome.result ?? "");
         await fs.chmod(runResultPath, 0o600).catch(() => {});
       }
     }
@@ -362,7 +378,22 @@ function armCancel() {
 }
 
 try {
-  const provider = providers.getProvider(
+  if (task.workflow) {
+    crashPoint('worker.before-gate');
+    const gate = path.join(dir, 'runs', String(runNumber), 'launch.json');
+    for (let attempt = 0; !(await store.exists(gate)); attempt++) {
+      if (attempt >= 200) throw new Error('Launch gate was not committed; no adapter was started. Use workflow recover.');
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+    const launch = await store.readJson(gate);
+    if (mode !== 'workflow' || grant !== task.execution.launchToken || launch.token !== grant || launch.pid !== process.pid) throw new Error('Worker launch token mismatch; no adapter was started.');
+    crashPoint('worker.gate-open');
+    await assertRuntimeCompatible();
+    if (task.workflow.runtimeFingerprint && task.workflow.runtimeFingerprint !== loadedRuntimeFingerprint) throw new Error('Runtime changed between task creation and worker start. No adapter was started.');
+    const cancel = await store.readCancelRequest(task);
+    if (cancelRequested || cancel?.run === runNumber) { outcomeOwned = true; await commitOutcome(cancelledOutcome()); process.exit(0); }
+  }
+  const provider = task.workflow ? createWorkflowProvider() : providers.getProvider(
     task.execution?.provider ?? providers.defaultProviderId
   );
   if (!provider) {
@@ -449,6 +480,8 @@ try {
     log(`launching ${provider.displayName} (${provider.id})`);
     outcome = await provider.start({
       cwd: base,
+      task,
+      store,
       prompt,
       onEvent,
       permission: { decisionFile: permissionDecisionFile },

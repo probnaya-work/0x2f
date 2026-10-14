@@ -18,7 +18,16 @@
 //     buildPrompt   // (brief) -> prompt string
 //   }
 
+import { fields, validateSnapshot, schema } from "./workflow-schema.mjs";
+import { randomUUID, createHash } from "node:crypto";
+import { processIdentity } from "./process-identity.mjs";
+import { commitWorkflow, operationPath, assertNoPendingOperation } from "./workflow-transaction.mjs";
+import { verifyArtifacts } from "./workflow-artifacts.mjs";
+import { backupFile } from "./durable.mjs";
+import { assertRuntimeCompatible, loadedRuntimeFingerprint } from "./workflow-scheduler.mjs";
+import { workflowKind } from "../workflows/registry.mjs";
 import path from "node:path";
+import { workflowLock, assertWorkflowSlot, WORKFLOW_PROVIDER } from "./workflows.mjs";
 import { closeTask, applyOutcome, cancelledOutcome } from "./lifecycle.mjs";
 import { WorkError } from "./errors.mjs";
 import { workEvent } from "./events.mjs";
@@ -119,6 +128,26 @@ export function createActions(ctx) {
     await store.appendEvent(task.slug, workEvent(type, task.id, data));
   }
 
+  async function launch(task) {
+    const pid = await node.startExecution({ task });
+    if (!pid) return task;
+    const fresh = await store.findTask(task.id);
+    if (currentRunNumber(fresh) !== currentRunNumber(task)) throw new WorkError("Run changed during launch.");
+    const workerIdentity = task.workflow ? await processIdentity(pid) : undefined;
+    if (task.workflow && (!workerIdentity || workerIdentity.unknown)) throw new WorkError("Worker identity could not be verified. Gate stays closed; use workflow doctor/recover.");
+    const updated = { ...fresh, pid, ...(workerIdentity ? { workerIdentity } : {}) };
+    await store.updateTask(updated);
+    if (task.workflow) await store.writeJson(path.join(store.taskDir(task.slug), "runs", String(currentRunNumber(task)), "launch.json"), { schemaVersion: 1, token: task.execution.launchToken, pid });
+    return updated;
+  }
+  const mutation = fn => async (id, ...args) => {
+    const task = await store.findTask(id);
+    return task.workflow ? workflowLock(store, async () => {
+      await assertNoPendingOperation(store, await store.findTask(id));
+      return fn(id, ...args);
+    }) : fn(id, ...args);
+  };
+
   // listWork(): Promise<Task[]> — all tasks, newest first.
   async function listWork() {
     return store.listTasks();
@@ -147,7 +176,12 @@ export function createActions(ctx) {
       throw new WorkError(`Task #${id} has no run ${runNumber}.`, 404);
     }
     const result = await store.readRunResult(task, record);
-    return { ...record, result };
+    let workflow = record.workflow;
+    if (task.workflow && !workflow) {
+      const file = path.join(store.taskDir(task.slug), "runs", String(runNumber), "workflow-definition.json");
+      if (await store.exists(file)) { const definition = schema(await store.readJson(file), "run definition"); workflow = { schemaVersion: 1, id: definition.id, version: definition.version, definitionDigest: definition.digest, trigger: task.workflow.trigger, triggerKey: task.workflow.triggerKey }; }
+    }
+    return { ...record, ...(workflow ? { workflow } : {}), result };
   }
 
   // createWork({ brief, provider?, model? }): create the task and start
@@ -162,7 +196,8 @@ export function createActions(ctx) {
   // no model call, so creating a task never depends on a provider being
   // authenticated. There is deliberately no Title + Description form: the
   // user writes the task, 0x2F names it.
-  async function createWork({ brief, provider, model } = {}) {
+  async function createWork({ brief, provider, model, workflow } = {}) {
+    if (provider === WORKFLOW_PROVIDER && !workflow) throw new WorkError("Start a configured workflow with 2f workflow run.");
     if (!brief || !brief.trim()) {
       throw new WorkError("Task brief is required.");
     }
@@ -184,8 +219,10 @@ export function createActions(ctx) {
 
     const task = await store.createTask({ title, brief: clean, prompt }, {
       provider: target.provider,
+      ...(workflow ? { workflow } : {}),
       node: target.node,
       workspace: ctx.workspaceId,
+      ...(workflow ? { launchToken: randomUUID() } : {}),
       ...(model ? { model } : {}),
       runs: [
         makeRunRecord({
@@ -196,21 +233,14 @@ export function createActions(ctx) {
           model,
           startedAt,
           requestedProvider: target.requested,
-          routing: target.routing
+          routing: target.routing,
+          ...(workflow ? { workflow } : {})
         })
       ]
     });
 
-    // Run 1's input is the original prompt (nothing has accumulated yet);
-    // persist it per run so every run's exact input is auditable and the
-    // worker reads the per-run file uniformly.
-    await store.writeRunPrompt(task, 1, prompt);
-
-    const pid = await node.startExecution({ task });
-    if (pid) await store.updateTask({ ...task, pid });
-
     await record(task, "task.created", { status: task.status });
-    return { ...task, pid };
+    return launch(task);
   }
 
   // rerunWork(id, { provider?, model? }): run the SAME task again as a NEW
@@ -224,7 +254,23 @@ export function createActions(ctx) {
   // yet), so a rerun refuses while the task is working. A blocked (needs_you)
   // task may be rerun — the blocked run stays in history, and the new run
   // starts fresh.
-  async function rerunWork(id, { provider, model } = {}) {
+  async function rerunWork(id, options = {}) {
+    const task = await store.findTask(id);
+    if (!task.workflow) return rerunUnchecked(id, options);
+    return workflowLock(store, async () => {
+      const fresh = await store.findTask(id);
+      await assertNoPendingOperation(store, fresh);
+      await assertRuntimeCompatible();
+      if (!fresh.workflow.definition.adapterPins || fresh.workflow.runtimeFingerprint !== loadedRuntimeFingerprint) throw new WorkError("Explicitly refresh workflow settings before rerunning on this runtime; prior history is preserved.");
+      validateSnapshot(fresh.workflow.definition);
+      if (options.provider && options.provider !== WORKFLOW_PROVIDER) throw new WorkError("Workflow execution uses its configured adapters; provider override is unavailable.");
+      if (["accepted", "published", "rejected", "deferred"].includes(fresh.workflow.review)) throw new WorkError("Record a new select or changes decision before continuing this workflow.");
+      await assertWorkflowSlot(store, fresh.id);
+      return rerunUnchecked(id, options);
+    });
+  }
+
+  async function rerunUnchecked(id, { provider, model } = {}) {
     requireWithin(provider, MAX_SELECTOR, "Provider id");
     requireWithin(model, MAX_SELECTOR, "Model id");
     const task = await store.findTask(id);
@@ -262,7 +308,8 @@ export function createActions(ctx) {
           model,
           startedAt,
           requestedProvider: target.requested,
-          routing: target.routing
+          routing: target.routing,
+          ...(task.workflow ? { workflow: task.workflow } : {})
         })
       ],
       // The CURRENT run's execution state — fresh for the new run. The
@@ -271,12 +318,13 @@ export function createActions(ctx) {
         provider: target.provider,
         node: target.node,
         workspace: ctx.workspaceId,
+        ...(task.workflow ? { launchToken: randomUUID() } : {}),
         ...(model ? { model } : {})
       }
     };
     delete current.blockedOn;
     delete current.error;
-    await store.updateTask(current);
+    if (task.workflow) { current.workflow = { ...current.workflow, packageComplete: false }; delete current.pid; delete current.workerIdentity; }
 
     // Build THIS run's input from current Task state — the original task
     // request plus everything accumulated since: user input (answers,
@@ -293,16 +341,18 @@ export function createActions(ctx) {
       originalPrompt,
       store
     });
-    await store.writeRunPrompt(current, runNumber, runPrompt);
-
-    const pid = await node.startExecution({ task: current });
-    if (pid) await store.updateTask({ ...current, pid });
+    if (current.workflow) current = await commitWorkflow(store, task, current, { kind: "rerun", payload: { run: runNumber }, files: [
+      { path: path.join(store.taskDir(current.slug), "runs", String(runNumber), "prompt.md"), bytes: runPrompt },
+      { path: path.join(store.taskDir(current.slug), "runs", String(runNumber), "workflow-definition.json"), bytes: JSON.stringify(current.workflow.definition, null, 2) + "\n" }
+    ] });
+    else { await store.writeRunPrompt(current, runNumber, runPrompt); await store.updateTask(current); }
+    current = await launch(current);
 
     await record(current, "task.updated", {
       status: "working",
       run: runNumber
     });
-    return { ...current, pid };
+    return current;
   }
 
   // resumeWork(id, grant): allow | reject — validate the task can be resumed,
@@ -378,26 +428,56 @@ export function createActions(ctx) {
   // and no provider supports free-text decision continuation. The task stays
   // needs_you after answering — the human decides next (rerun the task to
   // continue with the answer in context, or close the work).
-  async function answerWork(id, { answer } = {}) {
+  async function answerWork(id, options = {}) {
     const task = await store.findTask(id);
-    if (task.status !== "needs_you") {
+    if (!task.workflow) return answerUnchecked(id, options);
+    fields(options, ["answer", "action", "value", "operationId"], "decision input");
+    return workflowLock(store, () => answerUnchecked(id, options));
+  }
+
+  async function answerUnchecked(id, { answer, action, value, operationId } = {}) {
+    const task = await store.findTask(id);
+    if (action !== undefined) {
+      if (!task.workflow || typeof action !== "string" || (value !== undefined && typeof value !== "string" && typeof value !== "number")) throw new WorkError("Invalid structured decision.");
+      if (answer !== undefined) throw new WorkError("Use a structured action or answer, not both.");
+      answer = `${action}${value === undefined ? "" : ` ${value}`}`;
+    }
+    if (task.status !== "needs_you" && !(task.workflow?.packageDigest && task.status !== "working")) {
       throw new WorkError(
         `Task #${id} is ${task.status}, not needs_you — nothing to answer.`
       );
     }
-    if (task.blockedOn?.type !== "decision") {
+    if (task.blockedOn?.type !== "decision" && !task.workflow?.packageDigest) {
       throw new WorkError(
         `Task #${id} is not blocked on a decision — there is nothing to answer.`
       );
     }
-    if (!answer || !answer.trim()) {
+    if (typeof answer !== "string" || !answer.trim()) {
       throw new WorkError("An answer is required.");
     }
     requireWithin(answer, MAX_ANSWER, "Answer");
     const clean = answer.trim();
     const now = new Date().toISOString();
+    if (task.workflow) {
+      const lastDecision = task.workflow.decisions?.at(-1);
+      const repeated = lastDecision?.answer === clean && lastDecision.run === currentRunNumber(task) && lastDecision.packageDigest === task.workflow.packageDigest;
+      const opId = operationId ?? (repeated ? lastDecision.operationId : createHash("sha256").update(`${currentRunNumber(task)}:${task.workflow.packageDigest}:${task.workflow.decisions?.length ?? 0}:${clean}`).digest("hex"));
+      if (await store.exists(operationPath(store, task, opId))) return commitWorkflow(store, task, task, { operationId: opId, kind: "decision", payload: { answer: clean } });
+      await assertNoPendingOperation(store, task);
+      const kind = workflowKind(task.workflow.definition.kind);
+      if (kind.verifyDecisionArtifacts?.(clean)) await verifyArtifacts(store, task);
+      let updated = kind.decide(task, clean);
+      if (updated === task) return task;
+      const decisions = updated.workflow.decisions.map((decision, index, all) => index === all.length - 1 ? { ...decision, operationId: opId, answer: clean, run: currentRunNumber(task), packageDigest: task.workflow.packageDigest } : decision);
+      updated = { ...updated, workflow: { ...updated.workflow, decisions } };
+      updated = { ...updated, workflow: { ...updated.workflow, schemaVersion: 1 }, context: { ...(task.context ?? {}), notes: [...(task.context?.notes ?? []), { at: now, text: clean }] } };
+      if (!task.workflow.schemaVersion) await backupFile(path.join(store.taskDir(task.slug), "task.json"));
+      return commitWorkflow(store, task, updated, { operationId: opId, kind: "decision", payload: { answer: clean },
+        files: [{ path: path.join(store.taskDir(task.slug), "answer.json"), bytes: JSON.stringify({ schemaVersion: 1, operationId: opId, answer: clean, at: now }, null, 2) + "\n" }],
+        events: [{ type: "task.answered", data: { answer: clean, operationId: opId } }, { type: "task.updated", data: { status: updated.status } }] });
+    }
     const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
-    const updated = { ...task, context: { ...(task.context ?? {}), notes } };
+    let updated = { ...task, context: { ...(task.context ?? {}), notes } };
     await store.updateTask(updated);
     await store.writeDecisionAnswer(task, {
       answer: clean,
@@ -532,12 +612,22 @@ export function createActions(ctx) {
       const message = error instanceof Error ? error.message : String(error);
       throw new WorkError(`Could not cancel task #${id}: ${message}`);
     }
+    // A stop can arrive before the worker installs its SIGTERM handler.
+    // Observe that startup death and finalize the durable cancel request here.
+    // A worker that settles normally remains the owner of the outcome.
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const fresh = await store.findTask(id);
+      if (fresh.status !== "working") return fresh;
+      if (!pidAlive(fresh.pid)) return finalizeCancelled(fresh, "The worker stopped before recording its outcome.");
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
     return store.findTask(id);
   }
 
   // closeWork(id): user closes the task (any status -> done).
   async function closeWork(id) {
     const task = await store.findTask(id);
+    if (task.workflow && task.status === "working") throw new WorkError("Cancel the active workflow before closing it.");
     const closed = closeTask(task);
     await store.updateTask(closed);
     await record(task, "task.closed", { status: closed.status });
@@ -553,10 +643,10 @@ export function createActions(ctx) {
     rerunWork,
     resumeWork,
     answerWork,
-    noteWork,
-    correctWork,
-    cancelWork,
-    closeWork,
+    noteWork: mutation(noteWork),
+    correctWork: mutation(correctWork),
+    cancelWork: mutation(cancelWork),
+    closeWork: mutation(closeWork),
     allowWork: id => resumeWork(id, "allow"),
     rejectWork: id => resumeWork(id, "reject")
   };

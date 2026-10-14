@@ -113,7 +113,8 @@ export function createApp(runtime, opts = {}) {
           break;
         }
         case "answer": {
-          await actions.answerWork(intent.id, { answer: intent.text });
+          const saved = await actions.answerWork(intent.id, { answer: intent.text });
+          if (saved.workflow && !["selected", "changes_requested"].includes(saved.workflow.review)) { setFlash("workflow decision saved · acceptance and publication remain separate"); break; }
           if (!intent.continue) {
             setFlash("answer recorded on " + ref(intent.id) + " · it stays NEEDS YOU");
             break;

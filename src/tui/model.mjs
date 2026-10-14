@@ -17,6 +17,7 @@
 // own prior runs (see ledger.progressPercent) — falling back to reported
 // signals for run 1. READY lists changed files without deltas.
 
+import { workflowLines } from "../web/workflow.mjs";
 import os from "node:os";
 import {
   toSteps,
@@ -224,6 +225,7 @@ export function projectTask(task, events, opts = {}) {
 
   return {
     id: task.id,
+    workflowLines: workflowLines(task),
     idLabel: String(task.id).padStart(3, "0"),
     slug: task.slug,
     title: task.title ?? "",

@@ -19,6 +19,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 import { executableAvailable } from "../src/providers/index.mjs";
 import { startGeminiApiMock } from "./fixtures/gemini-api-mock.mjs";
 
@@ -64,7 +65,14 @@ async function waitForStatus(base, id, expected, opts = {}) {
       await new Promise(r => setTimeout(r, 60));
       continue;
     }
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      // Terminal state precedes the final notification; keep the fixture
+      // until its detached writer exits before teardown or another run.
+      const deadline = Date.now() + 5000;
+      while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+      assert.equal(pidAlive(task.pid), false, "detached fixture worker must exit before teardown");
+      return task;
+    }
     if (!ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }

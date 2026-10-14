@@ -17,6 +17,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { pidAlive } from "../src/recover.mjs";
 import { createStore } from "../src/core/store.mjs";
 import { executableAvailable } from "../src/providers/index.mjs";
 import {
@@ -65,7 +66,13 @@ async function waitForStatus(base, id, expected, opts = {}) {
       await new Promise(r => setTimeout(r, 60));
       continue;
     }
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      // Terminal state can precede the final live notification. Keep the
+      // disposable workspace until the detached writer has actually exited.
+      const deadline = Date.now() + 3000;
+      while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+      return task;
+    }
     if (!ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }

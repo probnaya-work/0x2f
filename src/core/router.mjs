@@ -46,7 +46,7 @@ const ROUTING_CONFIG_PATH = ".work/routing.json";
 export function orderCandidates(providers, prefer = []) {
   const available = providers
     .listProviders()
-    .filter(p => providers.available(p.id))
+    .filter(p => !p.workflowOnly && providers.available(p.id))
     .map(p => p.id);
   const preferred = prefer.filter(id => available.includes(id));
   const rest = available.filter(id => !prefer.includes(id));

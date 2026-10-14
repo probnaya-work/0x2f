@@ -1,0 +1,27 @@
+{
+  "id": "engineering",
+  "kind": "engineering",
+  "version": "0.1.0-proposal",
+  "name": "Sequential engineering loop",
+  "enabled": false,
+  "permissions": {
+    "readSources": [
+      "configured-repository"
+    ],
+    "localArtifacts": true,
+    "commit": false,
+    "push": false,
+    "pullRequest": false,
+    "merge": false,
+    "deploy": false
+  },
+  "stages": [
+    "isolated-worktree",
+    "investigation",
+    "implementation",
+    "targeted-checks",
+    "independent-review",
+    "user-decision"
+  ],
+  "schemaVersion": 1
+}

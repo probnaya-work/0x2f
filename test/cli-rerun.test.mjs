@@ -17,6 +17,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 
 const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
 
@@ -78,7 +79,14 @@ async function waitForStatus(base, id, expected, timeout = 10000) {
   const start = Date.now();
   while (true) {
     const task = await store.findTask(id);
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      if (task.status !== "working" && !task.blockedOn?.live) {
+        const deadline = Date.now() + 5000;
+        while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+        assert.equal(pidAlive(task.pid), false, "detached fixture writer must exit before teardown");
+      }
+      return task;
+    }
     if (task.status !== "working") {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }

@@ -708,8 +708,9 @@ async function answerDecision(id) {
   if (remoteBlocked()) return false;
   const answer = (state.answers.get(id) ?? "").trim();
   if (!answer) return false;
+  let saved;
   try {
-    await api("/api/tasks/" + id + "/answer", {
+    saved = await api("/api/tasks/" + id + "/answer", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ answer })
@@ -720,7 +721,7 @@ async function answerDecision(id) {
   }
   state.answers.delete(id);
   await reloadTasks();
-  return true;
+  return saved?.workflow ? saved : true;
 }
 
 function toggleOpen(id) {
@@ -1121,7 +1122,7 @@ function renderDecisionCard(row, accent) {
   const submit = el("button", {
     class: "act act-primary",
     "data-focus-key": "answer-" + row.id,
-    text: "ANSWER & CONTINUE"
+    text: row.workflow ? "APPLY DECISION" : "ANSWER & CONTINUE"
   });
   submit.disabled = value.trim().length === 0;
   submit.addEventListener("click", e => {
@@ -1525,6 +1526,7 @@ function renderRow(row, accent) {
         el("span", { class: "detail-state", style: { color: row.stateColor }, text: row.stateLabel })
       ]),
       renderBrief(row),
+      ...(row.workflowLines ?? []).map(text => el("div", { class: "routed-line", text })),
       renderTrack(row, accent),
       el("div", { class: "status-line" }, [
         el("span", { class: "status-phase", text: row.phaseLabel }),
@@ -2512,7 +2514,9 @@ async function answerAndContinue(id) {
   if (!answer) return false;
   // Never continue past a failed save: rerunning without the recorded answer
   // would spend a run on the same question the agent already asked.
-  if (!(await answerDecision(id))) return false;
+  const saved = await answerDecision(id);
+  if (!saved) return false;
+  if (saved.workflow && !["selected", "changes_requested"].includes(saved.workflow.review)) return true;
   return sendBack(id);
 }
 
@@ -2990,6 +2994,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
   // desktop detail uses, and the reason a long brief is never lost on the
   // phone (the relay carries it in full; see src/relay/project.mjs).
   parts.push(renderBrief(row));
+  for (const text of row.workflowLines ?? []) parts.push(el("div", { class: "m-dmeta", text }));
 
   if (row.trace) {
     parts.push(el("div", { class: "m-dtrace-wrap" }, [renderTrack(row, accent)]));
@@ -3120,7 +3125,7 @@ function renderMobileActionBar(row, frozen) {
     const value = (state.answers.get(row.id) ?? "").trim();
     const continueBtn = el("button", {
       class: "m-abar-btn m-abar-primary",
-      text: "ANSWER & CONTINUE",
+      text: row.workflow ? "APPLY DECISION" : "ANSWER & CONTINUE",
       "data-mobile-answer-gate": true,
       disabled: !value ? true : undefined
     });

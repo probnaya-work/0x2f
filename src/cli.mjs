@@ -5,6 +5,8 @@
 // calls (core/actions.mjs). It contains no lifecycle, provider, or session
 // logic of its own; `2f allow` and `2f reject` are thin wrappers over
 // actions.allowWork / actions.rejectWork.
+import { workflowLines } from "./web/workflow.mjs";
+import { workflowDoctor, recoverWorkflow, repairWorkflow } from "./core/workflow-doctor.mjs";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import readline from "node:readline/promises";
@@ -42,6 +44,15 @@ Commands:
   2f init
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
   2f status
+  2f workflow run <id> [trigger-key]
+  2f workflow refresh <task-id>    adopt updated settings; preserve prior evidence/runs
+  2f workflow schedule <id> <enable|pause|resume|status>
+  2f workflow tick
+  2f workflow doctor
+  2f workflow bindings <id> <python-executable>
+  2f workflow recover <task-id>
+  2f workflow repair <events|locks|staging|temps> [task-id]
+  2f workflow agent <install|status|repair|uninstall>
   2f open <id> [--run <n>]
   2f rerun <id> [--provider <id>]   run the same task again as a new run
   2f note <id> <text>    record a constraint/correction on the task; the next
@@ -143,6 +154,8 @@ async function openTask(id, base) {
 
   console.log(`#${String(detail.id).padStart(3, "0")} ${detail.title}\n`);
 
+  for (const line of workflowLines(detail)) console.log(line);
+  if (detail.workflow) console.log("");
   const blocked = detail.blockedOn;
   if (blocked?.type === "permission") {
     console.log("NEEDS YOU — Permission\n");
@@ -227,6 +240,7 @@ async function openRun(id, runNumber, base) {
   const outcome =
     { working: "WORKING", needs_you: "NEEDS YOU", ready: "READY", failed: "FAILED" }[run.outcome] ??
     String(run.outcome ?? "?").toUpperCase();
+  if (run.workflow) console.log(`Workflow  ${run.workflow.id} v${run.workflow.version} · ${run.workflow.trigger} · ${run.workflow.triggerKey}`);
   console.log(`Provider     ${provider}`);
   console.log(`Node         ${run.node ?? "—"}`);
   console.log(`Model        ${run.model ?? "—"}`);
@@ -266,6 +280,25 @@ async function main() {
 
   if (command === "version" || command === "--version" || command === "-v") {
     console.log(packageVersion());
+    return;
+  }
+
+  if (command === "workflow") {
+    await requireProject(base);
+    const runtime = createRuntime(base);
+    let result;
+    if (args[0] === "run" && args[1]) result = await runtime.actions.startWorkflow(args[1], args[2] ? { triggerKey: args[2] } : {});
+    else if (args[0] === "refresh" && args[1]) result = await runtime.actions.refreshWorkflow(Number(args[1]));
+    else if (args[0] === "schedule" && args[1]) result = await runtime.actions.scheduleWorkflow(args[1], args[2] ?? "status");
+    else if (args[0] === "bindings" && args[1]) result = await runtime.actions.bindWorkflow(args[1], args[2]);
+    else if (args[0] === "doctor") result = await workflowDoctor(runtime.store);
+    else if (args[0] === "recover" && args[1]) result = await recoverWorkflow(runtime.store, Number(args[1]));
+    else if (args[0] === "repair") result = await repairWorkflow(runtime.store, args[1], Number(args[2]));
+    else if (args[0] === "agent") result = await runtime.actions.schedulerAgent(args[1] ?? "status");
+    else if (args[0] === "tick") result = await runtime.actions.tickWorkflows();
+    else throw new Error("Usage: 2f workflow run <id> [trigger-key] | refresh <task-id> | schedule <id> <enable|pause|resume|status> | tick");
+    if (args[0] === "run" || args[0] === "refresh") console.log(`#${result.id} ${result.status} · ${result.slug}\n2f open ${result.id} · 2f tui`);
+    else console.log(JSON.stringify(result, null, 2));
     return;
   }
 

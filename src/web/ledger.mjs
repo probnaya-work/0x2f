@@ -28,6 +28,7 @@
 // synthesized phase frame and never a per-interval dot that could be misread
 // as a reported step.
 
+import { workflowLines, workflowView } from "./workflow.mjs";
 import { deriveTitle, briefBody } from "../core/title.mjs";
 import { canonicalPath } from "../core/paths.mjs";
 
@@ -1136,6 +1137,8 @@ export function projectRow(task, events, opts = {}) {
 
   return {
     id: task.id,
+    workflowLines: workflowLines(task),
+    workflow: workflowView(task),
     num: "/" + two(task.id),
     title: task.title,
     // The full brief, and the body a detail view renders under the heading:

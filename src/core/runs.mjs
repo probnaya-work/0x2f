@@ -44,7 +44,7 @@ export const RUN_OUTCOMES = ["working", "ready", "needs_you", "failed"];
 // `routing` records the AUTO decision (mode/reason/considered) so "why did
 // 0x2F run this here?" is answered from the persisted run, never
 // reconstructed from current configuration.
-export function makeRunRecord({ run, provider, node, workspace, model, startedAt, requestedProvider, routing }) {
+export function makeRunRecord({ run, provider, node, workspace, model, startedAt, requestedProvider, routing, workflow }) {
   return {
     run,
     provider,
@@ -55,7 +55,8 @@ export function makeRunRecord({ run, provider, node, workspace, model, startedAt
     ...(requestedProvider ? { requestedProvider } : {}),
     ...(routing ? { routing } : {}),
     outcome: "working",
-    attempts: 1
+    attempts: 1,
+    ...(workflow ? { workflow: { schemaVersion: 1, id: workflow.id, version: workflow.version, definitionDigest: workflow.definition.digest, trigger: workflow.trigger, triggerKey: workflow.triggerKey, runtimeFingerprint: workflow.runtimeFingerprint } } : {})
   };
 }
 

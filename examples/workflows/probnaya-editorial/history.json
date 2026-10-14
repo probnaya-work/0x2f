@@ -1,0 +1,168 @@
+{
+  "version": "1.1.0",
+  "provenance": "Nine past publication images supplied by the user on 2026-10-14. Partial history; figure dates are not verified LinkedIn publication timestamps. Exact post captions absent. Figure numbers can repeat across different publications.",
+  "publications": [
+    {
+      "id": "heard-public-field",
+      "title": "HEARD — PUBLIC FIELD",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-25",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": null,
+      "topicKeys": [
+        "heard:public-field"
+      ],
+      "reference": "references/heard-public-field.png",
+      "sha256": "b218002eca6d36656dc47825a5d259d7a93c77e6542cf1446f4231604233ca66",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "fig-008",
+      "title": "THE HOLDER RELATION",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-18",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "008",
+      "topicKeys": [
+        "surface-investigations:holder-relation"
+      ],
+      "reference": "references/fig-008-holder-relation.png",
+      "sha256": "7e91f80e343579832e33edd9a25d87c80ff0e0e5de3e91e7a7ff24a043c51c10",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "fig-007",
+      "title": "BEFORE THE FIRST OBSERVATION",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-16",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "007",
+      "topicKeys": [
+        "surface-investigations:before-first-observation"
+      ],
+      "reference": "references/fig-007-before-first-observation.png",
+      "sha256": "b32f7b9c6420ccd865913b0e092d73bdfb4b201e9b21c5e945e8112d3bf33996",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "fig-006",
+      "title": "0x2F × 057 / WORK AND FIELD",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-13",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "006",
+      "topicKeys": [
+        "0x2f:work-and-field",
+        "057:work-and-field"
+      ],
+      "reference": "references/fig-006-work-and-field.png",
+      "sha256": "77db45d3ffcc59a29db3d285e677326cbf0699a02472bc3aaf0f02861f736c76",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "fig-005",
+      "title": "PORTRAIT · RECORD · MARKS",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-11",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "005",
+      "topicKeys": [
+        "mpa:issued-objects"
+      ],
+      "reference": "references/fig-005-the-issue.png",
+      "sha256": "b4c908ab55bf3037b3e8a1e0c0f1f38212bdbb73a3275035775a3aa70748e021",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "fig-004",
+      "title": "MPA-01 IN SERVICE",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-09",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "004",
+      "topicKeys": [
+        "mpa:in-service"
+      ],
+      "reference": "references/fig-004-mpa-in-service.png",
+      "sha256": "433e7fea840744e18c287d05af8b19ef08651690e2e1db6202faf0eaee3ef7af",
+      "width": 2160,
+      "height": 2700
+    },
+    {
+      "id": "chinotto-what-continues",
+      "title": "CHINOTTO / WHAT CONTINUES",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-10-09",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": "007",
+      "topicKeys": [
+        "chinotto:what-continues"
+      ],
+      "reference": "references/fig-007-chinotto-what-continues.png",
+      "sha256": "e6ef7fd7865e55e81c9ddf582b34b4498393d2534d3939f84583cb4a7308efb0",
+      "width": 2160,
+      "height": 2700,
+      "terminology": "Private record; not a journaling app. Historical platform labels do not establish current availability."
+    },
+    {
+      "id": "observation-mostafa",
+      "title": "does it make me more human, or less?",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-22",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": null,
+      "topicKeys": [
+        "observation-002:c95f7f1f4ddb3ef5d50645963013c0a49d4aef08e241a58a341574e0b7943fe2"
+      ],
+      "reference": "references/observation-mostafa.png",
+      "sha256": "4f29ed32d631a821e7ff64a142aba3b44748abbcc61c9c232ac3b186a5fea8d8",
+      "width": 1080,
+      "height": 1350,
+      "author": "Mostafa",
+      "observationNumber": "002",
+      "contentPolicy": "Published as sent; text and title must not be rewritten."
+    },
+    {
+      "id": "observation-alexis",
+      "title": "It’s Late Night, Alexis",
+      "status": "published",
+      "confirmation": "User supplied as a past publication on 2026-10-14",
+      "figureDate": "2026-09-21",
+      "publicationDate": null,
+      "publicationUrl": null,
+      "figure": null,
+      "topicKeys": [
+        "observation-001:f680990f010361e455956522428b30b69f8bfd1f62eaeac198838e5817f47f19"
+      ],
+      "reference": "references/observation-alexis.png",
+      "sha256": "4c8e88392e4808ffa8bb39a5649458b1368d067a08eefe6ca69bc076bdccafb1",
+      "width": 1080,
+      "height": 1350,
+      "author": "Alexis",
+      "observationNumber": "001",
+      "contentPolicy": "Published as sent; text and title must not be rewritten."
+    }
+  ],
+  "schemaVersion": 1
+}

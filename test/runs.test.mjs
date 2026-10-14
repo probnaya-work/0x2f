@@ -18,6 +18,7 @@ import os from "node:os";
 import path from "node:path";
 import { createRuntime } from "../src/runtime.mjs";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 import { applyOutcome } from "../src/core/lifecycle.mjs";
 import {
   taskRuns,
@@ -528,7 +529,14 @@ async function waitForStatus(runtime, id, expected, opts = {}) {
   const start = Date.now();
   while (true) {
     const task = await runtime.store.findTask(id);
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      if (task.status !== "working" && !task.blockedOn?.live) {
+        const deadline = Date.now() + 5000;
+        while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+        assert.equal(pidAlive(task.pid), false, "detached fixture writer must exit before teardown");
+      }
+      return task;
+    }
     if (!ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }

@@ -24,6 +24,7 @@
 // only. Provider behavior (which CLI, which flags) lives in the provider;
 // state meaning lives in core; both are invisible here.
 
+import { identityMatches } from "../core/process-identity.mjs";
 import { spawn as defaultSpawn } from "node:child_process";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -43,7 +44,7 @@ export function createLocalNode({
     throw new Error(`Local execution node cannot resolve workspace "${workspaceId}".`);
   }
 
-  function spawnWorker({ base, slug, run = 1, mode, grant }) {
+  function spawnWorker({ base, slug, run = 1, mode, grant, launchToken }) {
     const worker = new URL("../worker.mjs", import.meta.url);
     const logPath = path.join(base, ".work", "tasks", slug, "run.log");
     // The node owns where this run's output goes; don't assume the task dir
@@ -57,6 +58,7 @@ export function createLocalNode({
     // to finalize the right run record, never guessing which run it is.
     const args = [worker.pathname, base, slug, String(run)];
     if (mode === "resume") args.push("resume", grant);
+    else if (launchToken) args.push("workflow", launchToken);
 
     // The worker inherits this runtime's environment, including a temporary
     // OpenCode model override on the process that started the run. A Core
@@ -66,6 +68,8 @@ export function createLocalNode({
       stdio: ["ignore", logFd, logFd],
       env
     });
+    fsSync.closeSync(logFd);
+    child.on?.("error", () => {});
     child.unref();
     return child.pid;
   }
@@ -77,7 +81,7 @@ export function createLocalNode({
 
     async startExecution({ task }) {
       const base = resolveWorkspace(task.execution?.workspace);
-      return spawnWorker({ base, slug: task.slug, run: currentRunNumber(task) });
+      return spawnWorker({ base, slug: task.slug, run: currentRunNumber(task), launchToken: task.execution?.launchToken });
     },
 
     async resumeExecution({ task, grant }) {
@@ -96,6 +100,7 @@ export function createLocalNode({
     // outcome. No pid is a no-op (nothing was launched).
     async cancelExecution({ task }) {
       if (!task.pid) return;
+      if (task.workflow && !(await identityMatches(task.workerIdentity))) throw new Error("Worker identity is unknown or changed; refusing to signal this PID. Use workflow recover.");
       kill(task.pid, "SIGTERM");
     }
   };

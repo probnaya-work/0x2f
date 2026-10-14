@@ -5,8 +5,13 @@
 // directly. A future execution node may keep its own store on another
 // machine; this store is the local (workspace) one.
 
+import { randomUUID } from "node:crypto";
+import { durableWrite, readBounded, safePath, syncDirectory } from "./durable.mjs";
+import { crashPoint } from "./faults.mjs";
+import { validateTaskWorkflow, parseWorkflowJson } from "./workflow-schema.mjs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { withLock } from "./lock.mjs";
 import { defaultProviderId } from "../providers/index.mjs";
 import { WorkError } from "./errors.mjs";
 
@@ -16,44 +21,24 @@ export async function exists(p) {
   try {
     await fs.access(p);
     return true;
-  } catch {
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
     return false;
   }
 }
 
 export async function readText(p, fallback = "") {
   try {
-    return await fs.readFile(p, "utf8");
-  } catch {
+    return (await readBounded(p, 64_000_000)).toString("utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
     return fallback;
   }
 }
 
-// Task state is private: it contains the user's task prompts, results and
-// notes, which may quote repository code. Write with mode 0600 (owner-only)
-// and re-chmod even when the file already exists, so a pre-existing file left
-// world-readable by an older version is tightened.
-const PRIVATE_FILE = { encoding: "utf8", mode: 0o600 };
-
-// Atomic whole-file write: write to a temp file in the same directory, then
-// rename over the destination. A reader (or a crash mid-write) can never
-// observe a partially written file — the task ledger sees either the previous
-// complete file or the new complete file, never a torn one. rename() is
-// atomic on the same filesystem; the temp file lives next to the destination
-// so they share one. Mode is 0600 on creation and re-applied after the
-// rename, exactly as the previous direct write behaved. A temp file orphaned
-// by a crash between write and rename is a hidden dotfile that the store
-// never reads; the next successful write replaces the destination normally.
+// Atomic, durable file replacement: file fsync -> rename -> directory fsync.
 async function writeAtomic(p, value) {
-  await fs.mkdir(path.dirname(p), { recursive: true });
-  const tmp = path.join(
-    path.dirname(p),
-    `.${path.basename(p)}.${process.pid}.${Date.now().toString(36)}.${Math.random().toString(36).slice(2, 8)}.tmp`
-  );
-  await fs.writeFile(tmp, value, PRIVATE_FILE);
-  await fs.chmod(tmp, 0o600);
-  await fs.rename(tmp, p);
-  await fs.chmod(p, 0o600).catch(() => {});
+  await durableWrite(p, value, { point: path.basename(p) });
 }
 
 export async function writeText(p, value) {
@@ -61,11 +46,14 @@ export async function writeText(p, value) {
 }
 
 export async function readJson(p) {
-  return JSON.parse(await fs.readFile(p, "utf8"));
+  try { return parseWorkflowJson((await readBounded(p)).toString("utf8")); }
+  catch (error) { throw new WorkError(`Cannot read ${p}: ${error.message}`); }
 }
 
 export async function writeJson(p, value) {
-  await writeAtomic(p, JSON.stringify(value, null, 2) + "\n");
+  const bytes = JSON.stringify(value, null, 2) + "\n";
+  if (Buffer.byteLength(bytes) > 4_000_000) throw new WorkError("JSON state exceeds 4MB; no write performed.");
+  await writeAtomic(p, bytes);
 }
 
 function slugify(input) {
@@ -83,7 +71,10 @@ function slugify(input) {
 export function createStore(base = process.cwd()) {
   const workDir = () => path.join(base, ".work");
   const tasksDir = () => path.join(workDir(), "tasks");
-  const taskDir = slug => path.join(tasksDir(), slug);
+  const taskDir = slug => {
+    if (typeof slug !== "string" || !/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(slug)) throw new WorkError("Invalid task slug.");
+    return path.join(tasksDir(), slug);
+  };
   const eventLogPath = slug => path.join(taskDir(slug), "events.jsonl");
 
   async function listTasks() {
@@ -92,16 +83,20 @@ export function createStore(base = process.cwd()) {
 
     const entries = await fs.readdir(dir, { withFileTypes: true });
     const out = [];
+    const ids = new Set();
 
     for (const entry of entries) {
+      if (entry.name.startsWith(".")) continue;
+      if (entry.isSymbolicLink()) throw new WorkError(`Symlink task directory: ${entry.name}`);
       if (!entry.isDirectory()) continue;
       const meta = path.join(dir, entry.name, "task.json");
       if (!(await exists(meta))) continue;
-      try {
-        out.push(await readJson(meta));
-      } catch {
-        // v0: ignore malformed folders
-      }
+      const task = await readJson(meta);
+      if (!Number.isSafeInteger(task.id) || task.id < 1 || task.slug !== entry.name) throw new WorkError(`Invalid task identity in ${meta}.`);
+      if (ids.has(task.id)) throw new WorkError(`Duplicate task id ${task.id}; restore the conflicting metadata before mutating state.`);
+      ids.add(task.id);
+      if (task.workflow) validateTaskWorkflow(task.workflow);
+      out.push(task);
     }
 
     return out.sort((a, b) => b.id - a.id);
@@ -116,7 +111,11 @@ export function createStore(base = process.cwd()) {
   // Three artifacts, one authored by the user. `brief` is persisted on the
   // task record because every surface needs it (a detail view shows it, the
   // relay projects it); prompt.md stays the agent-facing assembly.
-  async function createTask({ title, brief, prompt }, opts = {}) {
+  async function createTask(input, opts = {}) {
+    return withLock(path.join(workDir(), "task-create-lock"), () => createTaskReserved(input, opts));
+  }
+
+  async function createTaskReserved({ title, brief, prompt }, opts = {}) {
     const provider = opts.provider ?? defaultProviderId;
     const node = opts.node ?? "local";
     const workspace = opts.workspace ?? "local";
@@ -127,9 +126,16 @@ export function createStore(base = process.cwd()) {
     const runs = opts.runs;
 
     const all = await listTasks();
-    const id = all.reduce((max, t) => Math.max(max, t.id), 0) + 1;
+    const sequenceFile = path.join(workDir(), "task-sequence.json");
+    const sequence = await exists(sequenceFile) ? await readJson(sequenceFile) : { schemaVersion: 1, lastId: 0 };
+    if (sequence.schemaVersion !== 1 || !Number.isSafeInteger(sequence.lastId) || sequence.lastId < 0) throw new WorkError("Corrupt task sequence; run workflow doctor.");
+    const id = Math.max(sequence.lastId, ...all.map(t => t.id), 0) + 1;
+    if (!Number.isSafeInteger(id)) throw new WorkError("Task ID sequence is exhausted; no task was allocated.");
+    await writeJson(sequenceFile, { schemaVersion: 1, lastId: id });
+    crashPoint("create.id-reserved");
     const slug = `${String(id).padStart(3, "0")}-${slugify(title)}`;
-    const dir = taskDir(slug);
+    const finalDir = taskDir(slug);
+    const dir = path.join(tasksDir(), `.creating-${id}-${randomUUID()}`);
     await fs.mkdir(dir, { recursive: true });
     // The task directory is owner-only too: its listing would reveal task
     // slugs to other local users even though the files are unreadable.
@@ -145,9 +151,11 @@ export function createStore(base = process.cwd()) {
       // back to `task.brief ?? task.title` — correct for old tasks by
       // construction, and no migration is needed.
       brief,
+      ...(opts.workflow ? { workflow: opts.workflow } : {}),
       status: "working",
       execution: {
         provider,
+        ...(opts.launchToken ? { launchToken: opts.launchToken } : {}),
         node,
         workspace,
         // Model is a separate concern from provider/harness. Only persisted
@@ -163,9 +171,14 @@ export function createStore(base = process.cwd()) {
       updatedAt: now
     };
 
-    await writeJson(path.join(dir, "task.json"), task);
     await writeText(path.join(dir, "prompt.md"), prompt);
     await writeText(path.join(dir, "run.log"), "");
+    if (runs?.length) await writeText(path.join(dir, "runs", "1", "prompt.md"), prompt);
+    if (opts.workflow) await writeJson(path.join(dir, "runs", "1", "workflow-definition.json"), opts.workflow.definition);
+    await writeJson(path.join(dir, "task.json"), task);
+    crashPoint("create.inputs-durable");
+    await fs.rename(dir, finalDir); await syncDirectory(tasksDir());
+    crashPoint("create.visible");
     return task;
   }
 
@@ -240,6 +253,7 @@ export function createStore(base = process.cwd()) {
     }
     const out = [];
     for (const entry of entries) {
+      if (entry.name.startsWith(".")) continue;
       if (!entry.isDirectory()) continue;
       const text = await readText(eventLogPath(entry.name), null);
       // A task with no event log yet simply has nothing to tail.
@@ -249,18 +263,17 @@ export function createStore(base = process.cwd()) {
   }
 
   // The task's normalized event log as parsed events (append-only JSON lines).
-  // Unparseable lines are skipped exactly as the live tailer skips them.
+  // Persistence refuses malformed lines; the live tailer can remain tolerant.
   async function readEvents(slug) {
     const text = await readEventLog(slug);
     const events = [];
     for (const line of text.split("\n")) {
       if (!line.trim()) continue;
       try {
-        const event = JSON.parse(line);
-        if (event && typeof event.type === "string") events.push(event);
-      } catch {
-        // not a Work event line — ignore
-      }
+        const event = parseWorkflowJson(line, "Event log");
+        if (!event || typeof event.type !== "string") throw new Error("Missing event type");
+        events.push(event);
+      } catch (error) { throw new WorkError(`Corrupt events.jsonl for ${slug}; explicit repair is required: ${error.message}`); }
     }
     return events;
   }
@@ -270,11 +283,20 @@ export function createStore(base = process.cwd()) {
   // (separate process). The API layer tails this log for live updates.
   async function appendEvent(slug, event) {
     const p = eventLogPath(slug);
-    await fs.mkdir(path.dirname(p), { recursive: true });
-    await fs.appendFile(p, JSON.stringify(event) + "\n", "utf8");
-    // The event log may carry tool inputs and prose that quote repository
-    // content — keep it owner-only even when created via append.
-    await fs.chmod(p, 0o600).catch(() => {});
+    await safePath(p);
+    const task = await readJson(path.join(taskDir(slug), "task.json"));
+    // One advisory lock serializes each complete append across processes.
+    const append = async () => {
+      await readEvents(slug); // refuse a torn tail before another append
+      const text = await readEventLog(slug);
+      if (text && !text.endsWith("\n")) throw new WorkError(`Unterminated events.jsonl tail for ${slug}; explicit newline repair is required.`);
+      const fd = await fs.open(p, "a", 0o600);
+      try { await fd.writeFile(JSON.stringify(event) + "\n"); await fd.sync(); }
+      finally { await fd.close(); }
+      await syncDirectory(path.dirname(p)); crashPoint("event.durable");
+    };
+    if (task.workflow) await withLock(path.join(taskDir(slug), "event-lock"), append);
+    else await append(); // legacy providers retain single O_APPEND writes without a helper per event
   }
 
   // The interactive-permission channel: the human's ALLOW/REJECT for a live
@@ -290,11 +312,7 @@ export function createStore(base = process.cwd()) {
   async function readCancelRequest(task) {
     const p = await cancelRequestPath(task);
     if (!(await exists(p))) return null;
-    try {
-      return await readJson(p);
-    } catch {
-      return null;
-    }
+    return readJson(p);
   }
 
   async function writeCancelRequest(task, request) {

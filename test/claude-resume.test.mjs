@@ -19,6 +19,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 
 const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
 
@@ -43,7 +44,14 @@ async function waitForStatus(base, id, expected, timeout = 15000) {
   const start = Date.now();
   while (true) {
     const task = await store.findTask(id);
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      // Terminal state precedes the final notification; keep the fixture
+      // until its detached writer exits before teardown or another run.
+      const deadline = Date.now() + 5000;
+      while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+      assert.equal(pidAlive(task.pid), false, "detached fixture worker must exit before teardown");
+      return task;
+    }
     if (task.status !== "working" && task.status !== "needs_you") {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }

@@ -24,6 +24,9 @@
 // persisted session id remains on the run record for inspection, and the
 // task reruns normally (rerunWork only refuses while a task is "working").
 
+import { identityMatches, processIdentity } from "./core/process-identity.mjs";
+import { withLock } from "./core/lock.mjs";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome } from "./core/lifecycle.mjs";
@@ -125,8 +128,20 @@ export async function recoverInterruptedRuns(
   const recovered = [];
   for (const task of tasks) {
     if (task.status !== "working") continue;
-    if (pidAlive(task.pid, kill)) continue;
-    recovered.push(await failInterruptedRun(store, task, { log }));
+    if (task.workflow) {
+      await withLock(path.join(store.workDir(), "workflow-lock"), async () => {
+        const fresh = await store.findTask(task.id);
+        if (fresh.status !== "working") return;
+        if (fresh.workerIdentity ? await identityMatches(fresh.workerIdentity) : await processIdentity(fresh.pid)) return;
+        const operationDir = path.join(store.taskDir(fresh.slug), "operations");
+        const operations = await fs.readdir(operationDir).catch(e => { if (e.code === "ENOENT") return []; throw e; });
+        for (const name of operations.filter(f => f.endsWith(".json"))) if ((await store.readJson(path.join(operationDir, name))).state !== "complete") return;
+        recovered.push(await failInterruptedRun(store, fresh, { log }));
+      });
+    } else {
+      if (pidAlive(task.pid, kill)) continue;
+      recovered.push(await failInterruptedRun(store, task, { log }));
+    }
   }
   return recovered;
 }

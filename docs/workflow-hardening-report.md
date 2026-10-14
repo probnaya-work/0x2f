@@ -1,0 +1,254 @@
+# Local workflow hardening — completion evidence
+
+Date: 2026-10-14. Checkout: `/Users/bogart/Dev/PROBNAYA/work-cli-v0`.
+Scope: common 0x2F workflow mechanics; PROBNAYA topic selection, new visuals,
+publication and further editorial intelligence are outside this phase.
+
+## Audit and implementation
+
+The initial audit identified 5 BLOCKER, 8 HIGH, 4 MEDIUM and 1 LOW risks.
+Integration added H9 (pairing/replay durability) and a source-eligibility follow-up
+to H6. All local corrections are documented individually in
+[workflow-hardening-audit.md](workflow-hardening-audit.md), including original
+failure, state effect, prior coverage, recovery and correction.
+
+Common 0x2F now owns staged durable creation and ID allocation, advisory locks,
+process birth/launch authorization, operation journals and receipts, immutable
+run artifact manifests, strict schema/read boundaries, source descriptor reads,
+executable identity pins, schedule coalescing, installed runtime binding,
+diagnostics/recovery, and a shared CLI/TUI/Web state projection. Relay pairing
+and replay cache use durable writes. Publication rules, public-record eligibility,
+topic/review decisions, visual templates and editorial task fields are owned by
+the trusted editorial kind descriptor, rather than generic task lifecycle code.
+The static descriptor contract is documented in [workflows.md](workflows.md).
+No DAG engine or new active workflow kind was added.
+
+## Exact guarantees
+
+* A preserved trigger key identifies one visible task in its workspace under
+  cooperating locks. Creation commits visibility only after its inputs exist.
+  Reserved IDs may have gaps. Removal/restoration of state can invalidate this
+  guarantee; unrelated manual keys represent separate intents.
+* Critical file replacement uses file fsync, rename and directory fsync.
+  Required results/manifests precede terminal task state; acceptance checks
+  archived size/SHA-256. Journals replay only matching state and required hashes.
+* An image attempt has a durable pending receipt before invocation and is at
+  most once per task. Uncertain outcomes are not automatically retried. A receipt
+  cannot prove remote completion or charging; external exactly-once is not claimed.
+* Local reads may repeat before the evidence checkpoint; committed bytes are
+  reused. Local artifact preparation may repeat before its completed archive.
+* Decisions accept stable operation IDs and reject payload reuse conflicts.
+  Consecutive identical legacy answers and repeated acceptance/publication of
+  the current package are idempotent. An intervening decision establishes a new
+  intent. Publication confirmation stores a supplied HTTPS URL without publishing.
+* Workflow mutations/finalization serialize. New workers need a persisted launch
+  gate/token and process birth identity; cancellation is checked at startup and
+  commit. Kernel locks release on parent/helper death and never unlink the mutex.
+
+These are cooperative POSIX/process-crash guarantees. They are not an OS sandbox,
+external-provider guarantee, physical power-cut certification, or a retroactive
+constraint on old released binaries.
+
+## Schemas and recovery
+
+New workflow definitions, frozen snapshots, schedule state, decisions, receipts,
+source checkpoints, packages, artifact manifests, scheduler installation/health
+and ID sequence use schema 1. Missing version is legacy 0. Future or invalid
+versions fail closed. There is no mass migration: only touched legacy files have
+adjacent backups and lazy upgrade. Existing task #2 is excluded from upgrades.
+Refresh explicitly adopts current bindings/runtime while retaining prior runs
+and checkpointed evidence; acceptance/completeness must be established again.
+
+`workflow doctor` reads without repairing, advancing schedules or creating locks.
+It reports corrupt/incompatible state, pending journals/external attempts, workers,
+locks, source/executable drift, artifact integrity and scheduler health.
+`workflow recover <id>` and separate `workflow repair events|locks|staging|temps`
+perform explicit bounded repairs with backups. Invalid JSON, conflicting journals
+and uncertain external effects require inspection/trusted restoration.
+`workflow bindings` repairs Python configuration; `workflow agent repair`
+rebinds the installed runtime. Full commands and state-specific instructions are
+in [workflow-recovery.md](workflow-recovery.md).
+
+## Verification coverage
+
+Disposable subprocess tests actually SIGKILL at ID reservation, staged inputs,
+task visibility, task file fsync/rename/durability, worker before/open gate,
+source checkpoint, artifact fsync/rename/durability, archive completion,
+result file persistence and intent/state/complete, decision intent/state/complete,
+external pending/output persistence, rerun/refresh intent/state, and visible
+scheduled task before schedule advance.
+
+Tests cover same/different concurrent triggers, answer/rerun, early/active cancel,
+active/terminal refresh, lock owner/helper death and loss, PID reuse, wrong launch
+token, tampered/future definitions/snapshots, invalid schedule/timezone, corrupt
+JSON/JSONL, missing/oversized/symlink sources, changed adapter, timeout, uncertain
+external outcome, missing/tampered artifacts, repeated decisions/publication,
+private-record exclusion, moved runtime/Node binding, separate agent labels,
+missed slots/DST/repeated ticks, and read-only doctor file hashes.
+
+CLI, TUI and Web share workflow ID/version, run/trigger/origin, selected topic,
+review, completeness, acceptance, publication, errors and artifact manifest paths.
+Acceptance and publication remain separate; accept/defer/reject/published do not
+start another run. Historical run metadata remains inspectable. Phone projections
+omit private definitions, source roots, executable pins and private decisions.
+
+## Operational results
+
+Hardening and operational verification completed successfully in this checkout.
+
+* `npm run check`: passed; all four Python source files also parse successfully.
+* `npm test -- --test-timeout=30000`: **719 passed, 0 failed, 0 skipped**, 103.96 s.
+  This includes unit, integration, real vendor CLI/mock API, relay/LAN/crypto,
+  PTY/TUI and crash/race workflow tests. Earlier failed iterations exposed real
+  persistence and test-teardown races; the final full run is the completion proof.
+* Real manual editorial collection: disposable workspace, definition 1.1.1,
+  three topics, `needs_you`, no selection, packageComplete false; doctor healthy.
+* Real launchd collection: a separate disposable workspace, one scheduled task
+  for `schedule:2026-10-14`, three topics, `needs_you`. Repeat tick creates zero
+  duplicates. Actual repair retains label/binding; actual uninstall retains task
+  and schedule data. No visual, generated asset or personal repost is produced.
+* Actual workspace: singleton agent adopted with backup; new agent
+  `work.probnaya.0x2f.workflow.2519c81a-c8ab-4939-89e3-d341467d149b`
+  installed, loaded, matching with no drift; last tick successful. Schedule resumed:
+  every two calendar days, **10:00 Europe/Lisbon**, next **2026-10-16**.
+  The no-due restoration tick creates no task. Actual doctor is healthy.
+* Actual task set remains IDs 1 and 2. Task #2's **105 file hashes and exact file
+  set match baseline**, including all seven runs and previous artifacts. Package
+  and lock file bytes match their pre-hardening baseline.
+
+Evidence is retained under `.work/hardening-verification/`: `manual.json`,
+`launchd.json`, `scheduler-final.json`, `task-2-preservation.json`, `full-tests.log`,
+`check.log`, `changed-files.json` and `git-status.txt`. Original protections and
+schedule are retained under `.work/hardening-baseline/`. These are ignored local
+operational evidence, not committed application data.
+
+No topic has been chosen, no new visual or final publication package created,
+and nothing committed, pushed, released, deployed or published. Task #2 continues
+to await a user decision. This verified installation is local; the npm release
+and any already-running older UI process have not been updated.
+
+## Remaining limits and concrete follow-ups
+
+* Node >=20 and Python 3/POSIX fcntl are mutation dependencies. Windows needs a
+  native lock/descriptor-read backend at the existing helper boundary.
+* Trusted command adapters inherit process privileges. Permissions/pins validate
+  the protocol, but cannot enforce OS/network isolation, dollars or deliberately
+  encoded secrets. Provider limits remain outside this runtime.
+* A trusted detached child may survive worker SIGKILL until it exits. A supervised
+  adapter/watchdog with persisted child identity and isolated attempt directories
+  is a larger execution-node change. Receipts already prevent repeat calls.
+* Previously released runtimes cannot be taught retroactively to respect schema
+  1. Versioned distribution/update tooling is a follow-up; use the verified checkout
+  CLI and restart existing UI processes after source changes.
+* Reboot/logout/sleep scheduling semantics are covered by controlled fixtures and
+  real launchd load/lifecycle. This phase does not physically reboot the Mac.
+  Powered-off/logged-out hosts cannot execute tasks; overdue slots coalesce.
+
+
+## Git and file inventory
+
+Branch: `feat/opencode-acp-tui`. Work remains local and uncommitted. No commit,
+push, PR, deployment, release or publication is performed in this phase.
+The checkout was already dirty. Prior tracked changes included README,
+package.json/package-lock.json, CLI, actions/router/store/runtime/server/worker;
+the editorial subsystem, examples, setup scripts and workflow tests also existed
+locally before hardening. Their work is retained. Both package files match their
+saved pre-hardening bytes, so their Git diff belongs to the earlier work.
+
+The following inventory is the final combined working-tree diff/untracked set;
+it deliberately does not mislabel every file as newly created by hardening.
+Generated operational evidence in ignored `.work` is separate.
+
+| File | Git state |
+|---|---|
+| `README.md` | modified tracked |
+| `docs/workflow-hardening-audit.md` | untracked |
+| `docs/workflow-hardening-report.md` | untracked |
+| `docs/workflow-recovery.md` | untracked |
+| `docs/workflows.md` | untracked |
+| `examples/workflows/engineering/public-record.json` | untracked |
+| `examples/workflows/engineering/workflow.json` | untracked |
+| `examples/workflows/probnaya-editorial/examples.md` | untracked |
+| `examples/workflows/probnaya-editorial/history.json` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-004-mpa-in-service.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-005-the-issue.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-006-work-and-field.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-007-before-first-observation.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-007-chinotto-what-continues.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/fig-008-holder-relation.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/heard-public-field.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/observation-alexis.png` | untracked |
+| `examples/workflows/probnaya-editorial/references/observation-mostafa.png` | untracked |
+| `examples/workflows/probnaya-editorial/rules.md` | untracked |
+| `examples/workflows/probnaya-editorial/template.md` | untracked |
+| `examples/workflows/probnaya-editorial/visual-reference.md` | untracked |
+| `examples/workflows/probnaya-editorial/workflow.json` | untracked |
+| `package-lock.json` | modified tracked |
+| `package.json` | modified tracked |
+| `scripts/install-workflow-launchagent.mjs` | untracked |
+| `scripts/setup-editorial.mjs` | untracked |
+| `src/cli.mjs` | modified tracked |
+| `src/core/actions.mjs` | modified tracked |
+| `src/core/durable.mjs` | untracked |
+| `src/core/faults.mjs` | untracked |
+| `src/core/lock-helper.py` | untracked |
+| `src/core/lock.mjs` | untracked |
+| `src/core/process-identity.mjs` | untracked |
+| `src/core/router.mjs` | modified tracked |
+| `src/core/runs.mjs` | modified tracked |
+| `src/core/source-reader.py` | untracked |
+| `src/core/store.mjs` | modified tracked |
+| `src/core/workflow-adapters.mjs` | untracked |
+| `src/core/workflow-artifacts.mjs` | untracked |
+| `src/core/workflow-doctor.mjs` | untracked |
+| `src/core/workflow-scheduler.mjs` | untracked |
+| `src/core/workflow-schema.mjs` | untracked |
+| `src/core/workflow-sources.mjs` | untracked |
+| `src/core/workflow-transaction.mjs` | untracked |
+| `src/core/workflows.mjs` | untracked |
+| `src/nodes/local.mjs` | modified tracked |
+| `src/recover.mjs` | modified tracked |
+| `src/relay/agent.mjs` | modified tracked |
+| `src/relay/project.mjs` | modified tracked |
+| `src/runtime.mjs` | modified tracked |
+| `src/server.mjs` | modified tracked |
+| `src/tui/app.mjs` | modified tracked |
+| `src/tui/model.mjs` | modified tracked |
+| `src/tui/view.mjs` | modified tracked |
+| `src/web/app.js` | modified tracked |
+| `src/web/ledger.mjs` | modified tracked |
+| `src/web/workflow.mjs` | untracked |
+| `src/worker.mjs` | modified tracked |
+| `src/workflows/adapters.mjs` | untracked |
+| `src/workflows/decisions.mjs` | untracked |
+| `src/workflows/editorial-schema.mjs` | untracked |
+| `src/workflows/editorial.mjs` | untracked |
+| `src/workflows/provider.mjs` | untracked |
+| `src/workflows/registry.mjs` | untracked |
+| `src/workflows/visual.py` | untracked |
+| `src/workflows/visual_plate.py` | untracked |
+| `test/claude-resume.test.mjs` | modified tracked |
+| `test/cli-rerun.test.mjs` | modified tracked |
+| `test/codex-integration.test.mjs` | modified tracked |
+| `test/e2e-security.test.mjs` | modified tracked |
+| `test/gemini-integration.test.mjs` | modified tracked |
+| `test/lan-mode.test.mjs` | modified tracked |
+| `test/observed-files.test.mjs` | modified tracked |
+| `test/provider-integration.test.mjs` | modified tracked |
+| `test/relay-config-race.test.mjs` | modified tracked |
+| `test/relay-projection.test.mjs` | modified tracked |
+| `test/relay.test.mjs` | modified tracked |
+| `test/runs.test.mjs` | modified tracked |
+| `test/task-context.test.mjs` | modified tracked |
+| `test/workflow-fixture.mjs` | untracked |
+| `test/workflow-hardening.test.mjs` | untracked |
+| `test/workflow.test.mjs` | untracked |
+
+
+## Subsequent independent review
+
+The original completion claims above are historical. A fresh review reproduced
+additional persistence, integrity, source, diagnostic, scheduler lifecycle and
+test-teardown defects. Corrections, current verification and the unresolved
+worker-SIGKILL execution-supervision boundary are recorded in
+[workflow-independent-review.md](workflow-independent-review.md).

@@ -136,6 +136,7 @@ const ASSETS = {
   "/app/pair.mjs": ["web/pair.mjs", "text/javascript; charset=utf-8"],
   "/app/pair.css": ["web/pair.css", "text/css; charset=utf-8"],
   "/app/remote.mjs": ["web/remote.mjs", "text/javascript; charset=utf-8"],
+  "/app/workflow.mjs": ["web/workflow.mjs", "text/javascript; charset=utf-8"],
   "/app/ledger.mjs": ["web/ledger.mjs", "text/javascript; charset=utf-8"],
   "/app/sound-policy.mjs": ["web/sound-policy.mjs", "text/javascript; charset=utf-8"],
   "/app/sound.mjs": ["web/sound.mjs", "text/javascript; charset=utf-8"],
@@ -665,6 +666,15 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         return;
       }
 
+      const workflowMatch = url.pathname.match(/^\/api\/workflows\/([a-z][a-z0-9-]*)\/(run|schedule)$/);
+      if (req.method === "POST" && workflowMatch) {
+        const body = await readJsonBody(req);
+        const result = workflowMatch[2] === "run"
+          ? await actions.startWorkflow(workflowMatch[1], { triggerKey: body.triggerKey })
+          : await actions.scheduleWorkflow(workflowMatch[1], body.operation ?? "status");
+        json(res, result); return;
+      }
+
       if (req.method === "GET" && url.pathname === "/api/tasks") {
         json(res, await actions.listWork());
         return;
@@ -772,9 +782,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
       const answerMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/answer$/);
       if (req.method === "POST" && answerMatch) {
         const body = await readJsonBody(req);
-        const task = await actions.answerWork(Number(answerMatch[1]), {
-          answer: body.answer
-        });
+        const task = await actions.answerWork(Number(answerMatch[1]), body);
         json(res, task, 202);
         return;
       }
