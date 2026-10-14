@@ -142,7 +142,7 @@ test("E2E: `2f providers` detects codex and a task runs to READY through the rea
   } finally {
     await mock.close();
     await fs.rm(base, { recursive: true, force: true });
-    await fs.rm(codexHome, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
 
@@ -199,7 +199,7 @@ test("E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY work
     }
   } finally {
     await fs.rm(base, { recursive: true, force: true });
-    await fs.rm(codexHome, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
 
@@ -248,7 +248,7 @@ test("E2E: command_execution is recorded honestly as tool activity, never as fil
   } finally {
     await mock.close();
     await fs.rm(base, { recursive: true, force: true });
-    await fs.rm(codexHome, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
 
@@ -306,7 +306,7 @@ test("E2E: a codex decision needs_you is answered, and a rerun continues the tas
   } finally {
     await mock.close();
     await fs.rm(base, { recursive: true, force: true });
-    await fs.rm(codexHome, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
 
@@ -372,7 +372,7 @@ test("E2E: the same task can switch away from codex to another provider without 
   } finally {
     await mock.close();
     await fs.rm(base, { recursive: true, force: true });
-    await fs.rm(codexHome, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     await fs.rm(bins, { recursive: true, force: true });
   }
 });
