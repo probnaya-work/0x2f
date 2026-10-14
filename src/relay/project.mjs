@@ -138,6 +138,7 @@ export function projectRun(run, base) {
   if (!run || typeof run !== "object") return null;
   return {
     run: run.run,
+    ...(run.workflow ? { workflow: projectWorkflow(run.workflow, base) } : {}),
     provider: run.provider ?? null,
     model: run.model ?? null,
     outcome: run.outcome ?? "working",
@@ -183,6 +184,14 @@ function projectFailure(failure) {
   };
 }
 
+function projectWorkflow(w, base) {
+  if (!w || typeof w !== 'object') return undefined;
+  const publication = w.publication && typeof w.publication.url === 'string' ? { url: trunc(w.publication.url,2000,base), at: w.publication.at, packageDigest: w.publication.packageDigest } : undefined;
+  return { schemaVersion: 1, id: trunc(w.id,64), version: trunc(w.version,100), trigger: w.trigger, triggerKey: trunc(w.triggerKey,200,base),
+    review: w.review, selected: w.selected, packageDigest: w.packageDigest, acceptedDigest: w.acceptedDigest, packageComplete: w.packageComplete,
+    ...(publication ? { publication } : {}), ...(w.manifest ? { manifest: relPath(base,w.manifest) } : {}) };
+}
+
 export function projectTask(task, base, result) {
   if (!task || typeof task !== "object") return null;
   // The user's own words, carried whole (see TRUNC.brief). A task created
@@ -193,6 +202,7 @@ export function projectTask(task, base, result) {
   const brief = truncProse(task.brief ?? task.title, TRUNC.brief, base);
   const projected = {
     id: task.id,
+    ...(task.workflow ? { workflow: projectWorkflow(task.workflow, base) } : {}),
     title: task.title ?? "",
     brief: brief.text,
     ...(brief.truncated ? { briefTruncated: true } : {}),

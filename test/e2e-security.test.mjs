@@ -91,11 +91,16 @@ async function waitFor(condition, message, timeout = 8000) {
 // tests) plus a variant that returns the full pairing material.
 async function makeStack(t, { pair = false } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-e2esec-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle, agent, tailer;
+  t.after(async () => {
+    await agent?.stop(); tailer?.stop();
+    await handle?.close();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await fs.rm(base, { recursive: true, force: true, maxRetries: 10, retryDelay: 20 });
+  });
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet, commandTimeoutMs: 4000 });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -114,17 +119,13 @@ async function makeStack(t, { pair = false } = {}) {
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
   tailer.start();
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(
     () => handle.state.devices.get(deviceId)?.online === true,

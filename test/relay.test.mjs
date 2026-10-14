@@ -123,11 +123,16 @@ function rawHello(url, frame) {
 // tailer feeding the bus, and a PAIRED phone speaking the E2E protocol.
 async function makeHarness(t) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle, agent, tailer;
+  t.after(async () => {
+    await agent?.stop(); tailer?.stop();
+    await handle?.close();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await fs.rm(base, { recursive: true, force: true, maxRetries: 10, retryDelay: 20 });
+  });
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -146,17 +151,13 @@ async function makeHarness(t) {
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
   tailer.start();
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(
     () => handle.state.devices.get(deviceId)?.online === true,
@@ -261,6 +262,13 @@ test("creating a Task through the encrypted channel starts it on the Mac's node"
 test("redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac", async t => {
   const { runtime, phone } = await makeHarness(t);
   const task = await runtime.actions.createWork({ brief: "Events" });
+  const received = [];
+  const controller = new AbortController();
+  let opened;
+  const ready = new Promise(resolve => { opened = resolve; });
+  const stream = phone.events(plaintext => received.push(plaintext), { signal: controller.signal, onOpen: opened });
+  t.after(async () => { controller.abort(); await stream.catch(() => {}); });
+  await ready; // Subscribe before producing the event; durable append can outlast a tailer tick.
   await runtime.store.appendEvent(task.slug, {
     type: "tool.started",
     taskId: task.id,
@@ -274,9 +282,6 @@ test("redacted encrypted events reach the phone; sensitive tool inputs stay on t
     }
   });
 
-  const received = [];
-  const controller = new AbortController();
-  const stream = phone.events(plaintext => received.push(plaintext), { signal: controller.signal });
   await waitFor(
     () => received.some(p => p.cmd === "event" && p.event?.type === "tool.started"),
     "tool.started event to arrive"
@@ -370,6 +375,7 @@ test("a relay restart loses no session and keeps the phone paired", async t => {
       deviceId: phone.deviceId,
       key: phone.key
     });
+    await waitFor(async () => (await phone2.status()).mac === "online", "phone observes the reconnected Mac");
     const status = await phone2.status();
     assert.equal(status.mac, "online");
     const snap = await phone2.snapshot();

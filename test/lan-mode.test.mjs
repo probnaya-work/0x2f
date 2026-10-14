@@ -256,15 +256,15 @@ test("LAN pairing falls back to a free port when the requested port is foreign",
 
 async function makeLanServer(t, cfg) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-lan-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle;
+  t.after(async () => { await handle?.close(); await fs.rm(base, { recursive:true, force:true, maxRetries:10, retryDelay:20 }); });
   await writeConfig(base, cfg);
-  const handle = await startServer(base, 0, {
+  handle = await startServer(base, 0, {
     lan: true,
     lanGateTtlMs: 50,
     authToken: TEST_AUTH_TOKEN,
     relayLog: quiet
   });
-  t.after(() => handle.close());
   return { base, handle, port: handle.port };
 }
 
@@ -389,11 +389,17 @@ test("a phone pairs over the LAN and controls a task; the local API stays off-LA
     return;
   }
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-lan-e2e-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle, agent, tailer, controller, stream;
+  t.after(async () => {
+    controller?.abort(); if(stream)await stream.catch(()=>{});
+    await agent?.stop();tailer?.stop();await handle?.close();
+    await new Promise(resolve=>setTimeout(resolve,100));
+    await fs.rm(base,{recursive:true,force:true,maxRetries:10,retryDelay:20});
+  });
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
@@ -403,12 +409,11 @@ test("a phone pairs over the LAN and controls a task; the local API stays off-LA
   // The runtime server with the LAN surface mounted (as server-entry starts
   // it after `2f pair` writes the LAN transport). Started before the config
   // so the real port is known; the gate reads the config lazily.
-  const handle = await startServer(base, 0, {
+  handle = await startServer(base, 0, {
     lan: true,
     lanGateTtlMs: 50,
     relayLog: quiet
   });
-  t.after(() => handle.close());
   const port = handle.port;
 
   const configPath = path.join(base, ".work", "relay.json");
@@ -430,11 +435,7 @@ test("a phone pairs over the LAN and controls a task; the local API stays off-LA
   });
 
   // The agent connects outbound to the Mac's own LAN relay (its /ws).
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(
     () => handle.relay.state.devices.get(deviceId)?.online === true,
@@ -455,10 +456,10 @@ test("a phone pairs over the LAN and controls a task; the local API stays off-LA
 
   // Encrypted events reach the phone over the LAN (subscribe first, then act).
   const received = [];
-  const controller = new AbortController();
+  controller = new AbortController();
   let streamOpen;
   const opened = new Promise(r => (streamOpen = r));
-  const stream = phone.events(p => received.push(p), {
+  stream = phone.events(p => received.push(p), {
     signal: controller.signal,
     onOpen: () => streamOpen()
   });
@@ -507,20 +508,24 @@ test("the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto su
   t.after(() => _forceNobleFallback(false));
 
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-lan-noble-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle, agent, tailer, controller, stream;
+  t.after(async () => {
+    controller?.abort(); if(stream)await stream.catch(()=>{});
+    await agent?.stop();tailer?.stop();await handle?.close();
+    await new Promise(resolve=>setTimeout(resolve,100));
+    await fs.rm(base,{recursive:true,force:true,maxRetries:10,retryDelay:20});
+  });
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
   tailer.start();
-  t.after(() => tailer.stop());
 
-  const handle = await startServer(base, 0, { lan: true, lanGateTtlMs: 50, relayLog: quiet });
-  t.after(() => handle.close());
+  handle = await startServer(base, 0, { lan: true, lanGateTtlMs: 50, relayLog: quiet });
   const port = handle.port;
   const relayUrl = `http://${lanIp}:${port}`;
   const configPath = path.join(base, ".work", "relay.json");
@@ -538,8 +543,7 @@ test("the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto su
     code: "NOBLECODE00001",
     pairing: "pending"
   });
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => agent.stop());
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(() => handle.relay.state.devices.get(deviceId)?.online === true, "agent up");
 

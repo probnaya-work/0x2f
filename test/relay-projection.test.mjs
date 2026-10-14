@@ -278,3 +278,8 @@ test("relPath: out-of-workspace paths flatten to the basename — never an absol
   assert.equal(relPath("/w", "../outside/y.txt"), "y.txt");
   assert.equal(relPath("/w", "../outside/x/y.txt"), "y.txt");
 });
+
+test('workflow control metadata crosses the phone boundary without definitions or private source bindings',()=>{
+  const task=baseTask({status:'needs_you',workflow:{id:'probnaya-editorial',version:'1.1.1',trigger:'schedule',triggerKey:'schedule:2026-10-14',review:'accepted',selected:2,packageDigest:'digest',acceptedDigest:'digest',manifest:'runs/2/artifacts/editorial/manifest.json',definition:{sources:[{repo:'/private/secret'}],adapters:{credentialEnv:['SECRET']}},decisions:[{value:'private correction'}]}});
+  const projected=projectTask(task,'/private/work');assert.equal(projected.workflow.selected,2);assert.equal(projected.workflow.review,'accepted');assert.equal(projected.workflow.trigger,'schedule');assert.equal(projected.workflow.definition,undefined);assert.equal(projected.workflow.decisions,undefined);assert.ok(!JSON.stringify(projected).includes('/private/secret'));
+});

@@ -69,11 +69,15 @@ async function waitFor(condition, message, timeout = 6000) {
 
 async function makeHarness(t) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-result-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet });
   const handle = await relay.start();
-  t.after(() => handle.close());
+  let agent, tailer;
+  t.after(async () => {
+    await agent?.stop(); tailer?.stop();
+    await handle.close();
+    await fs.rm(base, { recursive: true, force: true, maxRetries: 3 });
+  });
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -87,10 +91,9 @@ async function makeHarness(t) {
   });
 
   const runtime = createRuntime(base, { node: fakeNode() });
-  const tailer = createTailer({ interval: 15, emit: e => runtime.events.emit(e), readLines: makeReadLines(runtime.store) });
+  tailer = createTailer({ interval: 15, emit: e => runtime.events.emit(e), readLines: makeReadLines(runtime.store) });
   tailer.start();
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => { agent.stop(); tailer.stop(); });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(() => handle.state.devices.get(deviceId)?.online === true, "agent connect");
 

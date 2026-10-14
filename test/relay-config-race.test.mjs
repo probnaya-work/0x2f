@@ -58,11 +58,11 @@ async function waitFor(condition, message, timeout = 6000) {
 // the pairing ceremony is the thing under test.
 async function makeHarness(t, { configPollMs = 40 } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-race-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let handle, agent;
+  t.after(async () => { await agent?.stop(); await handle?.close(); await fs.rm(base,{recursive:true,force:true,maxRetries:10,retryDelay:20}); });
 
-  const relay = createRelayServer({ dataFile: path.join(base, "state.json"), log: quiet });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  const relay = createRelayServer({ dataFile: path.join(base, "state.json"), log: quiet, commandTimeoutMs:3000 });
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -81,8 +81,7 @@ async function makeHarness(t, { configPollMs = 40 } = {}) {
   await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
 
   const runtime = createRuntime(base, { node: fakeNode() });
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
-  t.after(() => agent.stop());
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
   agent.start();
   await waitFor(() => handle.state.devices.get(deviceId)?.online === true, "agent to connect");
 
@@ -218,4 +217,21 @@ test("a pair-hello arriving with no live config is refused, not crashed on", asy
 
   assert.equal(h.agent.status().pairing, null);
   assert.deepEqual(rejections, [], "refusing must be quiet, not an unhandled rejection");
+});
+
+test('polling during a delayed pairing write never reads partial config',async t=>{
+  const h=await makeHarness(t,{configPollMs:1});let parseErrors=0,reading=false;
+  const originalOpen=fs.open,originalWrite=fs.writeFile;
+  fs.open=async(file,...args)=>{
+    const fd=await originalOpen.call(fs,file,...args);
+    if(String(file).includes('.relay.json.')){const write=fd.writeFile;fd.writeFile=async(...values)=>{await new Promise(r=>setTimeout(r,40));return write.apply(fd,values);};}
+    return fd;
+  };
+  fs.writeFile=async(file,...args)=>{
+    if(String(file)===h.configPath){await originalWrite.call(fs,file,'');await new Promise(r=>setTimeout(r,40));}
+    return originalWrite.call(fs,file,...args);
+  };
+  const timer=setInterval(async()=>{if(reading)return;reading=true;try{JSON.parse(await fs.readFile(h.configPath,'utf8'));}catch{parseErrors++;}finally{reading=false;}},1);
+  try { const result=await h.sendPairHello();assert.equal(result.ack?.ok,true);assert.equal(parseErrors,0); }
+  finally {clearInterval(timer);fs.open=originalOpen;fs.writeFile=originalWrite;}
 });

@@ -31,6 +31,7 @@
 //       agentName, code?, phoneId?, pairing? }
 //   ack cache    <workspace>/.work/relay-acks.json  (mode 0600)
 
+import { durableWrite } from "../core/durable.mjs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -125,18 +126,14 @@ export function createRelayAgent({
     }
   }
 
-  async function saveAckCache() {
-    try {
+  let ackWriteChain = Promise.resolve();
+  function saveAckCache() {
+    ackWriteChain = ackWriteChain.then(async () => {
       const obj = Object.fromEntries([...ackCache.entries()].map(([id, e]) => [id, e]));
-      await fs.mkdir(path.dirname(ackCachePath()), { recursive: true });
-      await fs.writeFile(ackCachePath(), JSON.stringify(obj) + "\n", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(ackCachePath(), 0o600);
-    } catch (err) {
-      error(`relay: could not persist the ack cache: ${err.message}`);
-    }
+      await durableWrite(ackCachePath(), JSON.stringify(obj) + "\n");
+      return true;
+    }).catch(err => { error(`relay: could not persist the ack cache: ${err.message}`); return false; });
+    return ackWriteChain;
   }
 
   function scheduleAckSave() {
@@ -161,14 +158,11 @@ export function createRelayAgent({
 
   async function writeConfig(next) {
     try {
-      await fs.mkdir(path.dirname(configPath), { recursive: true });
-      await fs.writeFile(configPath, JSON.stringify(next, null, 2) + "\n", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(configPath, 0o600);
+      await durableWrite(configPath, JSON.stringify(next, null, 2) + "\n");
+      return true;
     } catch (err) {
       error(`relay: could not write config: ${err.message}`);
+      return false;
     }
   }
 
@@ -442,9 +436,8 @@ export function createRelayAgent({
       warn("relay: rejected a pair-hello — pairing is not pending or the token does not match");
       return;
     }
-    config.phoneId = plaintext.phoneId;
-    config.pairing = "confirmed";
-    await writeConfig(config);
+    const confirmedConfig = { ...config, phoneId: plaintext.phoneId, pairing: "confirmed" };
+    if (!(await writeConfig(confirmedConfig))) return;
     // The config this ceremony validated may have stopped being the live one
     // while that write was in flight (the relay was disabled, or its config
     // was removed). The pairing is on disk, but this agent has nothing live
@@ -458,6 +451,8 @@ export function createRelayAgent({
       warn("relay: the configuration changed while pairing — not confirming to the phone");
       return;
     }
+    config.phoneId = confirmedConfig.phoneId;
+    config.pairing = confirmedConfig.pairing;
     info(`relay: phone paired (${config.phoneId}) — remote control is on`);
     await sendEnvelope({ cmd: "ack", ok: true, status: 200, body: { phoneId: config.phoneId } }, frame.requestId);
   }
@@ -503,8 +498,13 @@ export function createRelayAgent({
     }
     commandChain = commandChain
       .then(async () => {
-        const result = await runCommand({ op, taskId, body });
+        let result = await runCommand({ op, taskId, body });
+        if (result.body?.workflow) result = { ...result, body: projectTask(result.body, runtime.store.base) };
         rememberAck(requestId, result);
+        if (!(await saveAckCache())) {
+          await sendEnvelope({ cmd: "ack", ok: false, status: 503, error: "The action may have completed, but its acknowledgement could not be persisted. Reconcile task state before retrying." }, requestId);
+          return;
+        }
         await sendEnvelope({ cmd: "ack", ...result }, requestId);
       })
       .catch(async error => {
@@ -616,7 +616,7 @@ export function createRelayAgent({
         case "reject":
           return ok(202, await runtime.actions.rejectWork(taskId));
         case "answer":
-          return ok(202, await runtime.actions.answerWork(taskId, { answer: body?.answer }));
+          return ok(202, await runtime.actions.answerWork(taskId, body ?? {}));
         case "note":
           return ok(202, await runtime.actions.noteWork(taskId, { note: body?.note }));
         case "cancel":
@@ -729,7 +729,7 @@ export function createRelayAgent({
   }
 
   function stop() {
-    if (stopped) return;
+    if (stopped) return ackWriteChain;
     stopped = true;
     clearInterval(configTimer);
     clearInterval(keepaliveTimer);
@@ -748,7 +748,8 @@ export function createRelayAgent({
       ws = null;
     }
     state = "idle";
-    if (ackCache) saveAckCache();
+    if (ackCache) return saveAckCache();
+    return ackWriteChain;
   }
 
   function status() {
