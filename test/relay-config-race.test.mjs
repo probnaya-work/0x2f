@@ -56,7 +56,7 @@ async function waitFor(condition, message, timeout = 6000) {
 // material needed to send a genuine signed pair-hello. Deliberately smaller
 // than relay.test.mjs's harness: nothing here needs a paired phone, because
 // the pairing ceremony is the thing under test.
-async function makeHarness(t, { configPollMs = 40 } = {}) {
+async function makeHarness(t, { configPollMs = 40, beforeConnect } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-race-"));
   let handle, agent;
   t.after(async () => { await agent?.stop(); await handle?.close(); await fs.rm(base,{recursive:true,force:true,maxRetries:10,retryDelay:20}); });
@@ -83,6 +83,7 @@ async function makeHarness(t, { configPollMs = 40 } = {}) {
   const runtime = createRuntime(base, { node: fakeNode() });
   agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
   agent.start();
+  await beforeConnect?.({ agent, handle, deviceId });
   await waitFor(() => handle.state.devices.get(deviceId)?.online === true, "agent to connect");
 
   // The phone side of the ceremony.
@@ -234,4 +235,25 @@ test('polling during a delayed pairing write never reads partial config',async t
   const timer=setInterval(async()=>{if(reading)return;reading=true;try{JSON.parse(await fs.readFile(h.configPath,'utf8'));}catch{parseErrors++;}finally{reading=false;}},1);
   try { const result=await h.sendPairHello();assert.equal(result.ack?.ok,true);assert.equal(parseErrors,0); }
   finally {clearInterval(timer);fs.open=originalOpen;fs.writeFile=originalWrite;}
+});
+
+test('overlapping config polls cannot connect before the pairing key is ready', async t => {
+  const subtle = globalThis.crypto.subtle, original = subtle.deriveBits;
+  let markStarted, release;
+  const started = new Promise(resolve => { markStarted = resolve; });
+  const gate = new Promise(resolve => { release = resolve; });
+  subtle.deriveBits = async (...args) => {
+    markStarted(); await gate;
+    return original.apply(subtle, args);
+  };
+  try {
+    const h = await makeHarness(t, { configPollMs: 1, beforeConnect: async ({ agent, handle, deviceId }) => {
+      await started;
+      await new Promise(resolve => setTimeout(resolve, 30));
+      assert.equal(agent.status().state, 'idle', 'No transport may connect while key derivation is pending.');
+      assert.notEqual(handle.state.devices.get(deviceId)?.online, true);
+      release();
+    } });
+    assert.equal((await h.sendPairHello()).ack?.ok, true);
+  } finally { release(); subtle.deriveBits = original; }
 });

@@ -98,6 +98,7 @@ export function createRelayAgent({
   let stopped = false;
   let unsubscribe = null;
   let configTimer = null;
+  let configTickRunning = false;
   let reconnectTimer = null;
   let keepaliveTimer = null;
   let lastPongAt = 0;
@@ -654,7 +655,13 @@ export function createRelayAgent({
   // --- lifecycle ------------------------------------------------------------
 
   async function tickConfig() {
+    // Key derivation yields: another poll must not connect the transport
+    // while the first poll is still preparing its authentication key.
+    if (stopped || configTickRunning) return;
+    configTickRunning = true;
+    try {
     const next = await loadConfig();
+    if (stopped) return;
     const connKey = connectionKey(next);
     const cryptoChanged = cryptoKey(next) !== cryptoKey(cfg);
 
@@ -697,6 +704,7 @@ export function createRelayAgent({
     } else if (cfg && state === "idle") {
       connect();
     }
+    } finally { configTickRunning = false; }
   }
 
   function start() {
