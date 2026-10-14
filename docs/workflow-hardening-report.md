@@ -463,3 +463,144 @@ entry; `package-lock.json` contains its pre-existing dependency resolution.
 Both files retain their protected pre-review bytes and remain unstaged. There
 are no other modified files, untracked files or staged changes at completion.
 Ignored private runtime and recovery evidence are retained locally.
+
+## Supervision phase closure — 2026-10-14
+
+Branch: `feat/workflow-supervision`, based on verified checkpoint
+`4e568b7c5d063720a5296fe4730c7cbf06892125`.
+
+### Scoped verdicts
+
+- **GO: current scheduled PROBNAYA editorial collection**, with preview disabled,
+  no image/network adapter and no external changes. It remains independent of
+  supervisor installation. The real definition was not changed.
+- **GO: supervised local command execution under the reviewed contract**, on the
+  verified macOS launchd host. Required assumptions: stable reviewed runtime;
+  healthy matching service/native bindings; pinned executable; explicit command
+  and unattended permissions; local/unpaid operation; inherited job group; no
+  daemonizing, group/session escape or descriptor/work handoff; only declared
+  staging outputs; declared credentials and bounded resources. Every compositor,
+  including the repository Python compositor, uses this boundary. This is a
+  technical scoped verdict based on native evidence, not an external peer-audit
+  certificate or an OS sandbox claim.
+- **NO-GO: unattended network/provider and paid adapters**. The policy rejects
+  these capabilities. Local process control cannot settle a remote effect or
+  enforce provider spending. GO requires implemented and tested provider request
+  identity/account binding, idempotency or result/status lookup where available,
+  manual resolution when an outcome cannot be established, no automatic uncertain
+  retry, a new operation/attempt identity for conscious retry, and an independently
+  enforced provider-side hard spending cap for paid operations. The provider
+  integration must pass crash/restart/uncertainty tests; merely adding metadata or
+  setting a boolean is insufficient. No provider exactly-once guarantee is made.
+
+### Architecture and demonstrated changes
+
+A KeepAlive workspace watchdog and a separate launchd job per attempt replace
+worker-owned unmanaged output processes. The native job owns the group before
+spawn; a blocked gate receives GO only after child ownership/running intent is
+persisted. Both helper and independent watchdog observe worker loss/cancel/time
+limits; launchd group cleanup handles helper SIGKILL, including simultaneous
+worker/helper death. Native program arguments bind lifecycle actions to the
+correct workspace/runtime/attempt; microsecond libproc birth plus boot identity
+fences PID reuse. Production signals use native job handles, never raw PID/PGID.
+
+Receipts have integrity/version fencing and monotonic state transitions:
+`prepared → owned → running → exited → validated → promoted`, plus cancelling,
+cancelled, failed, uncertain, needs_reconciliation and explicit reconciled states.
+A repeated intent cannot spawn another call. Unresolved attempts block later
+external intents across runs. Reconciliation never retries a call; cleanup is
+explicit and retains receipts/archives.
+
+Owned process/stream closure, exact regular-file allowlists, size limits, optional
+PNG header/dimension checks and SHA-256 precede atomic staging→archive rename.
+Promotion rechecks run/token/worker/definition/runtime/cancel fences and archived
+bytes. Stale attempts cannot overwrite another archive. Minimal allowlist env,
+owner-only bounded UTF-8 IPC, discarded raw stdout/stderr and credential-output
+refusal protect receipts/events/diagnostics from declared credential values.
+Doctor and the shared CLI/TUI/Web projection expose worker and external states
+separately. See [workflow-supervision.md](workflow-supervision.md) for the full
+contract, state machine, failure matrix and inspection/reconciliation commands.
+
+### Review and verification provenance
+
+The separate manual invariant review fixed inspection-process group counting,
+canonical workspace/channel binding, spawn/GO ordering, independent watchdog for
+a stopped helper, state/version fencing, cross-run uncertainty barriers, output
+validation before promotion, credential packet/output handling, and native job
+binding before lifecycle actions. Black-box tests use independent observations:
+actual birth identities, group membership, open-descriptor writes, effect ledgers
+and immutable archive bytes. No independent reviewer-agent was launched because
+explicit user authorization for that agent was not received. This report does not
+claim that another reviewer audited the implementation.
+
+The pre-change real editorial worker experiment reproduced the old HIGH: adapter,
+child and grandchild survived worker SIGKILL, and late output grew from 5 to 35
+bytes. Only that birth/command-bound fixture group was terminated. In the new
+boundary, 40 process-level tests cover the real editorial worker, native Python,
+children/grandchildren, worker/helper/service SIGTERM/SIGKILL, stopped-helper
+watchdog, pre/post-GO crash windows, login-style native job redelivery, timeout,
+cancel, late writers, stale/concurrent/double intents, PID/identity ambiguity,
+executable and runtime/plist drift, damaged receipts/manifests/installations,
+unexpected/oversized/symlink/invalid PNG outputs and declared credentials.
+Known and uncertain provider outcomes are simulated with local fixture ledgers;
+no actual network/image/LLM/paid provider was connected.
+
+Final pre-commit full suite: **772/772 passed**, zero failures/skips.
+`npm run check` passed; both new Python helpers also passed AST checks.
+The full suite and checks are repeated after this closure commit; their actual
+exit/results and this commit's own hash are recorded in the final chat/private
+verification evidence, avoiding a self-referential Git hash in this file. A
+failed repeat reopens the affected scope. Native inventory after cleanup showed
+zero fixture processes and zero temporary supervision LaunchAgent plists/jobs.
+
+### Real state preservation
+
+The real schedule was paused during runtime editing. After verification, its
+original bytes were restored exactly: unpaused, every two days, next slot
+**2026-10-16 10:00 Europe/Lisbon (09:00 UTC)**. The real scheduler LaunchAgent is
+loaded and matches the new runtime fingerprint. Its label remains
+`work.probnaya.0x2f.workflow.2519c81a-c8ab-4939-89e3-d341467d149b`.
+An initial bootstrap returned transient native error 5 immediately after bootout;
+a subsequent explicit scheduler-only repair succeeded after unload completed.
+No external attempt/call was repeated by this operational retry.
+
+Doctor on the actual workspace returned healthy with no issues. Task #2 retains
+all **105 original files**, exact sizes/SHA-256, no extra/missing files and all
+seven runs. Actual task IDs remain `[2, 1]`; no new real task, topic selection,
+publication or history update was made. Both package files retain the protected
+pre-phase bytes. No supervisor was installed for the real collection-only
+workspace; it does not need one for its current scheduled scope.
+
+### Commits and remaining boundaries
+
+Implementation: `9d08d3a146031240eb7d4e33f0b597fce42566fa`
+(`feat(workflow): supervise isolated external attempts with launchd`).
+The core boundary, permissions/schema, dispatch adoption and their regressions
+are coupled in this commit: splitting them could advertise new permissions while
+leaving an output process on the old unmanaged path. The separate documentation
+closure commit contains this final report; its identity is in the final Git log.
+Before each commit the exact binary staged diff, path list and SHA-256 are retained
+in private evidence. The implementation diff was 23 files, 1087 additions and 33
+deletions, SHA-256
+`4e164f30d0f21cdf5dd116531c4485df565d8a0592c70b12f9027361ab7e183b`.
+
+The former surviving-adapter HIGH is closed only for the supported, reviewed
+inherited-group contract. **Remaining HIGH / NO-GO**: an executable that escapes
+its group/session, daemonizes, hands off work/descriptors or writes outside its
+owned staging can still survive/control effects outside this boundary. Such
+executables are not approved for unattended use. Arbitrary unreviewed external
+adapters and remote side effects are not declared safe after arbitrary worker
+SIGKILL. Same-user compromise, hostile runtime/executable changes and comprehensive
+filesystem/network/memory isolation are outside this trust boundary. Generic
+non-workflow providers receive no new supervision guarantee from this phase.
+
+Next stage: an explicitly reviewed provider capability contract with status/
+idempotency/account/budget enforcement, independent peer review when authorized,
+and stronger OS isolation before widening the executable/write/escape contract.
+No supervision expansion or real provider integration is silently assumed.
+
+Expected final tracked working-tree remainder is only the original unstaged
+`package.json` and `package-lock.json` modifications. They are neither amended nor
+committed. No `.work`, recovery archives, operational logs, runtime outputs,
+credentials or absolute user paths are included in these commits. No push, PR,
+merge, deploy, release or publication was performed.
