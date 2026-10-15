@@ -4,7 +4,8 @@ import { loadedRuntimeFingerprint, runtimeFingerprint } from '../core/workflow-s
 import {
   supervisionDir, readInstallation, listAttempts, readAttempt, attemptLock,
   writeAttempt, jobState, groupMembers, stopAttemptJob,
-  attemptIdentity, attemptIdentityMatches, observeAttemptIdentity
+  attemptIdentity, attemptIdentityMatches, observeAttemptIdentity,
+  credentialedAttempt, restrictedAttemptOutput, discardCredentialOutput
 } from '../core/workflow-supervision.mjs';
 
 const store = createStore(process.argv[2]);
@@ -24,16 +25,19 @@ while (!stopped) {
   });
   try {
     for (const original of await listAttempts(store)) {
-      if (settled.includes(original.state)) continue; // terminal receipts need no diagnostic lock churn
+      if (settled.includes(original.state) && !restrictedAttemptOutput(original)) continue;
       await attemptLock(store, original.request.id, async () => {
         const r = await readAttempt(store, original.request.id);
-        if (settled.includes(r.state)) return;
+        if (settled.includes(r.state)) { await discardCredentialOutput(store,r); return; }
         const job = await jobState(r.request.label);
         if (job.pid) {
           const ownerState = r.owner ? await observeAttemptIdentity(r.owner) : null;
-          if (ownerState === 'unknown') return;
+          if (ownerState === 'unknown') {
+            if (credentialedAttempt(r)) await writeAttempt(store,r,{state:'uncertain',reason:'owner_identity_unknown',restrictedOutput:true,cleanupRequired:true,cleanupAfterReconciliation:true});
+            return;
+          }
           if (r.owner && (job.pid !== r.owner.pid || ownerState !== 'alive')) {
-            await writeAttempt(store, r, { state: 'uncertain', reason: 'owner_identity_mismatch' });
+            await writeAttempt(store, r, { state: 'uncertain', reason: 'owner_identity_mismatch',...(credentialedAttempt(r)?{restrictedOutput:true,cleanupRequired:true,cleanupAfterReconciliation:true}:{}) });
             return;
           }
           // Independent watchdog: a stalled helper cannot prevent native group closure.
@@ -61,7 +65,7 @@ while (!stopped) {
         // Native startup may briefly have no PID. This bounded grace never releases GO.
         if (r.state === 'prepared' && job.loaded && Date.now() - Date.parse(r.at) < 2000) return;
         if (r.pgid && (await groupMembers(r.pgid)).length) {
-          await writeAttempt(store, r, { state: 'uncertain', reason: 'surviving_or_reused_group' });
+          await writeAttempt(store, r, { state: 'uncertain', reason: 'surviving_or_reused_group',...(credentialedAttempt(r)?{restrictedOutput:true,cleanupRequired:true,cleanupAfterReconciliation:true}:{}) });
           return;
         }
         if (r.state === 'cancelling') {
@@ -74,6 +78,7 @@ while (!stopped) {
             reason: r.state === 'prepared' ? 'incomplete_ownership_handshake' : 'supervisor_job_lost'
           });
         }
+        await discardCredentialOutput(store,await readAttempt(store,r.request.id));
       });
     }
   } catch {

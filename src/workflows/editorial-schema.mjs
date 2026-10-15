@@ -2,7 +2,8 @@ import { validateAdapterPolicy } from '../core/workflow-supervision.mjs';
 import path from 'node:path';
 import { sourceRootIdentity, validateSourcePath } from '../core/workflow-sources.mjs';
 import { createHash } from 'node:crypto';
-import { pinAdapters } from '../core/workflow-adapters.mjs';
+import { pinAdapters, rejectCredentials } from '../core/workflow-adapters.mjs';
+import { assertExplicitCommandPermission } from '../core/workflow-credentials.mjs';
 import { schema, parseWorkflowJson } from '../core/workflow-schema.mjs';
 import { WorkError } from '../core/errors.mjs';
 import { fields, https } from '../core/workflow-schema.mjs';
@@ -16,6 +17,7 @@ export function validateEditorialDefinition(d) {
   if (d.permissions.externalChanges !== false || d.permissions.localArtifacts !== true || !Array.isArray(d.permissions.readSources)) throw new WorkError('Workflow requires localArtifacts:true, externalChanges:false and readSources.');
   if (d.permissions.network !== undefined && d.permissions.network !== false) throw new WorkError('Network adapters are not supported.');
   for (const key of ['commandAdapters','imageGeneration','unattendedAdapters']) if(d.permissions[key]!==undefined&&typeof d.permissions[key]!=='boolean')throw new WorkError(`Invalid permission ${key}.`);
+  if (d.permissions.unattendedAdapters === true && (!Object.hasOwn(d.permissions, 'commandAdapters') || d.permissions.commandAdapters !== true)) throw new WorkError('Explicit source commandAdapters:true is required for unattended adapters.');
   if(d.previewFirstTopic!==undefined&&typeof d.previewFirstTopic!=='boolean')throw new WorkError('previewFirstTopic must be boolean.');
   fields(d.adapters, ['python','image','supervision'], 'adapters');
   if(d.adapters.supervision || d.permissions.unattendedAdapters===true)validateAdapterPolicy(d.adapters.supervision);
@@ -66,10 +68,13 @@ export function validateEditorialDecisionRecord(d) {
 }
 
 export async function freezeEditorialSnapshot({ store, definition, materials }) {
+  rejectCredentials({definition, materials}, definition);
   const publicationHistory = materials['history.json'] ? parseWorkflowJson(materials['history.json'], 'Publication history') : { publications: [] };
   schema(publicationHistory, 'publication history');
   if (!Array.isArray(publicationHistory.publications)) throw new WorkError('history.json needs a publications array.');
-  const snapshot = { permissions: { ...definition.permissions, commandAdapters: definition.permissions.commandAdapters ?? true, network: false }, adapterPins: await pinAdapters(definition), publicationHistory,
+  const snapshot = { permissions: { ...definition.permissions, commandAdapters: definition.permissions.commandAdapters ?? false, network: false },
+    permissionDeclarations: {commandAdapters: Object.hasOwn(definition.permissions, 'commandAdapters') && definition.permissions.commandAdapters === true},
+    adapterPins: await pinAdapters(definition), publicationHistory,
     sources: await Promise.all(definition.sources.map(async source => ({ ...source, sourcePin: await sourceRootIdentity(path.resolve(store.base, source.repo)), repo: path.resolve(store.base, source.repo),
       topics: (source.topics ?? []).map(topic => ({ ...topic,
         ...(topic.visual?.repo ? { visual: { ...topic.visual, repo: path.resolve(store.base, topic.visual.repo) } } : {})
@@ -82,7 +87,8 @@ export async function freezeEditorialSnapshot({ store, definition, materials }) 
 }
 
 export function validateEditorialSnapshot(d) {
-  const { materials, publicationHistory, adapterPins, digest, ...definition } = d;
+  const { materials, publicationHistory, adapterPins, digest, permissionDeclarations, ...definition } = d;
+  if (d.permissions?.unattendedAdapters === true) assertExplicitCommandPermission(d);
   validateEditorialDefinition({ ...definition, sources: definition.sources?.map(source => { const { sourcePin, ...rest } = source; return rest; }) });
   if (!materials || typeof materials['template.md'] !== 'string' || typeof materials['rules.md'] !== 'string' || typeof materials['examples.md'] !== 'string') throw new WorkError('Missing workflow material files.');
   if (publicationHistory) schema(publicationHistory, 'publication history');

@@ -24,7 +24,7 @@ export function createWorkflowProvider() {
         await onEvent({ type: 'run.started' });
         const outcome = await handler({ cwd, task, store, signal: controller.signal, onEvent });
         if (timedOut) return { status: 'failed', error: 'Workflow duration limit exceeded.' };
-        return outcome;
+        return rejectCredentials(outcome, task.workflow.definition);
       } catch (error) {
         let message = timedOut ? 'Workflow duration limit exceeded.' : error.message;
         try { rejectCredentials(message, task.workflow.definition); } catch { message = 'Credential-bearing error output refused.'; }

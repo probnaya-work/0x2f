@@ -9,6 +9,7 @@ import { promisify } from 'node:util';
 import { durableWrite, readBounded, safePath, syncDirectory } from './durable.mjs';
 import { withLock } from './lock.mjs';
 import { executableIdentity, verifyExecutable } from './workflow-adapters.mjs';
+import { rejectCredentialValues, assertExplicitCommandPermission } from './workflow-credentials.mjs';
 import { processIdentity as fallbackIdentity } from './process-identity.mjs';
 import { runtimeFingerprint, loadedRuntimeFingerprint, stopLaunchAgent } from './workflow-scheduler.mjs';
 import { validateSnapshot } from './workflow-schema.mjs';
@@ -172,6 +173,7 @@ export async function manageSupervision(store,operation) {
     for(const r of await listAttempts(store)) {await closeAttempt(store,r.request.id,'supervisor_uninstall');await stopLaunchAgent(r.request.label);await fs.rm(agentPath(r.request.label),{force:true});
       for(let n=0;n<100&&(await jobState(r.request.label)).pid;n++)await new Promise(resolve=>setTimeout(resolve,50));
       if(!(await jobState(r.request.label)).pid&&(!r.pgid||!(await groupMembers(r.pgid)).length))await removeChannel(store,r.request.id);
+      await attemptLock(store,r.request.id,async()=>discardCredentialOutput(store,await readAttempt(store,r.request.id)));
     }
     await closeService(prior);await fs.rm(agentPath(prior.label),{force:true});await store.writeJson(configFile(store),{...prior,disabled:true});await syncDirectory(supervisionDir(store));return {uninstalled:true,attemptsRetained:true};
   }
@@ -193,7 +195,7 @@ export async function assertDefinitionSupervised(store,d) {
   if(!externalDefinition(d))return;
   validateAdapterPolicy(d.adapters.supervision);
   if(d.adapters.image)validateAdapterPolicy({...d.adapters.supervision,credentialEnv:d.adapters.image.credentialEnv??[]});
-  if(d.permissions.commandAdapters!==true)throw new Error('Explicit commandAdapters permission is required.');
+  assertExplicitCommandPermission(d);
   if([...(d.adapters.supervision.credentialEnv??[]),...(d.adapters.image?.credentialEnv??[])].some(n=>!process.env[n]))throw new Error('Declared adapter credential is absent.');
   if(d.permissions.unattendedAdapters!==true)throw new Error('Explicit unattendedAdapters permission is required.');
   if(!(await supervisionStatus(store)).healthy)throw new Error('Unattended workflow is blocked: supervisor absent, unhealthy or drifted.');
@@ -216,14 +218,35 @@ export async function listAttempts(store) {
 export async function writeAttempt(store,r,patch) {
   const current=await readAttempt(store,r.request.id);if(current.integrity!==r.integrity)throw new Error('Concurrent/stale receipt writer.');
   if(patch.state&&patch.state!==r.state&&!transitions[r.state].includes(patch.state))throw new Error('Non-monotonic attempt transition.');
-  const next={...r,...patch,at:new Date().toISOString()};next.integrity=integrity(next);await store.writeJson(path.join(attemptDir(store,r.request.id),'receipt.json'),next);return next;
+  const next={...r,...patch,at:new Date().toISOString()};
+  rejectCredentialValues(next,(r.request.policy.credentialEnv??[]).map(name=>process.env[name]).filter(Boolean));
+  next.integrity=integrity(next);rejectCredentialValues(next,(r.request.policy.credentialEnv??[]).map(name=>process.env[name]).filter(Boolean));await store.writeJson(path.join(attemptDir(store,r.request.id),'receipt.json'),next);return next;
+}
+export const credentialedAttempt = r => Boolean(r.request.policy.credentialEnv?.length);
+export const restrictedAttemptOutput = r => credentialedAttempt(r) && r.state !== 'promoted' && !r.credentialOutputsDiscarded;
+
+// Call under the attempt lock. Never read potentially credential-bearing output
+// for diagnostics, and never delete it while a writer may still own the group.
+export async function discardCredentialOutput(store,r) {
+  if (!restrictedAttemptOutput(r) || ['prepared','owned','running','exited','validated','cancelling'].includes(r.state)) return r;
+  if ((r.state === 'uncertain' || r.cleanupAfterReconciliation) && r.state !== 'reconciled') return r;
+  const job = await jobState(r.request.label);
+  if (job.pid || !r.pgid || (await groupMembers(r.pgid)).length) return r;
+  const output = path.join(attemptDir(store,r.request.id),'output');
+  try {
+    await safePath(output);
+    await fs.chmod(output,0o700).catch(error=>{if(error.code!=='ENOENT')throw error;});
+    await fs.rm(output,{recursive:true,force:true});
+    await syncDirectory(attemptDir(store,r.request.id));
+  } catch { throw new Error('Restricted credential output cleanup could not be completed.'); }
+  return writeAttempt(store,r,{credentialOutputsDiscarded:true,restrictedOutput:false,cleanupRequired:false});
 }
 export async function stopAttemptJob(store,r,reason) {
   const job=await jobState(r.request.label);
   if(!job.pid)return true;
   if(['promoted','reconciled','failed','cancelled','uncertain','needs_reconciliation'].includes(r.state))return false;
   const installation=await readInstallation(store);
-  if(job.pid&&(!jobMatches(installation,job,r.request)||!r.owner||job.pid!==r.owner.pid||!await attemptIdentityMatches(r.owner))) {await writeAttempt(store,r,{state:'uncertain',reason:'owner_identity_mismatch'});return false;}
+  if(job.pid&&(!jobMatches(installation,job,r.request)||!r.owner||job.pid!==r.owner.pid||!await attemptIdentityMatches(r.owner))) {await writeAttempt(store,r,{state:'uncertain',reason:'owner_identity_mismatch',...(credentialedAttempt(r)?{restrictedOutput:true,cleanupRequired:true,cleanupAfterReconciliation:true}:{})});return false;}
   if(!job.pid)return true;
   await writeAttempt(store,r,{state:'cancelling',reason});
   // Unique validated launchd job identity is authority; never signal a PID/PGID.
@@ -236,18 +259,20 @@ export async function reconcileAttempt(store,id,decision) {
     if(r.pgid&&(await groupMembers(r.pgid)).length)throw new Error('Surviving or reused group: no promotion/cleanup/signalling is safe.');
     if(!['confirmed-effect','confirmed-no-effect','abandon'].includes(decision))throw new Error('Reconcile with confirmed-effect|confirmed-no-effect|abandon; this never retries a call.');
     if(!['uncertain','needs_reconciliation','cancelled','failed','exited','validated','prepared','owned','running','cancelling'].includes(r.state))throw new Error('Attempt does not need reconciliation.');
-    return writeAttempt(store,r,{state:'reconciled',resolution:decision});
+    r=await writeAttempt(store,r,{state:'reconciled',resolution:decision});
+    return discardCredentialOutput(store,r);
   });
 }
 export async function cleanupAttempt(store,id) {
   return attemptLock(store,id,async()=>{
     const r=await readAttempt(store,id);if(r.state!=='reconciled')throw new Error('Explicit reconciliation is required before staging cleanup.');
     if((await jobState(r.request.label)).pid||r.pgid&&(await groupMembers(r.pgid)).length)throw new Error('Owned/surviving processes prevent cleanup.');
-    await stopLaunchAgent(r.request.label);await fs.rm(agentPath(r.request.label),{force:true});await fs.chmod(path.join(attemptDir(store,id),'output'),0o700).catch(e=>{if(e.code!=='ENOENT')throw e;});await fs.rm(path.join(attemptDir(store,id),'output'),{recursive:true,force:true});await removeChannel(store,id);await syncDirectory(attemptDir(store,id));return writeAttempt(store,r,{cleaned:true});
+    await stopLaunchAgent(r.request.label);await fs.rm(agentPath(r.request.label),{force:true});await fs.chmod(path.join(attemptDir(store,id),'output'),0o700).catch(e=>{if(e.code!=='ENOENT')throw e;});await fs.rm(path.join(attemptDir(store,id),'output'),{recursive:true,force:true});await removeChannel(store,id);await syncDirectory(attemptDir(store,id));return writeAttempt(store,r,{cleaned:true,...(credentialedAttempt(r)?{credentialOutputsDiscarded:true,restrictedOutput:false,cleanupRequired:false}:{})});
   });
 }
 export async function prepareAttempt(store,task,{operationId,argv,pin,policy,outputs,outputRules={},inputs={},timeoutMs=30000,maxBytes=64000000,provider={},testCrashAt}) {
   validateAdapterPolicy(policy);
+  assertExplicitCommandPermission(task.workflow?.definition);
   if(task.workflow?.definition.permissions.commandAdapters!==true||task.workflow?.definition.permissions.unattendedAdapters!==true)throw new Error('External command/unattended adapter permission is absent.');
   if(task.workflow.runtimeFingerprint!==loadedRuntimeFingerprint)throw new Error('Worker runtime is stale.');
   if(!(await supervisionStatus(store)).healthy)throw new Error('Supervisor is unavailable/unhealthy/drifted.');
@@ -260,7 +285,7 @@ export async function prepareAttempt(store,task,{operationId,argv,pin,policy,out
   if(!provider||typeof provider!=='object'||Array.isArray(provider)||Object.keys(provider).some(n=>!['requestIdentity','idempotencyKey','statusLookup'].includes(n))||Object.values(provider).some(v=>typeof v!=='string'||v.length>8000))throw new Error('Invalid credential-free provider request identity.');
   const names=policy.credentialEnv??[],values=Object.fromEntries(names.map(n=>{if(!process.env[n])throw new Error('Declared credential is absent.');return [n,process.env[n]];}));
   if(Object.values(values).some(v=>Buffer.byteLength(v)>8192)||Object.values(values).reduce((n,v)=>n+Buffer.byteLength(v),0)>64000)throw new Error('Credential packet size limit.');
-  if(Object.values(values).some(v=>JSON.stringify({argv,pin,policy,provider,outputRules,operationId,outputs,inputNames:Object.keys(inputs)}).includes(v)||Object.values(inputs).some(b=>Buffer.from(b).includes(Buffer.from(v)))))throw new Error('Credential-bearing request refused.');
+  rejectCredentialValues({argv,pin,policy,provider,outputRules,operationId,outputs,inputs},Object.values(values));
   if(argv[0]!==pin?.command&&argv[0]!==pin?.realPath)throw new Error('Argv executable differs from pin.');
   await verifyExecutable(pin);const m=await readInstallation(store), run=currentRunNumber(task),id=digestAttempt({task:task.slug,run,operationId});
   return workflowLock(store,()=>withLock(path.join(supervisionDir(store),'intent-lock'),()=>attemptLock(store,id,async()=>{
@@ -275,15 +300,16 @@ export async function prepareAttempt(store,task,{operationId,argv,pin,policy,out
     for(const [name,bytes] of Object.entries(inputs)){if(!/^[-a-zA-Z0-9_.]+$/.test(name)||name.startsWith('.'))throw new Error('Invalid input filename.');const b=Buffer.isBuffer(bytes)?bytes:Buffer.from(bytes);if(b.length>maxBytes)throw new Error('Input size limit.');await durableWrite(path.join(dir,'input',name),typeof bytes==='string'?bytes.replaceAll('{outputDir}',path.join(dir,'output')).replaceAll('{inputDir}',path.join(dir,'input')):bytes);}
     const worker=await attemptIdentity(process.pid);if(!worker||worker.unknown)throw new Error('Worker identity cannot be established.');
     const request={schemaVersion:1,id,operationId,workspaceId:m.workspaceId,label:`${m.label}.attempt.${id}`,taskId:task.id,slug:task.slug,run,token:task.execution.launchToken,definitionDigest:task.workflow.definition.digest,runtimeFingerprint:loadedRuntimeFingerprint,worker,argv,pin,policy,outputs,outputRules,timeoutMs,maxBytes,provider,payloadDigest:digestAttempt({argv,pin,policy,outputs,outputRules,timeoutMs,maxBytes,inputs,provider}),...(process.env.WORKFLOW_TEST_MODE==='1'&&testCrashAt?{testCrashAt}: {})};
-    if(Object.values(values).some(v=>JSON.stringify(request).includes(v)))throw new Error('Credential-bearing request metadata refused.');
-    const r={schemaVersion:1,request,requestDigest:digestAttempt(request),state:'prepared',at:new Date().toISOString()};r.integrity=integrity(r);await store.writeJson(path.join(dir,'receipt.json'),r);crashPoint('attempt.prepared');
+    rejectCredentialValues(request,Object.values(values));
+    const r={schemaVersion:1,request,requestDigest:digestAttempt(request),state:'prepared',at:new Date().toISOString(),...(names.length?{restrictedOutput:true,cleanupRequired:true}:{})};
+    rejectCredentialValues(r,Object.values(values));r.integrity=integrity(r);rejectCredentialValues(r,Object.values(values));await store.writeJson(path.join(dir,'receipt.json'),r);crashPoint('attempt.prepared');
     await durableWrite(agentPath(request.label),supervisionPlist(m,request));crashPoint('attempt.plist-durable');await exec('/bin/launchctl',['bootstrap',`gui/${process.getuid()}`,agentPath(request.label)]);return r;
   })));
 }
-export async function validateAttemptOutputs(store,r,secrets=[],scrubSecrets=false) {
+export async function validateAttemptOutputs(store,r,secrets=[]) {
   const dir=path.join(attemptDir(store,r.request.id),'output');await safePath(dir);const names=await fs.readdir(dir);
   if(names.some(n=>!r.request.outputs.includes(n))||r.request.outputs.some(n=>!names.includes(n)))throw new Error('Unexpected or missing adapter output.');
-  let total=0;const files=[];for(const name of names.sort()){const bytes=await readBounded(path.join(dir,name),r.request.maxBytes);total+=bytes.length;if(secrets.some(s=>bytes.includes(Buffer.from(s)))){if(scrubSecrets)await fs.rm(path.join(dir,name));throw new Error('Credential-bearing output refused.');}if(total>r.request.maxBytes)throw new Error('Output size limit.');const rule=r.request.outputRules?.[name];
+  let total=0;const files=[];for(const name of names.sort()){const bytes=await readBounded(path.join(dir,name),r.request.maxBytes);total+=bytes.length;rejectCredentialValues(bytes,secrets);if(total>r.request.maxBytes)throw new Error('Output size limit.');const rule=r.request.outputRules?.[name];
     if(rule){const png=bytes.length>=24&&bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))&&bytes.toString('ascii',12,16)==='IHDR';if(!png||bytes.readUInt32BE(16)<1||bytes.readUInt32BE(20)<1||bytes.readUInt32BE(16)>8192||bytes.readUInt32BE(20)>8192||(rule.width&&bytes.readUInt32BE(16)!==rule.width)||(rule.height&&bytes.readUInt32BE(20)!==rule.height))throw new Error('Invalid PNG output header/dimensions.');}
     files.push({path:name,bytes:bytes.length,sha256:digestAttempt(bytes)});}
   return {schemaVersion:1,attemptId:r.request.id,requestDigest:r.requestDigest,files};
@@ -312,7 +338,7 @@ export async function promoteAttempt(store,id) {
     const manifest=await verifyAttemptManifest(store,r);
     if(!await store.exists(destination)){const actual=await validateAttemptOutputs(store,r);if(digestAttempt(actual)!==r.manifestDigest)throw new Error('Outputs changed since validation.');await fs.rename(path.join(dir,'output'),destination);await syncDirectory(dir);crashPoint('attempt.archive-renamed');}
     await verifyAttemptArchive(store,r);
-    if(r.state!=='promoted')await writeAttempt(store,r,{state:'promoted'});return {id,state:'promoted',directory:destination,manifest};
+    if(r.state!=='promoted')await writeAttempt(store,r,{state:'promoted',...(credentialedAttempt(r)?{restrictedOutput:false,cleanupRequired:false}:{})});return {id,state:'promoted',directory:destination,manifest};
   }));
 }
 export async function supervisedRun(store,task,options,{signal,onState}={}) {
@@ -340,7 +366,7 @@ export async function attemptProjection(store, task) {
     return (await listAttempts(store)).filter(r=>r.request.taskId===task.id).map(r=>({
       id:r.request.id,run:r.request.run,operationId:r.request.operationId,state:r.state,
       supervised:Boolean(r.owner)&&!['uncertain','needs_reconciliation'].includes(r.state),reason:r.reason??null,worker:r.request.worker.pid,supervisor:r.owner?.pid??null,
-      groupClosed:r.groupClosed===true,reconciliation:r.resolution??null
+      groupClosed:r.groupClosed===true,reconciliation:r.resolution??null,restrictedOutput:restrictedAttemptOutput(r),cleanupRequired:restrictedAttemptOutput(r)
     }));
   } catch { return [{state:'uncertain',reason:'corrupt_or_uninspectable_receipt'}]; }
 }

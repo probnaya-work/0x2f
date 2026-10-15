@@ -8,6 +8,12 @@ credential **names**. It is not an OS sandbox. Executables which detach, change
 session/group, pass descriptors to unrelated processes, delegate work to other
 services, or intentionally write outside their own outputs remain NO-GO.
 
+Unattended definitions must contain an explicit source `commandAdapters:true`.
+Freezing records that declaration in `permissionDeclarations`; normalization does
+not grant permission. Legacy normalized snapshots without that evidence cannot
+authorize unattended commands: refresh settings explicitly before execution.
+Collection-only inspection remains available; existing history is not migrated.
+
 Every output-producing compositor, including `python3` running the repository compositor, uses this boundary. The existing editorial collection mode (preview disabled, no image adapter,
 no network or external changes) does not depend on supervision.
 
@@ -72,6 +78,16 @@ native state block signals/promotion and require explicit investigation.
    attempt cannot promote. The archive is immutable by runtime protocol and
    read-only permissions, not protected against a malicious same-user actor.
 
+Credentialed unpromoted output is restricted by default. After nonzero exit,
+timeout, cancel or helper/worker death, the service removes the entire unpromoted
+output only after the native job has no PID and its recorded process group is
+empty. Receipts and reconciliation metadata remain. The service needs credential
+names to apply this policy, never persisted credential values. This is an explicit
+exception to ordinary staging retention. Unknown/mismatched ownership or a
+surviving group keeps output restricted and requires reconciliation followed by
+safe cleanup; no deletion occurs while a writer may remain. CLI/TUI/Web/doctor
+project restriction/cleanup metadata, never the directory contents.
+
 The allowed state transitions are checked at every write, with receipt integrity
 and optimistic version fencing in addition to kernel locks:
 
@@ -109,6 +125,13 @@ names) is delivered over an owner-only local socket. Loader/interpreter controls
 such as NODE_OPTIONS, DYLD_*, LD_*, PYTHON*, PATH and WORKFLOW_* cannot be credential
 names. Values are never saved in requests, receipts, logs or diagnostics. A local
 same-user compromise and malicious executable are outside this trust boundary.
+
+A shared recursive guard checks string values, object keys, arrays, Buffer/byte
+views and JSON material/input text before serialization. It rejects raw and
+JSON-escaped credential values without echoing inspected data. Definition/material
+snapshots, attempt metadata/receipts, adapter results, workflow journals and
+artifact writes use this guard. Failed credentialed outputs are purged through
+the group-closure policy above; they are not retained as ordinary staging.
 
 Provider metadata can carry a credential-free request identity, idempotency key
 and status-lookup reference. Fixture ledgers model known and uncertain outcomes.

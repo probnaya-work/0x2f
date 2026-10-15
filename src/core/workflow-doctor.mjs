@@ -1,4 +1,4 @@
-import { supervisionStatus, supervisionDir, readAttempt, jobState, groupMembers, attemptIdentityMatches, externalDefinition, assertDefinitionSupervised, verifyAttemptArchive } from './workflow-supervision.mjs';
+import { supervisionStatus, supervisionDir, readAttempt, jobState, groupMembers, attemptIdentityMatches, externalDefinition, assertDefinitionSupervised, verifyAttemptArchive, restrictedAttemptOutput } from './workflow-supervision.mjs';
 import { workflowKind } from '../workflows/registry.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -112,7 +112,7 @@ export async function workflowDoctor(store, { now = new Date() } = {}) {
       const mismatch=Boolean(job.pid&&r.owner&&(job.pid!==r.owner.pid||!await attemptIdentityMatches(r.owner)));
       if(['validated','promoted'].includes(r.state))await verifyAttemptArchive(store,r);
       const staging=await store.exists(path.join(supervisionDir(store),'attempts',entry.name,'output'));
-      attempts.push({id:entry.name,taskId:r.request.taskId,run:r.request.run,state:r.state,reason:r.reason??null,active:Boolean(job.pid),identityMismatch:mismatch,survivingGroup:!job.pid&&members.length>0,incompleteHandshake:['prepared','owned'].includes(r.state),unpromotedStaging:staging,pendingReconciliation:!job.pid&&!['promoted','reconciled'].includes(r.state)});
+      attempts.push({id:entry.name,taskId:r.request.taskId,run:r.request.run,state:r.state,reason:r.reason??null,active:Boolean(job.pid),identityMismatch:mismatch,survivingGroup:!job.pid&&members.length>0,incompleteHandshake:['prepared','owned'].includes(r.state),unpromotedStaging:staging,pendingReconciliation:!job.pid&&!['promoted','reconciled'].includes(r.state),restrictedOutput:restrictedAttemptOutput(r),cleanupRequired:restrictedAttemptOutput(r)});
       if(mismatch||(!job.pid&&members.length)||['uncertain','needs_reconciliation'].includes(r.state)||!job.pid&&!['promoted','reconciled','validated','cancelled','failed'].includes(r.state))problem('HIGH','ATTEMPT_UNCERTAIN',entry.name,'External ownership/outcome requires reconciliation','workflow attempt status <id>; cancel only verified native job; reconcile <id> <decision>; cleanup <id>. No automatic retry.');
       else if(staging&&!job.pid&&r.state!=='reconciled')problem('MEDIUM','UNPROMOTED_STAGING',entry.name,r.state,'Reconcile explicitly before cleanup.');
     }catch{problem('HIGH','ATTEMPT_RECEIPT',entry.name,'Corrupt/incomplete attempt; no signal or promotion allowed','Restore exact receipt from trusted backup; never fabricate ownership.');}

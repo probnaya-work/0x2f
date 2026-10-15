@@ -10,14 +10,16 @@ import {createStore} from '../src/core/store.mjs';
 import {readDefinition} from '../src/core/workflows.mjs';
 import {executableIdentity} from '../src/core/workflow-adapters.mjs';
 import {loadedRuntimeFingerprint,stopLaunchAgent} from '../src/core/workflow-scheduler.mjs';
-import {manageSupervision,supervisionStatus,readInstallation,listAttempts,readAttempt,prepareAttempt,supervisedRun,promoteAttempt,attemptDir,attemptLock,writeAttempt,stopAttemptJob,reconcileAttempt,cleanupAttempt,groupMembers,jobState,attemptIdentity,attemptIdentityMatches,observeAttemptIdentity,validateAdapterPolicy,digestAttempt} from '../src/core/workflow-supervision.mjs';
+import {manageSupervision,supervisionStatus,readInstallation,listAttempts,readAttempt,prepareAttempt,supervisedRun,promoteAttempt,attemptDir,attemptLock,writeAttempt,stopAttemptJob,reconcileAttempt,cleanupAttempt,groupMembers,jobState,attemptIdentity,attemptIdentityMatches,observeAttemptIdentity,validateAdapterPolicy,digestAttempt,attemptProjection,verifyAttemptArchive,assertDefinitionSupervised} from '../src/core/workflow-supervision.mjs';
+import {rejectCredentialValues} from '../src/core/workflow-credentials.mjs';
+import {validateSnapshot} from '../src/core/workflow-schema.mjs';
 import {recoverWorkflow,workflowDoctor} from '../src/core/workflow-doctor.mjs';
 import {fixture,pause,settled,captureFixtureEvidence} from './workflow-fixture.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 const exec=promisify(execFile),workerFile=new URL('./supervision-fixture-worker.mjs',import.meta.url).pathname;
 const policy={processGroup:'inherit',daemonizes:false,unattended:true,network:false,paid:false};
 async function wait(fn,label='condition',ms=12000){const until=Date.now()+ms;while(Date.now()<until){const v=await fn();if(v)return v;await pause(30);}throw new Error('Timed out: '+label);}
-async function harness(t,mode='success',{timeoutMs=4000,maxBytes=1000000,testCrashAt,credentialEnv=[],outputRules={}}={}){
+async function harness(t,mode='success',{timeoutMs=4000,maxBytes=1000000,testCrashAt,credentialEnv=[],outputRules={},holdPromotion=false}={}){
   const cleanup=[];const f=await fixture({after(fn){cleanup.push(fn);}}),store=f.runtime.store;
   const script=path.join(f.base,'attempt-fixture.mjs');
   await fs.writeFile(script,`#!${process.execPath}
@@ -35,6 +37,12 @@ else if(mode==='oversized'){fs.writeFileSync(path.join(output,'result.txt'),Buff
 else if(mode==='symlink'){fs.symlinkSync(ledger,path.join(output,'result.txt'));}
 else if(mode==='secret-unknown'){fs.writeFileSync(path.join(output,'unknown.txt'),process.env.FIXTURE_CREDENTIAL);}
 else if(mode==='secret'){console.log(process.env.FIXTURE_CREDENTIAL);console.error(process.env.FIXTURE_CREDENTIAL);fs.writeFileSync(path.join(output,'result.txt'),process.env.FIXTURE_CREDENTIAL);}
+else if(mode.endsWith('-with-secret')){
+ fs.writeFileSync(path.join(output,'result.txt'),process.env.FIXTURE_CREDENTIAL);
+ fs.writeFileSync(ledger+'.ready','ready');
+ if(mode==='fail-with-secret')process.exit(7);
+ const fd=fs.openSync(path.join(output,'result.txt'),'a');setInterval(()=>fs.writeSync(fd,process.env.FIXTURE_CREDENTIAL),25);
+}
 else if(mode==='fail'){process.exit(7);}
 else {fs.writeFileSync(path.join(output,'result.txt'),'known-result');}
 `);await fs.chmod(script,0o700);
@@ -43,6 +51,7 @@ else {fs.writeFileSync(path.join(output,'result.txt'),'known-result');}
   task={...task,status:'working',execution:{launchToken:randomUUID()},runs:[{run:1}],workflow:{schemaVersion:1,id:definition.id,version:definition.version,definition,runtimeFingerprint:loadedRuntimeFingerprint,trigger:'manual',triggerKey:'fixture',decisions:[]}};
   await store.updateTask(task);
   const ledger=path.join(f.base,'ledger'),command=mode==='native-python'?'python3':script,argv=mode==='native-python'?[command,'-c',"import sys;open(sys.argv[1],'w').write('known-result');open(sys.argv[2],'a').write('call\\n')",'{outputDir}/result.txt',ledger]:[script,mode,'{outputDir}',ledger],options={operationId:'operation-1',argv,pin:await executableIdentity(command),policy:{...policy,credentialEnv},outputs:['result.txt'],outputRules,timeoutMs,maxBytes,testCrashAt,provider:{requestIdentity:'fixture-operation-1',idempotencyKey:'fixture-operation-1',statusLookup:'local-ledger'}};
+  options.holdPromotion=holdPromotion;
   const file=path.join(f.base,'request.json');await store.writeJson(file,options);
   const child=spawn(process.execPath,[workerFile,f.base,String(task.id),file],{env:{...process.env,WORKFLOW_TEST_MODE:'1'},stdio:'ignore'});
   t.after(async()=>{await captureFixtureEvidence(store,'harness');const identity=await attemptIdentity(child.pid);if(identity&&!identity.unknown)process.kill(child.pid,'SIGKILL');await new Promise(resolve=>{if(child.exitCode!==null||child.signalCode)resolve();else child.once('exit',resolve);});await store.updateTask({...await store.findTask(task.id),status:'failed'});for(const fn of cleanup)await fn();});
@@ -161,11 +170,92 @@ test('executable drift and absent declared credentials fail before external inte
 });
 
 test('validated stale run and corrupted manifest cannot promote',native,async t=>{
-  const h=await harness(t,'success',{testCrashAt:'after-validation'});const r=await wait(async()=>{const r=await h.attempt();return r?.state==='promoted'&&r;});
+  const h=await harness(t,'success',{holdPromotion:true});await wait(()=>h.store.exists(h.file+'.validated'),'validated barrier');
+  const r=await h.attempt();assert.equal(r.state,'validated');await wait(async()=>!(await jobState(r.request.label)).pid,'closed validated runner');
+  assert.equal(await h.store.exists(path.join(attemptDir(h.store,r.request.id),'archive')),false);
   const original=await h.store.findTask(h.task.id);await h.store.updateTask({...original,runs:[{run:1},{run:2}],execution:{launchToken:'new-token'}});
   await assert.rejects(promoteAttempt(h.store,r.request.id),/Stale/);
   await h.store.updateTask(original);const file=path.join(attemptDir(h.store,r.request.id),'manifest.json'),saved=await fs.readFile(file);await fs.writeFile(file,'{}');
   try{await assert.rejects(promoteAttempt(h.store,r.request.id),/manifest/);}finally{await fs.writeFile(file,saved);}
+  assert.equal((await h.attempt()).state,'validated');assert.equal(await h.store.exists(path.join(attemptDir(h.store,r.request.id),'archive')),false);
+  await fs.writeFile(h.file+'.release','release');await wait(async()=> (await h.attempt()).state==='promoted');
+});
+
+test('attempt.archive-renamed crash replays intact archive without another invocation',native,async t=>{
+  const h=await harness(t,'success',{holdPromotion:true});await wait(()=>h.store.exists(h.file+'.validated'),'validated barrier');const r=await h.attempt();
+  await wait(async()=>!(await jobState(r.request.label)).pid,'closed validated runner');
+  const script="import {createStore} from './src/core/store.mjs';import {promoteAttempt} from './src/core/workflow-supervision.mjs';await promoteAttempt(createStore(process.argv[1]),process.argv[2]);";
+  await assert.rejects(exec(process.execPath,['--input-type=module','-e',script,h.base,r.request.id],{env:{...process.env,WORKFLOW_TEST_MODE:'1',WORKFLOW_TEST_CRASH_AT:'attempt.archive-renamed'}}),error=>error.signal==='SIGKILL');
+  assert.equal((await h.attempt()).state,'validated');const archive=path.join(attemptDir(h.store,r.request.id),'archive/result.txt');
+  assert.equal(await h.store.exists(path.join(attemptDir(h.store,r.request.id),'output')),false);await verifyAttemptArchive(h.store,await h.attempt());
+  const saved=await fs.readFile(archive);await fs.chmod(archive,0o600);await fs.writeFile(archive,'corrupt');await assert.rejects(promoteAttempt(h.store,r.request.id),/integrity/);await fs.writeFile(archive,saved);await fs.chmod(archive,0o400);
+  await promoteAttempt(h.store,r.request.id);assert.equal((await h.attempt()).state,'promoted');assert.equal((await fs.readFile(h.ledger,'utf8')).trim().split('\n').length,1);
+  await fs.writeFile(h.file+'.release','release');
+});
+
+async function assertNoPersistentCredential(dir,secret){
+  for(const entry of await fs.readdir(dir,{withFileTypes:true})){
+    assert.doesNotThrow(()=>rejectCredentialValues(entry.name,[secret]));const file=path.join(dir,entry.name);
+    if(entry.isDirectory())await assertNoPersistentCredential(file,secret);
+    else if(entry.isFile()){const bytes=await fs.readFile(file);assert.doesNotThrow(()=>rejectCredentialValues(bytes,[secret]));}
+  }
+}
+
+for(const failure of ['fail','timeout','cancel','helper','worker'])test(`credentialed ${failure}-with-secret removes output only after group closure`,native,async t=>{
+  const secret='disposable"\n\\failure-credential-71';process.env.FIXTURE_CREDENTIAL=secret;t.after(()=>delete process.env.FIXTURE_CREDENTIAL);
+  const h=await harness(t,failure+'-with-secret',{credentialEnv:['FIXTURE_CREDENTIAL'],timeoutMs:failure==='timeout'?4000:12000});
+  await wait(()=>h.store.exists(h.ledger+'.ready'),'credential writer ready');const initial=await h.attempt();
+  if(failure==='cancel')await attemptLock(h.store,initial.request.id,()=>stopAttemptJob(h.store,initial,'user_cancel'));
+  if(failure==='helper'){assert.equal(await attemptIdentityMatches(initial.owner),true);process.kill(initial.owner.pid,'SIGKILL');}
+  if(failure==='worker'){assert.equal(await attemptIdentityMatches(initial.request.worker),true);process.kill(h.child.pid,'SIGKILL');}
+  const end=await wait(async()=>{const r=await h.attempt();return r?.credentialOutputsDiscarded&&r;},'closed credential output discarded');
+  assert.deepEqual(await groupMembers(end.pgid),[]);assert.equal((await jobState(end.request.label)).pid,null);
+  assert.equal(await h.store.exists(path.join(attemptDir(h.store,end.request.id),'output')),false);assert.equal(await h.store.exists(path.join(attemptDir(h.store,end.request.id),'archive')),false);
+  assert.ok(['failed','cancelled','needs_reconciliation'].includes(end.state));await assertNoPersistentCredential(h.base,secret);
+  assert.equal((await fs.readFile(h.ledger,'utf8')).trim().split('\n').length,1);
+});
+
+test('uncertain credential output stays restricted until closure and reconciliation without diagnostic disclosure',native,async t=>{
+  const secret='disposable"\n\\restricted-credential-72';process.env.FIXTURE_CREDENTIAL=secret;t.after(()=>delete process.env.FIXTURE_CREDENTIAL);
+  const h=await harness(t,'uncertain-with-secret',{credentialEnv:['FIXTURE_CREDENTIAL'],timeoutMs:12000});await wait(()=>h.store.exists(h.ledger+'.ready'),'credential writer ready');const original=await h.attempt();
+  try{
+    assert.equal(await attemptIdentityMatches(original.owner),true);process.kill(original.owner.pid,'SIGSTOP');
+    await attemptLock(h.store,original.request.id,async()=>{const r=await readAttempt(h.store,original.request.id);const bad=await writeAttempt(h.store,r,{owner:{...r.owner,birth:'1:1'}});assert.equal(await stopAttemptJob(h.store,bad,'user_cancel'),false);});
+    const r=await h.attempt();assert.equal(r.state,'uncertain');assert.equal(r.restrictedOutput,true);assert.equal(r.cleanupAfterReconciliation,true);
+    const output=path.join(attemptDir(h.store,r.request.id),'output/result.txt');assert.equal(await h.store.exists(output),true);assert.ok((await groupMembers(r.pgid)).length>0);
+    await assert.rejects(cleanupAttempt(h.store,r.request.id),/reconciliation/);await assert.rejects(reconcileAttempt(h.store,r.request.id,'abandon'),/running/);
+    const doctor=await workflowDoctor(h.store),projection=await attemptProjection(h.store,await h.store.findTask(h.task.id));
+    assert.equal(doctor.attempts[0].restrictedOutput,true);assert.equal(projection[0].restrictedOutput,true);
+    const lines=workflowLines({...await h.store.findTask(h.task.id),externalAttempts:projection});assert.ok(lines.some(line=>line.includes('restricted output')));
+    assert.doesNotThrow(()=>rejectCredentialValues({doctor,projection,lines},[secret]));
+    const status=await exec(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname,'workflow','attempt','status',r.request.id],{cwd:h.base});assert.doesNotThrow(()=>rejectCredentialValues(status.stdout,[secret]));
+    assert.equal(await attemptIdentityMatches(original.owner),true);process.kill(original.owner.pid,'SIGKILL');await wait(async()=>!(await groupMembers(r.pgid)).length,'restricted group closed');
+    assert.equal(await h.store.exists(output),true);await reconcileAttempt(h.store,r.request.id,'abandon');assert.equal(await h.store.exists(output),false);await assertNoPersistentCredential(h.base,secret);
+  }finally{
+    if(await attemptIdentityMatches(original.owner))process.kill(original.owner.pid,'SIGKILL');
+  }
+});
+
+test('escaped credential request metadata and input bytes never enter persistent attempt tree',native,async t=>{
+  t.after(()=>delete process.env.FIXTURE_CREDENTIAL);
+  const h=await harness(t);await wait(async()=> (await h.attempt())?.state==='promoted');
+  for(const secret of ['request\nkey-81','request"key-82','request\\key-83','request"\n\\key-84']){
+    process.env.FIXTURE_CREDENTIAL=secret;
+    for(const patch of [{argv:[...h.options.argv,secret]},{provider:{requestIdentity:secret}},{inputs:{'input.json':JSON.stringify({nested:[{value:secret}]})}},{inputs:{'input.bin':Buffer.from(secret)}},{inputs:{[secret]:Buffer.from('safe')}}])
+      await assert.rejects(prepareAttempt(h.store,h.task,{...h.options,operationId:'rejected-input',policy:{...policy,credentialEnv:['FIXTURE_CREDENTIAL']},...patch}),/Credential-bearing/);
+    await assertNoPersistentCredential(h.base,secret);
+  }
+  delete process.env.FIXTURE_CREDENTIAL;assert.equal((await listAttempts(h.store)).length,1);
+});
+
+test('normalized legacy snapshot cannot stand in for explicit source permission',native,async t=>{
+  const f=await fixture(t),store=f.runtime.store,definition=await readDefinition(store,'probnaya-editorial');
+  assert.equal(definition.permissionDeclarations.commandAdapters,true);await assertDefinitionSupervised(store,definition);
+  const legacy=structuredClone(definition);delete legacy.permissionDeclarations;delete legacy.digest;legacy.digest=digestAttempt(legacy);
+  assert.throws(()=>validateSnapshot(legacy),/Explicit source commandAdapters/);await assert.rejects(assertDefinitionSupervised(store,legacy),/Explicit source commandAdapters/);
+  const manual={...definition,permissions:{...definition.permissions,unattendedAdapters:false,commandAdapters:false},previewFirstTopic:false};
+  await assertDefinitionSupervised(store,manual);
+  await assert.rejects(prepareAttempt(store,{workflow:{definition:manual}},{policy}),/Explicit source commandAdapters/);
 });
 
 test('long-lived supervisor SIGKILL restarts while owned attempt stays managed',native,async t=>{

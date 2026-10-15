@@ -3,19 +3,23 @@ import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { durableWrite, readBounded, safePath } from './durable.mjs';
 import { schema } from './workflow-schema.mjs';
+import { rejectCredentials } from './workflow-adapters.mjs';
 export const sha256 = b => createHash('sha256').update(b).digest('hex');
 export async function archiveArtifacts(store, task, source, run) {
   const destination = path.join(store.taskDir(task.slug), 'runs', String(run), 'artifacts', task.workflow.definition.kind);
   const files = [];
   await safePath(source);
   for (const entry of await fs.readdir(source, { withFileTypes: true })) {
+    rejectCredentials(entry.name, task.workflow.definition);
     if (entry.name.startsWith('.')) continue;
     if (!entry.isFile()) throw new Error('Artifacts must be regular files.');
     const bytes = await readBounded(path.join(source, entry.name), 64_000_000);
+    rejectCredentials(bytes, task.workflow.definition);
     await durableWrite(path.join(destination, entry.name), bytes, { point: 'artifact' });
     files.push({ path: entry.name, bytes: bytes.length, sha256: sha256(bytes) });
   }
   const manifest = { schemaVersion: 1, workflow: task.workflow.id, run, files };
+  rejectCredentials(manifest, task.workflow.definition);
   await store.writeJson(path.join(destination, 'manifest.json'), manifest);
   return { manifest: path.relative(store.taskDir(task.slug), path.join(destination, 'manifest.json')), manifestDigest: sha256(JSON.stringify(manifest)), artifactRun: run };
 }

@@ -5,6 +5,7 @@ import { spawn, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createStore } from '../core/store.mjs';
 import { verifyExecutable } from '../core/workflow-adapters.mjs';
+import { rejectCredentialValues, assertExplicitCommandPermission } from '../core/workflow-credentials.mjs';
 import { loadedRuntimeFingerprint, runtimeFingerprint } from '../core/workflow-scheduler.mjs';
 import { attemptDir, channelPath, readAttempt, readInstallation, jobState, groupMembers, attemptLock, writeAttempt, validateAttemptOutputs, digestAttempt, ensureChannel, observeAttemptIdentity, attemptIdentity as processIdentity, attemptIdentityMatches as identityMatches } from '../core/workflow-supervision.mjs';
 const exec=promisify(execFile),[, ,base,id]=process.argv,store=createStore(base);
@@ -35,11 +36,12 @@ const server=net.createServer(socket=>{
       credentials=input.env;
       if(!await identityMatches(request.worker))throw new Error('Worker disappeared before gate.');
       const task=await store.findTask(request.taskId);
+      assertExplicitCommandPermission(task.workflow?.definition);
       if(request.runtimeFingerprint!==await runtimeFingerprint()||task.workflow?.definition.digest!==request.definitionDigest||task.workflow.runtimeFingerprint!==request.runtimeFingerprint||task.workflow.definition.permissions.unattendedAdapters!==true||task.workflow.definition.permissions.commandAdapters!==true||task.status!=='working'||task.runs?.at(-1)?.run!==request.run||task.execution.launchToken!==request.token||(await store.readCancelRequest(task))?.run===request.run)throw new Error('Worker/run is cancelled or stale before gate.');
       const executable=await verifyExecutable({...request.pin,command:request.pin.realPath});
       const directory=attemptDir(store,id),output=path.join(directory,'output');
       const argv=request.argv.map(a=>a.replaceAll('{outputDir}',output).replaceAll('{inputDir}',path.join(directory,'input')));
-      if(Object.values(credentials).some(s=>argv.some(a=>a.includes(s))))throw new Error('Credential-bearing argv refused.');
+      rejectCredentialValues(argv,Object.values(credentials));
       child=spawn(installation.python.realPath,[new URL('./adapter-gate.py',import.meta.url).pathname,String(request.maxBytes),String(Math.ceil(request.timeoutMs/1000)),executable,...argv.slice(1)],{cwd:output,detached:false,env:{PATH:'/usr/bin:/bin',LANG:'C.UTF-8',...credentials,WORKFLOW_OPERATION_ID:request.operationId},stdio:['pipe','pipe','pipe']});
       await fault('spawn-before-record');
       child.stdin.on('error',()=>{});child.on('error',()=>{streamFailure=true;});child.on('close',code=>{mainExit=code??125;});
@@ -72,12 +74,11 @@ try{
        fresh=await writeAttempt(store,fresh,{state:'exited',exitCode:mainExit,groupClosed:true});
        if(mainExit!==0||streamFailure){await writeAttempt(store,fresh,{state:'failed',reason:'adapter_exit_or_output_failure'});return;}
        try{
-         const manifest=await validateAttemptOutputs(store,fresh,Object.values(credentials),true);await store.writeJson(path.join(attemptDir(store,id),'manifest.json'),manifest);
+         const manifest=await validateAttemptOutputs(store,fresh,Object.values(credentials));rejectCredentialValues(manifest,Object.values(credentials));await store.writeJson(path.join(attemptDir(store,id),'manifest.json'),manifest);
          for(const f of manifest.files)await fs.chmod(path.join(attemptDir(store,id),'output',f.path),0o400);await fs.chmod(path.join(attemptDir(store,id),'output'),0o500);
          await writeAttempt(store,fresh,{state:'validated',manifestDigest:digestAttempt(manifest)});
        }catch{
-         if(Object.keys(credentials).length)await fs.rm(path.join(attemptDir(store,id),'output'),{recursive:true,force:true});
-         await writeAttempt(store,fresh,{state:'failed',reason:'output_validation_failed',credentialOutputsDiscarded:Object.keys(credentials).length>0});
+         await writeAttempt(store,fresh,{state:'failed',reason:'output_validation_failed'});
        }
      });await fault('after-validation');break;
    }

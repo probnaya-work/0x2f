@@ -17,7 +17,7 @@ export function workflowLines(task) {
     `ACCEPTANCE ${v.acceptance} · PUBLICATION ${v.publication ?? 'unrecorded'}`,
     `ARTIFACTS ${v.artifactManifest ?? 'legacy path in result; no integrity manifest'}`,
     ...(task.workflow.definition?.permissions.unattendedAdapters ? ['ADAPTER TRUST trusted local executable · inherited group · attempt outputs only · no OS sandbox'] : []),
-    ...v.externalAttempts.map(a=>`EXTERNAL ${a.id?.slice(0,12)??'unknown'} · run ${a.run??'?'} · ${a.state}${a.supervised?' · supervised':''} · worker ${a.worker??'?'} · supervisor ${a.supervisor??'?'}${a.reason?' · '+a.reason:''}`),
+    ...v.externalAttempts.map(a=>`EXTERNAL ${a.id?.slice(0,12)??'unknown'} · run ${a.run??'?'} · ${a.state}${a.supervised?' · supervised':''}${a.restrictedOutput?' · restricted output · reconcile before safe cleanup':''} · worker ${a.worker??'?'} · supervisor ${a.supervisor??'?'}${a.reason?' · '+a.reason:''}`),
     ...(v.error ? [`ERROR ${v.error}`, `RECOVERY ${v.recovery}`] : [])];
 }
 export const decisionNeedsRun = task => Boolean(task.workflow && ['selected','changes_requested'].includes(task.workflow.review));

@@ -712,3 +712,34 @@ the session requires explicit reviewer-agent authorization, the question was
 sent, and no authorization was received. This is not represented as peer review.
 The next step is that independent review and any evidence-backed corrections,
 not an architecture expansion or real provider integration.
+
+### Three P2 fixes and bounded verification, 2026-10-15
+
+The independent read-only review was completed after `ca8d9e3`. Its three
+confirmed P2 findings are addressed in this local follow-up: recursive credential
+checks before serialization, restricted credential-output cleanup only after
+proven group closure, and evidence of explicit source command permission.
+The requested archive-rename fault test and pre-promotion stale-fence test were
+also added. No further reviewer-agent or architecture expansion was authorized
+or used. See [workflow-supervision-p2-fixes.md](workflow-supervision-p2-fixes.md)
+for implementation, complete test results and limitations.
+
+Five unchanged focused suites returned **62/62, 62/62, 62/62, 62/62, 61/62**.
+The last run exposed `validated stale run...` receiving `Only validated attempts
+can be promoted` instead of the expected `Stale`. The failure snapshot has an
+uncertain receipt with `owner_identity_mismatch`, manifest/output retained and
+no archive while the owning worker is alive. No assertion or timeout was weakened
+to pass it. The sequence stopped: **two full suites were not started** because
+the five-pass prerequisite failed. `npm run check` and Python AST checks passed.
+The earlier three supervisor-startup failures and their bounded confirmation are
+also preserved, without an invented root cause.
+
+**Trusted local rollout remains NO-GO** because verification is not stable.
+Arbitrary commands and network/provider adapters remain **NO-GO** under their
+previous conditions. Current collection remains on verified stable `4e568b7`;
+its LaunchAgent, installation and schedule bytes are unchanged. All 105 task #2
+files and seven runs are unchanged, as are the protected unstaged package files.
+Final fixture cleanup leaves no processes, jobs/plists, active locks, IPC or temp
+workspaces. The local fix commit contains source/tests/docs only; its hash and
+exact staged-diff evidence are recorded in the final verification/chat. No amend,
+push, PR, merge, deploy, release, publication or real adapter activation occurred.

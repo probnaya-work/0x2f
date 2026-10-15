@@ -6,7 +6,12 @@ const [base,id,optionsFile]=process.argv.slice(2),store=createStore(base);
 try {
   const task=await store.findTask(Number(id));
   const options=JSON.parse(await fs.readFile(optionsFile,'utf8'));
-  const result=await supervisedRun(store,task,options);
+  const result=await supervisedRun(store,task,options,{onState:async state=>{
+    if(options.holdPromotion && state.state==='validated'){
+      await store.writeJson(optionsFile+'.validated',{id:state.id});
+      while(!await store.exists(optionsFile+'.release'))await new Promise(resolve=>setTimeout(resolve,25));
+    }
+  }});
   await store.writeJson(optionsFile+'.result',{state:result.state,id:result.id});
   setInterval(()=>{},1000);
 } catch { await store.writeJson(optionsFile+'.result',{state:'blocked'}); }

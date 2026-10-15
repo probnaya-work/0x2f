@@ -3,7 +3,7 @@ import { durableWrite, readBounded } from '../core/durable.mjs';
 import { archiveArtifacts } from '../core/workflow-artifacts.mjs';
 import { schema, validateReceipt, parseWorkflowJson } from '../core/workflow-schema.mjs';
 import { validatePublicRecord, validateSourceCheckpoint } from './editorial-schema.mjs';
-import { rejectCredentials, verifyExecutable } from '../core/workflow-adapters.mjs';
+import { rejectCredentials, verifyExecutable, writeCredentialJson } from '../core/workflow-adapters.mjs';
 import { crashPoint } from '../core/faults.mjs';
 import { randomUUID } from 'node:crypto';
 import { readSourceFile } from '../core/workflow-sources.mjs';
@@ -101,6 +101,7 @@ function renderTemplate(template, topic, date) {
 }
 
 async function prepareVisual({ topic, def, dir, signal, store, date, task, onEvent }) {
+  const writeJson = (file,value) => writeCredentialJson(store,file,value,def);
   const final = path.join(dir, 'visual.png');
   const receipt = path.join(dir, 'visual-receipt.json');
   const visualKey = digest(JSON.stringify({ visual: topic.visual, title: topic.title, date, settings: def.visual }));
@@ -125,7 +126,7 @@ async function prepareVisual({ topic, def, dir, signal, store, date, task, onEve
       if (def.maxAdapterCalls !== 1) throw new Error('Image adapters require maxAdapterCalls:1.');
       await verifyExecutable(def.adapterPins?.image);
       const operationId = randomUUID();
-      await store.writeJson(attempt, { schemaVersion: 1, operationId, state: 'pending', key: visualKey, at: new Date().toISOString() });
+      await writeJson(attempt, { schemaVersion: 1, operationId, state: 'pending', key: visualKey, at: new Date().toISOString() });
       crashPoint('external.intent-durable');
       try {
         const argv = generator.argv.map(arg => arg.replaceAll('{output}', '{outputDir}/generated.png').replaceAll('{prompt}', visual.prompt));
@@ -134,9 +135,9 @@ async function prepareVisual({ topic, def, dir, signal, store, date, task, onEve
         const assetBytes = rejectCredentials(await readBounded(asset, 64_000_000), def);
         await durableWrite(asset, assetBytes);
         crashPoint('external.output-durable');
-        await store.writeJson(attempt, { schemaVersion: 1, operationId, state: 'complete', sha256: digest(assetBytes), key: visualKey, at: new Date().toISOString() });
+        await writeJson(attempt, { schemaVersion: 1, operationId, state: 'complete', sha256: digest(assetBytes), key: visualKey, at: new Date().toISOString() });
       } catch (error) {
-        await store.writeJson(attempt, { schemaVersion: 1, operationId, state: 'failed', key: visualKey, error: error.message });
+        await writeJson(attempt, { schemaVersion: 1, operationId, state: 'failed', key: visualKey, error: error.message });
         throw error;
       }
     }
@@ -154,12 +155,13 @@ async function prepareVisual({ topic, def, dir, signal, store, date, task, onEve
   }
   if (!['diagram', 'image'].includes(visual.kind)) return { complete: false, reason: visual.reason ?? 'No factual visual source configured.' };
   const spec = { ...def.visual, title: topic.title, date, status: topic.status, visual, output: final };
-  await store.writeJson(path.join(dir, 'visual-spec.json'), spec);
+  await writeJson(path.join(dir, 'visual-spec.json'), spec);
   {
     // Every output-producing process uses the same boundary, including the built-in compositor.
     const inputSpec={...spec,output:'{outputDir}/visual.png',visual:{...visual}};
     const inputs={};
     if(visual.kind==='image'){inputs['source.png']=await readBounded(visual.file,64_000_000);inputSpec.visual.file='{inputDir}/source.png';}
+    rejectCredentials(inputSpec,def);
     inputs['spec.json']=JSON.stringify(inputSpec);
     const external=await supervisedRun(store,task,{operationId:`visual-${task.runs.at(-1).run}-${visualKey}`,argv:[def.adapters.python,new URL('./visual.py',import.meta.url).pathname,'{inputDir}/spec.json'],pin:def.adapterPins.python,policy:def.adapters.supervision,outputs:['visual.png'],outputRules:{'visual.png':{kind:'png',width:def.visual.width??1200,height:def.visual.height??630}},inputs,timeoutMs:def.maxDurationMs,testCrashAt:process.env.WORKFLOW_TEST_RUNNER_CRASH_AT},{signal,onState:a=>onEvent({type:'progress',text:`External attempt ${a.id.slice(0,12)}: ${a.state}.`})});
     await durableWrite(final,await readBounded(path.join(external.directory,'visual.png'),64_000_000));
@@ -169,12 +171,15 @@ async function prepareVisual({ topic, def, dir, signal, store, date, task, onEve
   const width = def.visual.width ?? 1200, height = def.visual.height ?? 630;
   if (png.length < 24 || !png.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) || png.readUInt32BE(16) !== width || png.readUInt32BE(20) !== height) throw new Error(`Visual adapter produced an invalid ${width}x${height} PNG.`);
   const record = { schemaVersion: 1, key: visualKey, sha256: digest(png), kind: visual.kind, synthetic: Boolean(visual.synthetic), width, height };
-  await store.writeJson(receipt, record);
+  await writeJson(receipt, record);
   return { complete: true, file: final, ...record };
 }
 
 export async function runEditorial({ task, store, signal, onEvent }) {
   const def = task.workflow.definition;
+  rejectCredentials(task.workflow,def);
+  const writeJson = (file,value) => writeCredentialJson(store,file,value,def);
+  const writeText = (file,value) => store.writeText(file,rejectCredentials(value,def));
   if (def.permissions.externalChanges !== false) throw new Error('External changes are disabled for editorial.');
   const dir = path.join(store.taskDir(task.slug), 'artifacts', 'editorial');
   await fs.mkdir(dir, { recursive: true, mode: 0o700 });
@@ -190,7 +195,7 @@ export async function runEditorial({ task, store, signal, onEvent }) {
       if (await store.exists(p)) prior.push(validateSourceCheckpoint(await store.readJson(p)));
     }
     source = await collect(def, prior, signal);
-    await store.writeJson(sourceFile, source);
+    await writeJson(sourceFile, source);
   }
   signal.throwIfAborted();
   const date = localParts(new Date(task.createdAt)).date;
@@ -201,7 +206,7 @@ export async function runEditorial({ task, store, signal, onEvent }) {
   });
   if (!topics.length) {
     const result = 'No material: no new substantive changes in the configured sources and lookback window. Previously proposed topics were excluded.\n' + source.warnings.map(w => `Warning: ${w}\n`).join('');
-    await store.writeText(path.join(dir, 'review.md'), result);
+    await writeText(path.join(dir, 'review.md'), result);
     return { status: 'ready', result };
   }
   const selected = task.workflow.selected ?? (def.previewFirstTopic ? 1 : undefined);
@@ -211,7 +216,7 @@ export async function runEditorial({ task, store, signal, onEvent }) {
   if (selected) {
     await onEvent({ type: 'progress', text: `Preparing local visual for topic ${selected}.` });
     visual = await prepareVisual({ topic: topics[selected - 1], def, dir, signal, store, date, task, onEvent });
-    await store.writeText(path.join(dir, 'personal-repost.txt'), `A recent piece of work at PROBNAYA: ${topics[selected - 1].title.toLowerCase()}.\n${topics[selected - 1].description}\n${topics[selected - 1].link}\n`);
+    await writeText(path.join(dir, 'personal-repost.txt'), `A recent piece of work at PROBNAYA: ${topics[selected - 1].title.toLowerCase()}.\n${topics[selected - 1].description}\n${topics[selected - 1].link}\n`);
   }
   const corrections = (await store.listTasks()).filter(t => t.workflow?.id === task.workflow.id).flatMap(t => t.workflow.decisions ?? []);
   const packageRecord = { schemaVersion: 1, workflow: task.workflow.id, version: task.workflow.version, definitionDigest: def.digest, date, topics, selected: selected ?? null, selectionOrigin, visual,
@@ -220,14 +225,14 @@ export async function runEditorial({ task, store, signal, onEvent }) {
     checks: { sourcesSaved: true, duplicateTopicsExcluded: true, publicStatusRequiresEvidence: true, observationContentsUnedited: true, externalChanges: false, monetaryCost: 'No paid adapter used for local diagrams; paid command adapters cannot enforce monetary budgets.' } };
   const { file: visualPath, ...visualContent } = visual;
   const packageDigest = digest(JSON.stringify({ topics, selected, visual: visualContent }));
-  await store.writeJson(path.join(dir, 'package.json'), { ...packageRecord, digest: packageDigest });
-  for (const topic of topics) await store.writeText(path.join(dir, `topic-${topic.number}.txt`), topic.post);
+  await writeJson(path.join(dir, 'package.json'), { ...packageRecord, digest: packageDigest });
+  for (const topic of topics) await writeText(path.join(dir, `topic-${topic.number}.txt`), topic.post);
   const run = task.runs.at(-1).run;
   const archiveDir = path.join(store.taskDir(task.slug), 'runs', String(run), 'artifacts', 'editorial');
   const question = `Review the package. Answer: select N, changes N <full replacement post>, accept, defer or reject. After selecting/changing, rerun this task. Record publication separately with published <https URL>.`;
   const result = `# PROBNAYA editorial / ${date}\n\nTemplate: ${def.templateProvenance}\n\n${topics.map(t => `## ${t.number}. ${t.title}\n\nProject status: ${t.status}\n\n${t.post}\nSource: ${t.link}\n`).join('\n')}\nSelected topic: ${selected ?? 'pending'} (${selectionOrigin})\n\nVisual: ${visual.complete ? path.join(archiveDir, 'visual.png') : visual.reason}\n\nPackage complete: ${packageRecord.complete}\n\nArtifacts: ${archiveDir}\n\nPublication remains a separate manual action.\n\n## Needs human decision\nREQUIRED: yes\nQUESTION: ${question}\n`;
-  await store.writeText(path.join(dir, 'review.md'), result);
-  await store.writeJson(path.join(dir, 'package.json'), { ...packageRecord, digest: packageDigest, visual: { ...visual, ...(visual.complete ? { file: path.join(archiveDir, 'visual.png') } : {}) } });
+  await writeText(path.join(dir, 'review.md'), result);
+  await writeJson(path.join(dir, 'package.json'), { ...packageRecord, digest: packageDigest, visual: { ...visual, ...(visual.complete ? { file: path.join(archiveDir, 'visual.png') } : {}) } });
   const artifacts = await archiveArtifacts(store, task, dir, run);
   crashPoint('result.artifacts-durable');
   return { workflowPatch: { topicKeys: topics.map(t => t.key), packageDigest, packageComplete: packageRecord.complete, ...artifacts }, status: 'needs_you', reason: 'decision', blockedOn: { type: 'decision', text: `${question}\n\n${result.split('## Needs human decision')[0]}` }, result };

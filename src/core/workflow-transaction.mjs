@@ -5,6 +5,7 @@ import { crashPoint } from './faults.mjs';
 import { schema, fields, validateTaskWorkflow } from './workflow-schema.mjs';
 import { verifyArtifacts } from './workflow-artifacts.mjs';
 import { workEvent } from './events.mjs';
+import { rejectCredentials } from './workflow-adapters.mjs';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 // Hold the workflow lock while checking this barrier and mutating state.
 // A pending operation owns its precondition and required files until explicit
@@ -25,6 +26,7 @@ export const operationPath = (store, task, id) => {
 // task.json is the commit point. A durable intent makes post-commit events
 // replayable; an intent never implies that an external operation can be retried.
 export async function commitWorkflow(store, before, next, { operationId = randomUUID(), kind, payload = {}, files = [], events = [] } = {}) {
+  rejectCredentials({before, next, operationId, kind, payload, files, events}, next.workflow?.definition ?? before.workflow?.definition);
   const file = operationPath(store, before, operationId);
   await assertNoPendingOperation(store, before, operationId);
   if (await store.exists(file)) {
@@ -38,11 +40,13 @@ export async function commitWorkflow(store, before, next, { operationId = random
   const op = { schemaVersion: 1, operationId, kind, payloadDigest: hash(payload), beforeDigest: hash(before), next, state: 'pending', at: new Date().toISOString(),
     required: files.map(f => ({ path: path.relative(store.taskDir(before.slug), f.path), sha256: createHash('sha256').update(f.bytes).digest('hex') })),
     events: events.map((e, i) => ({ ...workEvent(e.type, before.id, e.data), eventId: `${operationId}-${i}` })) };
+  rejectCredentials(op, next.workflow?.definition);
   await store.writeJson(file, op); crashPoint(`${kind}.intent-durable`);
   await replayWorkflowOperation(store, before, op, file);
   return store.findTask(before.id);
 }
 export async function replayWorkflowOperation(store, task, op, file = operationPath(store, task, op.operationId)) {
+  rejectCredentials(op, task.workflow?.definition);
   fields(op, ['operationId','kind','payloadDigest','beforeDigest','next','state','at','required','events','completedAt'], 'operation');
   if (!['pending','complete'].includes(op.state) || !['decision','result','rerun','refresh'].includes(op.kind) || !Array.isArray(op.required) || !Array.isArray(op.events) || op.next?.id !== task.id || op.next?.slug !== task.slug) throw new Error('Malformed workflow operation; recovery refused.');
   validateTaskWorkflow(op.next.workflow);
@@ -62,5 +66,7 @@ export async function replayWorkflowOperation(store, task, op, file = operationP
   if (!committed) { await store.writeJson(path.join(store.taskDir(task.slug), 'task.json'), op.next); crashPoint(`${op.kind}.state-durable`); }
   // The post-commit notification makes live surfaces reload the committed state.
   for (const event of op.events.filter(e => e.type === 'task.updated')) if (!ids.has(event.eventId)) await store.appendEvent(task.slug, event);
-  await store.writeJson(file, { ...op, state: 'complete', completedAt: new Date().toISOString() }); crashPoint(`${op.kind}.complete`);
+  const completed = { ...op, state: 'complete', completedAt: new Date().toISOString() };
+  rejectCredentials(completed, task.workflow?.definition);
+  await store.writeJson(file, completed); crashPoint(`${op.kind}.complete`);
 }

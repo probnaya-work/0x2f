@@ -21,7 +21,9 @@ const safeId = id => { if (!/^[a-z][a-z0-9-]{0,63}$/.test(id)) throw new WorkErr
 
 export async function readDefinition(store, id) {
   const dir = path.join(store.workDir(), 'workflows', safeId(id));
-  const definition = validateDefinition(await store.readJson(path.join(dir, 'workflow.json')));
+  const raw = await store.readJson(path.join(dir, 'workflow.json'));
+  rejectCredentials(raw, raw);
+  const definition = validateDefinition(raw);
   if (definition.id !== id) throw new WorkError('Workflow filename/id mismatch.');
   const kind = workflowKind(definition.kind);
   const materials = {};
@@ -33,9 +35,9 @@ export async function readDefinition(store, id) {
     try { materials[name] = (await readBounded(path.join(dir, name), 256_000)).toString('utf8'); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-  rejectCredentials(JSON.stringify(materials), definition);
+  rejectCredentials(materials, definition);
   const snapshot = { ...definition, schemaVersion: 1, materials, ...await kind.freezeSnapshot({ store, definition, materials }) };
-  rejectCredentials(JSON.stringify(snapshot), definition);
+  rejectCredentials(snapshot, definition);
   return { ...snapshot, digest: digest(JSON.stringify(snapshot)) };
 }
 
