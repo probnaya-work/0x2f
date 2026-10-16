@@ -141,6 +141,24 @@ test("text with no spaces at all still truncates safely (no word boundary to fin
   assert.equal(complete, false);
 });
 
+test("supplementary characters truncate to valid UTF-16 at odd and even boundaries", () => {
+  for (const prefix of ["x", "xx"]) {
+    const brief = prefix + "😀".repeat(60);
+    const { title, complete } = deriveTitle(brief);
+    assert.equal(title, prefix + "😀".repeat(39) + "…");
+    assert.ok(title.length <= TITLE_TARGET + 1, `${prefix.length}-unit prefix: got ${title.length}`);
+    assert.ok(title.endsWith("…"));
+    assert.ok(
+      [...title].every(character => {
+        const point = character.codePointAt(0);
+        return point < 0xD800 || point > 0xDFFF;
+      }),
+      `${prefix.length}-unit prefix produced an unpaired surrogate`
+    );
+    assert.equal(complete, false);
+  }
+});
+
 test("a CJK run with no spaces truncates without hanging or over-cutting", () => {
   const { title } = deriveTitle("これは日本語のテキストです".repeat(40));
   assert.ok(title.length <= TITLE_TARGET + 1);

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "milestone": "foreground playbook canary",
+  "verdict": "BLOCKED: one authorized attempt consumed by service capacity failure",
+  "branch": "feat/task-continuity",
+  "baseCommit": "00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+  "taskId": 1,
+  "briefTitle": "Fix invalid UTF-16 in truncated task titles.",
+  "harnessVersion": "codex-cli 0.149.1",
+  "observedModels": [
+    "gpt-5.6-sol"
+  ],
+  "modelResolution": "installed CLI default, no explicit model",
+  "routing": [
+    {
+      "provider": "codex",
+      "purpose": "implement",
+      "reason": "single_provider_budget",
+      "considered": [
+        {
+          "provider": "claude-code",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "codex",
+          "reason": "qualified"
+        },
+        {
+          "provider": "deepseek-harness",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "gemini",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "opencode",
+          "reason": "execution_unqualified"
+        }
+      ]
+    }
+  ],
+  "providerAttempts": 1,
+  "implementationAttempts": 1,
+  "taskRuns": 1,
+  "result": "Selected model is at capacity. Please try a different model.",
+  "sourceUnchanged": true,
+  "inputDigest": "decec5314f12308c4af67e272992e3822561b0a5b6aef9c052c372a655b8cfe2",
+  "artifactDigest": "e095566df6330c961c6472e8eea3005cf946dcc5836c1f41d75feda315006e22",
+  "taskUsage": {
+    "confirmed": null,
+    "estimated": {
+      "moneyMicros": null,
+      "tokens": null,
+      "modelCalls": null,
+      "providerCalls": null
+    },
+    "reported": null,
+    "uncertainty": "unconfirmed"
+  },
+  "partialSessionTelemetry": {
+    "input_tokens": 19944,
+    "cached_input_tokens": 11136,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 185,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 20129
+  },
+  "partialTelemetryIsFinalBillingEvidence": false,
+  "moneyUsage": "unknown",
+  "internalModelCalls": "unknown",
+  "deliveryPreviewCreated": false,
+  "deliveryGrantCreated": false,
+  "localCommitsCreated": 0,
+  "deliveryReceiptCreated": false,
+  "taskStatus": "needs_you",
+  "blockedOn": {
+    "type": "decision",
+    "code": "executor_failed",
+    "text": "Executor failure/decision is preserved; no automatic replay."
+  },
+  "sharedProjection": [
+    "PURPOSE IMPLEMENT \u00b7 EXECUTOR codex \u00b7 RUN 1",
+    "NEXT USER \u00b7 REASON EXECUTOR_FAILED",
+    "COST UNKNOWN \u00b7 reservation retained \u00b7 1 reserved",
+    "HANDOFF 2403 bytes \u00b7 history 3363 bytes",
+    "WORKSPACE <managed-worktree> \u00b7 ref 00ae2dc6e4d28d3b159f3cd18f245657fd4801ad \u00b7 task-owned worktree",
+    "ROUTING implement \u2192 codex \u00b7 single_provider_budget"
+  ],
+  "cliTuiWebProjectionEquivalent": true,
+  "boundedBlockerFix": {
+    "reason": "Existing playbook mandatory investigation consumed sole provider budget before implementation.",
+    "behavior": "Only foreground playbook with agentRuns=1 begins implementation directly. Deterministic verification/review and independent-review triggers remain enforced.",
+    "patchSha256": "f7c118db2279866d8c9876b37c018e4ac923e67aa774e974a0a61de4666af85f",
+    "testsPassed": 8,
+    "codeCommitted": false
+  },
+  "ordinaryFullSuiteRuns": 0,
+  "fullSuiteReason": "No final canary artifact: stopped at explicit attempt budget boundary; retain the single final suite for a completed candidate.",
+  "productionActivated": false,
+  "unattendedProviderRuns": 0,
+  "scheduledProviderRuns": 0,
+  "authorizedAttemptRemaining": 0,
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "javascriptFiles": 196,
+    "pythonFiles": 7,
+    "exitCodesChecked": true
+  }
+}

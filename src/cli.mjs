@@ -57,6 +57,7 @@ Commands:
   2f workflow repair <events|locks|staging|temps> [task-id]
   2f workflow agent <install|status|repair|uninstall>
   2f open <id> [--run <n>]
+  2f rerun <id> --foreground --retry-run <n>  explicitly grant one capacity retry
   2f rerun <id> [--provider <id>]   run the same task again as a new run
   2f note <id> <text>    record a constraint/correction on the task; the next
                           run's context includes it (no execution is started)
@@ -132,6 +133,8 @@ function parseFlags(args) {
       flags.light = true;
     } else if (arg === "--foreground") {
       flags.foreground = true;
+    } else if (arg === "--retry-run") {
+      flags.retryRun = Number(args[++i]);
     } else if (arg === "--digest") {
       flags.digest = args[++i];
     } else {
@@ -397,7 +400,7 @@ async function main() {
 
     const runtime = createRuntime(base);
     const task = await runtime.actions.rerunWork(id, {
-      provider: flags.provider, foreground: flags.foreground
+      provider: flags.provider, foreground: flags.foreground, retryRun: flags.retryRun
     });
     const runNumber = task.runs?.at(-1)?.run ?? 1;
 

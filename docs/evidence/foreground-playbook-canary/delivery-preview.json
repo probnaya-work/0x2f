@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "state": "needs_you",
+  "deliveryState": "proposed",
+  "scopeDigest": "ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+  "diffDigest": "837a95fea492e577b4bf0bb7d80ddede7018ab6e34a29f0156b6394d5da56f54",
+  "parent": "00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+  "tree": "c5b98cae47c44a1233e5df9a1e19e5718082a81e",
+  "message": "fix: preserve Unicode task titles when truncating",
+  "files": [
+    "src/core/title.mjs",
+    "test/title.test.mjs"
+  ],
+  "hooks": [],
+  "author": {
+    "name": "0x2F Local Canary",
+    "email": "canary@0x2f.invalid"
+  },
+  "projection": [
+    "PURPOSE REVIEW · EXECUTOR local-checks · RUN 4",
+    "NEXT PERMISSION · REASON LOCAL_REVIEW_CLEAR",
+    "COST UNKNOWN · reservation retained · 2 reserved",
+    "RESULT PATCH VERIFIED · 4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8",
+    "ARTIFACT runs/2/artifacts/manifest.json",
+    "REVIEW runs/4/review.json · 06f47b7763051224c3448fa398b230dcfd8e6dd1abe0dcef2f5a440004fe517f",
+    "HANDOFF 4131 bytes · history 15888 bytes",
+    "WORKSPACE <managed-worktree> · ref 00ae2dc6e4d28d3b159f3cd18f245657fd4801ad · task-owned worktree",
+    "ROUTING implement → codex · single_provider_budget",
+    "ROUTING implement → codex · user_authorized_capacity_continuation",
+    "LOCAL COMMIT PROPOSED · ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+    "REPOSITORY <disposable-repository> · WORKTREE <managed-worktree> · PARENT 00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+    "MESSAGE fix: preserve Unicode task titles when truncating",
+    "DIFF 837a95fea492e577b4bf0bb7d80ddede7018ab6e34a29f0156b6394d5da56f54"
+  ],
+  "cliTuiWebEquivalent": true,
+  "webApiStatus": 200,
+  "tuiActionCarriesExactDigest": true,
+  "providerAttempts": 2,
+  "commitCreated": false,
+  "receiptCreated": false
+}

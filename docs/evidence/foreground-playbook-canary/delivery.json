@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "state": "ready",
+  "deliveryState": "committed",
+  "commit": "7beadd3b12f2ce45534dba0ba41841de3aa1b718",
+  "parent": "00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+  "tree": "c5b98cae47c44a1233e5df9a1e19e5718082a81e",
+  "commitsSinceParent": 1,
+  "scopeDigest": "ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+  "operationId": "e13305e1-b6ed-4457-aa07-1e6e5b98f42e",
+  "intentDigest": "ca8b5d38ca6ccd487d58f71b8bf7dab0c10449ef9c951b14fabd04c83f3f1651",
+  "receiptRef": {
+    "path": "delivery/ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125/receipt.json",
+    "digest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b"
+  },
+  "receiptVerified": true,
+  "grantConsumed": true,
+  "commitBytesMatchDurableIntent": true,
+  "diffMatchesGrantedPreview": true,
+  "exactApprovedPaths": [
+    "src/core/title.mjs",
+    "test/title.test.mjs"
+  ],
+  "reachableFromHead": true,
+  "cleanWorktree": true,
+  "acceptedArtifactStillValid": true,
+  "providerAttempts": 2,
+  "providerCallsAfterUserDelivery": 0,
+  "deliveryEffectRetried": false,
+  "receipt": {
+    "schemaVersion": 1,
+    "capability": "git.localCommit",
+    "scopeDigest": "ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+    "operationId": "e13305e1-b6ed-4457-aa07-1e6e5b98f42e",
+    "intentDigest": "ca8b5d38ca6ccd487d58f71b8bf7dab0c10449ef9c951b14fabd04c83f3f1651",
+    "grant": {
+      "scopeDigest": "ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+      "at": "2026-10-16T12:46:04.365Z",
+      "author": "user"
+    },
+    "consumedAt": "2026-10-16T12:46:04.796Z",
+    "taskId": 1,
+    "artifact": {
+      "path": "runs/2/artifacts/manifest.json",
+      "digest": "5afa154dd5c55d3cf124e58aecdc57346c4865f275d8101e83ba20b3d6ca3a3e",
+      "contentDigest": "4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8"
+    },
+    "repository": "<disposable-repository>",
+    "worktree": "<managed-worktree>",
+    "parent": "00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+    "tree": "c5b98cae47c44a1233e5df9a1e19e5718082a81e",
+    "diffDigest": "837a95fea492e577b4bf0bb7d80ddede7018ab6e34a29f0156b6394d5da56f54",
+    "message": "fix: preserve Unicode task titles when truncating",
+    "hooks": [],
+    "commit": "7beadd3b12f2ce45534dba0ba41841de3aa1b718",
+    "at": "2026-10-16T12:46:05.106Z"
+  },
+  "projection": [
+    "PURPOSE REVIEW · EXECUTOR local-checks · RUN 4",
+    "NEXT ACCEPT · REASON LOCAL_REVIEW_CLEAR",
+    "COST UNKNOWN · reservation retained · 2 reserved",
+    "RESULT PATCH VERIFIED · 4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8",
+    "ARTIFACT runs/2/artifacts/manifest.json",
+    "REVIEW runs/4/review.json · 06f47b7763051224c3448fa398b230dcfd8e6dd1abe0dcef2f5a440004fe517f",
+    "HANDOFF 4131 bytes · history 15888 bytes",
+    "WORKSPACE <managed-worktree> · ref 00ae2dc6e4d28d3b159f3cd18f245657fd4801ad · task-owned worktree",
+    "ROUTING implement → codex · single_provider_budget",
+    "ROUTING implement → codex · user_authorized_capacity_continuation",
+    "LOCAL COMMIT COMMITTED · ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125",
+    "REPOSITORY <disposable-repository> · WORKTREE <managed-worktree> · PARENT 00ae2dc6e4d28d3b159f3cd18f245657fd4801ad",
+    "MESSAGE fix: preserve Unicode task titles when truncating",
+    "DIFF 837a95fea492e577b4bf0bb7d80ddede7018ab6e34a29f0156b6394d5da56f54",
+    "COMMIT 7beadd3b12f2ce45534dba0ba41841de3aa1b718 · RECEIPT delivery/ab32e4abfd1b1f97de1c11397fd8070f86a1938ba977f3059461e11361fbc125/receipt.json"
+  ],
+  "cliTuiWebEquivalent": true,
+  "webApiStatus": 200
+}

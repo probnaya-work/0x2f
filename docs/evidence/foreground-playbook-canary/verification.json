@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "combinedDevelopmentPatchSha256": "0b973901bcd9847ae597e35e420a102c8f1da2689052ab6a5cb93e86cac3c377",
+  "realTaskArtifactDigest": "4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8",
+  "taskVerificationTests": 114,
+  "taskVerificationExit": 0,
+  "taskVerificationPreservedSource": true,
+  "reviewMode": "deterministic-policy",
+  "foregroundTargetedTests": 15,
+  "postGrantNoteTargetedTests": 2,
+  "ordinaryFullSuite": {
+    "command": "OX2F_NATIVE_LAUNCHD=0 npm test",
+    "runs": 1,
+    "exitCode": 0,
+    "scope": "Combined uncommitted development candidate: runtime blockers plus byte-identical real task patch",
+    "result": {
+      "tests": 895,
+      "pass": 776,
+      "fail": 0,
+      "skipped": 119,
+      "cancelled": 0,
+      "duration_ms": 79738.615958
+    }
+  },
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "javascriptFiles": 196,
+    "pythonFiles": 7,
+    "allExitCodesChecked": true
+  },
+  "runtimeCodeUnchangedAfterFullSuite": true,
+  "uiProjection": {
+    "realCliOpen": true,
+    "realLoopbackApiStatus": 200,
+    "tuiModelAndPrimaryAction": true,
+    "identicalWorkflowLines": true,
+    "exactDigestInPermission": true,
+    "nativeBrowserOrPtyCanaryUiRun": false
+  },
+  "nativeSuiteRuns": 0,
+  "deliveryCommitCount": 1,
+  "deliveryReceiptCount": 1,
+  "additionalProviderAttemptsAuthorizedRemaining": 0,
+  "deliveryCommit": "7beadd3b12f2ce45534dba0ba41841de3aa1b718",
+  "deliveryReceiptDigest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+  "deliveryEffectRepeated": false,
+  "finalTaskStatus": "ready",
+  "finalDeliveryState": "committed",
+  "postDeliveryProof": {
+    "receiptIntentGrantDiffVerified": true,
+    "commitsSinceParent": 1,
+    "cleanManagedWorktree": true,
+    "acceptedArtifactStillValid": true,
+    "realCliTuiWebProjectionEquivalent": true,
+    "webApiStatus": 200
+  },
+  "ordinaryFullSuiteRepeatedAfterDelivery": false
+}

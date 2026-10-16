@@ -94,7 +94,8 @@ export function normalizeBrief(brief) {
 function cutAtWord(text, max) {
   const slice = text.slice(0, max);
   const space = slice.lastIndexOf(" ");
-  const cut = space >= MIN_WORD_CUT ? slice.slice(0, space) : slice;
+  let cut = space >= MIN_WORD_CUT ? slice.slice(0, space) : slice;
+  if (/[\uD800-\uDBFF]$/.test(cut)) cut = cut.slice(0, -1);
   return cut.replace(/[\s,;:—-]+$/, "") + "…";
 }
 

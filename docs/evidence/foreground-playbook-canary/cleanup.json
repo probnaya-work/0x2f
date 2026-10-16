@@ -1,0 +1,12 @@
+{
+  "fixtureAgentFiles": 0,
+  "loadedFixtureAgents": [],
+  "nativeSuiteRuns": 0,
+  "deliveryFixtureRepositoriesRemaining": 0,
+  "canaryWorkersRemaining": [],
+  "canaryTaskLockOwnersRemaining": 0,
+  "historicalArtifactsRemoved": false,
+  "canaryRetainedForAudit": true,
+  "finalProjectionServerClosed": true,
+  "taskLockOwnersAfterDelivery": 0
+}

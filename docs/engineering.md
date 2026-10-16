@@ -26,6 +26,19 @@ no-change diagnosis verifies without implementation. A saved purpose boundary
 can resume the same task with `2f rerun <id> [--foreground]`; ambiguous dispatch,
 exhausted limits and changed source require a user decision, never blind replay.
 
+A foreground playbook with `agentRuns: 1` starts implementation directly: the
+executor investigates within its one patch attempt, then local verification and
+the existing review policy decide readiness. Sensitive paths still require the
+independent review boundary; a one-call budget cannot bypass that requirement.
+
+After a completed foreground capacity failure with unchanged source, an explicit
+user authorization can use `2f rerun <id> --foreground --retry-run <failed-run>`.
+This narrow continuation verifies the original handoff/outcome/artifact and live
+workspace, records the user decision, retains failed history and unknown usage,
+and adds exactly one provider/implementation attempt. It refuses uncertain,
+changed, mismatched or already-consumed runs. This is not an automatic retry or a
+delivery grant; ordinary rerun still cannot bypass exhausted limits.
+
 Sensitive paths or `requireReview: true` trigger a fresh-context reviewer. Optional
 `reviewProviders` is workspace policy, not a per-task model picker. Review receives
 the approved scope, immutable before/after snapshots and check receipts, without

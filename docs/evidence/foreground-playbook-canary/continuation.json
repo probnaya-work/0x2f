@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "state": "ready",
+  "providerAttemptsTotal": 2,
+  "providerAttemptsThisAuthorization": 1,
+  "runs": [
+    {
+      "run": 1,
+      "purpose": "implement",
+      "provider": "codex",
+      "outcome": "failed"
+    },
+    {
+      "run": 2,
+      "purpose": "implement",
+      "provider": "codex",
+      "outcome": "ready"
+    },
+    {
+      "run": 3,
+      "purpose": "verify",
+      "provider": "local-checks",
+      "outcome": "ready"
+    },
+    {
+      "run": 4,
+      "purpose": "review",
+      "provider": "local-checks",
+      "outcome": "ready"
+    }
+  ],
+  "harnessVersion": "codex-cli 0.149.1",
+  "models": [
+    "gpt-5.6-sol"
+  ],
+  "routing": [
+    {
+      "purpose": "implement",
+      "provider": "codex",
+      "reason": "single_provider_budget",
+      "considered": [
+        {
+          "provider": "claude-code",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "codex",
+          "reason": "qualified"
+        },
+        {
+          "provider": "deepseek-harness",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "gemini",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "opencode",
+          "reason": "execution_unqualified"
+        }
+      ]
+    },
+    {
+      "purpose": "implement",
+      "provider": "codex",
+      "reason": "user_authorized_capacity_continuation",
+      "considered": [
+        {
+          "provider": "codex",
+          "reason": "qualified"
+        },
+        {
+          "provider": "claude-code",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "deepseek-harness",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "gemini",
+          "reason": "execution_unqualified"
+        },
+        {
+          "provider": "opencode",
+          "reason": "execution_unqualified"
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "successfulRun": {
+      "confirmed": {
+        "tokens": 241512
+      },
+      "estimated": {
+        "moneyMicros": null,
+        "tokens": null,
+        "modelCalls": null,
+        "providerCalls": null
+      },
+      "reported": {
+        "input_tokens": 239563,
+        "cached_input_tokens": 214016,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1949,
+        "reasoning_output_tokens": 479
+      },
+      "uncertainty": "unconfirmed"
+    },
+    "partialSessionTelemetry": {
+      "input_tokens": 239563,
+      "cached_input_tokens": 214016,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 1949,
+      "reasoning_output_tokens": 479,
+      "total_tokens": 241512
+    },
+    "failedRunUsageRetained": {
+      "confirmed": null,
+      "estimated": {
+        "moneyMicros": null,
+        "tokens": null,
+        "modelCalls": null,
+        "providerCalls": null
+      },
+      "reported": null,
+      "uncertainty": "unconfirmed"
+    },
+    "monetaryCost": "unknown",
+    "internalModelCalls": "unknown"
+  },
+  "handoff": {
+    "digest": "6161681bce4cbca859403e94601b15b4d029ef9f314d526eb983742f46afb6c9",
+    "bytes": 3041,
+    "fullHistoryBytes": 4039,
+    "priorFailureOnly": {
+      "path": "runs/1/result.md",
+      "digest": "3076d430426648312741c2d400cfe33e8d4d9034224153bc347432151d5ad527",
+      "encoding": "text"
+    }
+  },
+  "artifact": {
+    "path": "runs/2/artifacts/manifest.json",
+    "digest": "5afa154dd5c55d3cf124e58aecdc57346c4865f275d8101e83ba20b3d6ca3a3e",
+    "contentDigest": "4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8"
+  },
+  "verification": {
+    "argv": [
+      "<pinned-node>",
+      "<private-canary-check>"
+    ],
+    "cwd": "<managed-worktree>",
+    "code": 0,
+    "error": null,
+    "sourceUnchanged": true,
+    "outputDigest": "25fa13b1ad371df7713566748589b35e339f535fbcf8706bcff905a5818bcfa1",
+    "testsPassed": 114,
+    "additionalUnicodeRegressionPassed": true
+  },
+  "review": {
+    "schemaVersion": 1,
+    "run": 4,
+    "artifact": {
+      "path": "runs/2/artifacts/manifest.json",
+      "digest": "5afa154dd5c55d3cf124e58aecdc57346c4865f275d8101e83ba20b3d6ca3a3e",
+      "contentDigest": "4d5ac0e3a106840e513c2b61901aacb78142c53a66a7dee7ac87edd0e7f401b8"
+    },
+    "verification": {
+      "path": "runs/3/verification.json",
+      "digest": "294f612dd262f99686f0bbf6094d9e8374ef58ae494851e8f838ed8bdb7eb260"
+    },
+    "mode": "deterministic-policy",
+    "findings": [],
+    "reason": "Approved paths and exact verification passed; no independent-review trigger."
+  },
+  "deliveryCommit": null,
+  "deliveryReceipt": null
+}

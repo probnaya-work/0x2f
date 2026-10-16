@@ -25,7 +25,11 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
   let task = await mutate(store, slug, token, t => {
     if (t.status !== 'working' || t.engineering.driver.state !== 'pending') return null;
     claimed = true;
-    return { ...t, pid: process.pid, engineering: { ...t.engineering, ...(foreground ? { trustClass } : {}), driver: { token, state: 'running', pid: process.pid } } };
+    // A foreground budget of one provider run must spend it on the patch.
+    // Investigation can happen inside implementation; exact checks and the
+    // existing risk-triggered review boundary still decide readiness.
+    const direct = foreground && t.engineering.config.limits.agentRuns === 1 && t.engineering.playbook.agentRuns === 0 && t.engineering.playbook.nextPurpose === 'investigate' && !t.engineering.playbook.dispatch;
+    return { ...t, pid: process.pid, engineering: { ...t.engineering, ...(foreground ? { trustClass } : {}), ...(direct ? { playbook: { ...t.engineering.playbook, nextPurpose: 'implement', reason: 'single_provider_budget' } } : {}), driver: { token, state: 'running', pid: process.pid } } };
   });
   if (!claimed) return task;
   const config = task.engineering.config;
@@ -208,7 +212,36 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
   } catch (error) { return stop('execution_uncertain', `${error.message} No automatic replay.`); }
 }
 
+// Explicit user retry of one *completed*, unchanged capacity failure. This is
+// deliberately narrower than recovery of uncertain execution or generic retry.
+export async function prepareCapacityContinuation(ctx, task, { foreground, retryRun } = {}) {
+  if (foreground !== true || !Number.isInteger(retryRun) || retryRun < 1) throw new Error('Capacity continuation requires an explicit foreground failed-run grant.');
+  return mutate(ctx.store, task.slug, task.engineering.driver.token, async t => {
+    const s=t.engineering.playbook, last=t.runs.at(-1), limits=t.engineering.config.limits;
+    if (t.status!=='needs_you' || t.blockedOn?.code!=='executor_failed' || t.engineering.trustClass!=='foreground-subscription' || t.engineering.delivery || last?.run!==retryRun || last.outcome!=='failed' || !last.completedAt || !['implement','fix'].includes(last.purpose) || !s?.dispatch || s.dispatch.run!==retryRun || last.capacityContinuation) throw new Error('No matching completed capacity failure; uncertain/consumed boundaries cannot continue.');
+    const root=ctx.store.taskDir(t.slug);
+    const handoff=await ctx.store.readJson(path.join(root,last.handoff.path));
+    const outcome=await ctx.store.readJson(path.join(root,last.outcomeRef.path));
+    const message=(await readBounded(path.join(root,'runs',String(retryRun),'result.md'),16000)).toString().trim();
+    if (message!=='Selected model is at capacity. Please try a different model.' || hash(handoff.content)!==last.handoff.digest || handoff.digest!==last.handoff.digest || s.dispatch.input!==handoff.digest || handoff.content.intentDigest!==engineeringIntent(t) || hash(outcome)!==last.outcomeRef.digest || outcome.status!=='failed' || hash(outcome.artifact)!==hash(last.artifact) || outcome.artifact.contentDigest!==handoff.content.refs.source.contentDigest) throw new Error('Capacity failure evidence is missing, changed or includes effects.');
+    await assertEngineeringWorkspace(ctx.store,t,retryRun);
+    await verifyArtifact(ctx.store,t,handoff.content.refs.source);
+    await verifyArtifact(ctx.store,t,last.artifact);
+    if ((await inventory(engineeringDirectory(ctx.store,t))).digest!==last.artifact.contentDigest) throw new Error('Workspace changed after the failed capacity run.');
+    if (limits.agentRuns!==s.agentRuns || limits.implementationAttempts!==s.implementationAttempts || limits.agentRuns>=10 || limits.implementationAttempts>=3) throw new Error('Capacity continuation requires exhausted bounded attempts and room for one explicit increment.');
+    const nextLimits={...limits,agentRuns:limits.agentRuns+1,implementationAttempts:limits.implementationAttempts+1,modelCalls:limits.modelCalls+1,providerCalls:limits.providerCalls+1};
+    const config={...t.engineering.config,limits:nextLimits},token=randomUUID();
+    const grant={author:'user',at:new Date().toISOString(),reason:'one_additional_foreground_attempt_after_capacity',run:retryRun,priorDispatch:s.dispatch,sourceDigest:last.artifact.contentDigest,limitsBefore:limits,limitsAfter:nextLimits};
+    return {...t,status:'working',blockedOn:undefined,context:{...(t.context??{}),notes:[...(t.context?.notes??[]),{at:grant.at,text:`User authorized exactly one additional foreground attempt after capacity failure in run ${retryRun}. Delivery still requires a separate exact grant.`}]},runs:t.runs.map(r=>r.run===retryRun?{...r,capacityContinuation:grant}:r),execution:{...t.execution,launchToken:token},engineering:{...t.engineering,config,configDigest:hash(config),budget:{...t.engineering.budget,limits:nextLimits},driver:{token,state:'pending'},playbook:{...s,dispatch:null,nextPurpose:last.purpose,reason:'user_authorized_capacity_continuation',sourceDigest:last.artifact.contentDigest,executorFailure:{run:retryRun,provider:last.provider,reason:'capacity',resultRef:`runs/${retryRun}/result.md`,resultDigest:hash(await readBounded(path.join(root,'runs',String(retryRun),'result.md'),16000))}}}};
+  });
+}
+
 export async function resumeEngineeringPlaybook(ctx, task, options = {}) {
+  if (options.retryRun !== undefined) {
+    const next = await prepareCapacityContinuation(ctx,task,options);
+    await ctx.store.appendEvent(task.slug,workEvent('task.answered',task.id,{run:options.retryRun,answer:'User authorized exactly one additional foreground attempt after the completed capacity failure.',additionalAttempts:1}));
+    return (await import('./engineering-foreground.mjs')).runForegroundEngineering(ctx,next);
+  }
   const s = task.engineering.playbook;
   if (!s || !['paused_boundary', 'review_required'].includes(task.blockedOn?.code) || s.dispatch) throw new Error('Engineering task has no safe completed boundary to resume; uncertain calls and exhausted limits cannot be replayed.');
   const token = randomUUID();

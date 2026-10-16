@@ -59,3 +59,44 @@ test('single-attempt foreground implementation verifies without requiring comple
   assert.equal(task.status,'ready',task.blockedOn?.text); assert.deepEqual(task.runs.map(r=>r.purpose),['implement','verify']);
   assert.equal(task.engineering.budget.reservations[0].maximum.moneyMicros,null);
 });
+
+
+for (const mode of ['foreground', 'unattended', 'required-review']) test(`one-run playbook budget: ${mode} preserves execution/review boundaries`, async t => {
+  const f = await playbookFixture(t, { config: { limits: { moneyMicros:0,tokens:0,modelCalls:0,providerCalls:0,wallClockMs:30000,implementationAttempts:1,investigationAttempts:1,reviewCycles:0,agentRuns:1 }, ...(mode==='required-review'?{requireReview:true}:{}) } });
+  const foreground = mode!=='unattended';
+  const task = await runEngineeringTask({ ...f.args, ...(foreground?{trustClass:'foreground-subscription'}:{}), qualify: p => ({ maximum:{moneyMicros:0,tokens:0,modelCalls:0,providerCalls:0}, ...(foreground?{trustClass:'foreground-subscription'}:{}), execute: input => p.start(input) }) });
+  assert.equal(f.calls.length,1);
+  if (mode==='foreground') {
+    assert.equal(task.status,'ready',task.blockedOn?.text);
+    assert.deepEqual(task.runs.map(r=>r.purpose),['implement','verify','review']);
+    assert.equal(task.runs.at(-1).review.mode,'deterministic-policy');
+    assert.equal(task.engineering.decisions[0].reason,'single_provider_budget');
+    assert.equal(task.engineering.playbook.diagnosis,undefined);
+  } else {
+    assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'agent_run_limit');
+    assert.equal(f.calls[0].purpose,foreground?'implement':'investigate');
+    assert.equal(task.engineering.playbook.review,undefined);
+  }
+});
+
+for (const mode of ['valid','drift','wrong-run','missing-outcome','different-failure','no-foreground','concurrent']) test(`explicit capacity continuation: ${mode}`,async t=>{
+  const {prepareCapacityContinuation}=await import('../src/core/engineering-playbook.mjs');
+  const f=await playbookFixture(t,{config:{limits:{moneyMicros:0,tokens:0,modelCalls:1,providerCalls:1,wallClockMs:30000,implementationAttempts:1,investigationAttempts:1,reviewCycles:0,agentRuns:1}},execute:async()=>({status:'failed',error:mode==='different-failure'?'Unknown execution outcome':'Selected model is at capacity. Please try a different model.'})});
+  const stopped=await runEngineeringTask({...f.args,trustClass:'foreground-subscription',qualify:p=>({trustClass:'foreground-subscription',execute:input=>p.start(input)})});
+  assert.equal(stopped.blockedOn.code,'executor_failed');
+  const ctx={store:f.runtime.store};const opts={foreground:mode!=='no-foreground',retryRun:mode==='wrong-run'?2:1};
+  if(mode==='drift')await fs.writeFile(path.join(f.base,f.source),validParser);
+  if(mode==='missing-outcome')await fs.rm(path.join(f.runtime.store.taskDir(stopped.slug),stopped.runs[0].outcomeRef.path));
+  if(['valid','concurrent'].includes(mode)) {
+    const attempts=await Promise.allSettled(Array.from({length:mode==='concurrent'?2:1},()=>prepareCapacityContinuation(ctx,stopped,opts)));
+    assert.equal(attempts.filter(r=>r.status==='fulfilled').length,1);
+    const next=attempts.find(r=>r.status==='fulfilled').value;
+    assert.equal(next.id,stopped.id);assert.equal(next.engineering.playbook.agentRuns,1);assert.equal(next.engineering.playbook.dispatch,null);
+    assert.equal(next.engineering.config.limits.agentRuns,2);assert.equal(next.engineering.config.limits.implementationAttempts,2);
+    assert.deepEqual(next.engineering.budget.uncertain,stopped.engineering.budget.uncertain);
+    assert.deepEqual(next.runs[0].capacityContinuation.priorDispatch,stopped.engineering.playbook.dispatch);
+    assert.equal(next.runs[0].outcome,'failed');assert.equal(next.engineering.playbook.reason,'user_authorized_capacity_continuation');
+    await assert.rejects(prepareCapacityContinuation(ctx,next,opts),/completed capacity|Stale/);
+  } else await assert.rejects(prepareCapacityContinuation(ctx,stopped,opts));
+  assert.equal(f.calls.length,1,'preparation cannot execute a provider');
+});
