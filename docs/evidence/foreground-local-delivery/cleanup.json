@@ -1,0 +1,17 @@
+{
+  "ordinaryAgentFilesUnchanged": true,
+  "fixtureAgentFiles": 0,
+  "loadedFixtureAgents": [],
+  "launchctlListExit": 0,
+  "deliveryTemporaryRepositoriesRemaining": [],
+  "supervisionSocketsRemaining": 0,
+  "foregroundDriverObservedAlive": false,
+  "foregroundLockOwnersRemaining": [],
+  "foregroundTaskStatus": "ready",
+  "retainedSmokeWorkspace": "private second-smoke evidence; no active driver",
+  "developmentWorktreeRetained": true,
+  "foreignOrHistoricalArtifactsDeleted": false,
+  "recentNativeFixtureDirectories": [],
+  "emptyFixtureDirectoriesRemoved": 1,
+  "emptyFixtureCleanupReason": "Empty fixture left by the first failing opt-in regression; exact observed name, owner and empty-directory check; rmdir only."
+}

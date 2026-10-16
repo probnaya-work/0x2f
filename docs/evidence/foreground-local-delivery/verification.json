@@ -1,0 +1,77 @@
+{
+  "implementationCommit": "23b96e158cc311f78ed4d95e966e67698d175a0d",
+  "unchangedFullSuiteRuns": 1,
+  "fullSuite": {
+    "command": "npm test",
+    "exit": 0,
+    "tests": 867,
+    "pass": 748,
+    "fail": 0,
+    "skip": 119,
+    "skipReason": "native launchd integration explicitly opted out",
+    "durationMs": 64413.371333
+  },
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "javascriptFiles": 192,
+    "pythonFiles": 7,
+    "allSyntaxExitCodesChecked": true
+  },
+  "targeted": [
+    {
+      "command": "node --test test/native-launchd-boundary.test.mjs",
+      "pass": 1,
+      "fail": 0
+    },
+    {
+      "command": "node scripts/test-native-launchd.mjs --test-name-pattern='fixture supervisor restarts'",
+      "pass": 4,
+      "fail": 0,
+      "selectedNativeScenarios": 1
+    },
+    {
+      "command": "node --test test/engineering-foreground.test.mjs test/codex-provider.test.mjs",
+      "pass": 25,
+      "fail": 0
+    },
+    {
+      "command": "node --test test/engineering-playbook.test.mjs",
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "command": "node --test test/engineering-foreground.test.mjs",
+      "pass": 5,
+      "fail": 0
+    },
+    {
+      "command": "node --test --test-concurrency=2 test/engineering-delivery.test.mjs test/engineering-workspace.test.mjs test/engineering-projection.test.mjs test/tui.test.mjs test/api.test.mjs",
+      "pass": 97,
+      "fail": 0
+    },
+    {
+      "command": "node --test --test-concurrency=2 test/engineering-delivery.test.mjs test/engineering-workspace.test.mjs test/engineering-projection.test.mjs",
+      "pass": 20,
+      "fail": 0
+    },
+    {
+      "command": "node --test --test-name-pattern='unmanaged or non-disposable' test/engineering-delivery.test.mjs",
+      "pass": 1,
+      "fail": 0
+    },
+    {
+      "command": "node scripts/demo-engineering-delivery.mjs",
+      "exit": 0,
+      "liveModelCalls": 0
+    }
+  ],
+  "verdicts": {
+    "foregroundSingleImplementationAndCheck": "PASS",
+    "fullPlaybookNativeMultiPurpose": "fixture-proven only",
+    "localCommitPermissionDisposableGit": "PASS",
+    "ordinaryNativeRegistration": "disabled; regression and inventory verified",
+    "productionActivation": false,
+    "unattendedProviderExecution": "NO-GO",
+    "anotherLiveAttemptAuthorized": false
+  }
+}

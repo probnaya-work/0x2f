@@ -1,0 +1,30 @@
+{
+  "originalTrackedUnchanged": true,
+  "originalHeadUnchanged": true,
+  "originalStatusUnchanged": true,
+  "stableUnchanged": true,
+  "protectedPackagesMatch": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "task2Historical": {
+    "baselineCount": 105,
+    "actualCount": 105,
+    "missing": [],
+    "extra": [],
+    "changed": []
+  },
+  "task2Unchanged": true,
+  "task3Unchanged": true,
+  "task3Files": 24,
+  "launchAgentFileAndBindingUnchanged": true,
+  "scheduleUnchanged": true,
+  "installationUnchanged": true,
+  "changedWorkFiles": [
+    "scheduler.log",
+    "scheduler/health.json"
+  ],
+  "extraWorkFiles": [],
+  "healthSuccess": true,
+  "agentLastExit": "0"
+}
