@@ -1,0 +1,2 @@
+{"type":"task.created","at":"2026-10-16T17:36:32.425Z","taskId":1,"status":"working"}
+{"type":"needs_user","at":"2026-10-16T17:36:33.351Z","taskId":1,"run":1,"blockedOn":{"type":"decision","code":"managed_api_key_missing","text":"Managed credential missing. Import with 2f-next auth import; this Task will not retry."}}

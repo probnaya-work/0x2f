@@ -1,0 +1,20 @@
+{
+  "root": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm",
+  "repository": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo",
+  "taskFile": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.work/tasks/001-fix-parsetaskid-014-to-return-14-preserving-the-/task.json",
+  "command": "/Users/bogart/.n/bin/2f-next",
+  "runtime": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+  "implementation": "351c74c1966a9b391173f3efb6db45725b95ad19",
+  "fixture": "isolated missing Keychain entry; fetch forbidden; no real credential used",
+  "taskId": 1,
+  "status": "needs_you",
+  "reason": "managed_api_key_missing",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "modelAvailability": 0,
+  "tokenCountRequests": 0,
+  "inferenceRequests": 0,
+  "attempts": 1,
+  "delivery": false,
+  "exit": 0,
+  "setup": "initial uncommitted setup refused a verifier symlink before Task creation; resolved binary path then pinned; no executor retry"
+}

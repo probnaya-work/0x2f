@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "run": 1,
+  "attempt": "b2c1b892-1bd5-4fe1-ac82-57f9870a9650",
+  "model": {
+    "id": "gpt-5.4-mini-2026-03-17",
+    "capabilities": [
+      "responses",
+      "function-calling",
+      "small-code-patch"
+    ],
+    "reasoningEffort": "none",
+    "price": {
+      "currency": "USD",
+      "perMillion": {
+        "input": 0.75,
+        "cachedInput": 0.075,
+        "output": 4.5
+      },
+      "observedAt": "2026-10-16T15:54:35Z",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+      "controlRequestPolicy": "unpriced_control_request"
+    },
+    "capabilitySource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+  },
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 2,
+    "countRequests": 2,
+    "responsesRequests": 4,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "predicted": {
+    "currency": "USD",
+    "inferenceUpperUsd": 0.024576,
+    "totalUpperUsd": null,
+    "controlRequests": {
+      "classification": "unpriced_control_request",
+      "maximum": 3,
+      "tokenCountMaximum": 2,
+      "availabilityMaximum": 1,
+      "separatePublishedFee": false,
+      "contractualZeroFee": false,
+      "includedInInferenceMaximum": false
+    },
+    "inputTokens": 8192,
+    "outputTokens": 4096,
+    "totalInferenceTokens": 12288,
+    "pricing": {
+      "currency": "USD",
+      "perMillion": {
+        "input": 0.75,
+        "cachedInput": 0.075,
+        "output": 4.5
+      },
+      "observedAt": "2026-10-16T15:54:35Z",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+      "controlRequestPolicy": "unpriced_control_request"
+    }
+  },
+  "authorization": {
+    "mode": "foreground",
+    "foregroundCanary": false,
+    "foregroundAuthorized": true
+  },
+  "packet": {
+    "schemaVersion": 1,
+    "brief": "Fix parseTaskId(\"014\") to return 14, preserving the public API.",
+    "constraints": [],
+    "acceptance": {
+      "check": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "--test",
+        "test/task-id.test.mjs"
+      ],
+      "scope": [
+        "src/task-id.mjs"
+      ]
+    },
+    "instructions": [],
+    "files": [
+      {
+        "id": "f1",
+        "path": "src/task-id.mjs",
+        "bytes": 39,
+        "sha256": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+        "writable": true
+      },
+      {
+        "id": "f2",
+        "path": "test/task-id.test.mjs",
+        "bytes": 126,
+        "sha256": "54f249031c65ddceaa983af5f7b75e030e6e7c422be3412dea1343fe16c77333",
+        "writable": false
+      }
+    ],
+    "prohibited": [
+      "shell",
+      "network",
+      "tests",
+      "Git",
+      "commit",
+      "delivery"
+    ],
+    "loop": "read necessary IDs, then submit one patch; context expansion stops"
+  },
+  "inputDigest": "2bfdf745a8de74a1ee74997a171fd1826b18e1d369a49560018f43b3313866ea",
+  "intent": "ade244af0dff7eb7df787c9587ebfff479aa75509926d13ca95eb645223c41f2",
+  "at": "2026-10-16T17:36:33.170Z"
+}

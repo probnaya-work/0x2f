@@ -11,14 +11,16 @@ scope and deterministic check once. For example:
 ```sh
 2f-next init --files src/task-id.mjs,test/task-id.test.mjs \
   --write src/task-id.mjs \
-  --check '["/opt/homebrew/bin/node","--test","test/task-id.test.mjs"]'
+  --check '["/opt/homebrew/Cellar/node/26.11.1/bin/node","--test","test/task-id.test.mjs"]'
 2f-next new 'Reject partially numeric task IDs while preserving the API.'
 2f-next open 1
 2f-next tui
 2f-next ui
 ```
 
-Use an absolute verifier executable and real file names for your repository.
+Use the resolved absolute verifier executable and real file names for your
+repository. `node -p process.execPath` prints the installed Node binary path;
+the existing verifier policy refuses symlink executables.
 Existing `.work/engineering.json` is never overwritten by init. Constraints are
 saved there through the existing engineering policy; no provider/model choice is
 needed. The task gets its own worktree from the configured ref (`HEAD` for new

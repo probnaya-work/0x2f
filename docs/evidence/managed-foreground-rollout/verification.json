@@ -1,0 +1,30 @@
+{
+  "implementation": "351c74c1966a9b391173f3efb6db45725b95ad19",
+  "fullSuiteRuns": 1,
+  "fullSuite": {
+    "tests": 982,
+    "passed": 863,
+    "failed": 0,
+    "skipped": 119,
+    "durationMs": 245774.205291,
+    "exit": 0,
+    "nativeLaunchAgentTests": false
+  },
+  "targeted": {
+    "focusedPolicyCredentialSourceChecks": 6,
+    "cliCredentialRegressionChecks": 7,
+    "exit": 0
+  },
+  "npmRunCheck": {
+    "exit": 0
+  },
+  "strictSyntax": {
+    "JavaScriptFiles": 213,
+    "PythonFiles": 9,
+    "allExitCodesChecked": true
+  },
+  "additionalLiveProviderCalls": 0,
+  "liveEvidence": "bcd18e6b7978873c65405d61c42235dad74dd2ec; docs/evidence/managed-live-canary-ready",
+  "codeChangesAfterFullSuite": false,
+  "documentationCorrectionAfterFullSuite": "example verifier now uses resolved binary path; no policy relaxation"
+}

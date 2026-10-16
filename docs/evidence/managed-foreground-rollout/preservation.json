@@ -1,0 +1,43 @@
+{
+  "before": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.foreground-rollout-before.json",
+  "after": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.foreground-rollout-after.json",
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "productionTrackedFilesAndPackagesUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "stableUnchanged": true,
+  "allProductionTasksUnchanged": true,
+  "task2Files": 105,
+  "task3Files": 24,
+  "protectedPackagesMatchHistoricalBaseline": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "launchAgentConfigurationUnchanged": true,
+  "scheduleAndBindingUnchanged": true,
+  "healthy": true,
+  "workFileCount": 235,
+  "workFilesChangedOnly": [
+    "scheduler.log",
+    "scheduler/health.json"
+  ],
+  "naturalSchedulerWake": {
+    "before": {
+      "queryExit": 0,
+      "state": "not running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "136",
+      "last exit code": "0"
+    },
+    "after": {
+      "queryExit": 0,
+      "state": "not running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "137",
+      "last exit code": "0"
+    },
+    "phaseInvokedTickRepairKickstart": false
+  },
+  "intentionalGitMetadataChange": "new detached durable candidate worktree; development branch advanced separately"
+}

@@ -1,0 +1,11 @@
+{
+  "command": "/Users/bogart/.n/bin/2f-next",
+  "candidate": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+  "implementation": "351c74c1966a9b391173f3efb6db45725b95ad19",
+  "launcher": "#!/bin/sh\n# 0x2F foreground candidate; remove this file to uninstall.\nexec '/opt/homebrew/Cellar/node/26.11.1/bin/node' '/Users/bogart/Dev/PROBNAYA/work-cli-foreground/src/foreground-cli.mjs' \"$@\"\n",
+  "existing2fLink": "../lib/node_modules/0x2f/src/cli.mjs",
+  "existing2fUntouched": true,
+  "dependencies": "copied existing local packages; no npm install, release or network",
+  "rollback": "remove only /Users/bogart/.n/bin/2f-next",
+  "foregroundOnly": true
+}

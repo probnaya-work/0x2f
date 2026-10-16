@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "slug": "001-fix-parsetaskid-014-to-return-14-preserving-the-",
+  "repository": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo",
+  "commonDir": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.git",
+  "requestedRef": "HEAD",
+  "commit": "347d6e7655196afc6b9e810a275cb52dc0f98aa9",
+  "path": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.work/worktrees/001-fix-parsetaskid-014-to-return-14-preserving-the-",
+  "identity": "95bec1a646610bfedbf802a8b89acd03eb04c4c07aaa3a2acde735ab425b66a7",
+  "state": "ready"
+}

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "purpose": "non-secret foreground rollout evidence integrity",
+  "implementation": "351c74c1966a9b391173f3efb6db45725b95ad19",
+  "files": {
+    "check-final.txt": {
+      "bytes": 274,
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f"
+    },
+    "cli-final.txt": {
+      "bytes": 749,
+      "sha256": "d106ddbf84e461b30234bd7c3adf78265115b4ad97402b4d2f7031cd817bef1c"
+    },
+    "cli.txt": {
+      "bytes": 1421,
+      "sha256": "b3a52ac9623e266445deccd0aea2c4491917044e0d78b64768417193255b3119"
+    },
+    "credential-audit.json": {
+      "bytes": 578,
+      "sha256": "fb8bb8f0f00466855ffdc6319d532e3e920cfac381bbab0b7a2662b0e9d41307"
+    },
+    "fixes.txt": {
+      "bytes": 720,
+      "sha256": "f06d2a04440184889054a9404eab05cbc2e5d927b1f0c9a5e8ebc7b286f6b139"
+    },
+    "full.txt": {
+      "bytes": 91434,
+      "sha256": "2b5a070b651a69c6df280254bed31eb5b7716977516a6f4630adf5148d1afcda"
+    },
+    "init.txt": {
+      "bytes": 131,
+      "sha256": "2b8f63c6098ac511ec25cd0624bdcb6220a7e8957c8daee2f784ae88a9a67705"
+    },
+    "installation.json": {
+      "bytes": 660,
+      "sha256": "77311358d193b407d419b27f4c6cbdaaa214674c0fb52efec8bc17bee6d72b16"
+    },
+    "preservation.json": {
+      "bytes": 1522,
+      "sha256": "e2b865ff9545a4237b14454ae35f4242b2046ef7121e8dee21b624b804f7725d"
+    },
+    "projections.json": {
+      "bytes": 4561,
+      "sha256": "189a5a4e128600247e6c1fcdd21b6d36483d8f9159cee26b8eb6464002bd95d0"
+    },
+    "report.md": {
+      "bytes": 5065,
+      "sha256": "a5d01ba03620b6f687c34f6f25583f8e881ee06d439b734297b63d99b93cc678"
+    },
+    "summary.json": {
+      "bytes": 955,
+      "sha256": "427150bfd826c62a8a5ba62169b868ad5cc271ba06e38c1483d823f2d439c82d"
+    },
+    "task-archive/events.jsonl": {
+      "bytes": 320,
+      "sha256": "56645acce7140024208a772a5bd6ea79821031e2943284eac8bddf1d2c0f68f5"
+    },
+    "task-archive/prompt.md": {
+      "bytes": 2091,
+      "sha256": "6d933b4f8b7ec9785fed017af6717b7df04dd95045f71f10f51b964892a9609a"
+    },
+    "task-archive/runs/1/managed/attempt.json": {
+      "bytes": 3497,
+      "sha256": "1c646b814a0e857b05d367ed9f77f54332e34d73772fa76e753dee1bf6edab61"
+    },
+    "task-archive/runs/1/prompt.md": {
+      "bytes": 2091,
+      "sha256": "6d933b4f8b7ec9785fed017af6717b7df04dd95045f71f10f51b964892a9609a"
+    },
+    "task-archive/task.json": {
+      "bytes": 6918,
+      "sha256": "120b5e93a00ffdd10b4e7f94e02dfdeef3026de2c1fcf93b3c8b3cb4fca95476"
+    },
+    "task-archive/workspace.json": {
+      "bytes": 597,
+      "sha256": "e5498f25dc0797e8328b8a69598e2cade569a39bcce050f16bf37fc398f24638"
+    },
+    "verification.json": {
+      "bytes": 827,
+      "sha256": "3048d4b790b8522af0cf6ff3919f0ceb8c0f27b57194230d1e31e49e23fa6e56"
+    }
+  }
+}

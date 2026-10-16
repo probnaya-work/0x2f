@@ -1,0 +1,2 @@
+Initialized /private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.work
+Engineering scope saved. Next: 2f-next new "<task>"

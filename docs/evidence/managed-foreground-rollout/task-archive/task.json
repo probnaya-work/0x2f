@@ -1,0 +1,240 @@
+{
+  "id": 1,
+  "slug": "001-fix-parsetaskid-014-to-return-14-preserving-the-",
+  "title": "Fix parseTaskId(\"014\") to return 14, preserving the public API.",
+  "brief": "Fix parseTaskId(\"014\") to return 14, preserving the public API.",
+  "engineering": {
+    "schemaVersion": 1,
+    "revision": 6,
+    "config": {
+      "schemaVersion": 1,
+      "enabled": true,
+      "currency": "USD",
+      "providers": [
+        "managed-openai"
+      ],
+      "files": [
+        "src/task-id.mjs",
+        "test/task-id.test.mjs"
+      ],
+      "writePaths": [
+        "src/task-id.mjs"
+      ],
+      "check": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "--test",
+        "test/task-id.test.mjs"
+      ],
+      "limits": {
+        "moneyMicros": 24576,
+        "tokens": 12288,
+        "modelCalls": 2,
+        "providerCalls": 5,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "agentRuns": 1,
+        "reviewCycles": 0
+      },
+      "workspace": {
+        "repository": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo",
+        "ref": "HEAD"
+      },
+      "policy": "engineering-continuity-v1",
+      "checkDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+      "reviewCheckPins": {}
+    },
+    "configDigest": "8c3d69dbafa0bbbbaa23c379ebf613ad20cd8f8ceeaf65f0048e832e371a6341",
+    "driver": {
+      "token": "5d4f3e75-b138-4dc1-8d57-9a1009bf9ed7",
+      "pid": 8761,
+      "state": "stopped"
+    },
+    "decisions": [
+      {
+        "purpose": "implement",
+        "provider": "managed-openai",
+        "model": "gpt-5.4-mini-2026-03-17",
+        "reason": "minimum-qualified-managed-model",
+        "lane": "managed-api",
+        "opaqueFallback": false
+      }
+    ],
+    "budget": {
+      "limits": {
+        "moneyMicros": 24576,
+        "tokens": 12288,
+        "modelCalls": 2,
+        "providerCalls": 5,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "agentRuns": 1,
+        "reviewCycles": 0
+      },
+      "confirmed": {
+        "moneyMicros": 0,
+        "tokens": 0,
+        "modelCalls": 0,
+        "providerCalls": 0
+      },
+      "reservations": [],
+      "uncertain": []
+    },
+    "verification": null,
+    "next": "user",
+    "workspace": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "slug": "001-fix-parsetaskid-014-to-return-14-preserving-the-",
+      "repository": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo",
+      "commonDir": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.git",
+      "requestedRef": "HEAD",
+      "commit": "347d6e7655196afc6b9e810a275cb52dc0f98aa9",
+      "path": "/private/tmp/0x2f-foreground-rollout-rehearsal-6vojoahm/repo/.work/worktrees/001-fix-parsetaskid-014-to-return-14-preserving-the-",
+      "identity": "95bec1a646610bfedbf802a8b89acd03eb04c4c07aaa3a2acde735ab425b66a7",
+      "state": "ready"
+    },
+    "economics": {
+      "policy": {
+        "version": "engineering-economics-v1",
+        "classification": "small",
+        "signals": {
+          "writeFiles": 1,
+          "relevantFiles": 2,
+          "directories": 1,
+          "sensitive": false
+        },
+        "hard": {
+          "inputBytes": 8192,
+          "attempts": 1,
+          "driverDeadlineMs": 120000
+        },
+        "soft": {
+          "totalTokens": 8000,
+          "toolOutputBytes": 4096
+        },
+        "unknown": [
+          "providerMoney",
+          "internalCalls",
+          "harnessInjectedContext",
+          "agentToolOutputLimit",
+          "processTreeTermination"
+        ]
+      }
+    },
+    "managed": {
+      "lane": "managed-api",
+      "state": "NEEDS YOU",
+      "limits": {
+        "attempts": 1,
+        "packetBytes": 8192,
+        "files": 4,
+        "sourceBytes": 65536,
+        "reads": 4,
+        "patches": 1,
+        "tools": 6,
+        "toolResultBytes": 24576,
+        "readResultBytes": 4096,
+        "serializedInputBytes": 32768,
+        "inferenceRequests": 2,
+        "countRequests": 2,
+        "responsesRequests": 4,
+        "inputTokens": 8192,
+        "inputTokensPerRequest": 4096,
+        "outputTokens": 4096,
+        "outputTokensPerRequest": 2048,
+        "deadlineMs": 120000,
+        "costUsd": 0.25
+      },
+      "attempt": "b2c1b892-1bd5-4fe1-ac82-57f9870a9650",
+      "requests": 0,
+      "inferences": 0,
+      "tools": 0,
+      "reads": 0,
+      "patches": 0,
+      "resultBytes": 0,
+      "inputBytes": 0,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "predicted": {
+        "currency": "USD",
+        "inferenceUpperUsd": 0.024576,
+        "totalUpperUsd": null,
+        "controlRequests": {
+          "classification": "unpriced_control_request",
+          "maximum": 3,
+          "tokenCountMaximum": 2,
+          "availabilityMaximum": 1,
+          "separatePublishedFee": false,
+          "contractualZeroFee": false,
+          "includedInInferenceMaximum": false
+        },
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "totalInferenceTokens": 12288,
+        "pricing": {
+          "currency": "USD",
+          "perMillion": {
+            "input": 0.75,
+            "cachedInput": 0.075,
+            "output": 4.5
+          },
+          "observedAt": "2026-10-16T15:54:35Z",
+          "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+          "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+          "controlRequestPolicy": "unpriced_control_request"
+        }
+      },
+      "reason": "managed_api_key_missing"
+    }
+  },
+  "status": "needs_you",
+  "execution": {
+    "provider": "managed-openai",
+    "launchToken": "5d4f3e75-b138-4dc1-8d57-9a1009bf9ed7",
+    "node": "local",
+    "workspace": "local"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "managed-openai",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-16T17:36:32.289Z",
+      "requestedProvider": "auto",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "purpose": "implement",
+      "executor": {
+        "kind": "managed",
+        "harness": "0x2f-responses-v1",
+        "requestedModel": "gpt-5.4-mini-2026-03-17",
+        "observedModel": null
+      },
+      "usage": {
+        "confirmed": null,
+        "estimated": null,
+        "uncertainty": "not_started"
+      },
+      "permissions": {
+        "tools": [
+          "read_task_file",
+          "submit_patch",
+          "request_context_expansion"
+        ],
+        "writePaths": [
+          "src/task-id.mjs"
+        ],
+        "externalActions": false
+      },
+      "completedAt": "2026-10-16T17:36:33.338Z"
+    }
+  ],
+  "createdAt": "2026-10-16T17:36:32.376Z",
+  "updatedAt": "2026-10-16T17:36:33.338Z",
+  "pid": 8761,
+  "blockedOn": {
+    "type": "decision",
+    "code": "managed_api_key_missing",
+    "text": "Managed credential missing. Import with 2f-next auth import; this Task will not retry."
+  }
+}

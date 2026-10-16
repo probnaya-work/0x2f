@@ -1,0 +1,14 @@
+✔ managed API key absent stops offline without reading harness authentication (867.845667ms)
+✔ managed source and patch credentials never enter Task artifacts (5954.615125ms)
+✔ managed foreground AUTO stops without key and never enters opaque preflight (666.913709ms)
+✔ managed credential is accessed once immediately before authorized dispatch, never on duplicate boundary (2537.4955ms)
+✔ ineligible foreground Task stops before credential, opaque harness or detached dispatch (550.750583ms)
+✔ authorization and configured budget failures happen before any credential access (1592.03625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12289.670209

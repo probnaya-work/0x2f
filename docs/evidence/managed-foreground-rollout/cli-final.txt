@@ -1,0 +1,15 @@
+✔ CLI: the dogfooding loop — new, rerun through another provider, open, open --run (1781.922958ms)
+✔ 2f version prints the package version only (134.178083ms)
+✔ 2f --version prints the package version only (94.520292ms)
+✔ 2f -v prints the package version only (92.032292ms)
+✔ candidate normal new auto-routes without model/harness choice and shares its safe-stop projection (1294.2635ms)
+✔ dedicated Keychain returns only safe status; retrieval is memory-only and foreground-gated (2.305083ms)
+✔ import verifies a private regular owned source and exact retrieval BEFORE unlink; failure preserves source (221.66825ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1928.319208
