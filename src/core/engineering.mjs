@@ -156,7 +156,7 @@ async function verifyFrozen(store, task, ref) {
 
 export async function assertEngineeringAccepted(store, task) {
   const delivery = task.engineering.delivery;
-  if (delivery?.state === 'committed') {
+  if (delivery?.state === 'committed' || delivery?.reconciliation?.result === 'APPLIED') {
     const r = await store.readJson(path.join(store.taskDir(task.slug), delivery.receipt.path));
     if (hash(r) !== delivery.receipt.digest || r.commit !== delivery.commit || r.scopeDigest !== delivery.scopeDigest) throw new Error('Local commit receipt changed.');
   }

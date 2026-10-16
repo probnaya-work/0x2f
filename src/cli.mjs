@@ -65,6 +65,7 @@ Commands:
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
   2f cancel <id>    stop the active run; the task and its history stay
   2f close <id>      stop working on a task; moves it to DONE
+  2f reconcile <id>  reconcile local commit read-only; never retry
   2f commit <id> <message>  preview a local commit of a verified disposable task
   2f allow <id> --digest <scope>   grant the exact proposed local commit
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
@@ -405,6 +406,15 @@ async function main() {
     else console.log(
       `Run ${String(runNumber).padStart(2, "0")} started with ${providerName(task, runtime.providers.getProvider)} in the background.`
     );
+    return;
+  }
+
+  if (command === 'reconcile') {
+    await requireProject(base);
+    const id = Number(args[0]);
+    if (!Number.isInteger(id) || id < 1) throw new Error('Usage: 2f reconcile <id>');
+    const task = await createRuntime(base).actions.reconcileCommit(id);
+    for (const line of workflowLines(task)) console.log(line);
     return;
   }
 

@@ -83,6 +83,8 @@ export async function cleanupEngineeringWorkspace(store, task) {
   return lock(store, task, async () => {
     const fresh = await store.findTask(task.id);
     if (fresh.status === 'working') throw new Error('Active engineering worktree cannot be removed.');
+    const delivery = fresh.engineering.delivery;
+    if (['running','uncertain'].includes(delivery?.state) || delivery?.reconciliation?.result === 'UNCERTAIN') throw new Error('Uncertain local commit evidence must be preserved; cleanup refused.');
     const r = await store.readJson(receiptPath(store, fresh));
     owned(store, fresh, r);
     const actual = await inspect(r, expectedHead(fresh, r));

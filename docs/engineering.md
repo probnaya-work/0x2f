@@ -99,3 +99,44 @@ commit receipt remain under the durable task. Duplicate execution returns the
 same receipt. A lost outcome after object/ref effect is uncertain and never
 replayed automatically. Manual reconciliation of uncertain delivery is a later
 slice. No push, PR, merge or deployment is performed.
+
+### Read-only local commit reconciliation
+
+`2f reconcile <id>` inspects one attempted `git.localCommit` under the task lock.
+CLI, TUI and Web render the same saved reconciliation projection. It never
+retries delivery, invokes hooks, fetches, updates refs/index, repairs a worktree,
+or removes a stale Git lock. Only task evidence and receipts are written.
+
+Before delivery, a version 2 intent binds task/run, proposal operation UUID,
+managed repository/worktree physical identity, parent, tree, diff, message,
+grant and Git configuration. Exact UTF-8 commit bytes include an
+`0x2f-operation` header; their Git object ID is computed and saved before effect
+startup. The approved message stays exact. Hooks still run once, with the prior
+post-hook scope checks. The object writer stores those exact bytes, then uses
+the existing parent-checked HEAD update. No generic delivery ledger is added.
+
+- `APPLIED`: that exact object and approved diff exist. A receipt records the
+  resulting object identity. Reachability from the observed HEAD is separate;
+  an object written before a crash may be unreachable. This does not claim that
+  HEAD was advanced, the index was installed, or the worktree is ready for
+  further execution. Existing workspace/acceptance fences continue to apply.
+- `NOT_APPLIED`: the dispatcher has stopped (dead PID or completed pre-effect
+  failure), the effect-start marker is absent, the exact object is absent and
+  the detached HEAD, bounded local refs and HEAD reflog match the pre-dispatch
+  snapshot. A new attempt requires a new preview UUID and grant; the consumed
+  grant never becomes executable again. Stale Git locks require separate human
+  handling; reconciliation does not remove them.
+- `UNCERTAIN`: every other case, including absent objects after the start marker,
+  rewritten/similar commits without exact operation identity, binding/config
+  drift, missing legacy intent, truncated absence evidence, and read failures.
+  The task needs the user; no success receipt or automatic retry is produced.
+
+The result is an immutable observation with a timestamp, relevant local refs
+and HEAD reflog, and a digest-bound evidence reference. Repeated/concurrent
+reconciliation returns that saved observation, including reachability **at its
+recorded time**; it is not a live repository monitor. Missing old intent is not
+silently upgraded. Self-contained disposable repositories remain the only
+supported delivery boundary; includes, partial clones and alternate object
+stores are refused. External mutation of Git storage during observation can
+force `UNCERTAIN`; this capability is not a filesystem sandbox or a general
+history-rewrite detector. Uncertain workspace cleanup is explicitly refused.

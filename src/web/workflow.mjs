@@ -5,6 +5,7 @@ export function engineeringLines(task) {
   if (!task.engineering) return [];
   const run = task.runs?.at(-1);
   const e = task.engineering;
+  if (e.delivery?.reconciliation) return [`TASK ${String(task.id).padStart(3,'0')}`, 'ACTION LOCAL COMMIT', `STATE ${e.delivery.reconciliation.result === 'UNCERTAIN' ? 'UNCERTAIN' : 'RECONCILED'}`, 'RECONCILE READ ONLY', `RESULT ${e.delivery.reconciliation.result.replaceAll('_',' ')}`, `COMMIT ${e.delivery.reconciliation.commit ?? '—'}`, `REACHABLE ${e.delivery.reconciliation.reachableFromHead === null ? 'UNKNOWN' : e.delivery.reconciliation.reachableFromHead ? 'YES' : 'NO'} · observed ${e.delivery.reconciliation.at}`, `NEXT ${e.delivery.reconciliation.result === 'APPLIED' ? 'READY' : 'NEEDS YOU'}`, ...e.delivery.reconciliation.reasons.map(r=>`EVIDENCE ${r}`)];
   const b = e.budget;
   const reason = task.blockedOn?.code ?? e.playbook?.reason ?? e.decisions.at(-1)?.reason;
   const review = e.playbook?.review ?? e.review;
@@ -19,7 +20,8 @@ export function engineeringLines(task) {
     ...(run?.handoff ? [`HANDOFF ${run.handoff.metrics.bytes} bytes · history ${run.handoff.metrics.fullHistoryBytes} bytes`] : []),
     ...(e.workspace ? [`WORKSPACE ${e.workspace.path} · ref ${e.workspace.commit} · task-owned worktree`] : []),
     ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider} · ${d.reason}`),
-    ...(e.delivery ? [`LOCAL COMMIT ${e.delivery.state.toUpperCase()} · ${e.delivery.scopeDigest}`, `REPOSITORY ${e.delivery.preview.repository} · WORKTREE ${e.delivery.preview.worktree} · PARENT ${e.delivery.preview.parent}`, `MESSAGE ${e.delivery.preview.message}`, `DIFF ${e.delivery.preview.diffDigest}`, ...(e.delivery.commit ? [`COMMIT ${e.delivery.commit} · RECEIPT ${e.delivery.receipt.path}`] : [])] : [])
+    ...(['running','uncertain','failed'].includes(e.delivery?.state) ? [`RECONCILE READ ONLY · 2f reconcile ${task.id}`] : []),
+    ...(e.delivery ? [`LOCAL COMMIT ${e.delivery.state.toUpperCase()} · ${e.delivery.scopeDigest}`, `REPOSITORY ${e.delivery.preview.repository} · WORKTREE ${e.delivery.preview.worktree} · PARENT ${e.delivery.preview.parent}`, `MESSAGE ${e.delivery.preview.message}`, `DIFF ${e.delivery.preview.diffDigest}`, ...(e.delivery.commit ? [`COMMIT ${e.delivery.commit} · RECEIPT ${e.delivery.receipt?.path ?? 'unrecorded'}`] : [])] : [])
   ];
 }
 export function workflowView(task) {

@@ -665,6 +665,7 @@ export function createActions(ctx) {
   }
 
   return {
+    reconcileCommit: async (id) => (await import('./engineering-delivery-reconcile.mjs')).reconcileLocalCommit(ctx, id),
     proposeCommit: async (id, options) => (await import('./engineering-delivery.mjs')).proposeLocalCommit(ctx, id, options),
     grantCommit: async (id, options) => (await import('./engineering-delivery.mjs')).grantLocalCommit(ctx, id, options),
     executeCommit: async (id, options) => (await import('./engineering-delivery.mjs')).executeLocalCommit(ctx, id, options),

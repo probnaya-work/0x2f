@@ -12,6 +12,8 @@ import { engineeringIntent, handoffHash as hash } from './engineering-handoff.mj
 import { readBounded } from './durable.mjs';
 import { workEvent } from './events.mjs';
 import { assertLockHeld } from './lock.mjs';
+import { crashPoint } from './faults.mjs';
+import { prepareDeliveryIntent, localCommitBytes, deliveryBinding, deliveryConfiguration } from './engineering-delivery-intent.mjs';
 const exec = promisify(execFile);
 const inside = (root, p) => p.startsWith(root + path.sep);
 const now = () => new Date().toISOString();
@@ -87,7 +89,7 @@ export async function proposeLocalCommit(ctx,id,{message}={}) {
   if(typeof message!=='string'||!message.trim()||message.length>500||/[\x00\r]/.test(message))throw new WorkError('A bounded commit message is required.');message=message.trim();
   return locked(ctx,id,async t=>{
     const old=t.engineering.delivery;
-    if(['running','uncertain','committed'].includes(old?.state))throw new WorkError('Existing delivery cannot be replaced or replayed.');
+    if((['running','uncertain','committed'].includes(old?.state) || old?.reconciliation && old.reconciliation.result !== 'NOT_APPLIED'))throw new WorkError('Existing delivery cannot be replaced or replayed.');
     if(old&&['proposed','granted'].includes(old.state)){
       if(old.preview.message===message)return t;
       throw new WorkError('Reject the existing commit proposal before replacing it.');
@@ -151,7 +153,10 @@ export async function executeLocalCommit(ctx,id,{scopeDigest,faultAt}={}) {
       lockInode=(await lockFile.stat()).ino;
       if(await indexDigest(w.index)!==p.indexDigest)throw new WorkError('Git index changed before delivery.');
       d={...d,state:'running',consumedAt:now()};t=await save(ctx,t,d);
-      await ctx.store.writeJson(path.join(dir,'intent.json'),{scopeDigest,grant:d.grant,consumedAt:d.consumedAt,phase:'local-commit'});
+      const intent=await prepareDeliveryIntent(ctx.store,t,d);
+      await ctx.store.writeJson(path.join(dir,'intent.json'),intent);
+      d={...d,operationId:intent.operationId,intentDigest:hash(intent)};t=await save(ctx,t,d);
+      crashPoint('local-commit.before-effect');
       await ctx.store.writeJson(path.join(dir,'permission.json'),{...d.grant,state:'consumed',consumedAt:d.consumedAt});
       const messageFile=path.join(dir,'message.txt');await ctx.store.writeText(messageFile,p.message+'\n');
       const env={...gitEnv(),GIT_INDEX_FILE:privateIndex,GIT_DIR:await git(w.path,['rev-parse','--absolute-git-dir']),GIT_WORK_TREE:w.path};
@@ -164,20 +169,28 @@ export async function executeLocalCommit(ctx,id,{scopeDigest,faultAt}={}) {
       }
       await assertEngineeringAccepted(ctx.store,t);
       if(hash(await hooks(w))!==hash(p.hooks)||await git(w.path,['write-tree'],{GIT_INDEX_FILE:privateIndex})!==p.tree||await fs.readFile(messageFile,'utf8')!==p.message+'\n'||await indexDigest(w.index)!==p.indexDigest||(await fs.lstat(w.index+'.lock')).ino!==lockInode)throw new WorkError('Hooks changed the approved tree/message/scope/index.');
-      const stamp=String(Math.floor(Date.now()/1000))+' +0000';
+      const currentBinding=await deliveryBinding(ctx.store,t,p);
+      if(hash(currentBinding.physical)!==hash(intent.physical)||hash(await deliveryConfiguration(currentBinding))!==hash(intent.configuration))throw new WorkError('Git identity/configuration changed before commit.');
+      const commitFile=path.join(dir,'commit.txt');
+      await ctx.store.writeText(commitFile,localCommitBytes(p,intent.operationId,intent.stamp));
+      await ctx.store.writeJson(path.join(dir,'effect.json'),{operationId:intent.operationId,intentDigest:hash(intent),phase:'started'});
       assertLockHeld();
       effect=true;
-      commit=await git(w.path,['commit-tree',p.tree,'-p',p.parent,'-F',messageFile],{GIT_AUTHOR_NAME:p.author.name,GIT_AUTHOR_EMAIL:p.author.email,GIT_COMMITTER_NAME:p.author.name,GIT_COMMITTER_EMAIL:p.author.email,GIT_AUTHOR_DATE:stamp,GIT_COMMITTER_DATE:stamp});
+      crashPoint('local-commit.effect-started');
+      commit=await git(w.path,['hash-object','-t','commit','-w','--no-filters','--',commitFile]);
+      if(commit!==intent.expectedCommit)throw new WorkError('Git produced a different commit object.');
+      crashPoint('local-commit.after-object');
       if(faultAt==='after-object'&&process.env.WORKFLOW_TEST_MODE==='1')throw new WorkError('Injected lost delivery outcome.');
       await ctx.store.writeJson(path.join(dir,'candidate.json'),{commit,parent:p.parent,tree:p.tree});
       assertLockHeld();
       await git(w.path,['update-ref','--no-deref','HEAD',commit,p.parent]);
+      crashPoint('local-commit.after-ref');
       if(faultAt==='after-ref'&&process.env.WORKFLOW_TEST_MODE==='1')throw new WorkError('Injected lost delivery receipt.');
       assertLockHeld();
       await lockFile.writeFile(await fs.readFile(privateIndex));await lockFile.sync();await lockFile.close();lockFile=null;await fs.rename(w.index+'.lock',w.index);
       const workspaceFile=path.join(ctx.store.taskDir(t.slug),'workspace.json');
       await ctx.store.writeJson(workspaceFile,{...await ctx.store.readJson(workspaceFile),deliveredCommit:commit});
-      const receipt={schemaVersion:1,capability:'git.localCommit',scopeDigest,grant:d.grant,consumedAt:d.consumedAt,taskId:t.id,artifact:p.artifact,repository:p.repository,worktree:p.worktree,parent:p.parent,tree:p.tree,diffDigest:p.diffDigest,message:p.message,hooks:receipts,commit,at:now()};
+      const receipt={schemaVersion:1,capability:'git.localCommit',scopeDigest,operationId:intent.operationId,intentDigest:hash(intent),grant:d.grant,consumedAt:d.consumedAt,taskId:t.id,artifact:p.artifact,repository:p.repository,worktree:p.worktree,parent:p.parent,tree:p.tree,diffDigest:p.diffDigest,message:p.message,hooks:receipts,commit,at:now()};
       const ref={path:`delivery/${scopeDigest}/receipt.json`,digest:hash(receipt)};await ctx.store.writeJson(path.join(ctx.store.taskDir(t.slug),ref.path),receipt);
       t=await save(ctx,t,{...d,state:'committed',commit,receipt:ref},{status:'ready',blockedOn:undefined});
       await event(ctx,t,{capability:'git.localCommit',scopeDigest,grant:'consumed',commit});return t;
