@@ -1,4 +1,5 @@
 // Inspect values before serialization. Never include inspected data in errors.
+export const credentialFreeEnvironment=(env=process.env)=>Object.fromEntries(Object.entries(env).filter(([name])=>name!=='OPENAI_API_KEY'));
 export function credentialValues(definition) {
   const names = [definition?.adapters?.supervision?.credentialEnv, definition?.adapters?.image?.credentialEnv]
     .flatMap(value => Array.isArray(value) ? value : []);

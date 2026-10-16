@@ -71,6 +71,11 @@ function info(log, ...args) {
 // every other historical field are preserved. Returns the failed task.
 export async function failInterruptedRun(store, task, { log = console } = {}) {
   const runNumber = currentRunNumber(task);
+  if(task.engineering?.managed?.attempt){
+    const blockedOn={type:'decision',code:'managed_uncertain',text:'UNCERTAIN managed attempt: reconcile durable request/tool intents before a new explicit foreground decision. No automatic replay.'};
+    const next={...task,status:'needs_you',blockedOn,runs:task.runs.map(r=>r.run===runNumber?{...r,outcome:'needs_you',completedAt:new Date().toISOString()}:r),engineering:{...task.engineering,next:'user',driver:{...task.engineering.driver,state:'stopped'},managed:{...task.engineering.managed,state:'UNCERTAIN',reason:'managed_uncertain'}}};
+    await store.updateTask(next);await store.appendEvent(task.slug,workEvent('needs_user',task.id,{run:runNumber,blockedOn}));return next;
+  }
   // The last event this run's worker persisted — the honest lower-bound anchor.
   const events = await store.readEvents(task.slug);
   const lastPersistedAt = events.filter(e => e.run === runNumber).at(-1)?.at;

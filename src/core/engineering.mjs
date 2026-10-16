@@ -6,6 +6,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { withLock } from './lock.mjs';
 import { readBounded } from './durable.mjs';
+import { managedGuard } from '../providers/managed-openai.mjs';
 import { economicDispatchBlock,economicProviderBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
 import { makeRunRecord } from './runs.mjs';
 import { workEvent } from './events.mjs';
@@ -77,6 +78,7 @@ function initialRun(provider) {
 }
 
 export async function createEngineeringTask(ctx, { title, brief, prompt, foreground }, config) {
+  if(foreground)managedGuard(process.env.OPENAI_API_KEY)({title,brief,prompt,config});
   const candidates = config.providers.filter(id => ctx.providers.available(id));
   const provider = candidates[0] ?? config.providers[0];
   const token = randomUUID();

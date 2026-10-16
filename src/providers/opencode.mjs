@@ -14,3 +14,4 @@ export const opencodeProvider = createAcpProvider({
   command: ["opencode", "acp"],
   permissions: "interactive"
 });
+Object.assign(opencodeProvider.capabilities,{opaqueAgentLoop:true,opaqueForegroundOnly:true,costBoundedSmallTasks:false,supportsHardInteractionLimits:false,supportsHardModelCallLimits:false,supportsHardTokenLimits:false});

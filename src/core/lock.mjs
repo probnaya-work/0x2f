@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import { durableWrite, registerFence, syncDirectory, safePath } from './durable.mjs';
+import { credentialFreeEnvironment } from './workflow-credentials.mjs';
 const scopes = new AsyncLocalStorage();
 const awaitPython = () => process.platform === 'darwin' ? '/usr/bin/python3' : 'python3';
 const helper = new URL('./lock-helper.py', import.meta.url).pathname;
@@ -24,7 +25,7 @@ async function acquire(root, probe = false) {
     }
   }
   return new Promise((resolve, reject) => {
-    const child = spawn(process.env.WORKFLOW_LOCK_PYTHON || (awaitPython()), [helper, root, probe ? 'probe' : 'hold'], { stdio: ['pipe', 'pipe', 'ignore'] });
+    const child = spawn(process.env.WORKFLOW_LOCK_PYTHON || (awaitPython()), [helper, root, probe ? 'probe' : 'hold'], { stdio: ['pipe', 'pipe', 'ignore'], env:credentialFreeEnvironment() });
     child.stdin.on('error', () => {});
     let text = '', settled = false;
     const fail = message => { if (!settled) { settled = true; child.stdin.end(); reject(new Error(message)); } };

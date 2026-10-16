@@ -7,9 +7,10 @@ import { promisify } from 'node:util';
 import { createHash } from 'node:crypto';
 import { withLock } from './lock.mjs';
 import { safePath } from './durable.mjs';
+import { credentialFreeEnvironment } from './workflow-credentials.mjs';
 
 const exec = promisify(execFile);
-const git = async (repository, args) => (await exec('git', ['-C', repository, ...args], { timeout: 15000, maxBuffer: 1000000 })).stdout.trim();
+const git = async (repository, args) => (await exec('git', ['-C', repository, ...args], { timeout: 15000, maxBuffer: 1000000, env:credentialFreeEnvironment() })).stdout.trim();
 const receiptPath = (store, task) => path.join(store.taskDir(task.slug), 'workspace.json');
 const lock = (store, task, fn) => withLock(path.join(store.taskDir(task.slug), 'workspace-lock'), fn);
 export const engineeringDirectory = (store, task) => task.engineering.workspace?.path ?? store.base;

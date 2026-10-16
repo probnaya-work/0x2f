@@ -34,6 +34,7 @@ export async function runForegroundEngineering(ctx, task) {
   if (!task.engineering.economics?.policy) {
     task = await mutateEngineering(ctx.store,task.slug,task.engineering.driver.token,t=>({...t,engineering:{...t.engineering,economics:{...t.engineering.economics,policy:economicsPolicy(t)}}}));
   }
+  if(task.engineering.economics.policy.classification==='small')return (await import('./engineering-managed.mjs')).runManagedForeground(ctx,task);
   const preflight = await foregroundPreflight();
   const controller = new AbortController();
   const abort = () => controller.abort();
