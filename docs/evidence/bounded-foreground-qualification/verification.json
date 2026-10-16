@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "verdict": "NO-GO: missing all-call and returned-payload boundary",
+  "runtimeChanges": false,
+  "harness": {
+    "version": "codex-cli 0.149.1",
+    "nativeBinaryPath": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "sha256": "f0d8762236594359b60cfbe17f4c7e945a3ce8d1c91e74778838c968d250fb6c"
+  },
+  "testSource": {
+    "path": "test/codex-bounded-qualification.test.mjs",
+    "sha256": "49b16ac69fc8ada5914082b09b2afa8374e0294472de03c7d9329e93ace26deb"
+  },
+  "targeted": {
+    "command": "OX2F_BOUNDED_EVIDENCE=<private-output> node --test test/codex-bounded-qualification.test.mjs",
+    "passed": 4,
+    "failures": 0,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-bounded-targeted.log",
+      "sha256": "c26daa5c0d51dcb1f630b3adc5ce4fc2c0191fb41b4154c40baa17ab34f45a49",
+      "bytes": 525
+    }
+  },
+  "fullSuite": {
+    "command": "OX2F_NATIVE_LAUNCHD=0 npm test",
+    "runs": 1,
+    "exitCode": 0,
+    "tests": 921,
+    "passed": 802,
+    "skippedNative": 119,
+    "failures": 0,
+    "durationMs": 86164.696917,
+    "log": {
+      "path": "/private/tmp/0x2f-bounded-full-suite.log",
+      "sha256": "c464fad4627db23d2684b7c7bae4aa4f13054991bc35d6bd0b23f6546ae4f0d4",
+      "bytes": 85455
+    }
+  },
+  "syntax": {
+    "javascriptFiles": 200,
+    "pythonFiles": 7,
+    "failures": 0,
+    "exitCodesChecked": true,
+    "npmRunCheckExit": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-bounded-syntax.log",
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+      "bytes": 274
+    }
+  },
+  "liveProviderAttempts": 0,
+  "canary": "NOT RUN: substantial interaction limits not enforceable through tested native gates",
+  "tokenUsage": "not measured; mock zero usage is synthetic",
+  "providerCost": "unknown; no real inference performed",
+  "productionActivated": false,
+  "newCredentials": false,
+  "deliveryEffects": 0,
+  "qualificationFixtureDirectoriesRemaining": 0,
+  "ordinaryLegacyRuntimeFilesChanged": [],
+  "privateEvidenceDirectoryRetained": "/private/tmp/0x2f-bounded-qualification-evidence"
+}

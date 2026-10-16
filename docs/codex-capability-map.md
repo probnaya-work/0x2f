@@ -178,3 +178,22 @@ capabilities: {
 5. The seatbelt sandbox cannot apply inside sandboxed/CI environments; there,
    tool execution requires `--dangerously-bypass-approvals-and-sandbox`
    (a deployment decision, not something 0x2F chooses silently).
+
+## Bounded foreground negative qualification (2026-10-16)
+
+Real CLI 0.149.1, disposable credential-free CODEX_HOME, loopback scripted model:
+`test/codex-bounded-qualification.test.mjs`. This is native harness evidence with
+a mock model, not a real provider canary or model/cost qualification.
+
+- Disabling `shell_tool` rejects an `exec_command` before its command executes.
+- A deny-all `PreToolUse` hook intercepts registered `update_plan` (positive
+  control), but not unsupported tool calls, including disabled `exec_command`.
+- Seven unsupported calls produce eight model requests and seven returned error
+  payloads, with no tool-action items in `exec --json` and no hook invocations.
+- A 26,008-byte unknown tool name produces a 26,026-byte tool error returned to
+  model context before 0x2F can intercept it. This exceeds a 24 KiB envelope.
+
+Thus these tested feature switches/hooks do not qualify an all-call interaction
+or returned-payload budget. Deadline/cancel after an event cannot retrospectively
+enforce it. No bounded foreground adapter or canary was enabled. See
+[qualification report](evidence/bounded-foreground-qualification/report.md).

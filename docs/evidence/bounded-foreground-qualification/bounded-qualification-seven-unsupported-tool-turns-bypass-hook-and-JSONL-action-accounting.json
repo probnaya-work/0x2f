@@ -1,0 +1,82 @@
+{
+  "version": "codex-cli 0.149.1",
+  "model": "gpt-5.6-sol",
+  "modelSource": "explicit fixture model; no entitlement/economic qualification",
+  "disabledFeatures": [
+    "shell_tool",
+    "multi_agent",
+    "multi_agent_v2",
+    "plugins",
+    "skill_search",
+    "tool_suggest",
+    "image_generation",
+    "in_app_browser",
+    "workspace_dependencies",
+    "shell_snapshot",
+    "view_image",
+    "goals",
+    "apps",
+    "browser_use",
+    "browser_use_external",
+    "computer_use",
+    "code_mode_host",
+    "enable_request_compression"
+  ],
+  "mockModelRequests": 8,
+  "hookTools": [],
+  "returnedToolPayloads": [
+    {
+      "bytes": 32,
+      "sha256": "dc6c185e3fd07e1e14b9abf7926c149b3e8fbe1b6130dc9039d8f783eec7c3e5",
+      "prefix": "unsupported call: unknown_tool_0"
+    },
+    {
+      "bytes": 32,
+      "sha256": "6b39df2322c16f155b69f4fcb450410ecf934eef39e58a5acc1920fab1a9ecdd",
+      "prefix": "unsupported call: unknown_tool_1"
+    },
+    {
+      "bytes": 32,
+      "sha256": "1fc8e55e5ac41be4c2f730f5d70a6ea1b23657653bd48b0038154f6b691a63df",
+      "prefix": "unsupported call: unknown_tool_2"
+    },
+    {
+      "bytes": 32,
+      "sha256": "15422dcab4b9327114d8fd8e90954810a3c8e3c03a02ea6c1dba1554c305dd45",
+      "prefix": "unsupported call: unknown_tool_3"
+    },
+    {
+      "bytes": 32,
+      "sha256": "b84473c1962a600ec38771a11e5af258c7fa437044e7b91224b7144e0e01e91f",
+      "prefix": "unsupported call: unknown_tool_4"
+    },
+    {
+      "bytes": 32,
+      "sha256": "6b96f4f56c5a34b8ac37ab2c35f67cfeb55133a8e169515875e1086faaa1cb3e",
+      "prefix": "unsupported call: unknown_tool_5"
+    },
+    {
+      "bytes": 32,
+      "sha256": "72ab235bd861000f6dd6f767fb1e5495e25bd45b7c80c911cd9235e8e1236873",
+      "prefix": "unsupported call: unknown_tool_6"
+    }
+  ],
+  "jsonlItemTypes": [
+    "error",
+    "error",
+    "error",
+    "agent_message"
+  ],
+  "jsonlEventTypes": [
+    "thread.started",
+    "item.completed",
+    "item.completed",
+    "item.completed",
+    "turn.started",
+    "item.completed",
+    "turn.completed"
+  ],
+  "commandExecuted": false,
+  "foregroundEligible": false,
+  "liveProviderCalls": 0
+}

@@ -1,0 +1,54 @@
+{
+  "version": "codex-cli 0.149.1",
+  "model": "gpt-5.1-codex",
+  "modelSource": "explicit fixture model; no entitlement/economic qualification",
+  "disabledFeatures": [
+    "shell_tool",
+    "multi_agent",
+    "multi_agent_v2",
+    "plugins",
+    "skill_search",
+    "tool_suggest",
+    "image_generation",
+    "in_app_browser",
+    "workspace_dependencies",
+    "shell_snapshot",
+    "view_image",
+    "goals",
+    "apps",
+    "browser_use",
+    "browser_use_external",
+    "computer_use",
+    "code_mode_host",
+    "enable_request_compression"
+  ],
+  "mockModelRequests": 2,
+  "hookTools": [
+    "update_plan"
+  ],
+  "returnedToolPayloads": [
+    {
+      "bytes": 79,
+      "sha256": "90a16960c189b32a5caa39e1e24f2d13f7491e036e46b08359f260a4e1e21f5b",
+      "prefix": "Tool call blocked by PreToolUse hook: bounded fixture denial. Tool: up"
+    }
+  ],
+  "jsonlItemTypes": [
+    "error",
+    "error",
+    "error",
+    "agent_message"
+  ],
+  "jsonlEventTypes": [
+    "thread.started",
+    "item.completed",
+    "item.completed",
+    "item.completed",
+    "turn.started",
+    "item.completed",
+    "turn.completed"
+  ],
+  "commandExecuted": false,
+  "foregroundEligible": false,
+  "liveProviderCalls": 0
+}

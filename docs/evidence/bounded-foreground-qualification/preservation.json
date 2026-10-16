@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "developmentBase": "4e7f85f750e28d3037f35caea182bfd2c8385ed4",
+  "mainHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "mainHeadStatusTrackedUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "stableUnchanged": true,
+  "task2": {
+    "baselineCount": 105,
+    "actualCount": 105,
+    "missing": [],
+    "extra": [],
+    "changed": []
+  },
+  "task2Unchanged": true,
+  "task3Files": 24,
+  "task3Unchanged": true,
+  "packagesMatchProtectedBaseline": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "launchAgentFileAndBindingUnchanged": true,
+  "schedulerInstallationUnchanged": true,
+  "schedulesUnchanged": true,
+  "workFileChanges": [],
+  "schedulerHealthSuccess": true,
+  "naturalSchedulerRuns": {
+    "before": "121",
+    "after": "121",
+    "lastExit": "0"
+  },
+  "existingCanaryReceipt": {
+    "digest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+    "unchanged": true,
+    "newDeliveryEffects": 0
+  }
+}

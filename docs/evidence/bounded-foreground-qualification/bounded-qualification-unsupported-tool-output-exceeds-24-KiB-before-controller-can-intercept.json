@@ -1,0 +1,52 @@
+{
+  "version": "codex-cli 0.149.1",
+  "model": "gpt-5.6-sol",
+  "modelSource": "explicit fixture model; no entitlement/economic qualification",
+  "disabledFeatures": [
+    "shell_tool",
+    "multi_agent",
+    "multi_agent_v2",
+    "plugins",
+    "skill_search",
+    "tool_suggest",
+    "image_generation",
+    "in_app_browser",
+    "workspace_dependencies",
+    "shell_snapshot",
+    "view_image",
+    "goals",
+    "apps",
+    "browser_use",
+    "browser_use_external",
+    "computer_use",
+    "code_mode_host",
+    "enable_request_compression"
+  ],
+  "mockModelRequests": 2,
+  "hookTools": [],
+  "returnedToolPayloads": [
+    {
+      "bytes": 26026,
+      "sha256": "8fe1d5c64c65ecd1231c4292dca1ff36079fcc4198666b4952d98e9c84e1f793",
+      "prefix": "unsupported call: unknown_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  ],
+  "jsonlItemTypes": [
+    "error",
+    "error",
+    "error",
+    "agent_message"
+  ],
+  "jsonlEventTypes": [
+    "thread.started",
+    "item.completed",
+    "item.completed",
+    "item.completed",
+    "turn.started",
+    "item.completed",
+    "turn.completed"
+  ],
+  "commandExecuted": false,
+  "foregroundEligible": false,
+  "liveProviderCalls": 0
+}
