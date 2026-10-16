@@ -1,0 +1,49 @@
+{
+  "implementation": "9dac99872b2c4d2d9ba46617d66995c95eaefb86",
+  "candidateWorkUnchanged": true,
+  "candidateWorkFileCount": 454,
+  "candidateTaskCount": 1,
+  "task001Unchanged": true,
+  "task002Created": false,
+  "candidateWorkBefore": "/private/tmp/0x2f-source-search-baseline/candidate-work-before.json",
+  "candidateWorkAfter": "/private/tmp/0x2f-source-search-baseline/candidate-work-after.json",
+  "productionBaselineBefore": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.source-search-before.json",
+  "productionBaselineAfter": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.source-search-after.json",
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "productionTrackedBytesAndPackagesUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "stableUnchanged": true,
+  "allProductionTasksUnchanged": true,
+  "task2Files": 105,
+  "task3Files": 24,
+  "launchAgentScheduleAndBindingUnchanged": true,
+  "healthy": true,
+  "naturalSchedulerWake": {
+    "before": {
+      "queryExit": 0,
+      "state": "running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "154",
+      "last exit code": "0"
+    },
+    "after": {
+      "queryExit": 0,
+      "state": "not running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "155",
+      "last exit code": "0"
+    },
+    "changedOnly": [
+      "scheduler.log",
+      "scheduler/health.json"
+    ],
+    "phaseInvokedSchedulerControl": false
+  },
+  "priorTrackedEvidenceUnchanged": true,
+  "existing2fAnd2fNextLaunchersUnchanged": true,
+  "keychainAccesses": 0,
+  "keychainModifications": 0,
+  "realProviderRequests": 0
+}

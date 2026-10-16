@@ -1,0 +1,17 @@
+{
+  "source": "read-only real durable Task #001; not run or changed by correction",
+  "taskPath": ".work/tasks/001-after-creating-a-task-print-one-concise-next-act/task.json",
+  "status": "needs_you",
+  "reason": "managed_input_limit",
+  "attempts": 1,
+  "inferenceRequests": 1,
+  "reads": 2,
+  "patches": 0,
+  "inputTokens": 1031,
+  "outputTokens": 54,
+  "totalTokens": 1085,
+  "resultBytes": 7786,
+  "wholeInitializedWorkBaseline": "/private/tmp/0x2f-source-search-baseline/candidate-work-before.json",
+  "wholeInitializedWorkFileCount": 454,
+  "baselineTaskJsonSha256": "d9d0ef1a95aaedf36097258bfc3bf4f509077ede6a1f4e13068160b3e5d6ae62"
+}

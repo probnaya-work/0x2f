@@ -1,0 +1,36 @@
+{
+  "implementation": "9dac99872b2c4d2d9ba46617d66995c95eaefb86",
+  "focused": {
+    "tests": 73,
+    "pass": 73,
+    "fail": 0,
+    "exit": 0
+  },
+  "check": {
+    "command": "npm run check",
+    "exit": 0,
+    "changedJavaScriptFilesIndividuallyChecked": 5
+  },
+  "full": {
+    "runs": 1,
+    "tests": 993,
+    "pass": 874,
+    "skip": 119,
+    "fail": 0,
+    "exit": 0,
+    "durationMs": 264540.915292,
+    "nativeLaunchAgentTests": false
+  },
+  "realProviderRequests": 0,
+  "keychainAccesses": 0,
+  "fixtures": "deterministic fake Responses with fixed loopback transport and fake in-memory key only",
+  "candidateInventory": {
+    "files": 429,
+    "bytes": 7330756,
+    "limits": {
+      "files": 512,
+      "bytes": 8000000
+    },
+    "qualified": true
+  }
+}

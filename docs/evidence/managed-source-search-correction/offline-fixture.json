@@ -1,0 +1,749 @@
+{
+  "kind": "deterministic fake Responses fixture; no provider or Keychain calls",
+  "task": {
+    "id": 1,
+    "slug": "001-fix-parser-without-changing-public-api-or-delive",
+    "title": "Fix parser without changing public API or delivering it.",
+    "brief": "Fix parser without changing public API or delivering it.",
+    "engineering": {
+      "schemaVersion": 1,
+      "revision": 29,
+      "config": {
+        "schemaVersion": 1,
+        "enabled": true,
+        "playbook": true,
+        "currency": "USD",
+        "providers": [
+          "primary",
+          "secondary"
+        ],
+        "reviewProviders": [
+          "reviewer"
+        ],
+        "files": [
+          "src/id.mjs",
+          "test/id.test.mjs"
+        ],
+        "writePaths": [
+          "src/id.mjs"
+        ],
+        "check": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/id.test.mjs"
+        ],
+        "limits": {
+          "moneyMicros": 250000,
+          "tokens": 20000,
+          "modelCalls": 2,
+          "providerCalls": 5,
+          "wallClockMs": 30000,
+          "implementationAttempts": 1,
+          "agentRuns": 1
+        },
+        "policy": "engineering-continuity-v1",
+        "checkDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+        "reviewCheckPins": {},
+        "workspace": {
+          "repository": "/private/tmp/0x2f-playbook-JugqLR",
+          "ref": "HEAD"
+        }
+      },
+      "configDigest": "de9b82e5d7efa405c5dc4536fcc1e03d614a4de3641b859dcb80d6613ace4471",
+      "driver": {
+        "token": "f3ad02e8-e5b9-4d72-9294-de4c32e68435",
+        "pid": 75191,
+        "state": "completed"
+      },
+      "decisions": [
+        {
+          "purpose": "implement",
+          "provider": "managed-openai",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "reason": "minimum-qualified-managed-model",
+          "lane": "managed-api",
+          "opaqueFallback": false
+        }
+      ],
+      "budget": {
+        "limits": {
+          "moneyMicros": 250000,
+          "tokens": 20000,
+          "modelCalls": 2,
+          "providerCalls": 5,
+          "wallClockMs": 30000,
+          "implementationAttempts": 1,
+          "agentRuns": 1
+        },
+        "confirmed": {
+          "moneyMicros": 0,
+          "tokens": 0,
+          "modelCalls": 0,
+          "providerCalls": 0
+        },
+        "reservations": [],
+        "uncertain": []
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "run": 2,
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "f254c245bde2e7e87f12a25a22784c95ba838429a8eabed8ab2818018b20c826",
+          "contentDigest": "c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37"
+        },
+        "argv": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/id.test.mjs"
+        ],
+        "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+        "cwd": "/private/tmp/0x2f-playbook-JugqLR/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+        "code": 0,
+        "error": null,
+        "output": "✔ test/id.test.mjs (49.040709ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 52.64275\n",
+        "groupClosed": true,
+        "sourceUnchanged": true,
+        "outputDigest": "8e1e1d1eeed3a1d9ebb75e99f7f741b8753e3f304077e6eccb3014106bbe42e4"
+      },
+      "next": "accept",
+      "playbook": {
+        "nextPurpose": "investigate",
+        "reason": "initial_executor",
+        "agentRuns": 0,
+        "implementationAttempts": 0,
+        "investigationAttempts": 0,
+        "reviewCycles": 0,
+        "dispatch": null,
+        "review": {
+          "path": "runs/2/review.json",
+          "digest": "552a2602645281d02286ec30211040a3eea6b773ec9f50b594f3e5bbde246468"
+        }
+      },
+      "workspace": {
+        "schemaVersion": 1,
+        "taskId": 1,
+        "slug": "001-fix-parser-without-changing-public-api-or-delive",
+        "repository": "/private/tmp/0x2f-playbook-JugqLR",
+        "commonDir": "/private/tmp/0x2f-playbook-JugqLR/.git",
+        "requestedRef": "HEAD",
+        "commit": "a97838bdfe270bf669af143b975d3922f4ebd83e",
+        "path": "/private/tmp/0x2f-playbook-JugqLR/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+        "identity": "3f25df342991ac166a6020c1530952053e3892622f54f2cd66a26321ec8789eb",
+        "state": "ready"
+      },
+      "economics": {
+        "policy": {
+          "version": "engineering-economics-v1",
+          "classification": "small",
+          "signals": {
+            "writeFiles": 1,
+            "relevantFiles": 2,
+            "directories": 1,
+            "sensitive": false
+          },
+          "hard": {
+            "inputBytes": 8192,
+            "attempts": 1,
+            "driverDeadlineMs": 30000
+          },
+          "soft": {
+            "totalTokens": 8000,
+            "toolOutputBytes": 4096
+          },
+          "unknown": [
+            "providerMoney",
+            "internalCalls",
+            "harnessInjectedContext",
+            "agentToolOutputLimit",
+            "processTreeTermination"
+          ]
+        },
+        "attempts": [
+          {
+            "run": 1,
+            "path": "runs/1/usage.json",
+            "digest": "b6583ce945c8b629e83bf2ec17e8db380bc997ddd634998db95c3cb121efc86c"
+          }
+        ],
+        "aggregate": {
+          "attempts": 1,
+          "metrics": {
+            "input": {
+              "value": 2062,
+              "observed": 2062,
+              "unknownAttempts": 0
+            },
+            "cachedInput": {
+              "value": 20,
+              "observed": 20,
+              "unknownAttempts": 0
+            },
+            "output": {
+              "value": 40,
+              "observed": 40,
+              "unknownAttempts": 0
+            },
+            "reasoning": {
+              "value": null,
+              "observed": 0,
+              "unknownAttempts": 1
+            },
+            "total": {
+              "value": 2102,
+              "observed": 2102,
+              "unknownAttempts": 0
+            }
+          },
+          "money": {
+            "value": 1713,
+            "currency": "USD"
+          },
+          "partial": false
+        },
+        "aggregateRef": {
+          "path": "usage/task-after-1.json",
+          "digest": "af64eb7bdaa1b6d1a74087d95297eefa40c23c3f2023c88f41d3de29f2fa4754"
+        }
+      },
+      "managed": {
+        "lane": "managed-api",
+        "state": "READY",
+        "limits": {
+          "attempts": 1,
+          "packetBytes": 8192,
+          "files": 4,
+          "sourceBytes": 65536,
+          "reads": 4,
+          "patches": 1,
+          "tools": 6,
+          "toolResultBytes": 24576,
+          "readResultBytes": 4096,
+          "serializedInputBytes": 32768,
+          "inferenceRequests": 2,
+          "countRequests": 2,
+          "responsesRequests": 4,
+          "inputTokens": 8192,
+          "inputTokensPerRequest": 4096,
+          "outputTokens": 4096,
+          "outputTokensPerRequest": 2048,
+          "deadlineMs": 120000,
+          "costUsd": 0.25
+        },
+        "attempt": "1f30b1a7-26cf-4a39-bad1-e48bfbe3a003",
+        "requests": 4,
+        "inferences": 2,
+        "tools": 3,
+        "reads": 1,
+        "searches": 1,
+        "patches": 1,
+        "resultBytes": 733,
+        "inputBytes": 22832,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "predicted": {
+          "currency": "USD",
+          "inferenceUpperUsd": 0.024576,
+          "totalUpperUsd": null,
+          "controlRequests": {
+            "classification": "unpriced_control_request",
+            "maximum": 3,
+            "tokenCountMaximum": 2,
+            "availabilityMaximum": 1,
+            "separatePublishedFee": false,
+            "contractualZeroFee": false,
+            "includedInInferenceMaximum": false
+          },
+          "inputTokens": 8192,
+          "outputTokens": 4096,
+          "totalInferenceTokens": 12288,
+          "pricing": {
+            "currency": "USD",
+            "perMillion": {
+              "input": 0.75,
+              "cachedInput": 0.075,
+              "output": 4.5
+            },
+            "observedAt": "2026-10-16T15:54:35Z",
+            "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+            "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+            "controlRequestPolicy": "unpriced_control_request"
+          }
+        },
+        "inputTokens": 2062,
+        "inputReserved": 2062,
+        "outputTokens": 40,
+        "outputReserved": 4096,
+        "counts": 2,
+        "modelQueries": 1,
+        "pricingPolicy": {
+          "version": "managed-foreground-pricing-v3",
+          "mode": "foreground",
+          "foregroundCanary": true,
+          "foregroundAuthorized": false,
+          "publishedBillableInferenceMaximumUsd": 0.024576,
+          "controlRequests": {
+            "classification": "unpriced_control_request",
+            "maximum": 3,
+            "tokenCountMaximum": 2,
+            "availabilityMaximum": 1,
+            "separatePublishedFee": false,
+            "contractualZeroFee": false,
+            "includedInInferenceMaximum": false
+          },
+          "totalBilledAmount": "unknown",
+          "retry": false,
+          "opaqueFallback": false
+        },
+        "pendingRequest": null,
+        "baseline": {
+          "path": "runs/1/inputs/manifest.json",
+          "digest": "aa0c975c2e4eb4e11de293ab5d1aacc723042f6fccc9a3ba3cd7de65a8d9a7a4",
+          "contentDigest": "a9987330bb3c7472775722cdfce07389df321941a2739a4982bdb1f30ea00872"
+        },
+        "pendingInputTokens": 0,
+        "actualUsage": {
+          "input": 2062,
+          "cachedInput": 20,
+          "output": 40,
+          "total": 2102
+        },
+        "calculatedInferenceCostUsd": 0.001713,
+        "providerReportedCost": "unknown",
+        "controlCost": "no separate published fee; actual billed amount unknown",
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "f254c245bde2e7e87f12a25a22784c95ba838429a8eabed8ab2818018b20c826",
+          "contentDigest": "c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37"
+        }
+      },
+      "review": {
+        "path": "runs/2/review.json",
+        "digest": "552a2602645281d02286ec30211040a3eea6b773ec9f50b594f3e5bbde246468"
+      }
+    },
+    "status": "ready",
+    "execution": {
+      "provider": "managed-openai",
+      "launchToken": "f3ad02e8-e5b9-4d72-9294-de4c32e68435",
+      "node": "local",
+      "workspace": "local"
+    },
+    "runs": [
+      {
+        "run": 1,
+        "provider": "managed-openai",
+        "node": "local",
+        "workspace": "local",
+        "startedAt": "2026-10-16T21:53:09.163Z",
+        "requestedProvider": "auto",
+        "outcome": "ready",
+        "attempts": 1,
+        "purpose": "implement",
+        "executor": {
+          "kind": "managed",
+          "harness": "0x2f-responses-v1",
+          "requestedModel": "gpt-5.4-mini-2026-03-17",
+          "observedModel": "gpt-5.4-mini-2026-03-17"
+        },
+        "usage": {
+          "confirmed": null,
+          "estimated": null,
+          "uncertainty": "not_started"
+        },
+        "permissions": {
+          "tools": [
+            "read_task_file",
+            "search_task_file",
+            "submit_patch",
+            "request_context_expansion"
+          ],
+          "writePaths": [
+            "src/id.mjs"
+          ],
+          "externalActions": false
+        },
+        "usageLedger": {
+          "run": 1,
+          "path": "runs/1/usage.json",
+          "digest": "b6583ce945c8b629e83bf2ec17e8db380bc997ddd634998db95c3cb121efc86c"
+        },
+        "completedAt": "2026-10-16T21:53:11.520Z",
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "f254c245bde2e7e87f12a25a22784c95ba838429a8eabed8ab2818018b20c826",
+          "contentDigest": "c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37"
+        },
+        "input": {
+          "path": "runs/1/inputs/manifest.json",
+          "digest": "aa0c975c2e4eb4e11de293ab5d1aacc723042f6fccc9a3ba3cd7de65a8d9a7a4",
+          "contentDigest": "a9987330bb3c7472775722cdfce07389df321941a2739a4982bdb1f30ea00872"
+        }
+      },
+      {
+        "run": 2,
+        "provider": "local-checks",
+        "node": "local",
+        "workspace": "local",
+        "startedAt": "2026-10-16T21:53:11.567Z",
+        "requestedProvider": "auto",
+        "outcome": "ready",
+        "attempts": 1,
+        "purpose": "verify",
+        "executor": {
+          "kind": "local"
+        },
+        "usage": {
+          "confirmed": null,
+          "estimated": null,
+          "uncertainty": "not_started"
+        },
+        "input": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "f254c245bde2e7e87f12a25a22784c95ba838429a8eabed8ab2818018b20c826",
+          "contentDigest": "c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37"
+        },
+        "completedAt": "2026-10-16T21:53:11.801Z",
+        "verification": {
+          "schemaVersion": 1,
+          "run": 2,
+          "artifact": {
+            "path": "runs/1/artifacts/manifest.json",
+            "digest": "f254c245bde2e7e87f12a25a22784c95ba838429a8eabed8ab2818018b20c826",
+            "contentDigest": "c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37"
+          },
+          "argv": [
+            "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+            "--test",
+            "test/id.test.mjs"
+          ],
+          "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+          "cwd": "/private/tmp/0x2f-playbook-JugqLR/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+          "code": 0,
+          "error": null,
+          "output": "✔ test/id.test.mjs (49.040709ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 52.64275\n",
+          "groupClosed": true,
+          "sourceUnchanged": true,
+          "outputDigest": "8e1e1d1eeed3a1d9ebb75e99f7f741b8753e3f304077e6eccb3014106bbe42e4"
+        }
+      }
+    ],
+    "createdAt": "2026-10-16T21:53:09.230Z",
+    "updatedAt": "2026-10-16T21:53:11.862Z",
+    "pid": 75191
+  },
+  "attempt": {
+    "schemaVersion": 1,
+    "taskId": 1,
+    "run": 1,
+    "attempt": "1f30b1a7-26cf-4a39-bad1-e48bfbe3a003",
+    "model": {
+      "id": "gpt-5.4-mini-2026-03-17",
+      "capabilities": [
+        "responses",
+        "function-calling",
+        "small-code-patch"
+      ],
+      "reasoningEffort": "none",
+      "price": {
+        "currency": "USD",
+        "perMillion": {
+          "input": 0.75,
+          "cachedInput": 0.075,
+          "output": 4.5
+        },
+        "observedAt": "2026-10-16T15:54:35Z",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+        "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+        "controlRequestPolicy": "unpriced_control_request"
+      },
+      "capabilitySource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+    },
+    "limits": {
+      "attempts": 1,
+      "packetBytes": 8192,
+      "files": 4,
+      "sourceBytes": 65536,
+      "reads": 4,
+      "patches": 1,
+      "tools": 6,
+      "toolResultBytes": 24576,
+      "readResultBytes": 4096,
+      "serializedInputBytes": 32768,
+      "inferenceRequests": 2,
+      "countRequests": 2,
+      "responsesRequests": 4,
+      "inputTokens": 8192,
+      "inputTokensPerRequest": 4096,
+      "outputTokens": 4096,
+      "outputTokensPerRequest": 2048,
+      "deadlineMs": 120000,
+      "costUsd": 0.25
+    },
+    "predicted": {
+      "currency": "USD",
+      "inferenceUpperUsd": 0.024576,
+      "totalUpperUsd": null,
+      "controlRequests": {
+        "classification": "unpriced_control_request",
+        "maximum": 3,
+        "tokenCountMaximum": 2,
+        "availabilityMaximum": 1,
+        "separatePublishedFee": false,
+        "contractualZeroFee": false,
+        "includedInInferenceMaximum": false
+      },
+      "inputTokens": 8192,
+      "outputTokens": 4096,
+      "totalInferenceTokens": 12288,
+      "pricing": {
+        "currency": "USD",
+        "perMillion": {
+          "input": 0.75,
+          "cachedInput": 0.075,
+          "output": 4.5
+        },
+        "observedAt": "2026-10-16T15:54:35Z",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+        "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+        "controlRequestPolicy": "unpriced_control_request"
+      }
+    },
+    "authorization": {
+      "mode": "foreground",
+      "foregroundCanary": true,
+      "foregroundAuthorized": false
+    },
+    "packet": {
+      "schemaVersion": 1,
+      "brief": "Fix parser without changing public API or delivering it.",
+      "constraints": [],
+      "acceptance": {
+        "check": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/id.test.mjs"
+        ],
+        "scope": [
+          "src/id.mjs"
+        ]
+      },
+      "instructions": [
+        {
+          "path": "AGENTS.md",
+          "text": "# Fixture constraints\n....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................",
+          "digest": "cb889869c56f688c5661426c06874bb946456e5a90ad8d957cae0534853ca60c"
+        }
+      ],
+      "files": [
+        {
+          "id": "f1",
+          "path": "src/id.mjs",
+          "bytes": 31003,
+          "sha256": "99c33a3753e5c1f6e22f432c85e75c156980eaa77004e79045cb35117933b005",
+          "identity": {
+            "dev": 16777233,
+            "ino": 56739305
+          },
+          "writable": true
+        },
+        {
+          "id": "f2",
+          "path": "test/id.test.mjs",
+          "bytes": 3046,
+          "sha256": "a0305ecb5ab7802ac1e088f5346a07781b833ede08b354d8393a01f11c29a7c8",
+          "identity": {
+            "dev": 16777233,
+            "ino": 56739307
+          },
+          "writable": false
+        }
+      ],
+      "prohibited": [
+        "shell",
+        "network",
+        "tests",
+        "Git",
+        "commit",
+        "delivery"
+      ],
+      "loop": "read necessary IDs, then submit one patch; context expansion stops"
+    },
+    "inputDigest": "c1151514f77fa0ed5eeb4d8df237dd9f9f18245bc851468924a454a28525048c",
+    "intent": "d05c469c74df3c6a318a48c8d8c00a5610a6f296edb3306b1c42ac1fd5ffbd50",
+    "at": "2026-10-16T21:53:09.792Z"
+  },
+  "receipts": [
+    {
+      "callId": "search",
+      "tool": "search_task_file",
+      "bytes": 538,
+      "sourceDigest": "99c33a3753e5c1f6e22f432c85e75c156980eaa77004e79045cb35117933b005",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "search",
+        "output": "{\"file_id\":\"f1\",\"matches\":[{\"line\":301,\"column\":14,\"excerpt\":\"export const parseTaskId = () => null;\",\"context\":[{\"line\":300,\"excerpt\":\"// filler xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"},{\"line\":302,\"excerpt\":\"//..............................................................................................................................................................\"}]}],\"truncated\":false}"
+      }
+    },
+    {
+      "callId": "targeted",
+      "tool": "read_task_file",
+      "bytes": 195,
+      "sourceDigest": "99c33a3753e5c1f6e22f432c85e75c156980eaa77004e79045cb35117933b005",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "targeted",
+        "output": "{\"file_id\":\"f1\",\"start_line\":301,\"line_count\":1,\"content\":\"export const parseTaskId = () => null;\",\"truncated\":false}"
+      }
+    }
+  ],
+  "usage": {
+    "schemaVersion": 1,
+    "taskId": 1,
+    "run": 1,
+    "boundary": "1f30b1a7-26cf-4a39-bad1-e48bfbe3a003",
+    "attempt": 1,
+    "harness": "managed-responses-v1",
+    "provider": "managed-openai",
+    "model": "gpt-5.4-mini-2026-03-17",
+    "routingReason": "minimum-qualified-managed-model",
+    "continuationReason": null,
+    "outcome": "ready",
+    "counterScope": "attempt",
+    "counterId": "1f30b1a7-26cf-4a39-bad1-e48bfbe3a003",
+    "complete": true,
+    "tokens": {
+      "values": {
+        "input": 2062,
+        "cachedInput": 20,
+        "output": 40,
+        "reasoning": null,
+        "total": 2102
+      },
+      "semantics": "delta",
+      "compatible": true,
+      "acceptedEvents": 2
+    },
+    "metricSources": {
+      "input": "OpenAI Responses usage; immutable managed request receipts",
+      "cachedInput": "OpenAI Responses usage; immutable managed request receipts",
+      "output": "OpenAI Responses usage; immutable managed request receipts",
+      "reasoning": "unknown",
+      "total": "OpenAI Responses usage; immutable managed request receipts"
+    },
+    "sourceEvidence": [
+      {
+        "path": "runs/1/managed/usage-1.json",
+        "responseId": "resp_1"
+      },
+      {
+        "path": "runs/1/managed/usage-2.json",
+        "responseId": "resp_2"
+      },
+      {
+        "path": "runs/1/managed/tool-1-receipt.json",
+        "tool": "search_task_file",
+        "bytes": 538
+      },
+      {
+        "path": "runs/1/managed/tool-2-receipt.json",
+        "tool": "read_task_file",
+        "bytes": 195
+      }
+    ],
+    "money": {
+      "value": 1713,
+      "currency": "USD",
+      "unit": "micros",
+      "source": "Calculated inference-only cost from versioned prices; other API fees unknown"
+    },
+    "contextManifest": {
+      "totalBytes": 2992,
+      "parts": [
+        {
+          "name": "task-packet",
+          "bytes": 2992,
+          "reason": "current approved small task"
+        }
+      ]
+    },
+    "limits": {
+      "controller": {
+        "version": "engineering-economics-v1",
+        "classification": "small",
+        "signals": {
+          "writeFiles": 1,
+          "relevantFiles": 2,
+          "directories": 1,
+          "sensitive": false
+        },
+        "hard": {
+          "inputBytes": 8192,
+          "attempts": 1,
+          "driverDeadlineMs": 30000
+        },
+        "soft": {
+          "totalTokens": 8000,
+          "toolOutputBytes": 4096
+        },
+        "unknown": [
+          "providerMoney",
+          "internalCalls",
+          "harnessInjectedContext",
+          "agentToolOutputLimit",
+          "processTreeTermination"
+        ]
+      },
+      "qualifiedMaximum": {
+        "tokens": 12288
+      },
+      "providerTotalTokenCeiling": "hard-qualified"
+    },
+    "at": null
+  },
+  "projection": [
+    "STATE READY",
+    "PURPOSE VERIFY · EXECUTOR local-checks · RUN 2",
+    "NEXT ACCEPT · REASON INITIAL_EXECUTOR",
+    "COST TOTAL UNKNOWN · inference calculation and provider charge are separate",
+    "LANE MANAGED API · READY · MODEL gpt-5.4-mini-2026-03-17 · NO OPAQUE FALLBACK",
+    "OBSERVED MODEL gpt-5.4-mini-2026-03-17",
+    "FOREGROUND ONLY · UNATTENDED NO-GO · NO AUTOMATIC RETRY OR DELIVERY",
+    "ENVELOPE 1 attempt · 2 inference + 2 count requests · 6 tools · 4 reads · 1 patch",
+    "MANAGED USAGE 4 Responses HTTP · 2 inference · 3 tools · 1 reads · 1 searches · 1 patches · 733 result bytes",
+    "BOUND 12288 inference tokens",
+    "LIMITS 4 files · 65536 source bytes · 8192 packet bytes · 120000 ms deadline",
+    "PAYLOAD 4096 bytes/read · 24576 result bytes · 32768 serialized API input bytes",
+    "PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576",
+    "CONTROL REQUESTS: 3 maximum, no separate published fee · 3 dispatched · contractual zero fee not claimed",
+    "ACTUAL TOKENS 2102 · CALCULATED INFERENCE USD 0.001713 · PROVIDER COST UNKNOWN",
+    "USAGE TOTAL 2102 · INPUT 2062 · CACHED 20 · OUTPUT 40 · REASONING ? · ATTEMPTS 1",
+    "USAGE COST USD 1713 micros",
+    "RESULT PATCH VERIFIED · c013df78e360c9f493c28e3b3dfeb382baac0901ab8f090ca4968d4616794c37",
+    "ARTIFACT runs/1/artifacts/manifest.json",
+    "REVIEW runs/2/review.json · 552a2602645281d02286ec30211040a3eea6b773ec9f50b594f3e5bbde246468",
+    "WORKSPACE /private/tmp/0x2f-playbook-JugqLR/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive · ref a97838bdfe270bf669af143b975d3922f4ebd83e · task-owned worktree",
+    "ROUTING implement → managed-openai · minimum-qualified-managed-model"
+  ],
+  "requests": [
+    {
+      "url": "/v1/models/gpt-5.4-mini-2026-03-17",
+      "bytes": 2
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "bytes": 5326
+    },
+    {
+      "url": "/v1/responses",
+      "bytes": 5420
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "bytes": 5996
+    },
+    {
+      "url": "/v1/responses",
+      "bytes": 6090
+    }
+  ]
+}
