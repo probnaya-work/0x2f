@@ -1,3 +1,4 @@
+import {nativeLaunchdEnabled} from './native-launchd-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -14,7 +15,7 @@ import {manageSupervision,supervisionStatus,readInstallation,listAttempts,readAt
 import {rejectCredentialValues} from '../src/core/workflow-credentials.mjs';
 import {validateSnapshot} from '../src/core/workflow-schema.mjs';
 import {recoverWorkflow,workflowDoctor} from '../src/core/workflow-doctor.mjs';
-import {fixture,pause,settled,captureFixtureEvidence} from './workflow-fixture.mjs';
+import {fixture,pause,settled,captureFixtureEvidence,restartFixtureJob} from './workflow-fixture.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 const exec=promisify(execFile),workerFile=new URL('./supervision-fixture-worker.mjs',import.meta.url).pathname;
 const policy={processGroup:'inherit',daemonizes:false,unattended:true,network:false,paid:false};
@@ -57,7 +58,7 @@ else {fs.writeFileSync(path.join(output,'result.txt'),'known-result');}
   t.after(async()=>{await captureFixtureEvidence(store,'harness');const identity=await attemptIdentity(child.pid);if(identity&&!identity.unknown)process.kill(child.pid,'SIGKILL');await new Promise(resolve=>{if(child.exitCode!==null||child.signalCode)resolve();else child.once('exit',resolve);});await store.updateTask({...await store.findTask(task.id),status:'failed'});for(const fn of cleanup)await fn();});
   return {...f,store,task,options,file,child,ledger,attempt:()=>listAttempts(store).then(x=>x[0])};
 }
-const native={skip:process.platform!=='darwin'};
+const native={skip:!nativeLaunchdEnabled()};
 
 test('real inspector timeout is unknown rather than proof of worker death',native,async t=>{
   const identity=await attemptIdentity(process.pid);assert.equal(identity.native,true);
@@ -113,7 +114,7 @@ for(const death of ['worker-kill','runner-kill','both','worker-term','runner-ter
   for(const identity of ids)assert.equal(await attemptIdentityMatches(identity),false);
   const staging=path.join(attemptDir(h.store,r.request.id),'output/result.txt'),before=await fs.readFile(staging);await pause(200);assert.deepEqual(await fs.readFile(staging),before);
   await assert.rejects(promoteAttempt(h.store,r.request.id),/validated/);assert.equal(await h.store.exists(path.join(attemptDir(h.store,r.request.id),'archive')),false);
-  const count=await fs.readFile(h.ledger,'utf8');await manageSupervision(h.store,'repair');await pause(200);assert.equal(await fs.readFile(h.ledger,'utf8'),count);
+  const count=await fs.readFile(h.ledger,'utf8');await restartFixtureJob(h.store);await pause(200);assert.equal(await fs.readFile(h.ledger,'utf8'),count);
   await assert.rejects(prepareAttempt(h.store,h.task,{...h.options,operationId:'operation-2'}),/reconciliation/);
   const report=await workflowDoctor(h.store);assert.ok(report.attempts.some(a=>a.pendingReconciliation));
   await reconcileAttempt(h.store,r.request.id,'abandon');await cleanupAttempt(h.store,r.request.id);assert.equal(await h.store.exists(staging),false);
@@ -126,7 +127,7 @@ for(const point of ['before-owned','after-owned','spawn-before-record','record-b
   const calls=(await fs.readFile(h.ledger,'utf8').catch(()=>'' )).trim().split('\n').filter(Boolean).length;
   if(point.endsWith('after-go'))assert.ok(calls<=1);
   else assert.equal(calls,['before-owned','after-owned','spawn-before-record','record-before-go','both:spawn-before-record','both:record-before-go'].includes(point)?0:1);
-  await manageSupervision(h.store,'repair');await pause(150);assert.equal((await fs.readFile(h.ledger,'utf8').catch(()=>'' )).trim().split('\n').filter(Boolean).length,calls);
+  await restartFixtureJob(h.store);await pause(150);assert.equal((await fs.readFile(h.ledger,'utf8').catch(()=>'' )).trim().split('\n').filter(Boolean).length,calls);
   if(point!=='after-validation')await assert.rejects(promoteAttempt(h.store,r.request.id),/validated/);
 });
 
@@ -368,9 +369,21 @@ test('damaged service installation cannot stop or delete another workspace nativ
 
 test('login-style native job redelivery inspects old receipt without another provider-fixture effect',native,async t=>{
   const h=await harness(t,'hang',{timeoutMs:12000});await wait(()=>h.store.exists(h.ledger));const r=await h.attempt(),m=await readInstallation(h.store);
-  assert.equal(await attemptIdentityMatches(r.owner),true);await stopLaunchAgent(r.request.label);await stopLaunchAgent(m.label);await wait(async()=>!(await groupMembers(r.pgid)).length);
+  assert.equal(await attemptIdentityMatches(r.owner),true);await exec('/bin/launchctl',['kill','SIGTERM',`gui/${process.getuid()}/${r.request.label}`]);await wait(async()=>!(await groupMembers(r.pgid)).length);
   const calls=await fs.readFile(h.ledger,'utf8');
-  await exec('/bin/launchctl',['bootstrap',`gui/${process.getuid()}`,path.join(os.homedir(),'Library/LaunchAgents',r.request.label+'.plist')]);
-  await manageSupervision(h.store,'repair');await wait(async()=>['needs_reconciliation','uncertain'].includes((await h.attempt()).state));
+  await restartFixtureJob(h.store,r.request.label);
+  await restartFixtureJob(h.store);await wait(async()=>['needs_reconciliation','uncertain'].includes((await h.attempt()).state));
   assert.equal(await fs.readFile(h.ledger,'utf8'),calls);await assert.rejects(promoteAttempt(h.store,r.request.id));
+});
+
+test('fixture supervisor restarts preserve the existing native registration',native,async t=>{
+  const f=await fixture(t),m=await readInstallation(f.runtime.store);
+  const plist=path.join(os.homedir(),'Library/LaunchAgents',m.label+'.plist');
+  const before=await fs.stat(plist),bytes=await fs.readFile(plist);
+  for(let n=0;n<2;n++){
+    await restartFixtureJob(f.runtime.store);
+    await wait(async()=> (await supervisionStatus(f.runtime.store)).healthy,'restarted fixture health');
+  }
+  assert.deepEqual(await fs.readFile(plist),bytes);assert.equal((await fs.stat(plist)).ino,before.ino);
+  await assert.rejects(restartFixtureJob(f.runtime.store,'work.probnaya.0x2f.workflow.foreign'),/Unknown fixture/);
 });

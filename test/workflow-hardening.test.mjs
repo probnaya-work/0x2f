@@ -1,6 +1,7 @@
+import {nativeLaunchdEnabled} from './native-launchd-fixture.mjs';
 import {readInstallation,jobState,attemptIdentity,attemptIdentityMatches} from '../src/core/workflow-supervision.mjs';
 import nodeTest from 'node:test';
-const test=process.platform==='darwin'?nodeTest:nodeTest.skip;
+const test=nativeLaunchdEnabled()?nodeTest:nodeTest.skip;
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';

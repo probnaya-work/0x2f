@@ -258,3 +258,19 @@ node server.mjs --port 8080 --data ./data/state.json
 
 See [`docs/remote-control.md`](remote-control.md) for the full walkthrough
 and [`relay/README.md`](../relay/README.md) for deployment.
+
+## Native launchd tests are explicit
+
+`npm test` is the ordinary suite: it never registers native LaunchAgents. Tests
+requiring real launchd are marked skipped unless the explicit native runner opts
+in. Pure policy, engineering, persistence, CLI/TUI/Web tests remain ordinary.
+
+Run `node scripts/test-native-launchd.mjs` for the separate macOS integration
+suite. For a narrow restart check use:
+`node scripts/test-native-launchd.mjs --test-name-pattern='fixture supervisor restarts'`.
+This registers disposable fixture labels only. Existing registrations restart via
+`kickstart -k`; fixture restart refuses unknown labels, private-path mismatches,
+unloaded jobs and modified plists. Bootstrap is reserved for a new registration;
+cleanup verifies fixture ownership before uninstalling. Production scheduling is
+not involved. Native integration remains a separate qualification track, not an
+implicit side effect of ordinary regression testing.

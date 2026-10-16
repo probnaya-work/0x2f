@@ -1,3 +1,5 @@
+import {assertNativeFixture} from './native-launchd-fixture.mjs';
+import {readInstallation,listAttempts,jobState,supervisionPlist} from '../src/core/workflow-supervision.mjs';
 import { manageSupervision } from '../src/core/workflow-supervision.mjs';
 import { identityMatches } from "../src/core/process-identity.mjs";
 import test from 'node:test';
@@ -48,6 +50,7 @@ export async function captureFixtureEvidence(store, phase = 'fixture') {
 }
 
 export async function fixture(t, { adapter = 'okay', duration = 30000, sleepMs = 5000, generated = false } = {}) {
+  await assertNativeFixture();
   const base = await fs.mkdtemp(path.join(os.tmpdir(), '2f-workflow-'));
   t.after(async () => {
     const runtime = createRuntime(base);
@@ -56,6 +59,7 @@ export async function fixture(t, { adapter = 'okay', duration = 30000, sleepMs =
     for (const task of await runtime.store.listTasks()) {
       for (let n=0; n<300 && await identityMatches(task.workerIdentity); n++) await pause(25);
     }
+    await assertNativeFixture(base);
     await manageSupervision(runtime.store,'uninstall');
     async function writable(dir){for(const e of await fs.readdir(dir,{withFileTypes:true})){if(e.isDirectory()){const d=path.join(dir,e.name);await fs.chmod(d,0o700);await writable(d);}}}
     await writable(base);
@@ -106,3 +110,17 @@ export async function settled(runtime, id, status) {
   throw new Error('Worker did not settle.');
 }
 export const packDir = (store, task) => path.join(store.taskDir(task.slug), 'artifacts', 'editorial');
+
+// Restart only a registration whose label, plist, runtime and temporary base
+// match this fixture. Never bootstrap an existing job or touch a production job.
+export async function restartFixtureJob(store, label) {
+  await assertNativeFixture(store.base);
+  const m=await readInstallation(store); label ??= m.label;
+  const request=label===m.label?null:(await listAttempts(store)).find(r=>r.request.label===label)?.request;
+  if(label!==m.label&&!request)throw new Error('Unknown fixture job label.');
+  const plist=path.join(os.homedir(),'Library/LaunchAgents',label+'.plist');
+  if(await store.readText(plist)!==supervisionPlist(m,request))throw new Error('Fixture plist ownership mismatch.');
+  const job=await jobState(label);
+  if(!job.loaded||job.program!==m.node.realPath||!job.argv.includes(m.base))throw new Error('Fixture registration ownership mismatch.');
+  await exec('/bin/launchctl',['kickstart','-k',`gui/${process.getuid()}/${label}`]);
+}
