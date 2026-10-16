@@ -65,6 +65,8 @@ Commands:
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
   2f cancel <id>    stop the active run; the task and its history stay
   2f close <id>      stop working on a task; moves it to DONE
+  2f commit <id> <message>  preview a local commit of a verified disposable task
+  2f allow <id> --digest <scope>   grant the exact proposed local commit
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
@@ -129,6 +131,8 @@ function parseFlags(args) {
       flags.light = true;
     } else if (arg === "--foreground") {
       flags.foreground = true;
+    } else if (arg === "--digest") {
+      flags.digest = args[++i];
     } else {
       rest.push(arg);
     }
@@ -404,13 +408,25 @@ async function main() {
     return;
   }
 
+  if (command === 'commit') {
+    await requireProject(base);
+    const id = Number(args[0]), message = args.slice(1).join(' ');
+    const runtime = createRuntime(base);
+    const task = await runtime.actions.proposeCommit(id, { message });
+    for (const line of workflowLines(task)) console.log(line);
+    console.log(await runtime.store.readText(path.join(runtime.store.taskDir(task.slug), 'delivery', task.engineering.delivery.scopeDigest, 'patch.diff')));
+    console.log(`Grant: 2f allow ${id} --digest ${task.engineering.delivery.scopeDigest}`);
+    return;
+  }
   if (command === "allow" || command === "reject") {
     await requireProject(base);
-    const id = Number(args[0]);
+    const {rest,flags} = parseFlags(args);
+    const id = Number(rest[0]);
     if (!Number.isFinite(id)) throw new Error(`Usage: 2f ${command} <id>`);
 
-    const task = await createRuntime(base).actions.resumeWork(id, command);
+    const task = await createRuntime(base).actions.resumeWork(id, command, {scopeDigest:flags.digest});
     console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
+    if (task.engineering?.delivery) { for (const line of workflowLines(task)) console.log(line); return; }
     if (task.live) {
       // An interactive permission request: the run's process is still alive,
       // holding the outstanding request; the grant is delivered in place and

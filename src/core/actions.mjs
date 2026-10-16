@@ -393,8 +393,15 @@ export function createActions(ctx) {
   //
   //   otherwise — the run ended (provider session persisted); a fresh worker
   //   resumes the same provider session (--resume / session/load).
-  async function resumeWork(id, grant) {
+  async function resumeWork(id, grant, options = {}) {
     const task = await store.findTask(id);
+    if (task.engineering?.delivery) {
+      if (!['allow','reject'].includes(grant)) throw new WorkError('Local commit permission requires explicit allow or reject.');
+      const d = await import('./engineering-delivery.mjs');
+      if (grant === 'reject') return d.revokeLocalCommit(ctx, id, options);
+      await d.grantLocalCommit(ctx, id, options);
+      return d.executeLocalCommit(ctx, id, options);
+    }
     if (task.engineering) throw new WorkError('Engineering policy cannot be bypassed by a session permission resume.');
     if (task.status !== "needs_you") {
       throw new WorkError(
@@ -647,6 +654,7 @@ export function createActions(ctx) {
   // closeWork(id): user closes the task (any status -> done).
   async function closeWork(id) {
     const task = await store.findTask(id);
+    if (['proposed','granted','running'].includes(task.engineering?.delivery?.state)) throw new WorkError('Reject the pending commit permission before closing this task.');
     if (task.engineering && task.status === 'working') throw new WorkError('Cancel the active engineering task before closing it.');
     if (task.engineering && task.status === 'ready') await assertEngineeringAccepted(store, task);
     if (task.workflow && task.status === "working") throw new WorkError("Cancel the active workflow before closing it.");
@@ -657,6 +665,10 @@ export function createActions(ctx) {
   }
 
   return {
+    proposeCommit: async (id, options) => (await import('./engineering-delivery.mjs')).proposeLocalCommit(ctx, id, options),
+    grantCommit: async (id, options) => (await import('./engineering-delivery.mjs')).grantLocalCommit(ctx, id, options),
+    executeCommit: async (id, options) => (await import('./engineering-delivery.mjs')).executeLocalCommit(ctx, id, options),
+    revokeCommit: async (id, options) => (await import('./engineering-delivery.mjs')).revokeLocalCommit(ctx, id, options),
     listWork,
     getWork,
     getRun,
@@ -672,7 +684,7 @@ export function createActions(ctx) {
     correctWork: mutation(correctWork),
     cancelWork: mutation(cancelWork),
     closeWork: mutation(closeWork),
-    allowWork: id => resumeWork(id, "allow"),
-    rejectWork: id => resumeWork(id, "reject")
+    allowWork: (id, options) => resumeWork(id, "allow", options),
+    rejectWork: (id, options) => resumeWork(id, "reject", options)
   };
 }

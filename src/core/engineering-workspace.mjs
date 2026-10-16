@@ -14,12 +14,13 @@ const receiptPath = (store, task) => path.join(store.taskDir(task.slug), 'worksp
 const lock = (store, task, fn) => withLock(path.join(store.taskDir(task.slug), 'workspace-lock'), fn);
 export const engineeringDirectory = (store, task) => task.engineering.workspace?.path ?? store.base;
 
-async function inspect(receipt) {
+const expectedHead = (task, receipt) => task.engineering.delivery?.state === 'committed' && task.engineering.delivery.commit === receipt.deliveredCommit ? receipt.deliveredCommit : receipt.commit;
+async function inspect(receipt, head = receipt.commit) {
   await safePath(receipt.path);
   const exists = await fs.stat(receipt.path).then(() => true, e => { if (e.code === 'ENOENT') return false; throw e; });
   if (!exists) return { exists: false };
   const common = await fs.realpath(await git(receipt.path, ['rev-parse', '--path-format=absolute', '--git-common-dir']));
-  if (common !== receipt.commonDir || await git(receipt.path, ['rev-parse', 'HEAD']) !== receipt.commit) throw new Error('Engineering worktree repository/ref identity changed.');
+  if (common !== receipt.commonDir || await git(receipt.path, ['rev-parse', 'HEAD']) !== head) throw new Error('Engineering worktree repository/ref identity changed.');
   if (await fs.realpath(receipt.path) !== receipt.path) throw new Error('Engineering worktree path changed.');
   return { exists: true, dirty: Boolean(await git(receipt.path, ['status', '--porcelain', '--untracked-files=all'])) };
 }
@@ -47,7 +48,7 @@ export async function ensureEngineeringWorkspace(store, task, spec) {
     owned(store, task, r);
     if (await fs.realpath(spec.repository) !== r.repository || spec.ref !== r.requestedRef) throw new Error('Workspace request differs from the saved task binding.');
     if (r.state === 'removed' || r.state === 'removing') throw new Error('Engineering workspace was removed or has pending removal.');
-    const actual = await inspect(r);
+    const actual = await inspect(r, expectedHead(task, r));
     if (!actual.exists) {
       if (r.state !== 'preparing') throw new Error('Owned engineering workspace is missing; explicit recovery is required.');
       // This durable receipt precedes creation. A crash after Git succeeds can
@@ -67,7 +68,7 @@ export async function assertEngineeringWorkspace(store, task, run) {
   if (fresh.slug !== task.slug || fresh.runs.at(-1).run !== run || fresh.engineering.driver.token !== task.engineering.driver.token) throw new Error('Stale task/run cannot use this engineering worktree.');
   const r = await store.readJson(receiptPath(store, task));
   owned(store, fresh, r);
-  if (r.state !== 'ready' || !(await inspect(r)).exists) throw new Error('Engineering workspace is not ready.');
+  if (r.state !== 'ready' || !(await inspect(r, expectedHead(fresh, r))).exists) throw new Error('Engineering workspace is not ready.');
 }
 
 export async function engineeringWorkspaceStatus(store, task) {
@@ -75,7 +76,7 @@ export async function engineeringWorkspaceStatus(store, task) {
   if (!await store.exists(file)) return { managed: false };
   const r = await store.readJson(file);
   owned(store, task, r);
-  return { ...r, managed: true, ...await inspect(r), sandbox: false };
+  return { ...r, managed: true, ...await inspect(r, expectedHead(task, r)), sandbox: false };
 }
 
 export async function cleanupEngineeringWorkspace(store, task) {
@@ -84,7 +85,7 @@ export async function cleanupEngineeringWorkspace(store, task) {
     if (fresh.status === 'working') throw new Error('Active engineering worktree cannot be removed.');
     const r = await store.readJson(receiptPath(store, fresh));
     owned(store, fresh, r);
-    const actual = await inspect(r);
+    const actual = await inspect(r, expectedHead(fresh, r));
     if (actual.dirty) return { removed: false, reason: 'uncommitted_results', path: r.path };
     await store.writeJson(receiptPath(store, fresh), { ...r, state: 'removing' });
     if (actual.exists) await git(r.repository, ['worktree', 'remove', r.path]);

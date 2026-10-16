@@ -148,7 +148,7 @@ function haltOf(task, base) {
     partial: blocked.canAllow === false || blocked.canReject === false,
     live: blocked.live === true,
     note:
-      blocked.live === true
+      blocked.capability === 'git.localCommit' ? 'Commits the approved patch locally.' : blocked.live === true
         ? "resumable — the same run continues the moment you allow"
         : "the same provider session resumes when you allow"
   };
@@ -227,6 +227,7 @@ export function projectTask(task, events, opts = {}) {
   return {
     id: task.id,
     engineering: Boolean(task.engineering),
+    ...(task.blockedOn?.scopeDigest ? {permissionDigest:task.blockedOn.scopeDigest} : {}),
     workflowLines: workflowLines(task),
     idLabel: String(task.id).padStart(3, "0"),
     slug: task.slug,

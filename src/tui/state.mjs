@@ -79,9 +79,9 @@ export function primaryAction(task, state, ctx = {}) {
   const target = rerunTarget(task, state);
   const name = ctx.lookup ? ctx.lookup(target).name : String(target ?? "").toUpperCase();
   if (task.state === "needs") {
-    if (task.engineering) return { label: 'SAVE ANSWER', input: 'answer-save' };
+    if (task.engineering && task.halt?.kind !== 'permission') return { label: 'SAVE ANSWER', input: 'answer-save' };
     return task.halt?.kind === "permission"
-      ? { label: "ALLOW", intent: { type: "allow", id: task.id } }
+      ? { label: "ALLOW", intent: { type: "allow", id: task.id, ...(task.permissionDigest?{scopeDigest:task.permissionDigest}:{}) } }
       : { label: "ANSWER & CONTINUE", input: "answer" };
   }
   if (task.state === "ready") return { label: "ACCEPT", intent: { type: "accept", id: task.id } };
@@ -104,7 +104,7 @@ export function secondaryAction(task) {
   if (!task) return null;
   if (task.state === "needs") {
     return task.halt?.kind === "permission"
-      ? { label: "REJECT", intent: { type: "reject", id: task.id } }
+      ? { label: "REJECT", intent: { type: "reject", id: task.id, ...(task.permissionDigest?{scopeDigest:task.permissionDigest}:{}) } }
       : { label: "SAVE ONLY", input: "answer-save" };
   }
   if (task.state === "ready") return { label: "SEND BACK", input: "sendback" };

@@ -155,6 +155,11 @@ async function verifyFrozen(store, task, ref) {
 }
 
 export async function assertEngineeringAccepted(store, task) {
+  const delivery = task.engineering.delivery;
+  if (delivery?.state === 'committed') {
+    const r = await store.readJson(path.join(store.taskDir(task.slug), delivery.receipt.path));
+    if (hash(r) !== delivery.receipt.digest || r.commit !== delivery.commit || r.scopeDigest !== delivery.scopeDigest) throw new Error('Local commit receipt changed.');
+  }
   const v = task.engineering.verification;
   if (!v || v.code !== 0 || v.error || !v.sourceUnchanged) throw new Error('No verified engineering artifact is available for acceptance.');
   await verifyFrozen(store, task, v.artifact);

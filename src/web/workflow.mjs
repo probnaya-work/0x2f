@@ -18,7 +18,8 @@ export function engineeringLines(task) {
     ...task.runs.filter(r => r.review?.findings?.length).flatMap(r => r.review.findings.map(f => `FINDING ${f.severity.toUpperCase()} · ${f.confirmed ? 'CONFIRMED' : 'NEEDS DECISION'} · ${f.message}`)),
     ...(run?.handoff ? [`HANDOFF ${run.handoff.metrics.bytes} bytes · history ${run.handoff.metrics.fullHistoryBytes} bytes`] : []),
     ...(e.workspace ? [`WORKSPACE ${e.workspace.path} · ref ${e.workspace.commit} · task-owned worktree`] : []),
-    ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider} · ${d.reason}`)
+    ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider} · ${d.reason}`),
+    ...(e.delivery ? [`LOCAL COMMIT ${e.delivery.state.toUpperCase()} · ${e.delivery.scopeDigest}`, `REPOSITORY ${e.delivery.preview.repository} · WORKTREE ${e.delivery.preview.worktree} · PARENT ${e.delivery.preview.parent}`, `MESSAGE ${e.delivery.preview.message}`, `DIFF ${e.delivery.preview.diffDigest}`, ...(e.delivery.commit ? [`COMMIT ${e.delivery.commit} · RECEIPT ${e.delivery.receipt.path}`] : [])] : [])
   ];
 }
 export function workflowView(task) {

@@ -67,3 +67,35 @@ Fixtures do not establish real harness integration; record a live smoke separate
 Rollback: disable opt-in for new tasks, revert the relevant development commits,
 and retain durable history/artifacts/reservations. Do not bind the stable scheduler
 to this candidate. No real `.work` migration is needed or performed.
+
+## Local commit permission (disposable worktrees only)
+
+After verification, use `2f commit <id> "fix: ..."` for a preview containing the
+repository/worktree/parent identity, exact diff digest, proposed message, author,
+hooks and task/artifact scope. The command prints the exact patch and a scoped
+`2f allow <id> --digest <scope>` command. ALLOW grants and consumes this separate
+local capability; patch ACCEPT alone never grants it. REJECT with the same digest
+preserves the verified patch. Local TUI/Web permissions use the same shared
+boundary and carry the preview digest. Remote relay delivery is not enabled.
+
+Commits require a self-contained disposable repository under the system temporary
+roots and the task's owned detached Git worktree. Source checkout edits and
+foreign staged bytes are preserved. A private Git index builds the verified tree;
+an owned index lock and compare-and-swap detached HEAD update publish only that
+tree. Native `commit-tree`/`update-ref` plumbing avoids an implicit hook changing
+the approved artifact during commit. Repository-local pre-commit,
+prepare-commit-msg and commit-msg hooks run explicitly with bounded output/time
+and saved receipts. Bytes, tree, message, hooks and index are checked again before
+effect. Custom hooksPath and other active hooks are refused. User/global Git
+configuration, signing and credential helpers are not invoked by this narrow
+fixture capability; the disposable repository needs its own local author identity.
+This is trusted local hook execution, not an arbitrary-command sandbox.
+
+Permission binds the exact task/intent/artifact/verification/scope/tree/diff,
+message, author, hooks and repository identity. Changed inputs invalidate the
+permission; restoring old bytes does not revive it. A replacement proposal has a
+new identity. Grant/revoke/consumption, intent, hook/failure evidence and resulting
+commit receipt remain under the durable task. Duplicate execution returns the
+same receipt. A lost outcome after object/ref effect is uncertain and never
+replayed automatically. Manual reconciliation of uncertain delivery is a later
+slice. No push, PR, merge or deployment is performed.

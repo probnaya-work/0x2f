@@ -97,18 +97,18 @@ export function createApp(runtime, opts = {}) {
     try {
       switch (intent.type) {
         case "allow": {
-          const task = await actions.allowWork(intent.id);
+          const task = await actions.allowWork(intent.id, intent.scopeDigest ? {scopeDigest:intent.scopeDigest}:undefined);
           setFlash(
-            task.live
+            task.engineering?.delivery ? `local commit ${task.engineering.delivery.state}` : task.live
               ? "allowed · " + ref(intent.id) + " continues in the same run"
               : "allowed · " + ref(intent.id) + " resumes the same provider session"
           );
           break;
         }
         case "reject": {
-          await actions.rejectWork(intent.id);
+          const task = await actions.rejectWork(intent.id, intent.scopeDigest ? {scopeDigest:intent.scopeDigest}:undefined);
           setFlash(
-            "declined · " + ref(intent.id) + " continues with the request withdrawn",
+            task.engineering?.delivery ? 'local commit declined · verified patch saved' : "declined · " + ref(intent.id) + " continues with the request withdrawn",
             "warn"
           );
           break;

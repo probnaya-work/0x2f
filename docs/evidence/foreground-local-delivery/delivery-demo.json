@@ -1,0 +1,21 @@
+{
+  "mode": "offline-harness-real-local-git",
+  "liveModelCalls": 0,
+  "taskId": 1,
+  "patchAcceptedBeforePermission": true,
+  "revokedProposalDigest": "cc3bd54be4c5e2c41e6296ecaac9a921ff4edb462be623edd88db44fb4ab938e",
+  "scopeDigest": "d7219490c1e8e78ba1a397918888a2d0294331be9d0860a6b1f8a904a55f4525",
+  "artifactDigest": "96613611d0c993a85debcbd7ff7abf015305bb11c8699e62d4b286721cd9b923",
+  "diffDigest": "a9738c999549a891e9c9efdbcfa4a81a37208d8f5e0944e151b7e31f143eddd2",
+  "resultingCommit": "aa68081496e6325f0666394928c89ad8f31153e1",
+  "parent": "36113425c12d612b07e8ad185fbb4a9a4635fdfd",
+  "tree": "6807a4a4b3149ff7e5dc754ef3fb062007ccd5f2",
+  "message": "fix: preserve task id API",
+  "hookReceipts": [],
+  "duplicateReturnedSameCommit": true,
+  "totalCommits": 2,
+  "sourceCheckoutHeadUnchanged": true,
+  "sourceDirtyBytesPreserved": true,
+  "worktreeClean": true,
+  "receiptDigest": "7a415cea24c8cadbfdf4e4fc9e68d948a40db2b62938176504d3f3f9436435b0"
+}

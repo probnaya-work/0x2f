@@ -381,8 +381,8 @@ function remoteBlocked() {
   return false;
 }
 
-function post(path) {
-  return api(path, { method: "POST" });
+function post(path, body) {
+  return api(path, { method: "POST", ...(body ? {headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{}) });
 }
 
 // --- the slash: sound, visual, notification ---------------------------------
@@ -665,11 +665,13 @@ async function act(fn) {
 
 const allow = id => {
   if (remoteBlocked()) return;
-  act(() => post("/api/tasks/" + id + "/allow"));
+  const digest=state.tasks.find(t=>t.id===id)?.blockedOn?.scopeDigest;
+  act(() => post("/api/tasks/" + id + "/allow",digest?{scopeDigest:digest}:undefined));
 };
 const reject = id => {
   if (remoteBlocked()) return;
-  act(() => post("/api/tasks/" + id + "/reject"));
+  const digest=state.tasks.find(t=>t.id===id)?.blockedOn?.scopeDigest;
+  act(() => post("/api/tasks/" + id + "/reject",digest?{scopeDigest:digest}:undefined));
 };
 const accept = id => {
   if (remoteBlocked()) return Promise.resolve(false);

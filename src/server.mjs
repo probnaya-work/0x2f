@@ -767,14 +767,14 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
 
       const allowMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/allow$/);
       if (req.method === "POST" && allowMatch) {
-        const task = await actions.allowWork(Number(allowMatch[1]));
+        const task = await actions.allowWork(Number(allowMatch[1]), await readJsonBody(req));
         json(res, task, 202);
         return;
       }
 
       const rejectMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/reject$/);
       if (req.method === "POST" && rejectMatch) {
-        const task = await actions.rejectWork(Number(rejectMatch[1]));
+        const task = await actions.rejectWork(Number(rejectMatch[1]), await readJsonBody(req));
         json(res, task, 202);
         return;
       }
