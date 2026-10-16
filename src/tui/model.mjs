@@ -225,6 +225,7 @@ export function projectTask(task, events, opts = {}) {
 
   return {
     id: task.id,
+    engineering: Boolean(task.engineering),
     workflowLines: workflowLines(task),
     idLabel: String(task.id).padStart(3, "0"),
     slug: task.slug,

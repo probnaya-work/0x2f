@@ -152,6 +152,7 @@ export function createStore(base = process.cwd()) {
       // construction, and no migration is needed.
       brief,
       ...(opts.workflow ? { workflow: opts.workflow } : {}),
+      ...(opts.engineering ? { engineering: opts.engineering } : {}),
       status: "working",
       execution: {
         provider,

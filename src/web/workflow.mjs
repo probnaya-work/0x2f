@@ -1,4 +1,18 @@
 // DOM-free projection shared by all three local surfaces.
+// Engineering shares the existing detail projection; no new browser module or
+// static route is needed. Missing usage is never rendered as free execution.
+export function engineeringLines(task) {
+  if (!task.engineering) return [];
+  const run = task.runs?.at(-1);
+  const e = task.engineering;
+  const b = e.budget;
+  return [
+    `PURPOSE ${(run?.purpose ?? 'unknown').toUpperCase()} · EXECUTOR ${run?.provider ?? 'unknown'} · RUN ${run?.run ?? 1}`,
+    `NEXT ${e.next.toUpperCase()}${task.blockedOn?.code ? ' · REASON ' + task.blockedOn.code.toUpperCase() : ''}`,
+    `COST ${b.uncertain.length ? 'UNKNOWN · reservation retained' : 'USD ' + (b.confirmed.moneyMicros / 1000000).toFixed(6) + ' confirmed'} · ${b.reservations.length} reserved`,
+    ...(e.verification ? [`RESULT ${e.verification.code === 0 && !e.verification.error && e.verification.sourceUnchanged ? 'PATCH VERIFIED' : 'CHECK FAILED'} · ${e.verification.artifact.contentDigest}`, `ARTIFACT ${e.verification.artifact.path}`] : [])
+  ];
+}
 export function workflowView(task) {
   const w = task.workflow; if (!w) return null;
   const run = task.runs?.at(-1)?.run ?? 1;
@@ -11,6 +25,7 @@ export function workflowView(task) {
     recovery: task.status === 'failed' ? `2f workflow doctor · 2f workflow recover ${task.id}` : null };
 }
 export function workflowLines(task) {
+  if (task.engineering) return engineeringLines(task);
   const v = workflowView(task); if (!v) return [];
   return [`WORKFLOW ${v.id} v${v.version} · run ${v.run} · ${v.origin} · ${v.triggerKey}`,
     `STATE ${v.status} · worker ${v.worker??'unrecorded'}${v.waitingForDecision ? ' · waiting for decision' : ''} · topic ${v.selected ?? 'pending'} · review ${v.review}`,

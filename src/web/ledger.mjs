@@ -1138,6 +1138,7 @@ export function projectRow(task, events, opts = {}) {
   return {
     id: task.id,
     workflowLines: workflowLines(task),
+    engineering: Boolean(task.engineering),
     workflow: workflowView(task),
     num: "/" + two(task.id),
     title: task.title,

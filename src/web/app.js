@@ -1122,7 +1122,7 @@ function renderDecisionCard(row, accent) {
   const submit = el("button", {
     class: "act act-primary",
     "data-focus-key": "answer-" + row.id,
-    text: row.workflow ? "APPLY DECISION" : "ANSWER & CONTINUE"
+    text: row.engineering ? 'SAVE ANSWER' : row.workflow ? "APPLY DECISION" : "ANSWER & CONTINUE"
   });
   submit.disabled = value.trim().length === 0;
   submit.addEventListener("click", e => {
@@ -2516,6 +2516,7 @@ async function answerAndContinue(id) {
   // would spend a run on the same question the agent already asked.
   const saved = await answerDecision(id);
   if (!saved) return false;
+  if (saved.engineering) return true;
   if (saved.workflow && !["selected", "changes_requested"].includes(saved.workflow.review)) return true;
   return sendBack(id);
 }

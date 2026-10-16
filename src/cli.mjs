@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { manageSupervision, attemptAction } from './core/workflow-supervision.mjs';
+import { engineeringConfig } from './core/engineering.mjs';
 // 0x2F CLI — one client of the Work Runtime.
 //
 // The CLI renders state and invokes the SAME shared actions the Web API
@@ -345,7 +346,7 @@ async function main() {
     // refusal is printed HERE instead of creating a task that is doomed to
     // fail in the background with an opaque spawn error. Explicit selections
     // are refused by the shared action with the same message.
-    if (!provider) {
+    if (!provider && !await engineeringConfig(runtime.store)) {
       const effective = runtime.router.defaultRequestedProvider();
       if (effective !== "auto" && !runtime.providers.available(effective)) {
         throw new Error(unavailableMessage(effective, runtime.providers));

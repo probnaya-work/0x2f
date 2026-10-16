@@ -1,4 +1,5 @@
 import { attemptProjection } from './workflow-supervision.mjs';
+import { engineeringConfig, createEngineeringTask, withEngineeringLock, assertEngineeringAccepted } from './engineering.mjs';
 // Shared Work actions — the SINGLE implementation of Work's business rules.
 //
 // Both the CLI and the HTTP API call these actions; neither implements its
@@ -143,6 +144,7 @@ export function createActions(ctx) {
   }
   const mutation = fn => async (id, ...args) => {
     const task = await store.findTask(id);
+    if (task.engineering) return withEngineeringLock(store, task.slug, () => fn(id, ...args));
     return task.workflow ? workflowLock(store, async () => {
       await assertNoPendingOperation(store, await store.findTask(id));
       return fn(id, ...args);
@@ -213,6 +215,13 @@ export function createActions(ctx) {
     // a guard, and an unbounded title would reach every surface and the
     // task's directory name.
     requireWithin(title, MAX_TITLE, "Task title");
+    if (!workflow) {
+      const config = await engineeringConfig(store);
+      if (config) {
+        if ((provider && provider !== 'auto') || model) throw new WorkError('Engineering execution is selected by workspace policy; per-task provider/model overrides are unavailable.');
+        return createEngineeringTask(ctx, { title, brief: clean, prompt: await ctx.buildPrompt(clean) }, config);
+      }
+    }
     const target = resolveTarget(provider);
 
     // The agent receives the FULL brief, never the derived label.
@@ -258,6 +267,7 @@ export function createActions(ctx) {
   // starts fresh.
   async function rerunWork(id, options = {}) {
     const task = await store.findTask(id);
+    if (task.engineering) throw new WorkError('Engineering task continuation is bounded by its saved policy. A blocked task requires a new approved scope; ordinary rerun cannot bypass its ceilings.');
     if (!task.workflow) return rerunUnchecked(id, options);
     return workflowLock(store, async () => {
       const fresh = await store.findTask(id);
@@ -379,6 +389,7 @@ export function createActions(ctx) {
   //   resumes the same provider session (--resume / session/load).
   async function resumeWork(id, grant) {
     const task = await store.findTask(id);
+    if (task.engineering) throw new WorkError('Engineering policy cannot be bypassed by a session permission resume.');
     if (task.status !== "needs_you") {
       throw new WorkError(
         `Task #${id} is ${task.status}, not needs_you — nothing to ${grant}.`
@@ -629,6 +640,8 @@ export function createActions(ctx) {
   // closeWork(id): user closes the task (any status -> done).
   async function closeWork(id) {
     const task = await store.findTask(id);
+    if (task.engineering && task.status === 'working') throw new WorkError('Cancel the active engineering task before closing it.');
+    if (task.engineering && task.status === 'ready') await assertEngineeringAccepted(store, task);
     if (task.workflow && task.status === "working") throw new WorkError("Cancel the active workflow before closing it.");
     const closed = closeTask(task);
     await store.updateTask(closed);
@@ -644,7 +657,10 @@ export function createActions(ctx) {
     createWork,
     rerunWork,
     resumeWork,
-    answerWork,
+    answerWork: async (id, options) => {
+      const task = await store.findTask(id);
+      return task.engineering ? withEngineeringLock(store, task.slug, () => answerWork(id, options)) : answerWork(id, options);
+    },
     noteWork: mutation(noteWork),
     correctWork: mutation(correctWork),
     cancelWork: mutation(cancelWork),

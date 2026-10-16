@@ -44,8 +44,8 @@ export function createLocalNode({
     throw new Error(`Local execution node cannot resolve workspace "${workspaceId}".`);
   }
 
-  function spawnWorker({ base, slug, run = 1, mode, grant, launchToken }) {
-    const worker = new URL("../worker.mjs", import.meta.url);
+  function spawnWorker({ base, slug, run = 1, mode, grant, launchToken, engineering = false }) {
+    const worker = new URL(engineering ? '../engineering-worker.mjs' : '../worker.mjs', import.meta.url);
     const logPath = path.join(base, ".work", "tasks", slug, "run.log");
     // The node owns where this run's output goes; don't assume the task dir
     // exists yet (in practice the action creates it before launching).
@@ -57,7 +57,8 @@ export function createLocalNode({
     // The run number is explicit: the worker records it on events and uses it
     // to finalize the right run record, never guessing which run it is.
     const args = [worker.pathname, base, slug, String(run)];
-    if (mode === "resume") args.push("resume", grant);
+    if (engineering) args.push(launchToken);
+    else if (mode === "resume") args.push("resume", grant);
     else if (launchToken) args.push("workflow", launchToken);
 
     // The worker inherits this runtime's environment, including a temporary
@@ -81,7 +82,7 @@ export function createLocalNode({
 
     async startExecution({ task }) {
       const base = resolveWorkspace(task.execution?.workspace);
-      return spawnWorker({ base, slug: task.slug, run: currentRunNumber(task), launchToken: task.execution?.launchToken });
+      return spawnWorker({ base, slug: task.slug, run: currentRunNumber(task), launchToken: task.execution?.launchToken, engineering: Boolean(task.engineering) });
     },
 
     async resumeExecution({ task, grant }) {

@@ -114,6 +114,7 @@ export function createApp(runtime, opts = {}) {
         }
         case "answer": {
           const saved = await actions.answerWork(intent.id, { answer: intent.text });
+          if (saved.engineering) { setFlash('answer saved · execution remains bounded by the task policy'); break; }
           if (saved.workflow && !["selected", "changes_requested"].includes(saved.workflow.review)) { setFlash("workflow decision saved · acceptance and publication remain separate"); break; }
           if (!intent.continue) {
             setFlash("answer recorded on " + ref(intent.id) + " · it stays NEEDS YOU");

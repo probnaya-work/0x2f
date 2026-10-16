@@ -5,6 +5,7 @@
 // status MEANS — that stays in core/lifecycle.mjs and core/actions.mjs.
 
 import { getProvider as nativeGetProvider } from "./providers/index.mjs";
+import { engineeringLines } from './web/workflow.mjs';
 
 export function blockedReasonLabel(task) {
   const blocked = task.blockedOn;
@@ -120,6 +121,7 @@ export function renderTasks(tasks) {
         `  #${String(item.id).padStart(3, "0")}  ${item.title}  ${age(item)}`
       );
       const reason = blockedReasonLabel(item);
+      for (const line of engineeringLines(item)) out.push(`        ${line}`);
       if (reason) out.push(`        ${reason}`);
     }
     out.push("");

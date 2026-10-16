@@ -79,6 +79,7 @@ export function primaryAction(task, state, ctx = {}) {
   const target = rerunTarget(task, state);
   const name = ctx.lookup ? ctx.lookup(target).name : String(target ?? "").toUpperCase();
   if (task.state === "needs") {
+    if (task.engineering) return { label: 'SAVE ANSWER', input: 'answer-save' };
     return task.halt?.kind === "permission"
       ? { label: "ALLOW", intent: { type: "allow", id: task.id } }
       : { label: "ANSWER & CONTINUE", input: "answer" };
