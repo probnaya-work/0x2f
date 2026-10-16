@@ -12,7 +12,7 @@ export async function confirmEngineeringReview({ store, task, run, review, artif
   for (const f of review.findings) {
     if (!['low', 'medium', 'high', 'critical'].includes(f.severity) || typeof f.message !== 'string' || !f.message.trim() || f.message.length > 2000) throw new Error('Invalid independent review finding.');
     const evidence = f.evidence;
-    const bound = evidence?.artifactDigest === artifact.contentDigest && manifest.files[evidence?.path]?.sha256 === evidence?.sha256;
+    const bound = evidence?.artifactDigest === artifact.contentDigest && task.engineering.config.writePaths.includes(evidence?.path) && /^[a-f0-9]{64}$/.test(evidence?.sha256 ?? '') && manifest.files[evidence.path]?.sha256 === evidence.sha256;
     const pin = bound && task.engineering.config.reviewCheckPins?.[f.checkId];
     let reproduction = null;
     if (pin) {

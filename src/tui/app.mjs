@@ -59,6 +59,7 @@ export function createApp(runtime, opts = {}) {
 
   async function refresh() {
     model = await snapshot(runtime, { now: clock() });
+    if (model.engineering) state = { ...state, composer: { ...state.composer, provider: 'auto' } };
     // A task can disappear from the filtered list under the cursor; keep the
     // selection inside the list rather than pointing at nothing.
     const list = model.tasks.length;
@@ -173,7 +174,7 @@ export function createApp(runtime, opts = {}) {
         case "create": {
           const task = await actions.createWork({
             brief: intent.brief,
-            provider: intent.provider ?? undefined
+            provider: model.engineering ? 'auto' : intent.provider ?? undefined
           });
           const name = model.lookup(task.execution?.provider).name;
           state = {
@@ -228,7 +229,7 @@ export function createApp(runtime, opts = {}) {
       const previous = state;
       const result = apply(state, key, {
         tasks: model.tasks,
-        providerOrder,
+        providerOrder: model.providerOrder ?? providerOrder,
         lookup: model.lookup
       });
       state = result.state;

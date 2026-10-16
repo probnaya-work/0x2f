@@ -200,7 +200,7 @@ export function createActions(ctx) {
   // no model call, so creating a task never depends on a provider being
   // authenticated. There is deliberately no Title + Description form: the
   // user writes the task, 0x2F names it.
-  async function createWork({ brief, provider, model, workflow } = {}) {
+  async function createWork({ brief, provider, model, workflow, foreground } = {}) {
     if (provider === WORKFLOW_PROVIDER && !workflow) throw new WorkError("Start a configured workflow with 2f workflow run.");
     if (!brief || !brief.trim()) {
       throw new WorkError("Task brief is required.");
@@ -219,9 +219,10 @@ export function createActions(ctx) {
       const config = await engineeringConfig(store);
       if (config) {
         if ((provider && provider !== 'auto') || model) throw new WorkError('Engineering execution is selected by workspace policy; per-task provider/model overrides are unavailable.');
-        return createEngineeringTask(ctx, { title, brief: clean, prompt: await ctx.buildPrompt(clean) }, config);
+        return createEngineeringTask(ctx, { title, brief: clean, prompt: await ctx.buildPrompt(clean), foreground }, config);
       }
     }
+    if (foreground) throw new WorkError('Foreground engineering requires enabled .work/engineering.json.');
     const target = resolveTarget(provider);
 
     // The agent receives the FULL brief, never the derived label.
@@ -268,7 +269,8 @@ export function createActions(ctx) {
   async function rerunWork(id, options = {}) {
     const task = await store.findTask(id);
     if (task.engineering) {
-      if (task.engineering.playbook && task.status !== 'working') return (await import('./engineering-playbook.mjs')).resumeEngineeringPlaybook(ctx, task);
+      if (options.provider && options.provider !== 'auto' || options.model) throw new WorkError('Engineering continuation selects its executor automatically.');
+      if (task.engineering.playbook && task.status !== 'working') return (await import('./engineering-playbook.mjs')).resumeEngineeringPlaybook(ctx, task, options);
       throw new WorkError('Engineering task continuation is bounded by its saved policy. A blocked task requires a new approved scope; ordinary rerun cannot bypass its ceilings.');
     }
     if (!task.workflow) return rerunUnchecked(id, options);
@@ -554,6 +556,7 @@ export function createActions(ctx) {
   // outside the workspace, or no git repository) is reported without hunks.
   async function getTaskDiff(id) {
     const task = await store.findTask(id);
+    if (task.engineering) return (await import('./engineering-diff.mjs')).engineeringDiff(store, task);
     const events = await store.readEvents(task.slug);
     const files = [];
     for (const event of events) {

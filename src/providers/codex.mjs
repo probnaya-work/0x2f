@@ -141,6 +141,12 @@ export const codexProvider = {
     return runCodex({ cwd, args, onEvent });
   },
 
+  // Explicit foreground engineering entry; never inherit a bypass sandbox or
+  // silently fall back to API-key billing. Ordinary adapter behavior is intact.
+  async startForeground({ cwd, prompt, onEvent = () => {} }) {
+    return runCodex({ cwd, args: ['exec', '--json', '--skip-git-repo-check', '-s', 'workspace-write', '-c', 'forced_login_method="chatgpt"', '-c', 'sandbox_workspace_write.writable_roots=[]', '-c', 'sandbox_workspace_write.network_access=false', '-c', 'sandbox_workspace_write.exclude_tmpdir_env_var=true', '-c', 'sandbox_workspace_write.exclude_slash_tmp=true', prompt], onEvent });
+  },
+
   async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {} }) {
     if (!externalSessionId) {
       throw new Error("No external session id — this task cannot be resumed.");
@@ -198,6 +204,7 @@ export function consumeCodexLine(state, line) {
       break;
     case "turn.completed":
       state.turnCompleted = true;
+      if (event.usage) state.usageEvidence = event.usage;
       break;
     case "turn.failed":
       state.turnFailed = { message: event.error?.message ?? "codex reported a failed turn." };
@@ -309,7 +316,10 @@ function runCodex({ cwd, args, onEvent }) {
           ...(failure ? { failure } : {})
         });
       } else if (state.turnCompleted) {
-        resolve(normalizeCodexRun({ text: state.lastAgentText, threadId: state.threadId }));
+        const outcome = normalizeCodexRun({ text: state.lastAgentText, threadId: state.threadId });
+        const u = state.usageEvidence;
+        const tokens = u && Number.isSafeInteger(u.input_tokens) && u.input_tokens >= 0 && Number.isSafeInteger(u.output_tokens) && u.output_tokens >= 0 ? u.input_tokens + u.output_tokens : null;
+        resolve({ ...outcome, ...(u ? { usageEvidence: u } : {}), ...(Number.isSafeInteger(tokens) ? { usage: { tokens } } : {}) });
       } else if (code !== 0) {
         const error =
           stderr.trim() ||

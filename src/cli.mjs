@@ -45,6 +45,7 @@ Commands:
   2f version        print the installed 0x2F version
   2f init
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
+  2f new <task> --foreground       opted-in engineering; existing subscription
   2f status
   2f workflow run <id> [trigger-key]
   2f workflow refresh <task-id>    adopt updated settings; preserve prior evidence/runs
@@ -126,6 +127,8 @@ function parseFlags(args) {
       flags.noBrowser = true;
     } else if (arg === "--light") {
       flags.light = true;
+    } else if (arg === "--foreground") {
+      flags.foreground = true;
     } else {
       rest.push(arg);
     }
@@ -135,7 +138,7 @@ function parseFlags(args) {
 
 function parseNewArgs(args) {
   const { rest, flags } = parseFlags(args);
-  return { brief: rest.join(" ").trim(), provider: flags.provider };
+  return { brief: rest.join(" ").trim(), provider: flags.provider, foreground: flags.foreground };
 }
 
 async function status(base) {
@@ -244,6 +247,9 @@ async function openRun(id, runNumber, base) {
     String(run.outcome ?? "?").toUpperCase();
   if (run.workflow) console.log(`Workflow  ${run.workflow.id} v${run.workflow.version} · ${run.workflow.trigger} · ${run.workflow.triggerKey}`);
   console.log(`Provider     ${provider}`);
+  if (run.purpose) console.log(`Purpose      ${run.purpose} · reason ${run.routing?.reason ?? run.predecessor?.reason ?? 'initial_executor'}`);
+  if (run.artifact) console.log(`Artifact     ${run.artifact.path} · ${run.artifact.contentDigest}`);
+  if (run.review) console.log(`Review       ${run.review.mode} · ${run.review.findings.length} findings`);
   console.log(`Node         ${run.node ?? "—"}`);
   console.log(`Model        ${run.model ?? "—"}`);
   console.log(`Started      ${run.startedAt ?? "—"}`);
@@ -337,7 +343,7 @@ async function main() {
 
   if (command === "new") {
     await requireProject(base);
-    const { brief, provider } = parseNewArgs(args);
+    const { brief, provider, foreground } = parseNewArgs(args);
     if (!brief) throw new Error('Usage: 2f new "Investigate ..." [--provider <id>]');
 
     const runtime = createRuntime(base);
@@ -353,10 +359,11 @@ async function main() {
       }
     }
 
-    const task = await runtime.actions.createWork({ brief, provider });
+    const task = await runtime.actions.createWork({ brief, provider, foreground });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
-    console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
+    if (foreground) for (const line of workflowLines(task)) console.log(line);
+    else console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
     return;
   }
 
@@ -385,12 +392,13 @@ async function main() {
 
     const runtime = createRuntime(base);
     const task = await runtime.actions.rerunWork(id, {
-      provider: flags.provider
+      provider: flags.provider, foreground: flags.foreground
     });
     const runNumber = task.runs?.at(-1)?.run ?? 1;
 
     console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
-    console.log(
+    if (flags.foreground) for (const line of workflowLines(task)) console.log(line);
+    else console.log(
       `Run ${String(runNumber).padStart(2, "0")} started with ${providerName(task, runtime.providers.getProvider)} in the background.`
     );
     return;

@@ -18,6 +18,7 @@
 // signals for run 1. READY lists changed files without deltas.
 
 import { workflowLines } from "../web/workflow.mjs";
+import { engineeringConfig } from '../core/engineering.mjs';
 import os from "node:os";
 import {
   toSteps,
@@ -280,6 +281,7 @@ export async function snapshot(runtime, opts = {}) {
   const tasks = await runtime.actions.listWork();
   const providers = providerMap(runtime.providers);
   const lookup = providerLookup(runtime.providers);
+  const engineering = Boolean(await engineeringConfig(runtime.store));
   const projected = [];
   for (const task of tasks) {
     const [events, result] = await Promise.all([
@@ -295,7 +297,8 @@ export async function snapshot(runtime, opts = {}) {
     counts: counts(projected),
     workspace: deriveWorkspace(runtime.base),
     node,
-    providerOrder: (runtime.providers.listProviders?.() ?? []).map(p => p.id),
+    engineering,
+    providerOrder: engineering ? ['auto'] : (runtime.providers.listProviders?.() ?? []).map(p => p.id),
     providers,
     lookup,
     at: now

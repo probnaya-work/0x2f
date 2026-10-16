@@ -8,6 +8,7 @@ import { createHandoff, verifyHandoff, handoffHash as hash, engineeringIntent } 
 import { engineeringDirectory, assertEngineeringWorkspace } from './engineering-workspace.mjs';
 import { engineeringInventory as inventory, freezeEngineering as freeze, verifyEngineeringArtifact as verifyArtifact, mutateEngineering as mutate, engineeringRun as makeRun, engineeringStop as stopped } from './engineering.mjs';
 import { confirmEngineeringReview } from './engineering-review.mjs';
+import { engineeringQualified, engineeringReservationFits, engineeringSettleUsage, executeEngineeringCall } from './engineering.mjs';
 
 const dimensions = ['moneyMicros', 'tokens', 'modelCalls', 'providerCalls'];
 const zero = () => Object.fromEntries(dimensions.map(k => [k, 0]));
@@ -18,12 +19,13 @@ function metadata(outcome) {
   try { return JSON.parse(outcome.result); } catch { return {}; }
 }
 
-export async function runEngineeringPlaybook({ store, slug, token, providers, qualify, signal, checkRunner, pauseAfterPurpose }) {
+export async function runEngineeringPlaybook({ store, slug, token, providers, qualify, signal, checkRunner, pauseAfterPurpose, trustClass }) {
+  const foreground = trustClass === 'foreground-subscription';
   let claimed = false;
   let task = await mutate(store, slug, token, t => {
     if (t.status !== 'working' || t.engineering.driver.state !== 'pending') return null;
     claimed = true;
-    return { ...t, pid: process.pid, engineering: { ...t.engineering, driver: { token, state: 'running', pid: process.pid } } };
+    return { ...t, pid: process.pid, engineering: { ...t.engineering, ...(foreground ? { trustClass } : {}), driver: { token, state: 'running', pid: process.pid } } };
   });
   if (!claimed) return task;
   const config = task.engineering.config;
@@ -52,7 +54,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
   async function prepare(purpose, provider, before, extra = {}) {
     const run = nextRun();
     const state = task.engineering.playbook;
-    task = await update(t => ({ ...t, runs: [...t.runs.filter(r => r.run !== run), { ...makeRun(provider), run, purpose, executor: { kind: provider === 'local-checks' ? 'local' : 'agent', harness: provider, observedModel: null } }], execution: { ...t.execution, provider }, engineering: { ...t.engineering, next: purpose } }));
+    task = await update(t => ({ ...t, runs: [...t.runs.filter(r => r.run !== run), { ...makeRun(provider), run, purpose, predecessor: run > 1 ? { run: run - 1, reason: state.reason } : null, routing: { mode: 'auto', reason: state.reason }, permissions: { writePaths: ['investigate', 'review', 'verify'].includes(purpose) ? [] : config.writePaths, externalActions: false }, executor: { kind: provider === 'local-checks' ? 'local' : 'agent', harness: provider, observedModel: null } }], execution: { ...t.execution, provider }, engineering: { ...t.engineering, next: purpose } }));
     const source = await freeze(store, task, run, before, 'inputs');
     const h = await createHandoff(store, task, { run, purpose, source, artifact: state.artifact, diagnosis: state.diagnosis, verification: state.verification, failedCheck: state.failedCheck, executorFailure: state.executorFailure, questions: ['Does this exact change satisfy the brief and preserve the relevant boundaries?'] });
     const file = path.join(store.taskDir(slug), 'runs', String(run), 'handoff.json');
@@ -72,7 +74,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     if (s.agentRuns >= limit.agentRuns) return stop('agent_run_limit', 'Configured executor-run limit reached.');
     if (purpose === 'investigate' && s.investigationAttempts >= limit.investigationAttempts) return stop('diagnosis_unconfirmed', 'Diagnosis remains unsupported after bounded investigation.');
     if (['implement', 'fix'].includes(purpose) && s.implementationAttempts >= limit.implementationAttempts) return stop('attempt_limit', 'Implementation attempts exhausted.');
-    if (task.engineering.budget.uncertain.length) return stop('usage_unknown', 'Unconfirmed usage reservation blocks another executor call.');
+    if (!foreground && task.engineering.budget.uncertain.length) return stop('usage_unknown', 'Unconfirmed usage reservation blocks another executor call.');
     const considered = [];
     let selected;
     const candidates = preferredCandidates ?? (s.primary ? [s.primary, ...config.providers.filter(id => id !== s.primary)] : config.providers);
@@ -80,24 +82,25 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
       const p = providers.getProvider(id);
       const capable = p && (!p.capabilities?.engineeringPurposes || p.capabilities.engineeringPurposes.includes(purpose));
       const proof = capable && providers.available(id) ? await qualify(p, config, { purpose }) : null;
-      const valid = proof && typeof proof.execute === 'function' && dimensions.every(k => Number.isSafeInteger(proof.maximum?.[k]) && proof.maximum[k] >= 0);
+      const valid = engineeringQualified(proof, foreground);
       considered.push({ provider: id, reason: !capable ? 'capability_mismatch' : !providers.available(id) ? 'unavailable' : !valid ? 'execution_unqualified' : 'qualified' });
       if (!selected && valid) selected = { provider: p, proof };
     }
     if (!selected) return stop('execution_unqualified', 'No executor is qualified for this trust class and purpose; unattended remains blocked.');
     const { provider, proof } = selected;
-    const maximum = { ...proof.maximum };
+    const maximum = proof.maximum ?? Object.fromEntries(dimensions.map(k => [k, null]));
     const budget = task.engineering.budget;
-    if (dimensions.some(k => budget.confirmed[k] + budget.reservations.reduce((sum, r) => sum + r.maximum[k], 0) + maximum[k] > limit[k])) return stop('budget_limit', 'Next executor reservation exceeds its available envelope.');
+    if (!engineeringReservationFits(budget, maximum, limit)) return stop('budget_limit', 'Next executor reservation exceeds its available envelope.');
     const { run, handoff } = await prepare(purpose, provider.id, before);
     const boundary = hash({ taskId: task.id, run, purpose, input: handoff.digest });
     task = await update(t => ({ ...t, engineering: { ...t.engineering, decisions: [...t.engineering.decisions, { boundary, purpose, provider: provider.id, reason: purpose === 'review' ? 'risk_policy' : s.reason, considered }], budget: { ...t.engineering.budget, reservations: [...t.engineering.budget.reservations, { boundary, maximum }] }, playbook: { ...t.engineering.playbook, dispatch: { run, boundary, input: handoff.digest }, agentRuns: s.agentRuns + 1, implementationAttempts: s.implementationAttempts + (purpose === 'implement' || purpose === 'fix' ? 1 : 0), investigationAttempts: s.investigationAttempts + (purpose === 'investigate' ? 1 : 0), primary: purpose === 'review' ? s.primary : provider.id } } }));
     await record('run.started', { run, purpose, provider: provider.id });
-    let timer;
-    let outcome;
-    try {
-      outcome = await Promise.race([proof.execute({ cwd, prompt: JSON.stringify(handoff.content), purpose, signal }), new Promise((_, reject) => { timer = setTimeout(() => { try { proof.cancel?.(); } catch {} reject(new Error('Executor timed out; effect remains uncertain.')); }, Math.max(1, remaining())); })]);
-    } finally { clearTimeout(timer); }
+    const fresh = await store.findTask(task.id);
+    if (remaining() <= 0 || signal.aborted || await store.readCancelRequest(fresh)) return stop('deadline', 'Dispatch stopped at the deadline/cancellation boundary.');
+    if (engineeringIntent(fresh) !== originalIntent) return stop('input_changed', 'Task intent changed during dispatch preparation.');
+    await verifyHandoff(store, fresh, handoff, { run, sourceDigest: (await inventory(cwd)).digest });
+    if (remaining() <= 0 || signal.aborted) return stop('deadline', 'Dispatch preparation exhausted its deadline.');
+    const outcome = await executeEngineeringCall(proof, { cwd, prompt: JSON.stringify(handoff.content), purpose, signal }, remaining());
     if (!['ready', 'failed', 'needs_you'].includes(outcome?.status)) throw new Error('Invalid executor outcome.');
     const result = String(outcome.result ?? outcome.error ?? '');
     await store.writeText(path.join(store.taskDir(slug), 'runs', String(run), 'result.md'), result);
@@ -105,11 +108,11 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     const artifact = await freeze(store, task, run, after, 'artifacts');
     const outcomeRef = { path: `runs/${run}/outcome.json`, digest: hash({ status: outcome.status, metadata: metadata(outcome), artifact }) };
     await store.writeJson(path.join(store.taskDir(slug), outcomeRef.path), { status: outcome.status, metadata: metadata(outcome), artifact });
-    const usage = outcome.usage;
-    const known = usage && dimensions.every(k => Number.isSafeInteger(usage[k]) && usage[k] >= 0 && usage[k] <= maximum[k]);
-    task = await update(t => ({ ...t, engineering: { ...t.engineering, budget: { ...t.engineering.budget, confirmed: Object.fromEntries(dimensions.map(k => [k, t.engineering.budget.confirmed[k] + (known ? usage[k] : 0)])), reservations: known ? t.engineering.budget.reservations.filter(r => r.boundary !== boundary) : t.engineering.budget.reservations, uncertain: known ? t.engineering.budget.uncertain : [...t.engineering.budget.uncertain, boundary] } } }));
-    await finish(run, outcome.status, { artifact, outcomeRef, usage: { confirmed: known ? usage : null, estimated: maximum, uncertainty: known ? null : 'unconfirmed' } });
-    if (!known) return stop('usage_unknown', 'Completed call has unconfirmed usage; preserved reservation prevents further model calls.');
+    const settled = engineeringSettleUsage(task.engineering.budget, boundary, outcome.usage, maximum, foreground);
+    task = await update(t => ({ ...t, engineering: { ...t.engineering, budget: settled.budget } }));
+    await finish(run, outcome.status, { artifact, outcomeRef, qualification: proof.evidence ?? null, externalSessionId: outcome.externalSessionId ?? null, usage: { confirmed: settled.confirmed, estimated: maximum, reported: outcome.usageEvidence ?? null, uncertainty: settled.known ? null : 'unconfirmed' } });
+    if (!settled.known && !foreground) return stop('usage_unknown', 'Completed call has unconfirmed usage; preserved reservation prevents further model calls.');
+    if (!engineeringReservationFits(task.engineering.budget, null, limit)) return stop('budget_limit', 'Reported usage exceeds the configured foreground limit.');
     if (['investigate', 'review'].includes(purpose) && before.digest !== after.digest) return stop('read_only_violation', 'A read-only purpose changed workspace bytes.');
     if (changed(initial, after).some(f => !config.writePaths.includes(f))) return stop('scope_changed', 'Changes exceed the approved task scope.');
     for (const file of changed(before, after)) await record('file.changed', { run, path: file, source: 'snapshot' });
@@ -191,7 +194,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
         const { outcome, run, artifact, after, outcomeRef } = call;
         if (purpose === 'investigate') {
           const diagnosis = metadata(outcome).diagnosis;
-          const confirmed = diagnosis?.confirmed === true && diagnosis.evidence?.length && diagnosis.evidence.every(e => before.files[e.path]?.sha256 === e.sha256);
+          const confirmed = diagnosis?.confirmed === true && Array.isArray(diagnosis.evidence) && diagnosis.evidence.length && diagnosis.evidence.every(e => typeof e?.path === 'string' && config.files.includes(e.path) && /^[a-f0-9]{64}$/.test(e.sha256 ?? '') && before.files[e.path]?.sha256 === e.sha256);
           if (!confirmed) { await checkpoint('investigate', 'unconfirmed_diagnosis', { unconfirmedDiagnosis: outcomeRef, sourceDigest: after.digest }); }
           else {
             const ref = { path: `runs/${run}/diagnosis.json`, digest: hash(diagnosis) };
@@ -205,7 +208,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
   } catch (error) { return stop('execution_uncertain', `${error.message} No automatic replay.`); }
 }
 
-export async function resumeEngineeringPlaybook(ctx, task) {
+export async function resumeEngineeringPlaybook(ctx, task, options = {}) {
   const s = task.engineering.playbook;
   if (!s || !['paused_boundary', 'review_required'].includes(task.blockedOn?.code) || s.dispatch) throw new Error('Engineering task has no safe completed boundary to resume; uncertain calls and exhausted limits cannot be replayed.');
   const token = randomUUID();
@@ -213,6 +216,7 @@ export async function resumeEngineeringPlaybook(ctx, task) {
     if (t.status !== 'needs_you' || t.engineering.playbook.dispatch) throw new Error('Engineering task changed before continuation.');
     return { ...t, status: 'working', blockedOn: undefined, execution: { ...t.execution, launchToken: token }, engineering: { ...t.engineering, driver: { token, state: 'pending' } } };
   });
+  if (options.foreground) return (await import('./engineering-foreground.mjs')).runForegroundEngineering(ctx, next);
   const pid = await ctx.node.startExecution({ task: next });
   if (pid) await mutate(ctx.store, task.slug, token, t => ({ ...t, pid }));
   return ctx.store.findTask(task.id);

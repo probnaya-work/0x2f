@@ -1,3 +1,4 @@
+import { engineeringConfig } from './core/engineering.mjs';
 // Work local API — the boundary between clients and Work Core.
 //
 // The browser (and a future TUI/desktop client) speaks HTTP + SSE to this
@@ -689,9 +690,11 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
       // `prefer` is informational. Normalized, never raw config.
       if (req.method === "GET" && url.pathname === "/api/routing") {
         const config = runtime.router.config;
+        const engineering = Boolean(await engineeringConfig(runtime.store));
         json(res, {
-          default: config?.default ?? runtime.providers.defaultProviderId,
-          prefer: config?.prefer ?? []
+          default: engineering ? 'auto' : config?.default ?? runtime.providers.defaultProviderId,
+          prefer: config?.prefer ?? [],
+          ...(engineering ? { engineering: true } : {})
         });
         return;
       }

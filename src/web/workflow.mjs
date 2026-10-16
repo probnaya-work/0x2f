@@ -6,11 +6,19 @@ export function engineeringLines(task) {
   const run = task.runs?.at(-1);
   const e = task.engineering;
   const b = e.budget;
+  const reason = task.blockedOn?.code ?? e.playbook?.reason ?? e.decisions.at(-1)?.reason;
+  const review = e.playbook?.review ?? e.review;
+  const unknown = b.uncertain.length || b.reservations.some(r => Object.values(r.maximum ?? {}).some(v => v === null));
   return [
     `PURPOSE ${(run?.purpose ?? 'unknown').toUpperCase()} · EXECUTOR ${run?.provider ?? 'unknown'} · RUN ${run?.run ?? 1}`,
-    `NEXT ${e.next.toUpperCase()}${task.blockedOn?.code ? ' · REASON ' + task.blockedOn.code.toUpperCase() : ''}`,
-    `COST ${b.uncertain.length ? 'UNKNOWN · reservation retained' : 'USD ' + (b.confirmed.moneyMicros / 1000000).toFixed(6) + ' confirmed'} · ${b.reservations.length} reserved`,
-    ...(e.verification ? [`RESULT ${e.verification.code === 0 && !e.verification.error && e.verification.sourceUnchanged ? 'PATCH VERIFIED' : 'CHECK FAILED'} · ${e.verification.artifact.contentDigest}`, `ARTIFACT ${e.verification.artifact.path}`] : [])
+    `NEXT ${e.next.toUpperCase()}${reason ? ' · REASON ' + reason.toUpperCase() : ''}`,
+    `COST ${unknown ? 'UNKNOWN · reservation retained' : 'USD ' + (b.confirmed.moneyMicros / 1000000).toFixed(6) + ' confirmed'} · ${b.reservations.length} reserved`,
+    ...(e.verification ? [`RESULT ${e.verification.code === 0 && !e.verification.error && e.verification.sourceUnchanged ? e.outcome?.kind === 'no_change' ? 'NO CHANGE REQUIRED' : 'PATCH VERIFIED' : 'CHECK FAILED'} · ${e.verification.artifact.contentDigest}`, `ARTIFACT ${e.verification.artifact.path}`] : []),
+    ...(review ? [`REVIEW ${review.path} · ${review.digest}`] : []),
+    ...task.runs.filter(r => r.review?.findings?.length).flatMap(r => r.review.findings.map(f => `FINDING ${f.severity.toUpperCase()} · ${f.confirmed ? 'CONFIRMED' : 'NEEDS DECISION'} · ${f.message}`)),
+    ...(run?.handoff ? [`HANDOFF ${run.handoff.metrics.bytes} bytes · history ${run.handoff.metrics.fullHistoryBytes} bytes`] : []),
+    ...(e.workspace ? [`WORKSPACE ${e.workspace.path} · ref ${e.workspace.commit} · task-owned worktree`] : []),
+    ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider} · ${d.reason}`)
   ];
 }
 export function workflowView(task) {

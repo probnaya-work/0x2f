@@ -19,6 +19,30 @@ const POLICY = 'engineering-continuity-v1';
 const zero = () => Object.fromEntries(dimensions.map(k => [k, 0]));
 const relative = p => typeof p === 'string' && p && !path.isAbsolute(p) && !p.split(/[\\/]/).some(x => !x || x === '..' || x === '.') && !['.work', '.git', 'node_modules'].includes(p.split('/')[0]);
 
+// Foreground subscription execution can reserve an explicitly unknown envelope.
+// It never upgrades that estimate to a proven hard ceiling or zero usage.
+export const engineeringQualified = (proof, foreground) => proof && typeof proof.execute === 'function' && (foreground && proof.trustClass === 'foreground-subscription' || dimensions.every(k => Number.isSafeInteger(proof.maximum?.[k]) && proof.maximum[k] >= 0));
+export const engineeringReservationFits = (budget, maximum, limits) => dimensions.every(k => budget.confirmed[k] + budget.reservations.reduce((sum, r) => sum + (r.maximum?.[k] ?? 0), 0) + (maximum?.[k] ?? 0) <= limits[k]);
+export function engineeringSettleUsage(budget, boundary, usage, maximum, foreground) {
+  const confirmed = Object.fromEntries(dimensions.filter(k => Number.isSafeInteger(usage?.[k]) && usage[k] >= 0 && (foreground || usage[k] <= maximum[k])).map(k => [k, usage[k]]));
+  const known = dimensions.every(k => confirmed[k] !== undefined);
+  const accepted = foreground ? confirmed : known ? confirmed : {};
+  return { known, confirmed: Object.keys(accepted).length ? accepted : null, budget: { ...budget, confirmed: Object.fromEntries(dimensions.map(k => [k, budget.confirmed[k] + (accepted[k] ?? 0)])), reservations: known ? budget.reservations.filter(r => r.boundary !== boundary) : budget.reservations, uncertain: known ? budget.uncertain : [...budget.uncertain, boundary] } };
+}
+
+export async function executeEngineeringCall(proof, input, timeout) {
+  let timer;
+  let abort;
+  try {
+    return await Promise.race([proof.execute(input), new Promise((_, reject) => {
+      abort = () => { try { proof.cancel?.(); } catch {} reject(new Error('Executor interrupted; effect remains uncertain.')); };
+      timer = setTimeout(abort, Math.max(1, timeout));
+      input.signal?.addEventListener('abort', abort, { once: true });
+      if (input.signal?.aborted) abort();
+    })]);
+  } finally { clearTimeout(timer); input.signal?.removeEventListener('abort', abort); }
+}
+
 export async function engineeringConfig(store) {
   const file = path.join(store.workDir(), 'engineering.json');
   if (!await store.exists(file)) return null;
@@ -50,7 +74,7 @@ function initialRun(provider) {
   return { ...makeRunRecord({ run: 1, provider, node: 'local', workspace: 'local', startedAt: now(), requestedProvider: 'auto' }), purpose: 'implement', executor: { kind: 'agent', harness: provider, backend: null, requestedModel: null, observedModel: null }, usage: { confirmed: null, estimated: null, uncertainty: 'not_started' } };
 }
 
-export async function createEngineeringTask(ctx, { title, brief, prompt }, config) {
+export async function createEngineeringTask(ctx, { title, brief, prompt, foreground }, config) {
   const candidates = config.providers.filter(id => ctx.providers.available(id));
   const provider = candidates[0] ?? config.providers[0];
   const token = randomUUID();
@@ -65,6 +89,7 @@ export async function createEngineeringTask(ctx, { title, brief, prompt }, confi
       return mutate(ctx.store, task.slug, token, t => stopPatch(t, 'workspace_setup', error.message));
     }
   }
+  if (foreground) return (await import('./engineering-foreground.mjs')).runForegroundEngineering(ctx, task);
   const pid = await ctx.node.startExecution({ task });
   // A synchronous test node may have already finished. Never overwrite it.
   if (pid) await mutate(ctx.store, task.slug, token, t => ({ ...t, pid }));
@@ -136,6 +161,13 @@ export async function assertEngineeringAccepted(store, task) {
   const receipt = await store.readJson(path.join(store.taskDir(task.slug), 'runs', String(v.run), 'verification.json'));
   await assertEngineeringWorkspace(store, task, task.runs.at(-1).run);
   if (hash(receipt) !== hash(v) || (await inventory(engineeringDirectory(store, task))).digest !== v.artifact.contentDigest) throw new Error('Verified artifact/check changed; acceptance refused.');
+  if (task.engineering.playbook) {
+    const ref = task.engineering.playbook.review;
+    if (!ref) throw new Error('Engineering review is missing.');
+    const review = await store.readJson(path.join(store.taskDir(task.slug), ref.path));
+    const independent = task.engineering.config.requireReview || task.engineering.config.writePaths.some(p => /(^|\/)(auth|authentication|permissions?|secrets?|migrations?|privacy|deploy)(\/|[.-])/i.test(p));
+    if (hash(review) !== ref.digest || hash(review.artifact) !== hash(v.artifact) || review.verification?.digest !== hash(v) || !Array.isArray(review.findings) || review.findings.length || independent && review.mode !== 'independent-fresh-context') throw new Error('Engineering review changed or does not approve the verified artifact.');
+  }
 }
 
 function stopPatch(t, code, text) {
@@ -156,6 +188,8 @@ export async function runEngineeringTask(args) {
     return { ...t, engineering: { ...t.engineering, driver: { token, state: 'running', pid: process.pid } } };
   });
   if (!claimed) return task;
+  const foreground = args.trustClass === 'foreground-subscription';
+  if (foreground) task = await mutate(store, slug, token, t => ({ ...t, pid: process.pid, engineering: { ...t.engineering, trustClass: args.trustClass } }));
   const start = Date.now();
   const config = task.engineering.config;
   const executionDirectory = engineeringDirectory(store, task);
@@ -189,7 +223,7 @@ export async function runEngineeringTask(args) {
       for (const id of preferred) {
         const p = providers.getProvider(id);
         const proof = p && providers.available(id) ? await qualify(p, config) : null;
-        const valid = proof && dimensions.every(k => Number.isSafeInteger(proof.maximum?.[k]) && proof.maximum[k] >= 0) && typeof proof.execute === 'function';
+        const valid = engineeringQualified(proof, foreground);
         considered.push({ provider: id, reason: !p || !providers.available(id) ? 'unavailable' : !valid ? 'hard_ceiling_unqualified' : 'qualified' });
         if (valid && !selected) selected = { provider: p, proof };
       }
@@ -202,13 +236,13 @@ export async function runEngineeringTask(args) {
       const input = { schemaVersion: 1, taskId: task.id, purpose, brief: task.brief, scope: config.writePaths, prohibited: ['commit', 'push', 'PR', 'merge', 'deploy', 'publication', 'new account/provider'], constraints: task.context?.notes ?? [], files: config.files, sourceDigest: before.digest, ...(prior ? { failedCheck: prior, previousArtifact: previous } : {}), ...(executorFailure ? { executorFailure } : {}) };
       const inputDigest = hash(input);
       const boundary = hash({ policy: POLICY, taskId: task.id, run, purpose, inputDigest });
-      const maximum = { ...proof.maximum };
+      const maximum = proof.maximum ?? Object.fromEntries(dimensions.map(k => [k, null]));
       let reserved = false;
       task = await update(t => {
         if (t.status !== 'working' || t.engineering.driver.state !== 'running' || deadline()) return null;
         if (t.engineering.decisions.some(d => d.boundary === boundary)) return null;
         const budget = t.engineering.budget;
-        if (budget.uncertain.length || dimensions.some(k => budget.confirmed[k] + budget.reservations.reduce((sum, r) => sum + r.maximum[k], 0) + maximum[k] > config.limits[k])) return null;
+        if ((!foreground && budget.uncertain.length) || !engineeringReservationFits(budget, maximum, config.limits)) return null;
         reserved = true;
         const record = { ...initialRun(provider.id), run, purpose, predecessor: run > 1 ? { run: run - 1, boundary, reason: prior ? 'verification_failed' : 'executor_unavailable' } : null, input: { path: `runs/${run}/input.json`, digest: inputDigest }, permissions: { writePaths: config.writePaths, externalActions: false }, reservation: boundary };
         const runs = t.runs.at(-1).outcome === 'working' ? [...t.runs.slice(0, -1), record] : [...t.runs, record];
@@ -226,26 +260,27 @@ export async function runEngineeringTask(args) {
       await assertEngineeringWorkspace(store, task, run);
       await verifyHandoff(store, await store.findTask(task.id), handoff, { run, sourceDigest: (await inventory(executionDirectory)).digest });
       await store.appendEvent(slug, workEvent('run.started', task.id, { run, purpose, provider: provider.id }));
+      const fresh = await store.findTask(task.id);
+      if (deadline() || await cancelled()) return stop('deadline', 'Dispatch preparation exhausted its deadline or was cancelled.');
+      await verifyHandoff(store, fresh, handoff, { run, sourceDigest: (await inventory(executionDirectory)).digest });
+      if (deadline() || signal.aborted) return stop('deadline', 'Dispatch preparation exhausted its deadline.');
       let outcome;
-      const timer = setTimeout(() => proof.cancel?.(), Math.max(1, config.limits.wallClockMs - (Date.now() - start)));
-      const abort = () => proof.cancel?.();
-      signal.addEventListener('abort', abort, { once: true });
-      try { outcome = await proof.execute({ cwd: executionDirectory, prompt: JSON.stringify(handoff.content), purpose, signal }); }
-      finally { clearTimeout(timer); signal.removeEventListener('abort', abort); }
+      outcome = await executeEngineeringCall(proof, { cwd: executionDirectory, prompt: JSON.stringify(handoff.content), purpose, signal }, config.limits.wallClockMs - (Date.now() - start));
       if (!['ready', 'failed', 'needs_you'].includes(outcome?.status)) throw new Error('Executor returned an invalid outcome.');
       const usage = outcome.usage;
-      const known = usage && dimensions.every(k => Number.isSafeInteger(usage[k]) && usage[k] >= 0 && usage[k] <= maximum[k]);
+      const settled = engineeringSettleUsage(task.engineering.budget, boundary, usage, maximum, foreground);
+      const known = settled.known;
       const result = outcome.result ?? outcome.error ?? '';
       await store.writeText(path.join(dir, 'result.md'), result);
       const after = await inventory(executionDirectory);
       previous = await freeze(store, task, run, after, 'artifacts');
       task = await update(t => {
-        const budget = t.engineering.budget;
-        return { ...t, runs: t.runs.map(r => r.run === run ? { ...r, outcome: outcome.status, completedAt: now(), artifact: previous, usage: { confirmed: known ? usage : null, uncertainty: known ? null : 'unconfirmed' }, ...(outcome.error ? { error: outcome.error } : {}) } : r), engineering: { ...t.engineering, budget: { ...budget, confirmed: Object.fromEntries(dimensions.map(k => [k, budget.confirmed[k] + (known ? usage[k] : 0)])), reservations: known ? budget.reservations.filter(r => r.boundary !== boundary) : budget.reservations, uncertain: known ? budget.uncertain : [...budget.uncertain, boundary] } } };
+        return { ...t, runs: t.runs.map(r => r.run === run ? { ...r, outcome: outcome.status, completedAt: now(), artifact: previous, qualification: proof.evidence ?? null, externalSessionId: outcome.externalSessionId ?? null, usage: { confirmed: settled.confirmed, estimated: maximum, reported: outcome.usageEvidence ?? null, uncertainty: known ? null : 'unconfirmed' }, ...(outcome.error ? { error: outcome.error } : {}) } : r), engineering: { ...t.engineering, budget: settled.budget } };
       });
       await store.appendEvent(slug, workEvent(outcome.status === 'ready' ? 'run.completed' : 'run.failed', task.id, { run, artifact: previous, purpose }));
       for (const file of changed(before, after)) await store.appendEvent(slug, workEvent('file.changed', task.id, { run, path: file, source: 'snapshot' }));
-      if (!known) return stop('usage_unknown', 'Usage is unconfirmed or exceeded its reservation; no further executor call is allowed.');
+      if (!known && !foreground) return stop('usage_unknown', 'Usage is unconfirmed or exceeded its reservation; no further executor call is allowed.');
+      if (!engineeringReservationFits(task.engineering.budget, null, config.limits)) return stop('budget_limit', 'Reported usage exceeds the configured foreground limit.');
       if (deadline() || await cancelled()) return stop('deadline', 'Cancellation/deadline reached; no verification or further call was started.');
       if (changed(baseline, after).some(f => !config.writePaths.includes(f))) return stop('scope_changed', 'Changes exceed approved paths; independent decision/review is required.');
       if (hash(task.context ?? null) !== noteDigest) return stop('input_changed', 'Task constraints changed during execution; a new input snapshot is required.');

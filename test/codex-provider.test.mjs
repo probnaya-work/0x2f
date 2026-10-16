@@ -293,6 +293,11 @@ test("start() runs codex exec --json and normalizes a successful run", async () 
 
       assert.equal(outcome.status, "ready");
       assert.equal(outcome.result, "Done: I ran the tool.");
+      const reported = stdout.split('\n').filter(Boolean).map(line => JSON.parse(line)).find(e => e.type === 'turn.completed').usage;
+      assert.deepEqual(outcome.usageEvidence, reported);
+      assert.deepEqual(outcome.usage, { tokens: reported.input_tokens + reported.output_tokens });
+      assert.equal(outcome.usage.moneyMicros, undefined);
+      assert.equal(outcome.usage.providerCalls, undefined);
       assert.equal(outcome.externalSessionId, "01a03e5d-2ef3-7422-8f50-c49ef0edbd18");
       assert.ok(events.some(e => e.type === "run.started"));
       assert.ok(events.some(e => e.type === "tool.started"));

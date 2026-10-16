@@ -2071,6 +2071,12 @@ async function loadProviders() {
     } catch {
       /* server default applies */
     }
+    if (routing?.engineering) {
+      providerSelect.replaceChildren(el('option', { value: 'auto', text: 'AUTO' }));
+      providerSelect.value = 'auto';
+      providerSelect.disabled = true;
+      return;
+    }
     providerSelect.replaceChildren(
       el("option", { value: "auto", text: "AUTO" }),
       ...providers.map(p =>
