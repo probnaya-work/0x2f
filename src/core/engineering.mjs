@@ -34,9 +34,16 @@ export async function engineeringConfig(store) {
   for (const [key, maximum] of [['investigationAttempts', 2], ['reviewCycles', 2], ['agentRuns', 10]]) if (limits[key] !== undefined && (!Number.isSafeInteger(limits[key]) || limits[key] < (key === 'reviewCycles' ? 0 : 1) || limits[key] > maximum)) throw new Error(`Invalid ${key} limit.`);
   if (c.currency !== 'USD') throw new Error('Engineering money is integer USD micros; no implicit currency conversion.');
   if (c.workspace && (typeof c.workspace.repository !== 'string' || !path.isAbsolute(c.workspace.repository) || typeof c.workspace.ref !== 'string' || !c.workspace.ref || c.workspace.ref.length > 200)) throw new Error('Engineering workspace requires an absolute repository and explicit Git ref.');
+  if (c.reviewProviders && (!Array.isArray(c.reviewProviders) || !c.reviewProviders.length || c.reviewProviders.some(p => typeof p !== 'string' || !p))) throw new Error('Invalid engineering reviewer policy.');
+  const reviewCheckPins = {};
+  if (c.reviewChecks && (typeof c.reviewChecks !== 'object' || Array.isArray(c.reviewChecks) || Object.keys(c.reviewChecks).length > 8)) throw new Error('Invalid preapproved review checks.');
+  for (const [id, argv] of Object.entries(c.reviewChecks ?? {})) {
+    if (!/^[a-z][a-z0-9-]{0,40}$/.test(id) || !Array.isArray(argv) || !path.isAbsolute(argv[0] ?? '') || argv.some(a => typeof a !== 'string' || !a)) throw new Error('Invalid preapproved review check argv.');
+    reviewCheckPins[id] = { argv, executableDigest: digest(await readBounded(argv[0], 256000000)) };
+  }
   if (!c.playbook && c.files.some(p => /(^|\/)(auth|permissions?|secrets?|migrations?)(\/|[.-])/i.test(p))) throw new Error('Sensitive engineering paths require the reviewed engineering playbook.');
   const checkBytes = await readBounded(c.check[0], 256000000);
-  return { ...c, policy: POLICY, checkDigest: digest(checkBytes) };
+  return { ...c, policy: POLICY, checkDigest: digest(checkBytes), reviewCheckPins };
 }
 
 function initialRun(provider) {

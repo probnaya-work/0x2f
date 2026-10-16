@@ -41,6 +41,7 @@ export async function createHandoff(store, task, { run, purpose, source, artifac
   if (['implement', 'fix'].includes(purpose)) add('diagnosis', diagnosis);
   if (['fix', 'verify', 'review'].includes(purpose)) add('artifact', snapshot(artifact));
   if (['fix', 'review'].includes(purpose)) add('verification', verification);
+  if (purpose === 'fix') add('review', task.engineering.playbook?.review);
   if (purpose === 'review') add('diagnosis', diagnosis);
   const content = {
     schemaVersion: 1, taskId: task.id, slug: task.slug, run, purpose,
@@ -52,7 +53,7 @@ export async function createHandoff(store, task, { run, purpose, source, artifac
     taskDirectory: store.taskDir(task.slug), workspace: task.engineering.workspace?.path ?? store.base,
     refs,
     ...(purpose === 'investigate' ? { symptoms: task.brief, question: 'Establish a diagnosis supported by concrete evidence, or explain why no change is required.', outputContract: { diagnosis: { confirmed: 'boolean', noChange: 'boolean', evidence: [{ path: 'relative source path', sha256: 'exact source hash' }] } } } : {}),
-    ...(['implement', 'fix'].includes(purpose) ? { files: task.engineering.config.files, ...(failedCheck ? { failedCheck, previousArtifact: artifact } : {}), ...(executorFailure ? { executorFailure } : {}) } : {}),
+    ...(['implement', 'fix'].includes(purpose) ? { files: task.engineering.config.files, ...(failedCheck ? { failedCheck, previousArtifact: artifact } : {}), ...(task.engineering.playbook?.fixFindings ? { confirmedReviewFindings: task.engineering.playbook.fixFindings } : {}), ...(executorFailure ? { executorFailure } : {}) } : {}),
     ...(purpose === 'verify' ? { check: task.engineering.config.check, claimedOutcome: 'Check the exact saved artifact.' } : {}),
     ...(purpose === 'review' ? { freshContext: true, questions, permittedChecks: Object.keys(task.engineering.config.reviewChecks ?? {}), outputContract: { review: { findings: [{ severity: 'low|medium|high|critical', message: 'concrete defect', evidence: { path: 'affected path', sha256: 'exact artifact file hash', artifactDigest: 'exact artifact content digest' }, checkId: 'preapproved reproduction check, if available' }] } }, instruction: 'Review only the approved changes and receipts. Return JSON matching outputContract. Do not implement or change files.' } : {})
   };

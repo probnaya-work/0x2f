@@ -14,6 +14,7 @@ export async function playbookFixture(t, options = {}) {
   const source = options.risk ? 'src/auth.mjs' : 'src/id.mjs';
   await fs.writeFile(path.join(base, source), options.noChange ? validParser : brokenParser);
   await fs.writeFile(path.join(base, 'test/id.test.mjs'), `import assert from 'node:assert/strict'; import {parseTaskId} from '../${source}'; assert.equal(parseTaskId('014'),14);\n`);
+  if (options.setup) await options.setup({ base, source });
   const config = { schemaVersion: 1, enabled: true, playbook: true, currency: 'USD', providers: ['primary', 'secondary'], reviewProviders: ['reviewer'], files: [source, 'test/id.test.mjs'], writePaths: [source], check: [process.execPath, '--test', 'test/id.test.mjs'], limits: { ...zeroUsage, wallClockMs: 30000, implementationAttempts: 2, investigationAttempts: 2, reviewCycles: 2, agentRuns: 10 }, ...options.config };
   await fs.writeFile(path.join(base, '.work/engineering.json'), JSON.stringify(config));
   const calls = [];
