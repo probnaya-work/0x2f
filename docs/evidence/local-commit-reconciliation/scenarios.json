@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "fixtureKind": "real disposable Git, deterministic offline executor; actual SIGKILL worker boundaries",
+  "repositoryBytesChecked": [
+    "working files",
+    "objects",
+    "refs",
+    "HEAD",
+    "reflog",
+    "index",
+    "stale locks",
+    "config",
+    "hooks"
+  ],
+  "scenarios": [
+    {
+      "number": 1,
+      "scenario": "Worker SIGKILL before effect",
+      "result": "NOT_APPLIED",
+      "verified": true,
+      "evidence": "Stopped dispatcher, absent start marker/object, exact baseline refs/reflog; no grant replay."
+    },
+    {
+      "number": 2,
+      "scenario": "Worker SIGKILL after object / after HEAD update",
+      "result": "APPLIED",
+      "verified": true,
+      "evidence": "Exact operation object found at both boundaries; reachability false / true; receipt completed without repair."
+    },
+    {
+      "number": 3,
+      "scenario": "Existing receipt / repeated call",
+      "result": "APPLIED",
+      "verified": true,
+      "evidence": "Original receipt retained, task/result idempotent; ordinary acceptance still works."
+    },
+    {
+      "number": 4,
+      "scenario": "Unrelated successor commit",
+      "result": "APPLIED",
+      "verified": true,
+      "evidence": "Intended ancestor found; successor HEAD preserved."
+    },
+    {
+      "number": 5,
+      "scenario": "HEAD or symbolic ref changed",
+      "result": "UNCERTAIN",
+      "verified": true,
+      "evidence": "No absence claim after ref drift; local ref/reflog evidence saved."
+    },
+    {
+      "number": 6,
+      "scenario": "Same message, different tree",
+      "result": "UNCERTAIN",
+      "verified": true,
+      "evidence": "Similarity never proves the operation."
+    },
+    {
+      "number": 7,
+      "scenario": "Same tree, no operation identity",
+      "result": "UNCERTAIN",
+      "verified": true,
+      "evidence": "No inference from tree similarity."
+    },
+    {
+      "number": 8,
+      "scenario": "Repository / worktree identity mismatch",
+      "result": "UNCERTAIN",
+      "verified": true,
+      "evidence": "No adoption or success receipt."
+    },
+    {
+      "number": 9,
+      "scenario": "Concurrent reconciliation",
+      "result": "APPLIED",
+      "verified": true,
+      "evidence": "One durable result and one revision; both callers get identical state."
+    },
+    {
+      "number": 10,
+      "scenario": "Hook or process failure",
+      "result": "NOT_APPLIED or UNCERTAIN",
+      "verified": true,
+      "evidence": "Hook failure before dispatch proves absence without rerunning hook; started marker without object remains uncertain."
+    }
+  ],
+  "additionalRegressions": [
+    "config drift",
+    "legacy missing intent",
+    "CLI action / shared CLI-TUI-Web projection",
+    "uncertain cleanup refused",
+    "signature program never invoked",
+    "SIGKILL after durable reconciliation before task pointer"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "dccd5d5cf47433129261384b9491818aef50b90a",
+  "implementationCommit": "6931cec2bd06cc7f30bba32cfcccf01f96c4618d",
+  "implementationPatchSha256": "67e71cf4be71f1ff58a688395922de02094fef2655187cd50574ea5c203fba3a",
+  "targeted": {
+    "command": "node --test test/engineering-delivery-reconcile.test.mjs",
+    "exitCode": 0,
+    "result": {
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "duration_ms": 41790.78725
+    }
+  },
+  "existingDeliveryTargeted": {
+    "result": "16/16 non-Web scenarios; loopback Web test separately 1/1",
+    "initialEnvironmentFailure": "Sandbox denied loopback listen (EPERM); same Web test passed with local test permission.",
+    "codeFailure": false
+  },
+  "ordinaryFullSuite": {
+    "command": "OX2F_NATIVE_LAUNCHD=0 npm test",
+    "runsOnFinalCandidate": 1,
+    "exitCode": 0,
+    "result": {
+      "tests": 884,
+      "pass": 765,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 119,
+      "duration_ms": 77441.28075
+    }
+  },
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "independentSyntax": {
+      "javascriptFiles": 196,
+      "pythonFiles": 7,
+      "allExitCodesChecked": true
+    }
+  },
+  "nativeSuiteRuns": 0,
+  "providerCalls": 0,
+  "modelSmokeAttempts": 0,
+  "realGitCrashBoundaries": [
+    "before effect start",
+    "effect started before object write",
+    "after exact object write",
+    "after HEAD update before receipt",
+    "after reconciliation result before task pointer"
+  ],
+  "review": {
+    "independentReadOnlyReviewers": 1,
+    "confirmedP1": 1,
+    "confirmedP2": 1,
+    "bothFixedWithRegressionTests": true
+  },
+  "runtimeCodeChangedAfterFullSuite": false
+}

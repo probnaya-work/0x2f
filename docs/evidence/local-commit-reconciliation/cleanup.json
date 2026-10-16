@@ -1,0 +1,13 @@
+{
+  "fixtureAgentFiles": 0,
+  "loadedFixtureAgents": [],
+  "launchctlListExit": 0,
+  "deliveryTemporaryRepositoriesRemaining": [],
+  "deliveryWorkersRemaining": [],
+  "supervisionSocketsRemaining": 0,
+  "nativeSuiteInvocations": 0,
+  "ordinaryNativeOptIn": "0",
+  "fixtureCleanup": "owned fixture test teardown only",
+  "foreignOrHistoricalArtifactsDeleted": false,
+  "deliveryLockHelpersRemaining": []
+}
