@@ -1,0 +1,82 @@
+{
+  "candidate": "0122425b3381a706c15bef410802a8aeb37fb5f7",
+  "commits": [
+    "9dcd282870eee4c6d978e7aa12fd814023faeb1b",
+    "93078ac0553f915f9096cd7b9e5c2363f606c050",
+    "4c42fa2d6e21a6810e4fd39160fe69129bfd5b36",
+    "47aa35f38c5c9c74f42b2d4da586389dba8891eb",
+    "0122425b3381a706c15bef410802a8aeb37fb5f7"
+  ],
+  "commands": [
+    {
+      "command": "node --test test/engineering*.test.mjs",
+      "exit": 0,
+      "pass": 51,
+      "fail": 0
+    },
+    {
+      "command": "node --test test/codex-provider.test.mjs test/engineering-projection.test.mjs",
+      "exit": 0,
+      "pass": 21,
+      "fail": 0
+    },
+    {
+      "command": "npm test",
+      "exit": 1,
+      "pass": 843,
+      "fail": 2,
+      "reason": "timing failures: attempt deadline and ACP writer exit"
+    },
+    {
+      "command": "node --test --test-concurrency=2 test/engineering-playbook.test.mjs test/provider-integration.test.mjs",
+      "exit": 0,
+      "pass": 14,
+      "fail": 0
+    },
+    {
+      "command": "node --test --test-concurrency=4 'test/*.test.mjs'",
+      "exit": 0,
+      "pass": 845,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "command": "npm run check",
+      "exit": 0
+    },
+    {
+      "command": "independent node --check per JS file; Python ast.parse per Python file",
+      "exit": 0,
+      "javascriptFiles": 185,
+      "pythonFiles": 7
+    },
+    {
+      "command": "node scripts/demo-engineering-playbook.mjs",
+      "exit": 0,
+      "scenarios": 6,
+      "liveModelCalls": 0
+    }
+  ],
+  "firstForegroundSmoke": {
+    "harnessVersion": "codex-cli 0.149.1",
+    "invocations": 1,
+    "result": "HTTP 400; configured gpt-6.1-sol unsupported for ChatGPT account",
+    "verifiedPatch": false,
+    "credentialsUnchanged": true,
+    "usage": "unknown; reservation retained"
+  },
+  "verdicts": {
+    "offlineCandidate": "accepted",
+    "nativeSuccessfulForeground": "unproven",
+    "unattendedProviderExecution": "NO-GO",
+    "productionActivation": false
+  },
+  "preservation": {
+    "task2Files": 105,
+    "task2Runs": 7,
+    "task2AllHashesMatch": true,
+    "protectedPackagesMatch": true,
+    "originalAndStableUnchanged": true,
+    "productionBindingUnchanged": true
+  }
+}

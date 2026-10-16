@@ -1,0 +1,129 @@
+{
+  "acceptedCommit": "0122425b3381a706c15bef410802a8aeb37fb5f7",
+  "mode": "offline-fixture",
+  "liveModelCalls": 0,
+  "scenarios": [
+    {
+      "scenario": "one-primary",
+      "taskId": 1,
+      "status": "ready",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "implement"
+        }
+      ],
+      "diffFiles": [
+        "src/id.mjs"
+      ]
+    },
+    {
+      "scenario": "observed-unavailable",
+      "taskId": 1,
+      "status": "ready",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-secondary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-secondary",
+          "purpose": "implement"
+        }
+      ],
+      "diffFiles": [
+        "src/id.mjs"
+      ]
+    },
+    {
+      "scenario": "failed-check-fix",
+      "taskId": 1,
+      "status": "ready",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "implement"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "fix"
+        }
+      ],
+      "diffFiles": [
+        "src/id.mjs"
+      ]
+    },
+    {
+      "scenario": "risk-review",
+      "taskId": 1,
+      "status": "ready",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "implement"
+        },
+        {
+          "id": "fixture-reviewer",
+          "purpose": "review"
+        }
+      ],
+      "diffFiles": [
+        "src/auth.mjs"
+      ]
+    },
+    {
+      "scenario": "bounded-stop",
+      "taskId": 1,
+      "status": "needs_you",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "implement"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "fix"
+        }
+      ],
+      "diffFiles": []
+    },
+    {
+      "scenario": "resume",
+      "taskId": 1,
+      "status": "ready",
+      "calls": [
+        {
+          "id": "fixture-primary",
+          "purpose": "investigate"
+        },
+        {
+          "id": "fixture-primary",
+          "purpose": "implement"
+        }
+      ],
+      "diffFiles": [
+        "src/id.mjs"
+      ]
+    }
+  ]
+}
