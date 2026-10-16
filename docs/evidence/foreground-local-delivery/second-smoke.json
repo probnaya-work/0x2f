@@ -1,0 +1,60 @@
+{
+  "harnessVersion": "codex-cli 0.149.1",
+  "invocations": 1,
+  "taskStatus": "ready",
+  "purposes": [
+    "implement",
+    "verify"
+  ],
+  "providers": [
+    "codex",
+    "local-checks"
+  ],
+  "inputHandoffDigest": "c3624e9b3b49ce4e7c22e115ca32136969da0cd877229d89ecccf7d52d998e3f",
+  "inputBytes": 1506,
+  "artifactDigest": "6b50a62a043c973af0a03feeab84541678789c8df815a5ccb3f07667d250b28c",
+  "changedFiles": [
+    "src/id.mjs"
+  ],
+  "verification": {
+    "command": [
+      "node",
+      "--test",
+      "test/id.test.mjs"
+    ],
+    "cwd": "<disposable-fixture>",
+    "exit": 0,
+    "error": null,
+    "sourceUnchanged": true,
+    "outputDigest": "1eb1b90a0b85daabf14e9a9d2f7f7b974d9a7adc50152c46cd28b0180e332c80"
+  },
+  "routing": [
+    {
+      "purpose": "implement",
+      "provider": "codex",
+      "reason": "initial_executor"
+    }
+  ],
+  "usage": {
+    "confirmed": {
+      "tokens": 78407
+    },
+    "estimated": {
+      "moneyMicros": null,
+      "tokens": null,
+      "modelCalls": null,
+      "providerCalls": null
+    },
+    "reported": {
+      "input_tokens": 77880,
+      "cached_input_tokens": 60416,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 527,
+      "reasoning_output_tokens": 93
+    },
+    "uncertainty": "unconfirmed"
+  },
+  "credentialsUnchanged": true,
+  "repositoryCommitCreated": false,
+  "noFurtherLiveAttemptAuthorized": true
+}
