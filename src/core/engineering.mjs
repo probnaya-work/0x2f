@@ -9,6 +9,7 @@ import { readBounded } from './durable.mjs';
 import { makeRunRecord } from './runs.mjs';
 import { workEvent } from './events.mjs';
 import { createHandoff, verifyHandoff } from './engineering-handoff.mjs';
+import { ensureEngineeringWorkspace, assertEngineeringWorkspace, engineeringDirectory } from './engineering-workspace.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hash = value => digest(JSON.stringify(value));
@@ -22,7 +23,7 @@ export async function engineeringConfig(store) {
   const file = path.join(store.workDir(), 'engineering.json');
   if (!await store.exists(file)) return null;
   const c = await store.readJson(file);
-  if (Object.keys(c).some(k => !['schemaVersion', 'enabled', 'currency', 'providers', 'files', 'writePaths', 'check', 'limits'].includes(k))) throw new Error('Unknown engineering policy field.');
+  if (Object.keys(c).some(k => !['schemaVersion', 'enabled', 'currency', 'providers', 'files', 'writePaths', 'check', 'limits', 'workspace'].includes(k))) throw new Error('Unknown engineering policy field.');
   if (c.enabled === false) return null;
   if (c.schemaVersion !== 1 || c.enabled !== true || !Array.isArray(c.providers) || !c.providers.length || c.providers.some(p => typeof p !== 'string' || !p) || new Set(c.providers).size !== c.providers.length) throw new Error('Invalid engineering provider policy.');
   if (!Array.isArray(c.files) || !c.files.length || c.files.some(p => !relative(p)) || !Array.isArray(c.writePaths) || !c.writePaths.length || c.writePaths.some(p => !c.files.includes(p))) throw new Error('Engineering requires explicit relative input and write paths.');
@@ -31,6 +32,7 @@ export async function engineeringConfig(store) {
   if (limits && Object.keys(limits).some(k => ![...dimensions, 'wallClockMs', 'implementationAttempts'].includes(k))) throw new Error('Unknown engineering hard ceiling.');
   if (!limits || [...dimensions, 'wallClockMs', 'implementationAttempts'].some(k => !Number.isSafeInteger(limits[k]) || limits[k] < 0) || limits.wallClockMs < 1 || limits.wallClockMs > 120000 || limits.implementationAttempts < 1 || limits.implementationAttempts > 2) throw new Error('Invalid engineering hard ceilings (maximum two implementation attempts / 120 seconds).');
   if (c.currency !== 'USD') throw new Error('Engineering money is integer USD micros; no implicit currency conversion.');
+  if (c.workspace && (typeof c.workspace.repository !== 'string' || !path.isAbsolute(c.workspace.repository) || typeof c.workspace.ref !== 'string' || !c.workspace.ref || c.workspace.ref.length > 200)) throw new Error('Engineering workspace requires an absolute repository and explicit Git ref.');
   if (c.files.some(p => /(^|\/)(auth|permissions?|secrets?|migrations?)(\/|[.-])/i.test(p))) throw new Error('Sensitive engineering paths require independent review; this slice cannot execute them.');
   const checkBytes = await readBounded(c.check[0], 256000000);
   return { ...c, policy: POLICY, checkDigest: digest(checkBytes) };
@@ -45,8 +47,16 @@ export async function createEngineeringTask(ctx, { title, brief, prompt }, confi
   const provider = candidates[0] ?? config.providers[0];
   const token = randomUUID();
   const engineering = { schemaVersion: 1, revision: 1, config, configDigest: hash(config), driver: { token, state: 'pending' }, decisions: [], budget: { limits: config.limits, confirmed: zero(), reservations: [], uncertain: [] }, verification: null, next: 'automatic' };
-  const task = await ctx.store.createTask({ title, brief, prompt }, { provider, runs: [initialRun(provider)], engineering, launchToken: token });
+  let task = await ctx.store.createTask({ title, brief, prompt }, { provider, runs: [initialRun(provider)], engineering, launchToken: token });
   await ctx.store.appendEvent(task.slug, workEvent('task.created', task.id, { status: task.status }));
+  if (config.workspace) {
+    try {
+      const workspace = await ensureEngineeringWorkspace(ctx.store, task, config.workspace);
+      task = await mutate(ctx.store, task.slug, token, t => ({ ...t, engineering: { ...t.engineering, workspace } }));
+    } catch (error) {
+      return mutate(ctx.store, task.slug, token, t => stopPatch(t, 'workspace_setup', error.message));
+    }
+  }
   const pid = await ctx.node.startExecution({ task });
   // A synchronous test node may have already finished. Never overwrite it.
   if (pid) await mutate(ctx.store, task.slug, token, t => ({ ...t, pid }));
@@ -93,7 +103,7 @@ async function freeze(store, task, run, manifest, label) {
   const root = path.join(store.taskDir(task.slug), 'runs', String(run), label);
   for (const file of task.engineering.config.files) {
     if (!manifest.files[file]) continue;
-    const bytes = await readBounded(path.join(store.base, file), 2000000);
+    const bytes = await readBounded(path.join(engineeringDirectory(store, task), file), 2000000);
     if (digest(bytes) !== manifest.files[file].sha256) throw new Error('Input changed while snapshotting.');
     await store.writeText(path.join(root, 'files', file), bytes);
   }
@@ -116,7 +126,8 @@ export async function assertEngineeringAccepted(store, task) {
   if (!v || v.code !== 0 || v.error || !v.sourceUnchanged) throw new Error('No verified engineering artifact is available for acceptance.');
   await verifyFrozen(store, task, v.artifact);
   const receipt = await store.readJson(path.join(store.taskDir(task.slug), 'runs', String(v.run), 'verification.json'));
-  if (hash(receipt) !== hash(v) || (await inventory(store.base)).digest !== v.artifact.contentDigest) throw new Error('Verified artifact/check changed; acceptance refused.');
+  await assertEngineeringWorkspace(store, task, task.runs.at(-1).run);
+  if (hash(receipt) !== hash(v) || (await inventory(engineeringDirectory(store, task))).digest !== v.artifact.contentDigest) throw new Error('Verified artifact/check changed; acceptance refused.');
 }
 
 function stopPatch(t, code, text) {
@@ -137,6 +148,7 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
   if (!claimed) return task;
   const start = Date.now();
   const config = task.engineering.config;
+  const executionDirectory = engineeringDirectory(store, task);
   const noteDigest = hash(task.context ?? null);
   const stop = async (code, text) => {
     task = await mutate(store, slug, token, t => t.status === 'working' ? stopPatch(t, code, text) : null);
@@ -157,7 +169,8 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
   let executorFailure = null;
   let preferred = config.providers;
   try {
-    const baseline = await inventory(store.base);
+    await assertEngineeringWorkspace(store, task, task.runs.at(-1).run);
+    const baseline = await inventory(executionDirectory);
     for (const f of config.files) if (!baseline.files[f]) return stop('missing_input', `Required input is absent: ${f}`);
     for (let attempt = 1; attempt <= config.limits.implementationAttempts; attempt++) {
       if (deadline() || await cancelled()) return stop('deadline', 'Execution stopped at its wall-clock/cancellation boundary.');
@@ -172,7 +185,7 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
       }
       if (!selected) return stop('execution_unqualified', 'No executor proves the required money/token/model-call/provider-call hard ceilings. No provider was called.');
       const { provider, proof } = selected;
-      const before = await inventory(store.base);
+      const before = await inventory(executionDirectory);
       const purpose = prior ? 'fix' : 'implement';
       let run = task.runs.at(-1).run;
       if (task.runs.at(-1).outcome !== 'working') run++;
@@ -200,20 +213,21 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
       await store.writeJson(path.join(dir, 'handoff.json'), handoff);
       await store.writeRunPrompt(task, run, JSON.stringify(handoff.content, null, 2));
       task = await update(t => ({ ...t, runs: t.runs.map(r => r.run === run ? { ...r, handoff: { path: `runs/${run}/handoff.json`, digest: handoff.digest, metrics: handoff.metrics } } : r) }));
-      await verifyHandoff(store, await store.findTask(task.id), handoff, { run, sourceDigest: (await inventory(store.base)).digest });
+      await assertEngineeringWorkspace(store, task, run);
+      await verifyHandoff(store, await store.findTask(task.id), handoff, { run, sourceDigest: (await inventory(executionDirectory)).digest });
       await store.appendEvent(slug, workEvent('run.started', task.id, { run, purpose, provider: provider.id }));
       let outcome;
       const timer = setTimeout(() => proof.cancel?.(), Math.max(1, config.limits.wallClockMs - (Date.now() - start)));
       const abort = () => proof.cancel?.();
       signal.addEventListener('abort', abort, { once: true });
-      try { outcome = await proof.execute({ cwd: store.base, prompt: JSON.stringify(handoff.content), purpose, signal }); }
+      try { outcome = await proof.execute({ cwd: executionDirectory, prompt: JSON.stringify(handoff.content), purpose, signal }); }
       finally { clearTimeout(timer); signal.removeEventListener('abort', abort); }
       if (!['ready', 'failed', 'needs_you'].includes(outcome?.status)) throw new Error('Executor returned an invalid outcome.');
       const usage = outcome.usage;
       const known = usage && dimensions.every(k => Number.isSafeInteger(usage[k]) && usage[k] >= 0 && usage[k] <= maximum[k]);
       const result = outcome.result ?? outcome.error ?? '';
       await store.writeText(path.join(dir, 'result.md'), result);
-      const after = await inventory(store.base);
+      const after = await inventory(executionDirectory);
       previous = await freeze(store, task, run, after, 'artifacts');
       task = await update(t => {
         const budget = t.engineering.budget;
@@ -240,10 +254,11 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
       if (digest(await readBounded(config.check[0], 256000000)) !== config.checkDigest) return stop('check_drift', 'Verification executable changed.');
       await verifyFrozen(store, task, previous);
       await store.appendEvent(slug, workEvent('run.started', task.id, { run: verifyRun, purpose: 'verify', provider: 'local-checks' }));
-      const receipt = await checkRunner({ argv: config.check, cwd: store.base, timeout: Math.min(5000, config.limits.wallClockMs - (Date.now() - start)), signal });
-      const checked = await inventory(store.base);
+      await assertEngineeringWorkspace(store, task, verifyRun);
+      const receipt = await checkRunner({ argv: config.check, cwd: executionDirectory, timeout: Math.min(5000, config.limits.wallClockMs - (Date.now() - start)), signal });
+      const checked = await inventory(executionDirectory);
       await verifyFrozen(store, task, previous);
-      const verification = { schemaVersion: 1, run: verifyRun, artifact: previous, argv: config.check, executableDigest: config.checkDigest, cwd: store.base, ...receipt, sourceUnchanged: checked.digest === after.digest, outputDigest: digest(receipt.output) };
+      const verification = { schemaVersion: 1, run: verifyRun, artifact: previous, argv: config.check, executableDigest: config.checkDigest, cwd: executionDirectory, ...receipt, sourceUnchanged: checked.digest === after.digest, outputDigest: digest(receipt.output) };
       await store.writeJson(path.join(store.taskDir(slug), 'runs', String(verifyRun), 'verification.json'), verification);
       await store.writeText(path.join(store.taskDir(slug), 'runs', String(verifyRun), 'result.md'), receipt.output);
       task = await update(t => ({ ...t, runs: t.runs.map(r => r.run === verifyRun ? { ...r, outcome: receipt.code === 0 && verification.sourceUnchanged ? 'ready' : 'failed', completedAt: now(), verification, usage: { confirmed: zero(), uncertainty: null } } : r), engineering: { ...t.engineering, verification } }));

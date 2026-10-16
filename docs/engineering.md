@@ -38,6 +38,12 @@ task intent, run identity, human decisions and immutable evidence. Their measure
 byte size is compared with saved audit history. Changed inputs or references
 cannot be dispatched through an old handoff.
 
+An optional `workspace: { repository: "/absolute/repository", ref: "HEAD" }`
+creates a task-owned detached Git worktree at the resolved commit. Original dirty
+files are not copied or changed. A durable preparation receipt supports recovery
+of the same checkout. Cleanup uses Git without force and refuses dirty results.
+Worktree ownership is not a security sandbox.
+
 Limits: this is not managed worktree ownership, a sandbox, unattended supervision,
 independent review, delivery authorization or crash-safe external replay. Ambiguous
 effects/launches are never retried. A blocked engineering task cannot bypass its
