@@ -267,7 +267,10 @@ export function createActions(ctx) {
   // starts fresh.
   async function rerunWork(id, options = {}) {
     const task = await store.findTask(id);
-    if (task.engineering) throw new WorkError('Engineering task continuation is bounded by its saved policy. A blocked task requires a new approved scope; ordinary rerun cannot bypass its ceilings.');
+    if (task.engineering) {
+      if (task.engineering.playbook && task.status !== 'working') return (await import('./engineering-playbook.mjs')).resumeEngineeringPlaybook(ctx, task);
+      throw new WorkError('Engineering task continuation is bounded by its saved policy. A blocked task requires a new approved scope; ordinary rerun cannot bypass its ceilings.');
+    }
     if (!task.workflow) return rerunUnchecked(id, options);
     return workflowLock(store, async () => {
       const fresh = await store.findTask(id);

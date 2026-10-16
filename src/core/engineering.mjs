@@ -23,17 +23,18 @@ export async function engineeringConfig(store) {
   const file = path.join(store.workDir(), 'engineering.json');
   if (!await store.exists(file)) return null;
   const c = await store.readJson(file);
-  if (Object.keys(c).some(k => !['schemaVersion', 'enabled', 'currency', 'providers', 'files', 'writePaths', 'check', 'limits', 'workspace'].includes(k))) throw new Error('Unknown engineering policy field.');
+  if (Object.keys(c).some(k => !['schemaVersion', 'enabled', 'currency', 'providers', 'files', 'writePaths', 'check', 'limits', 'workspace', 'playbook', 'requireReview', 'reviewProviders', 'reviewChecks'].includes(k))) throw new Error('Unknown engineering policy field.');
   if (c.enabled === false) return null;
   if (c.schemaVersion !== 1 || c.enabled !== true || !Array.isArray(c.providers) || !c.providers.length || c.providers.some(p => typeof p !== 'string' || !p) || new Set(c.providers).size !== c.providers.length) throw new Error('Invalid engineering provider policy.');
   if (!Array.isArray(c.files) || !c.files.length || c.files.some(p => !relative(p)) || !Array.isArray(c.writePaths) || !c.writePaths.length || c.writePaths.some(p => !c.files.includes(p))) throw new Error('Engineering requires explicit relative input and write paths.');
   if (!Array.isArray(c.check) || c.check.length < 1 || c.check.some(a => typeof a !== 'string' || !a) || !path.isAbsolute(c.check[0])) throw new Error('Engineering check requires a pinned absolute executable argv.');
   const limits = c.limits;
-  if (limits && Object.keys(limits).some(k => ![...dimensions, 'wallClockMs', 'implementationAttempts'].includes(k))) throw new Error('Unknown engineering hard ceiling.');
-  if (!limits || [...dimensions, 'wallClockMs', 'implementationAttempts'].some(k => !Number.isSafeInteger(limits[k]) || limits[k] < 0) || limits.wallClockMs < 1 || limits.wallClockMs > 120000 || limits.implementationAttempts < 1 || limits.implementationAttempts > 2) throw new Error('Invalid engineering hard ceilings (maximum two implementation attempts / 120 seconds).');
+  if (limits && Object.keys(limits).some(k => ![...dimensions, 'wallClockMs', 'implementationAttempts', 'investigationAttempts', 'reviewCycles', 'agentRuns'].includes(k))) throw new Error('Unknown engineering hard ceiling.');
+  if (!limits || [...dimensions, 'wallClockMs', 'implementationAttempts'].some(k => !Number.isSafeInteger(limits[k]) || limits[k] < 0) || limits.wallClockMs < 1 || limits.wallClockMs > 600000 || limits.implementationAttempts < 1 || limits.implementationAttempts > (c.playbook ? 3 : 2)) throw new Error('Invalid bounded engineering execution limits.');
+  for (const [key, maximum] of [['investigationAttempts', 2], ['reviewCycles', 2], ['agentRuns', 10]]) if (limits[key] !== undefined && (!Number.isSafeInteger(limits[key]) || limits[key] < (key === 'reviewCycles' ? 0 : 1) || limits[key] > maximum)) throw new Error(`Invalid ${key} limit.`);
   if (c.currency !== 'USD') throw new Error('Engineering money is integer USD micros; no implicit currency conversion.');
   if (c.workspace && (typeof c.workspace.repository !== 'string' || !path.isAbsolute(c.workspace.repository) || typeof c.workspace.ref !== 'string' || !c.workspace.ref || c.workspace.ref.length > 200)) throw new Error('Engineering workspace requires an absolute repository and explicit Git ref.');
-  if (c.files.some(p => /(^|\/)(auth|permissions?|secrets?|migrations?)(\/|[.-])/i.test(p))) throw new Error('Sensitive engineering paths require independent review; this slice cannot execute them.');
+  if (!c.playbook && c.files.some(p => /(^|\/)(auth|permissions?|secrets?|migrations?)(\/|[.-])/i.test(p))) throw new Error('Sensitive engineering paths require the reviewed engineering playbook.');
   const checkBytes = await readBounded(c.check[0], 256000000);
   return { ...c, policy: POLICY, checkDigest: digest(checkBytes) };
 }
@@ -46,8 +47,8 @@ export async function createEngineeringTask(ctx, { title, brief, prompt }, confi
   const candidates = config.providers.filter(id => ctx.providers.available(id));
   const provider = candidates[0] ?? config.providers[0];
   const token = randomUUID();
-  const engineering = { schemaVersion: 1, revision: 1, config, configDigest: hash(config), driver: { token, state: 'pending' }, decisions: [], budget: { limits: config.limits, confirmed: zero(), reservations: [], uncertain: [] }, verification: null, next: 'automatic' };
-  let task = await ctx.store.createTask({ title, brief, prompt }, { provider, runs: [initialRun(provider)], engineering, launchToken: token });
+  const engineering = { schemaVersion: 1, revision: 1, config, configDigest: hash(config), driver: { token, state: 'pending' }, decisions: [], budget: { limits: config.limits, confirmed: zero(), reservations: [], uncertain: [] }, verification: null, next: 'automatic', ...(config.playbook ? { playbook: { nextPurpose: 'investigate', reason: 'initial_executor', agentRuns: 0, implementationAttempts: 0, investigationAttempts: 0, reviewCycles: 0, dispatch: null } } : {}) };
+  let task = await ctx.store.createTask({ title, brief, prompt }, { provider, runs: [{ ...initialRun(provider), purpose: config.playbook ? 'investigate' : 'implement' }], engineering, launchToken: token });
   await ctx.store.appendEvent(task.slug, workEvent('task.created', task.id, { status: task.status }));
   if (config.workspace) {
     try {
@@ -138,7 +139,9 @@ function stopPatch(t, code, text) {
 // Qualification is an in-process dependency seam for controlled fixtures, not
 // a user-authored assertion in engineering.json. Production has no qualified
 // paid executor in this version. Availability/usage reporting cannot prove caps.
-export async function runEngineeringTask({ store, slug, token, providers, qualify = () => null, signal = new AbortController().signal, checkRunner = runCheck }) {
+export async function runEngineeringTask(args) {
+  const { store, slug, token, providers, qualify = () => null, signal = new AbortController().signal, checkRunner = runCheck } = args;
+  if ((await store.readJson(path.join(store.taskDir(slug), 'task.json'))).engineering?.config.playbook) return (await import('./engineering-playbook.mjs')).runEngineeringPlaybook({ ...args, qualify, signal, checkRunner });
   let claimed = false;
   let task = await mutate(store, slug, token, t => {
     if (t.status !== 'working' || t.engineering.driver.state !== 'pending') return null;
@@ -283,3 +286,5 @@ function runCheck({ argv, cwd, timeout, signal }) {
     execFile(argv[0], argv.slice(1), { cwd, timeout: Math.max(1, timeout), maxBuffer: 65536, signal, env: { PATH: '/usr/bin:/bin', LANG: 'C.UTF-8' } }, (error, stdout, stderr) => resolve({ code: error ? typeof error.code === 'number' ? error.code : null : 0, output: String(stdout) + String(stderr), error: error && typeof error.code !== 'number' ? error.code ?? 'check_failed' : null }));
   });
 }
+
+export { inventory as engineeringInventory, freeze as freezeEngineering, verifyFrozen as verifyEngineeringArtifact, mutate as mutateEngineering, initialRun as engineeringRun, stopPatch as engineeringStop, runCheck as runEngineeringCheck };
