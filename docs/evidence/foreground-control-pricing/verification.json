@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "2fc8ce8ce661f98690eb347a14f1e42117a78773",
+  "scope": "Foreground pricing policy only; no architecture expansion",
+  "targeted": {
+    "tests": 8,
+    "passed": 8,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 10186.980709,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-control-pricing-targeted.log",
+      "sha256": "fd06ff12fae8a1bae317cc1a3202e2695fcea8094cab6a2e89062224d3b14cc1",
+      "bytes": 922
+    }
+  },
+  "finalCandidateTargeted": {
+    "tests": 6,
+    "passed": 6,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 6167.336125,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-control-pricing-targeted-final.log",
+      "sha256": "d193108b45349604f512a5a584133e7ec0f9c28a8caf933d5cc4e31bb90d633a",
+      "bytes": 727
+    }
+  },
+  "finalPolicyTests": {
+    "tests": 3,
+    "passed": 3,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 4218.955375,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-control-pricing-policy-final.log",
+      "sha256": "ca7a9085b888c0b76ae46376b2cabe30de15baddff687d14cbda9fcb2ac6ec58",
+      "bytes": 432
+    }
+  },
+  "targetedSetsOverlap": true,
+  "fullSuite": {
+    "tests": 977,
+    "passed": 858,
+    "failures": 0,
+    "skipped": 119,
+    "durationMs": 145188.614167,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-control-pricing-full-suite.log",
+      "sha256": "269bb28055b866d3aadcc5e8a5f3de5fbfa9e11b956596500af68d4239fd0b7f",
+      "bytes": 90698
+    },
+    "runs": 1,
+    "command": "env -u OPENAI_API_KEY OX2F_NATIVE_LAUNCHD=0 OX2F_MANAGED_EVIDENCE_DIR=/private/tmp/0x2f-managed-control-pricing-evidence npm test",
+    "codeChangedAfterCandidate": false
+  },
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "javascriptFiles": 206,
+    "pythonFiles": 7,
+    "exitCodesChecked": true,
+    "logs": [
+      {
+        "path": "/private/tmp/0x2f-control-pricing-syntax.log",
+        "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+        "bytes": 274
+      },
+      {
+        "path": "/private/tmp/0x2f-control-pricing-exit-syntax.log",
+        "sha256": "8b61b03dd210ace3fc299e502592ab8c75f6ebf7c3a9f323f817406d714561e6",
+        "bytes": 51
+      }
+    ]
+  },
+  "codeHashes": {
+    "src/core/engineering-managed.mjs": "97553dd6c47dee76ad5ef0f28903d41a758f9925ef3193237bee415658a9707a",
+    "src/providers/managed-openai.mjs": "85fdca1e45eec726dd43562629af4f391a55d55e65c07fb4ebccb90f02d964db",
+    "src/web/workflow.mjs": "034bb302c9eb97d244cb813f9d0b379327f0b3e0969d59d15a90ccb3f7447d58",
+    "test/engineering-managed.test.mjs": "4964dc653e21e60be2f341b629f937474d1f1deee06ccb4eddfb13cb2aa142dd",
+    "test/fixtures/managed-crash-worker.mjs": "b5d208ff6d742928f114a5680f6775fbf691db3a6cc29b8ccb649d96f5d02a48"
+  },
+  "offlineNormalFlow": {
+    "path": "docs/evidence/foreground-control-pricing/normal-flow.json",
+    "sha256": "a4a369d44fd5f066e1aaa623f8d41f908cebc7170d4ca99701f9a6c4b4bcb0b7",
+    "bytes": 49421
+  },
+  "credentialPresenceOnly": false,
+  "credentialStoresRead": false,
+  "realKeyPrintedSavedOrHashed": false,
+  "liveCanary": "NOT RUN: OPENAI_API_KEY absent from foreground process environment",
+  "liveProviderRequests": 0,
+  "actualLiveTokens": null,
+  "actualLiveCalculatedCostUsd": null,
+  "actualLiveBilledAmount": null,
+  "actualLiveVerifier": null,
+  "actualLiveTaskCreated": false,
+  "providerBillingConfigured": false,
+  "productionActivated": false,
+  "commitDeliveryEffects": 0,
+  "verdicts": {
+    "offlineManaged": "GO",
+    "boundedForegroundManaged": "Pricing policy GO for one explicit canary; live qualification pending foreground credential",
+    "opaqueForeground": "Unchanged explicit eligibility; hard spending guarantees unavailable; not bounded AUTO/fallback",
+    "unattended": "NO-GO"
+  }
+}

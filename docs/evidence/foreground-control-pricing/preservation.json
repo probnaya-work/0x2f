@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "2fc8ce8ce661f98690eb347a14f1e42117a78773",
+  "baselineBefore": {
+    "path": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.control-pricing-before.json",
+    "sha256": "ce2cee40a2d5bcc6b11651b9669c0180ae31de42b27bfa0ba7579552e1d142f8",
+    "bytes": 183827
+  },
+  "baselineAfter": {
+    "path": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.control-pricing-after.json",
+    "sha256": "258f84bfb8467acd7334658110ef212d1bef641e5b956ce89ff5d051f2cd2922",
+    "bytes": 183827
+  },
+  "mainHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "mainHeadStatusTrackedUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "stableUnchanged": true,
+  "task2": {
+    "baselineCount": 105,
+    "actualCount": 105,
+    "missing": [],
+    "extra": [],
+    "changed": []
+  },
+  "task2Unchanged": true,
+  "task3Unchanged": true,
+  "task3Files": 24,
+  "protectedPackagesMatchBaseline": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "launchAgentFileAndBindingUnchanged": true,
+  "schedulesUnchanged": true,
+  "schedulerInstallationUnchanged": true,
+  "changedWorkFiles": [
+    "scheduler.log",
+    "scheduler/health.json"
+  ],
+  "extraWorkFiles": [],
+  "missingWorkFiles": [],
+  "schedulerHealthSuccess": true,
+  "naturalSchedulerRuns": {
+    "before": "130",
+    "after": "131",
+    "lastExit": "0"
+  },
+  "existingReceipt": {
+    "semanticDigest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+    "unchanged": true,
+    "newDeliveryEffects": 0
+  }
+}

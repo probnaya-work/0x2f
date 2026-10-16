@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "modelRegistry": [
+    {
+      "id": "gpt-5.4-mini-2026-03-17",
+      "capabilities": [
+        "responses",
+        "function-calling",
+        "small-code-patch"
+      ],
+      "reasoningEffort": "none",
+      "price": {
+        "currency": "USD",
+        "perMillion": {
+          "input": 0.75,
+          "cachedInput": 0.075,
+          "output": 4.5
+        },
+        "observedAt": "2026-10-16T15:54:35Z",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+        "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+        "controlRequestPolicy": "unpriced_control_request"
+      },
+      "capabilitySource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+    }
+  ],
+  "hardLimits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 2,
+    "countRequests": 2,
+    "responsesRequests": 4,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "predicted": {
+    "currency": "USD",
+    "inferenceUpperUsd": 0.024576,
+    "totalUpperUsd": null,
+    "controlRequests": {
+      "classification": "unpriced_control_request",
+      "maximum": 3,
+      "tokenCountMaximum": 2,
+      "availabilityMaximum": 1,
+      "separatePublishedFee": false,
+      "contractualZeroFee": false,
+      "includedInInferenceMaximum": false
+    },
+    "inputTokens": 8192,
+    "outputTokens": 4096,
+    "totalInferenceTokens": 12288,
+    "pricing": {
+      "currency": "USD",
+      "perMillion": {
+        "input": 0.75,
+        "cachedInput": 0.075,
+        "output": 4.5
+      },
+      "observedAt": "2026-10-16T15:54:35Z",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+      "controlRequestPolicy": "unpriced_control_request"
+    }
+  },
+  "explicitForegroundCanary": {
+    "version": "managed-foreground-pricing-v2",
+    "mode": "foreground",
+    "foregroundCanary": true,
+    "publishedBillableInferenceMaximumUsd": 0.024576,
+    "controlRequests": {
+      "classification": "unpriced_control_request",
+      "maximum": 3,
+      "tokenCountMaximum": 2,
+      "availabilityMaximum": 1,
+      "separatePublishedFee": false,
+      "contractualZeroFee": false,
+      "includedInInferenceMaximum": false
+    },
+    "totalBilledAmount": "unknown",
+    "retry": false,
+    "opaqueFallback": false
+  },
+  "unattended": "NO-GO; unpriced control request foreground exception does not apply",
+  "credentialPresentAtInspection": false,
+  "liveCanary": "NOT RUN",
+  "liveRequests": 0,
+  "officialSources": {
+    "count": "https://developers.openai.com/api/reference/python/resources/responses/subresources/input_tokens/methods/count",
+    "countingGuide": "https://developers.openai.com/api/docs/guides/token-counting",
+    "pricing": "https://developers.openai.com/api/docs/pricing"
+  }
+}

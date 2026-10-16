@@ -9,7 +9,7 @@ import {engineeringDirectory,assertEngineeringWorkspace} from './engineering-wor
 import {mutateEngineering,engineeringInventory,freezeEngineering,engineeringRun,engineeringStop,verifyEngineeringArtifact} from './engineering.mjs';
 import {saveEngineeringUsage,economicsPolicy} from './engineering-economics.mjs';
 import {workEvent} from './events.mjs';
-import {MANAGED_LIMITS,MANAGED_MODELS,selectManagedModel,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_MODELS,selectManagedModel,managedForegroundPricing,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
 
 const now=()=>new Date().toISOString();
 const int=n=>Number.isSafeInteger(n)&&n>=0;
@@ -44,7 +44,7 @@ export function managedCheck({argv,cwd,timeout,signal}) {
   });
 }
 
-export async function runManagedForeground(ctx,initial,{env=process.env,transport,limits=MANAGED_LIMITS,registry=MANAGED_MODELS,fault=()=>{},checkRunner=managedCheck}={}) {
+export async function runManagedForeground(ctx,initial,{env=process.env,transport,limits=MANAGED_LIMITS,registry=MANAGED_MODELS,foregroundCanary=false,onPreview=preview=>console.log(JSON.stringify(preview,null,2)),fault=()=>{},checkRunner=managedCheck}={}) {
   const store=ctx.store,slug=initial.slug,root=store.taskDir(slug),token=initial.engineering.driver.token,key=env.OPENAI_API_KEY;
   const guard=managedGuard(key),controller=new AbortController();const began=Date.now();
   if(Object.entries(MANAGED_LIMITS).some(([k,max])=>!Number.isFinite(limits[k])||limits[k]<0||limits[k]>max))fail('managed_limit_configuration');
@@ -77,12 +77,12 @@ export async function runManagedForeground(ctx,initial,{env=process.env,transpor
       const fresh=await store.findTask(task.id);if(engineeringIntent(fresh)!==intent||fresh.status!=='working')fail('managed_input_drift');
       if((await engineeringInventory(cwd)).digest!==expected)fail('managed_source_drift');
       const number=state.requests+state.modelQueries+1,requestId=randomUUID();
-      const reservation={schemaVersion:1,taskId:task.id,run,attempt,requestId,number,kind,model:model.id,inputDigest:hash(body),attemptCostReservationUsd:predicted.totalUpperUsd,reservation:kind==='inference'?{inputTokens:state.pendingInputTokens,outputTokens:body.max_output_tokens,inferenceCostUpperUsd:predicted.inferenceUpperUsd,totalCostUpperUsd:predicted.totalUpperUsd}:null,remaining:{responses:limits.responsesRequests-state.requests,inputTokens:limits.inputTokens-state.inputReserved,outputTokens:limits.outputTokens-state.outputReserved,costUsd:predicted.totalUpperUsd===null?null:limits.costUsd-predicted.totalUpperUsd},allowedTools:managedTools.map(t=>t.name),body,at:now()};
+      const reservation={schemaVersion:1,taskId:task.id,run,attempt,requestId,number,kind,requestType:kind==='inference'?'published_billable_inference':'unpriced_control_request',model:model.id,inputDigest:hash(body),attemptInferenceReservationUsd:predicted.inferenceUpperUsd,attemptTotalCostReservationUsd:null,reservation:kind==='inference'?{inputTokens:state.pendingInputTokens,outputTokens:body.max_output_tokens,inferenceCostUpperUsd:predicted.inferenceUpperUsd,totalCostUpperUsd:predicted.totalUpperUsd}:null,remaining:{responses:limits.responsesRequests-state.requests,inputTokens:limits.inputTokens-state.inputReserved,outputTokens:limits.outputTokens-state.outputReserved,publishedInferenceUsd:limits.costUsd-predicted.inferenceUpperUsd,totalCostUsd:null,controlRequests:predicted.controlRequests.maximum-state.counts-state.modelQueries},allowedTools:managedTools.map(t=>t.name),body,at:now()};
       await write(`${dir}/request-${number}-intent.json`,reservation);fault('before-request',kind);active();pendingRequest=true;
       if(kind==='model')state.modelQueries++;else {state.requests++;state.inputBytes+=byteCount;if(kind==='count')state.counts++;else state.inferences++;}
       await sync({pendingRequest:requestId});
       active();const result=guard(await network(()=>transport.call(kind,body,controller.signal,model.id)));active();
-      await write(`${dir}/request-${number}-receipt.json`,{schemaVersion:1,requestId,kind,model:model.id,inputDigest:hash(body),response:result,at:now()});pendingRequest=false;
+      await write(`${dir}/request-${number}-receipt.json`,{schemaVersion:1,requestId,kind,requestType:kind==='inference'?'published_billable_inference':'unpriced_control_request',model:model.id,inputDigest:hash(body),response:result,at:now()});pendingRequest=false;
       fault('after-response',kind);await sync({pendingRequest:null});return result;
     }
     async function ledger(status) {
@@ -92,7 +92,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,transpor
       const cost=cached===null||!knownUsage?null:((input-cached)*model.price.perMillion.input+cached*model.price.perMillion.cachedInput+output*model.price.perMillion.output)/1e6;
       const outcome={status,usageCostSource:'Calculated inference-only cost from versioned prices; other API fees unknown',usage:{tokens,modelCalls:state.inferences,providerCalls:state.requests+state.modelQueries,...(cost===null?{}:{moneyMicros:Math.ceil(cost*1e6)})},usageDetails:{events:usageEvents,semantics:'delta',model:model.id,complete:knownUsage,source:'OpenAI Responses usage; immutable managed request receipts',sources:usageEvents.map((e,i)=>({path:`${dir}/usage-${i+1}.json`,responseId:e.id}))}};
       task=await saveEngineeringUsage(store,task,{run,boundary:attempt,provider:'managed-openai',proof:{maximum:{tokens:limits.inputTokens+limits.outputTokens},evidence:{version:'managed-responses-v1'}},outcome,handoff:{metrics:{contextManifest:{totalBytes:Buffer.byteLength(JSON.stringify(packet)),parts:[{name:'task-packet',bytes:Buffer.byteLength(JSON.stringify(packet)),reason:'current approved small task'}]}}},reason:'minimum-qualified-managed-model'});
-      await sync({actualUsage:knownUsage?{input,cachedInput:cached,output,total:tokens}:null,calculatedInferenceCostUsd:cost,providerReportedCost:'unknown',counterCost:'unknown',predicted});
+      await sync({actualUsage:knownUsage?{input,cachedInput:cached,output,total:tokens}:null,calculatedInferenceCostUsd:cost,providerReportedCost:'unknown',controlCost:'no separate published fee; actual billed amount unknown',predicted});
     }
     try{
       if(economicsPolicy(task).classification!=='small')fail('managed_small_only');
@@ -103,14 +103,16 @@ export async function runManagedForeground(ctx,initial,{env=process.env,transpor
       for(const f of packet.files)if(baseline.files[f.path]?.sha256!==f.sha256)fail('managed_source_drift');
       for(const i of packet.instructions)if(baseline.files[i.path]?.sha256!==i.digest)fail('managed_source_drift');
       ({model,predicted}=selectManagedModel(limits,registry));
-      await write(`${dir}/attempt.json`,{schemaVersion:1,taskId:task.id,run,attempt,model,limits,predicted,packet,inputDigest:hash(packet),intent,at:now()});
+      await write(`${dir}/attempt.json`,{schemaVersion:1,taskId:task.id,run,attempt,model,limits,predicted,authorization:{mode:'foreground',foregroundCanary:foregroundCanary===true},packet,inputDigest:hash(packet),intent,at:now()});
       task=await update(t=>({...t,runs:t.runs.map(r=>r.run===run?{...r,purpose:'implement',provider:'managed-openai',executor:{kind:'managed',harness:'0x2f-responses-v1',requestedModel:model.id,observedModel:null},permissions:{tools:managedTools.map(t=>t.name),writePaths:t.engineering.config.writePaths,externalActions:false}}:r),engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose:'implement',provider:'managed-openai',model:model.id,reason:'minimum-qualified-managed-model',lane:'managed-api',opaqueFallback:false}],managed:{...t.engineering.managed,model:model.id,predicted}}}));
       if(!key)fail('managed_api_key_missing');
       const configured=task.engineering.config.limits;
       if(predicted.inferenceUpperUsd>configured.moneyMicros/1e6||limits.inputTokens+limits.outputTokens>configured.tokens||limits.inferenceRequests>configured.modelCalls||limits.responsesRequests+1>configured.providerCalls)fail('managed_configured_budget');
       transport??=managedTransport(key);
-      // Published inference prices alone do not certify token-count endpoint fees.
-      if(transport.live&&(predicted.totalUpperUsd===null||predicted.totalUpperUsd>limits.costUsd))fail('managed_cost_unproven');
+      const pricingPolicy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary});
+      const preview=guard({schemaVersion:1,task:{id:task.id,brief:task.brief},model:model.id,hardLimits:limits,pricingPolicy,pricingSource:model.price.source,controlPricingSource:model.price.apiPricingSource,pricingObservedAt:model.price.observedAt,notice:'Control requests: no separate published fee; contractual zero fee and complete billed amount are not claimed.'});
+      await write(`${dir}/foreground-preview.json`,preview);await sync({pricingPolicy});
+      await network(()=>Promise.resolve(onPreview(preview)));
       if(transport.live&&Date.now()-Date.parse(model.price.observedAt)>86400000)fail('managed_pricing_stale');
       const available=await rpc('model',{});if(available.id!==model.id)fail('managed_model_unavailable');
       const source=await freezeEngineering(store,task,run,baseline,'inputs');await sync({baseline:source});await event('run.started',{run,provider:'managed-openai',purpose:'implement'});

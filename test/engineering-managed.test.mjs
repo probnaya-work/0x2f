@@ -14,13 +14,13 @@ import {runManagedForeground,managedCheck} from '../src/core/engineering-managed
 import {runForegroundEngineering} from '../src/core/engineering-foreground.mjs';
 import {credentialFreeEnvironment} from '../src/core/workflow-credentials.mjs';
 import {renderTasks} from '../src/render.mjs';
-import {MANAGED_LIMITS,MANAGED_MODELS,managedTransport,managedGuard} from '../src/providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_MODELS,managedTransport,managedGuard,managedCost,managedForegroundPricing} from '../src/providers/managed-openai.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 import {projectRow} from '../src/web/ledger.mjs';
 import {snapshot} from '../src/tui/model.mjs';
 import {recoverInterruptedRuns} from '../src/recover.mjs';
 const key='sk-fake-managed-qualification-key';
-const registry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,counterFee:0,source:'offline fixture price qualification'}}));
+const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
 const read=(id='read')=>call('read_task_file',{file_id:'f1'},id);
@@ -36,8 +36,8 @@ async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},
   if(hook)result=await hook({req,body,result,f,workspace,inf})??result;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result));
  });await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));
  const transport=managedTransport(key,{fetchImpl:(url,init)=>fetch('http://127.0.0.1:'+server.address().port+new URL(url).pathname,init)});transport.live=false;
- const options={env:{OPENAI_API_KEY:key},transport,registry,limits};
- return {...f,task,workspace,requests,port:server.address().port,options,run:opts=>runManagedForeground({store:f.runtime.store},task,{...options,...opts})};
+ const previews=[];const options={foregroundCanary:true,onPreview:preview=>{previews.push(preview);},env:{OPENAI_API_KEY:key},transport,registry,limits};
+ return {...f,task,workspace,requests,previews,port:server.address().port,options,run:opts=>runManagedForeground({store:f.runtime.store},task,{...options,...opts})};
 }
 async function artifacts(root){let text='';async function walk(dir){for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())await walk(p);else if(e.isFile())text+=await fs.readFile(p,'utf8');}}await walk(root);return text;}
 
@@ -53,7 +53,7 @@ test('managed read → patch → external deterministic verifier, durable usage 
   for(const entry of await fs.readdir(path.join(root,'runs/1/managed'))){
    if(entry.endsWith('.json'))journal[entry]=await f.runtime.store.readJson(path.join(root,'runs/1/managed',entry));
   }
-  const evidence=managedGuard(key)({kind:'offline mock only; counter fee zero is a fixture assumption',task,journal,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,inputDigest:hash(r.body),serializedBytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification});
+  const evidence=managedGuard(key)({kind:'offline mock only; native unpriced_control_request policy; explicit foreground canary authorization is synthetic',task,journal,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,inputDigest:hash(r.body),serializedBytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification});
   await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'normal-flow.json'),JSON.stringify(evidence,null,2)+'\n');
  }
 });
@@ -78,9 +78,52 @@ test('managed provider counter blocks over-budget input before inference',async 
 test('managed serialized input and output reservations stop before inference',async t=>{
  for(const limits of [{...MANAGED_LIMITS,serializedInputBytes:1},{...MANAGED_LIMITS,outputTokensPerRequest:0}]){const f=await fixture(t,{limits}),task=await f.run();assert.equal(task.status,'needs_you');assert.ok(['managed_input_limit','managed_output_limit'].includes(task.blockedOn.code));assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,0);}
 });
-test('managed expensive worst-case and unknown live total cost block all HTTP',async t=>{
+test('managed expensive worst-case and missing explicit foreground decision block all HTTP',async t=>{
  const f=await fixture(t);const expensive=registry.map(m=>({...m,price:{...m.price,perMillion:{input:100,cachedInput:100,output:100}}}));const a=await f.run({registry:expensive});assert.equal(a.blockedOn.code,'managed_cost_limit');assert.equal(f.requests.length,0);
- const g=await fixture(t);g.options.transport.live=true;const b=await g.run({registry:MANAGED_MODELS});assert.equal(b.blockedOn.code,'managed_cost_unproven');assert.equal(g.requests.length,0);
+ const g=await fixture(t);g.options.transport.live=true;const b=await g.run({registry:MANAGED_MODELS,foregroundCanary:false});assert.equal(b.blockedOn.code,'managed_foreground_canary_required');assert.equal(g.requests.length,0);
+});
+
+test('foreground pricing permits unpriced controls only for an explicit canary, never unattended',()=>{
+ const predicted=managedCost(MANAGED_MODELS[0]);
+ assert.equal(predicted.inferenceUpperUsd,0.024576);assert.equal(predicted.totalUpperUsd,null);
+ assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:3,tokenCountMaximum:2,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
+ assert.throws(()=>managedForegroundPricing(predicted,{mode:'foreground'}),/managed_foreground_canary_required/);
+ assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundCanary:true}),/managed_unattended_unqualified/);
+ assert.throws(()=>managedForegroundPricing({...predicted,inferenceUpperUsd:0.024577},{mode:'foreground',foregroundCanary:true}),/managed_cost_limit/);
+ const policy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary:true});
+ assert.equal(policy.totalBilledAmount,'unknown');assert.equal(policy.retry,false);assert.equal(policy.opaqueFallback,false);
+});
+
+test('foreground pricing saves and shows the preview before HTTP; controls remain separately bounded',async t=>{
+ const f=await fixture(t,{hook:({req})=>{
+  if(req.url==='/v1/responses')assert.equal(f.previews.length,1);
+ }});
+ // Exercise the native policy gate with the same local transport. No live call.
+ f.options.transport.live=true;
+ // Freshness is a clock fixture; this does not refresh official price evidence.
+ const freshRegistry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,observedAt:new Date().toISOString()}}));
+ const task=await f.run({registry:freshRegistry});assert.equal(task.status,'ready');assert.equal(f.previews.length,1);
+ const preview=f.previews[0];assert.equal(preview.pricingPolicy.publishedBillableInferenceMaximumUsd,0.024576);
+ assert.equal(preview.pricingPolicy.controlRequests.maximum,3);assert.equal(preview.model,MANAGED_MODELS[0].id);
+ assert.equal(preview.pricingSource,MANAGED_MODELS[0].price.source);assert.ok(preview.pricingObservedAt);assert.match(preview.notice,/no separate published fee/);
+ const saved=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),'runs/1/managed/foreground-preview.json'));assert.deepEqual(saved,preview);
+ assert.equal(f.requests.filter(r=>r.url.startsWith('/v1/models/')).length,1);assert.equal(f.requests.filter(r=>r.url.endsWith('/input_tokens')).length,2);assert.equal(f.requests.length,5);
+ for(let i=1;i<=5;i++){
+  const receipt=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),`runs/1/managed/request-${i}-receipt.json`));
+  assert.equal(receipt.requestType,receipt.kind==='inference'?'published_billable_inference':'unpriced_control_request');
+ }
+ const lines=workflowLines(task);assert.ok(lines.includes('PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576'));
+ assert.ok(lines.some(l=>l.startsWith('CONTROL REQUESTS: 3 maximum, no separate published fee')));
+ assert.ok(lines.some(l=>l.startsWith('COST TOTAL UNKNOWN')));assert.ok(!lines.some(l=>l.includes('TOTAL COST 0.024576')));
+ assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,lines);assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,lines);
+ await f.run();assert.equal(f.requests.length,5);assert.equal(f.calls.length,0);
+});
+
+test('foreground pricing control-count ceiling stops without retry or fallback',async t=>{
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,countRequests:1}}),task=await f.run();
+ assert.equal(task.blockedOn.code,'managed_request_limit');assert.equal(f.requests.filter(r=>r.url.endsWith('/input_tokens')).length,1);
+ assert.equal(f.requests.filter(r=>r.url.startsWith('/v1/models/')).length,1);assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,1);
+ await f.run();assert.equal(f.requests.length,3);assert.equal(f.calls.length,0);
 });
 
 test('managed existing or uncertain Task budget cannot obtain a fresh attempt',async t=>{

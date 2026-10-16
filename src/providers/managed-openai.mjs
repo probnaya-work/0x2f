@@ -1,7 +1,8 @@
 // One small-task Responses lane. No SDK retries, hosted tools or OAuth access.
 import {rejectCredentialValues} from '../core/workflow-credentials.mjs';
 export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,sourceBytes:65536,reads:4,patches:1,tools:6,toolResultBytes:24576,readResultBytes:4096,serializedInputBytes:32768,inferenceRequests:2,countRequests:2,responsesRequests:4,inputTokens:8192,inputTokensPerRequest:4096,outputTokens:4096,outputTokensPerRequest:2048,deadlineMs:120000,costUsd:0.25});
-export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-16T15:03:51Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',counterFee:'unknown'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
+export const MANAGED_FOREGROUND_INFERENCE_MAX_USD=0.024576;
+export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-16T15:54:35Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',controlRequestPolicy:'unpriced_control_request'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
 export class ManagedStop extends Error {constructor(code){super(code);this.code=code;}}
 export const fail=code=>{throw new ManagedStop(code);};
 export function managedGuard(key) {
@@ -10,7 +11,16 @@ export function managedGuard(key) {
 export function managedCost(model,limits=MANAGED_LIMITS) {
   const p=model.price?.perMillion;
   if(!p||model.price.currency!=='USD'||['input','cachedInput','output'].some(k=>!Number.isFinite(p[k])||p[k]<0))fail('managed_pricing_unproven');
-  return {currency:'USD',inferenceUpperUsd:(limits.inputTokens*Math.max(p.input,p.cachedInput)+limits.outputTokens*p.output)/1e6,counterFee:model.price.counterFee,totalUpperUsd:model.price.counterFee===0?(limits.inputTokens*Math.max(p.input,p.cachedInput)+limits.outputTokens*p.output)/1e6:null,inputTokens:limits.inputTokens,outputTokens:limits.outputTokens,totalInferenceTokens:limits.inputTokens+limits.outputTokens,pricing:model.price};
+  return {currency:'USD',inferenceUpperUsd:(limits.inputTokens*Math.max(p.input,p.cachedInput)+limits.outputTokens*p.output)/1e6,totalUpperUsd:null,controlRequests:{classification:model.price.controlRequestPolicy,maximum:limits.countRequests+1,tokenCountMaximum:limits.countRequests,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false},inputTokens:limits.inputTokens,outputTokens:limits.outputTokens,totalInferenceTokens:limits.inputTokens+limits.outputTokens,pricing:model.price};
+}
+// A trusted foreground caller supplies the explicit canary decision; workspace
+// configuration and API-key presence cannot grant it. No unattended exception.
+export function managedForegroundPricing(predicted,{mode='unattended',foregroundCanary=false}={}) {
+  if(mode!=='foreground')fail('managed_unattended_unqualified');
+  if(foregroundCanary!==true)fail('managed_foreground_canary_required');
+  if(predicted.controlRequests?.classification!=='unpriced_control_request')fail('managed_pricing_unproven');
+  if(!Number.isFinite(predicted.inferenceUpperUsd)||predicted.inferenceUpperUsd>MANAGED_FOREGROUND_INFERENCE_MAX_USD)fail('managed_cost_limit');
+  return {version:'managed-foreground-pricing-v2',mode,foregroundCanary:true,publishedBillableInferenceMaximumUsd:predicted.inferenceUpperUsd,controlRequests:predicted.controlRequests,totalBilledAmount:'unknown',retry:false,opaqueFallback:false};
 }
 export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS) {
   const ranked=registry.filter(m=>m.capabilities.includes('function-calling')&&m.capabilities.includes('small-code-patch')).map(model=>({model,predicted:managedCost(model,limits)})).sort((a,b)=>a.predicted.inferenceUpperUsd-b.predicted.inferenceUpperUsd);

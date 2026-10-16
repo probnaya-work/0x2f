@@ -15,7 +15,7 @@ transport.call=async(kind,...args)=>{
   if(point==='in-flight'&&kind==='inference')setTimeout(()=>process.kill(process.pid,'SIGKILL'),100);
   return pending;
 };
-const registry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,counterFee:0}}));
-await runManagedForeground({store},task,{transport,registry,fault:(p,kind)=>{
+const registry=MANAGED_MODELS;
+await runManagedForeground({store},task,{transport,registry,foregroundCanary:true,fault:(p,kind)=>{
   if(p===point&&kind==='inference')process.kill(process.pid,'SIGKILL');
 }});
