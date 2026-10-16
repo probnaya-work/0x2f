@@ -6,7 +6,6 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { withLock } from './lock.mjs';
 import { readBounded } from './durable.mjs';
-import { managedGuard } from '../providers/managed-openai.mjs';
 import { economicDispatchBlock,economicProviderBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
 import { makeRunRecord } from './runs.mjs';
 import { workEvent } from './events.mjs';
@@ -78,13 +77,17 @@ function initialRun(provider) {
 }
 
 export async function createEngineeringTask(ctx, { title, brief, prompt, foreground }, config) {
-  if(foreground)managedGuard(process.env.OPENAI_API_KEY)({title,brief,prompt,config});
   const candidates = config.providers.filter(id => ctx.providers.available(id));
   const provider = candidates[0] ?? config.providers[0];
   const token = randomUUID();
   const engineering = { schemaVersion: 1, revision: 1, config, configDigest: hash(config), driver: { token, state: 'pending' }, decisions: [], budget: { limits: config.limits, confirmed: zero(), reservations: [], uncertain: [] }, verification: null, next: 'automatic', ...(config.playbook ? { playbook: { nextPurpose: 'investigate', reason: 'initial_executor', agentRuns: 0, implementationAttempts: 0, investigationAttempts: 0, reviewCycles: 0, dispatch: null } } : {}) };
   let task = await ctx.store.createTask({ title, brief, prompt }, { provider, runs: [{ ...initialRun(provider), purpose: config.playbook ? 'investigate' : 'implement' }], engineering, launchToken: token });
   await ctx.store.appendEvent(task.slug, workEvent('task.created', task.id, { status: task.status }));
+  if(!foreground&&config.providers.includes('managed-openai')) {
+    task=await mutate(ctx.store,task.slug,token,t=>stopPatch(t,'managed_foreground_required','Managed execution requires the foreground terminal command. No background dispatch or credential access.'));
+    await ctx.store.appendEvent(task.slug,workEvent('needs_user',task.id,{blockedOn:task.blockedOn}));
+    return task;
+  }
   if (config.workspace) {
     try {
       const workspace = await ensureEngineeringWorkspace(ctx.store, task, config.workspace);

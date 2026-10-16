@@ -8,7 +8,9 @@ import { promisify } from 'node:util';
 import { codexProvider, codexBin } from '../providers/codex.mjs';
 import { economicsPolicy } from './engineering-economics.mjs';
 import { readCodexSessionUsage } from '../providers/codex-usage.mjs';
-import { runEngineeringTask, mutateEngineering } from './engineering.mjs';
+import { runEngineeringTask, mutateEngineering, engineeringStop } from './engineering.mjs';
+import { managedCredential } from './managed-keychain.mjs';
+import { workEvent } from './events.mjs';
 import { handoffHash } from './engineering-handoff.mjs';
 const exec = promisify(execFile);
 
@@ -34,7 +36,20 @@ export async function runForegroundEngineering(ctx, task) {
   if (!task.engineering.economics?.policy) {
     task = await mutateEngineering(ctx.store,task.slug,task.engineering.driver.token,t=>({...t,engineering:{...t.engineering,economics:{...t.engineering.economics,policy:economicsPolicy(t)}}}));
   }
-  if(task.engineering.economics.policy.classification==='small')return (await import('./engineering-managed.mjs')).runManagedForeground(ctx,task);
+  if(economicsPolicy(task).classification!=='small') {
+    task=await mutateEngineering(ctx.store,task.slug,task.engineering.driver.token,t=>({...engineeringStop(t,'managed_small_only','Foreground execution requires a bounded small Task: at most two writable files, four inputs, and no sensitive/review-required scope.'),engineering:{...engineeringStop(t,'managed_small_only','').engineering,decisions:[...t.engineering.decisions,{purpose:'implement',lane:'managed-api',reason:'managed_small_only',opaqueFallback:false}]}}));
+    await ctx.store.appendEvent(task.slug,workEvent('needs_user',task.id,{blockedOn:task.blockedOn}));
+    return task;
+  }
+  return (await import('./engineering-managed.mjs')).runManagedForeground(ctx,task,{
+    foregroundAuthorized:true,credential:ctx.managedCredential??(()=>managedCredential('retrieve',{foreground:true})),
+    onPreview:p=>console.log(`AUTO → managed · ${p.model}\nPUBLISHED BILLABLE INFERENCE MAXIMUM: $${p.pricingPolicy.publishedBillableInferenceMaximumUsd}\nCONTROL REQUESTS: 3 maximum, no separate published fee · TOTAL COST UNKNOWN`)
+  });
+}
+
+// Compatibility entry point for explicitly authorized opaque operation only;
+// AUTO and the foreground candidate never call it.
+export async function runOpaqueForegroundEngineering(ctx,task) {
   const preflight = await foregroundPreflight();
   const controller = new AbortController();
   const abort = () => controller.abort();

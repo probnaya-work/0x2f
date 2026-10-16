@@ -44,9 +44,9 @@ export function managedCheck({argv,cwd,timeout,signal}) {
   });
 }
 
-export async function runManagedForeground(ctx,initial,{env=process.env,transport,limits=MANAGED_LIMITS,registry=MANAGED_MODELS,foregroundCanary=false,onPreview=preview=>console.log(JSON.stringify(preview,null,2)),fault=()=>{},checkRunner=managedCheck}={}) {
-  const store=ctx.store,slug=initial.slug,root=store.taskDir(slug),token=initial.engineering.driver.token,key=env.OPENAI_API_KEY;
-  const guard=managedGuard(key),controller=new AbortController();const began=Date.now();
+export async function runManagedForeground(ctx,initial,{env=process.env,credential,transport,limits=MANAGED_LIMITS,registry=MANAGED_MODELS,foregroundCanary=false,foregroundAuthorized=false,onPreview=preview=>console.log(JSON.stringify(preview,null,2)),fault=()=>{},checkRunner=managedCheck}={}) {
+  const store=ctx.store,slug=initial.slug,root=store.taskDir(slug),token=initial.engineering.driver.token;
+  let key,guard=managedGuard();const controller=new AbortController();const began=Date.now();
   if(Object.entries(MANAGED_LIMITS).some(([k,max])=>!Number.isFinite(limits[k])||limits[k]<0||limits[k]>max))fail('managed_limit_configuration');
   const timeout=Math.min(limits.deadlineMs,MANAGED_LIMITS.deadlineMs,initial.engineering.config.limits.wallClockMs);const timer=setTimeout(()=>controller.abort(),timeout);
   const aborted=()=>controller.abort();process.once('SIGINT',aborted);process.once('SIGTERM',aborted);
@@ -58,7 +58,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,transpor
     const event=(type,data)=>store.appendEvent(slug,guard(workEvent(type,task.id,data)));
     const write=async(file,value)=>{guard(value);const target=path.join(root,file);if(await store.exists(target))fail('managed_immutable_collision');await store.writeJson(target,value);};
     const stop=async(code)=>{
-      task=await update(t=>({...engineeringStop(t,code,code==='managed_api_key_missing'?'Set OPENAI_API_KEY in the foreground process environment; opaque fallback is disabled.':code==='managed_uncertain'?'UNCERTAIN: reconcile durable intents/receipts before any explicit foreground decision; no replay.':code),engineering:{...engineeringStop(t,code,code).engineering,managed:{...t.engineering.managed,state:code==='managed_uncertain'?'UNCERTAIN':'NEEDS YOU',reason:code}}}));
+      task=await update(t=>({...engineeringStop(t,code,code==='managed_api_key_missing'?'Managed credential missing. Import with 2f-next auth import; this Task will not retry.':code==='managed_uncertain'?'UNCERTAIN: reconcile durable intents/receipts before any explicit foreground decision; no replay.':code),engineering:{...engineeringStop(t,code,code).engineering,managed:{...t.engineering.managed,state:code==='managed_uncertain'?'UNCERTAIN':'NEEDS YOU',reason:code}}}));
       await event('needs_user',{run:task.runs.at(-1).run,blockedOn:task.blockedOn});return task;
     };
     if(task.engineering.managed?.attempt)return task.status==='working'?stop('managed_uncertain'):task;
@@ -103,13 +103,22 @@ export async function runManagedForeground(ctx,initial,{env=process.env,transpor
       for(const f of packet.files)if(baseline.files[f.path]?.sha256!==f.sha256)fail('managed_source_drift');
       for(const i of packet.instructions)if(baseline.files[i.path]?.sha256!==i.digest)fail('managed_source_drift');
       ({model,predicted}=selectManagedModel(limits,registry));
-      await write(`${dir}/attempt.json`,{schemaVersion:1,taskId:task.id,run,attempt,model,limits,predicted,authorization:{mode:'foreground',foregroundCanary:foregroundCanary===true},packet,inputDigest:hash(packet),intent,at:now()});
-      task=await update(t=>({...t,runs:t.runs.map(r=>r.run===run?{...r,purpose:'implement',provider:'managed-openai',executor:{kind:'managed',harness:'0x2f-responses-v1',requestedModel:model.id,observedModel:null},permissions:{tools:managedTools.map(t=>t.name),writePaths:t.engineering.config.writePaths,externalActions:false}}:r),engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose:'implement',provider:'managed-openai',model:model.id,reason:'minimum-qualified-managed-model',lane:'managed-api',opaqueFallback:false}],managed:{...t.engineering.managed,model:model.id,predicted}}}));
-      if(!key)fail('managed_api_key_missing');
       const configured=task.engineering.config.limits;
       if(predicted.inferenceUpperUsd>configured.moneyMicros/1e6||limits.inputTokens+limits.outputTokens>configured.tokens||limits.inferenceRequests>configured.modelCalls||limits.responsesRequests+1>configured.providerCalls)fail('managed_configured_budget');
+      const pricingPolicy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary,foregroundAuthorized});
+      if((!transport||transport.live)&&Date.now()-Date.parse(model.price.observedAt)>86400000)fail('managed_pricing_stale');
+      // All eligibility, ownership, budget and authorization checks precede the
+      // only credential access. Detached workers never enter this boundary.
+      try{key=credential?await network(()=>credential()):env.OPENAI_API_KEY;}catch{fail('managed_keychain_unavailable');}
+      guard=managedGuard(key);guard({task,packet,baseline});
+      // Re-read under the now-bound secret guard before freezing any source.
+      // The eligibility pass deliberately did not retrieve the credential.
+      const guardedPacket=await managedPacket(store,task,guard,limits);
+      if(hash(guardedPacket)!==hash(packet))fail('managed_source_drift');
+      await write(`${dir}/attempt.json`,{schemaVersion:1,taskId:task.id,run,attempt,model,limits,predicted,authorization:{mode:'foreground',foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true},packet,inputDigest:hash(packet),intent,at:now()});
+      task=await update(t=>({...t,runs:t.runs.map(r=>r.run===run?{...r,purpose:'implement',provider:'managed-openai',executor:{kind:'managed',harness:'0x2f-responses-v1',requestedModel:model.id,observedModel:null},permissions:{tools:managedTools.map(t=>t.name),writePaths:t.engineering.config.writePaths,externalActions:false}}:r),engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose:'implement',provider:'managed-openai',model:model.id,reason:'minimum-qualified-managed-model',lane:'managed-api',opaqueFallback:false}],managed:{...t.engineering.managed,model:model.id,predicted}}}));
+      if(!key)fail('managed_api_key_missing');
       transport??=managedTransport(key);
-      const pricingPolicy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary});
       const preview=guard({schemaVersion:1,task:{id:task.id,brief:task.brief},model:model.id,hardLimits:limits,pricingPolicy,pricingSource:model.price.source,controlPricingSource:model.price.apiPricingSource,pricingObservedAt:model.price.observedAt,notice:'Control requests: no separate published fee; contractual zero fee and complete billed amount are not claimed.'});
       await write(`${dir}/foreground-preview.json`,preview);await sync({pricingPolicy});
       await network(()=>Promise.resolve(onPreview(preview)));

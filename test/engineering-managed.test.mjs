@@ -83,12 +83,14 @@ test('managed expensive worst-case and missing explicit foreground decision bloc
  const g=await fixture(t);g.options.transport.live=true;const b=await g.run({registry:MANAGED_MODELS,foregroundCanary:false});assert.equal(b.blockedOn.code,'managed_foreground_canary_required');assert.equal(g.requests.length,0);
 });
 
-test('foreground pricing permits unpriced controls only for an explicit canary, never unattended',()=>{
+test('foreground pricing permits unpriced controls only with explicit foreground authorization, never unattended',()=>{
  const predicted=managedCost(MANAGED_MODELS[0]);
  assert.equal(predicted.inferenceUpperUsd,0.024576);assert.equal(predicted.totalUpperUsd,null);
  assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:3,tokenCountMaximum:2,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'foreground'}),/managed_foreground_canary_required/);
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundCanary:true}),/managed_unattended_unqualified/);
+ assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundAuthorized:true}),/managed_unattended_unqualified/);
+ assert.equal(managedForegroundPricing(predicted,{mode:'foreground',foregroundAuthorized:true}).publishedBillableInferenceMaximumUsd,0.024576);
  assert.throws(()=>managedForegroundPricing({...predicted,inferenceUpperUsd:0.024577},{mode:'foreground',foregroundCanary:true}),/managed_cost_limit/);
  const policy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary:true});
  assert.equal(policy.totalBilledAmount,'unknown');assert.equal(policy.retry,false);assert.equal(policy.opaqueFallback,false);
@@ -139,7 +141,7 @@ test('managed existing or uncertain Task budget cannot obtain a fresh attempt',a
  }
 });
 test('managed API key absent stops offline without reading harness authentication',async t=>{
- const f=await fixture(t),task=await f.run({env:{}});assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(f.requests.length,0);assert.match(task.blockedOn.text,/OPENAI_API_KEY/);
+ const f=await fixture(t),task=await f.run({env:{}});assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(f.requests.length,0);assert.match(task.blockedOn.text,/2f-next auth import/);
 });
 test('managed provider rate limit has no retry or opaque fallback',async t=>{
  const f=await fixture(t,{transportFailure:true}),task=await f.run();assert.equal(task.status,'needs_you');assert.equal(task.engineering.managed.state,'UNCERTAIN');assert.equal(f.requests.length,1);assert.equal(f.calls.length,0);
@@ -230,7 +232,7 @@ test('managed source/packet budgets stop before HTTP',async t=>{
 
 test('managed foreground AUTO stops without key and never enters opaque preflight',async t=>{
  assert.equal(Boolean(process.env.OPENAI_API_KEY),false,'test runner must unset real credentials');
- const f=await fixture(t),task=await runForegroundEngineering({store:f.runtime.store},f.task);
+ const f=await fixture(t),task=await runForegroundEngineering({store:f.runtime.store,managedCredential:async()=>null},f.task);
  assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(task.execution.provider,'managed-openai');
  assert.equal(task.runs[0].executor.observedModel,null);assert.equal(f.calls.length,0);assert.equal(f.requests.length,0);
 });
@@ -241,12 +243,28 @@ test('managed artifact CHANGES also works for the existing minimal engineering c
  await f.runtime.actions.closeWork(task.id);assert.equal((await f.runtime.store.findTask(task.id)).status,'done');
 });
 
-test('managed foreground refuses credential-bearing brief before creating a Task',async t=>{
- const f=await fixture(t),before=(await f.runtime.store.listTasks()).length;
- process.env.OPENAI_API_KEY=key;
- try{await assert.rejects(f.runtime.actions.createWork({brief:'Do not save '+key,foreground:true}),/managed_credential_guard/);}
- finally{delete process.env.OPENAI_API_KEY;}
- assert.equal((await f.runtime.store.listTasks()).length,before);
+test('managed credential is accessed once immediately before authorized dispatch, never on duplicate boundary',async t=>{
+ const f=await fixture(t);let reads=0;
+ const credential=async()=>{reads++;assert.equal(f.requests.length,0);return key;};
+ const task=await f.run({env:{},credential,foregroundCanary:false,foregroundAuthorized:true});
+ assert.equal(task.status,'ready');assert.equal(reads,1);
+ await f.run({env:{},credential,foregroundCanary:false,foregroundAuthorized:true});
+ assert.equal(reads,1);assert.equal(f.requests.length,5);
+});
+
+test('ineligible foreground Task stops before credential, opaque harness or detached dispatch',async t=>{
+ const f=await fixture(t,{config:{requireReview:true}});let credentials=0;
+ const task=await runForegroundEngineering({store:f.runtime.store,managedCredential:async()=>{credentials++;throw new Error('must not retrieve');}},f.task);
+ assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'managed_small_only');
+ assert.equal(credentials,0);assert.equal(f.requests.length,0);assert.equal(f.calls.length,0);
+});
+
+test('authorization and configured budget failures happen before any credential access',async t=>{
+ for(const opts of [{foregroundCanary:false},{limits:{...MANAGED_LIMITS,inputTokens:MANAGED_LIMITS.inputTokens}}]){
+  const f=await fixture(t,opts.limits?{config:{limits:{moneyMicros:0,tokens:20000,modelCalls:2,providerCalls:5,wallClockMs:30000,implementationAttempts:1}}}:{});
+  let reads=0;const task=await f.run({...opts,credential:async()=>{reads++;return key;}});
+  assert.equal(task.status,'needs_you');assert.equal(reads,0);assert.equal(f.requests.length,0);
+ }
 });
 
 test('managed deadline closes loop; late ignored response cannot apply a patch',async t=>{

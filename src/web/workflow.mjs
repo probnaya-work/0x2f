@@ -13,13 +13,18 @@ export function engineeringLines(task) {
   const review = e.playbook?.review ?? e.review;
   const unknown = Boolean(economics?.policy&&!usage)||usage?.money.value===null||b.uncertain.length || b.reservations.some(r => Object.values(r.maximum ?? {}).some(v => v === null));
   return [
+    `STATE ${task.status.toUpperCase().replaceAll('_',' ')}`,
     `PURPOSE ${(run?.purpose ?? 'unknown').toUpperCase()} · EXECUTOR ${run?.provider ?? 'unknown'} · RUN ${run?.run ?? 1}`,
     `NEXT ${e.next.toUpperCase()}${reason ? ' · REASON ' + reason.toUpperCase() : ''}`,
     e.managed?'COST TOTAL UNKNOWN · inference calculation and provider charge are separate':`COST ${unknown ? 'UNKNOWN · reservation retained' : 'USD ' + (b.confirmed.moneyMicros / 1000000).toFixed(6) + ' confirmed'} · ${b.reservations.length} reserved`,
     ...(e.managed?[`LANE MANAGED API · ${e.managed.state} · MODEL ${e.managed.model??'pending'} · NO OPAQUE FALLBACK`,
+      `OBSERVED MODEL ${task.runs.find(r=>r.executor?.kind==='managed')?.executor?.observedModel??'UNKNOWN'}`,
+      'FOREGROUND ONLY · UNATTENDED NO-GO · NO AUTOMATIC RETRY OR DELIVERY',
       `ENVELOPE 1 attempt · ${e.managed.limits.inferenceRequests} inference + ${e.managed.limits.countRequests} count requests · ${e.managed.limits.tools} tools · ${e.managed.limits.reads} reads · 1 patch`,
       `MANAGED USAGE ${e.managed.requests} Responses HTTP · ${e.managed.inferences} inference · ${e.managed.tools} tools · ${e.managed.reads} reads · ${e.managed.patches} patches · ${e.managed.resultBytes} result bytes`,
       `BOUND ${e.managed.limits.inputTokens+e.managed.limits.outputTokens} inference tokens`,
+      `LIMITS ${e.managed.limits.files} files · ${e.managed.limits.sourceBytes} source bytes · ${e.managed.limits.packetBytes} packet bytes · ${e.managed.limits.deadlineMs} ms deadline`,
+      `PAYLOAD ${e.managed.limits.readResultBytes} bytes/read · ${e.managed.limits.toolResultBytes} result bytes · ${e.managed.limits.serializedInputBytes} serialized API input bytes`,
       `PUBLISHED BILLABLE INFERENCE MAXIMUM: $${e.managed.predicted?.inferenceUpperUsd??'UNKNOWN'}`,
       `CONTROL REQUESTS: ${e.managed.predicted?.controlRequests?.maximum??e.managed.limits.countRequests+1} maximum, no separate published fee · ${(e.managed.counts??0)+(e.managed.modelQueries??0)} dispatched · contractual zero fee not claimed`,
       `ACTUAL TOKENS ${e.managed.actualUsage?.total??'UNKNOWN'} · CALCULATED INFERENCE USD ${e.managed.calculatedInferenceCostUsd??'UNKNOWN'} · PROVIDER COST UNKNOWN`]:[]),
@@ -31,7 +36,7 @@ export function engineeringLines(task) {
     ...task.runs.filter(r => r.review?.findings?.length).flatMap(r => r.review.findings.map(f => `FINDING ${f.severity.toUpperCase()} · ${f.confirmed ? 'CONFIRMED' : 'NEEDS DECISION'} · ${f.message}`)),
     ...(run?.handoff ? [`HANDOFF ${run.handoff.metrics.bytes} bytes · history ${run.handoff.metrics.fullHistoryBytes} bytes`] : []),
     ...(e.workspace ? [`WORKSPACE ${e.workspace.path} · ref ${e.workspace.commit} · task-owned worktree`] : []),
-    ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider} · ${d.reason}`),
+    ...e.decisions.map(d => `ROUTING ${d.purpose} → ${d.provider??'none'} · ${d.reason}`),
     ...(['running','uncertain','failed'].includes(e.delivery?.state) ? [`RECONCILE READ ONLY · 2f reconcile ${task.id}`] : []),
     ...(e.delivery ? [`LOCAL COMMIT ${e.delivery.state.toUpperCase()} · ${e.delivery.scopeDigest}`, `REPOSITORY ${e.delivery.preview.repository} · WORKTREE ${e.delivery.preview.worktree} · PARENT ${e.delivery.preview.parent}`, `MESSAGE ${e.delivery.preview.message}`, `DIFF ${e.delivery.preview.diffDigest}`, ...(e.delivery.commit ? [`COMMIT ${e.delivery.commit} · RECEIPT ${e.delivery.receipt?.path ?? 'unrecorded'}`] : [])] : [])
   ];

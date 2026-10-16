@@ -13,14 +13,14 @@ export function managedCost(model,limits=MANAGED_LIMITS) {
   if(!p||model.price.currency!=='USD'||['input','cachedInput','output'].some(k=>!Number.isFinite(p[k])||p[k]<0))fail('managed_pricing_unproven');
   return {currency:'USD',inferenceUpperUsd:(limits.inputTokens*Math.max(p.input,p.cachedInput)+limits.outputTokens*p.output)/1e6,totalUpperUsd:null,controlRequests:{classification:model.price.controlRequestPolicy,maximum:limits.countRequests+1,tokenCountMaximum:limits.countRequests,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false},inputTokens:limits.inputTokens,outputTokens:limits.outputTokens,totalInferenceTokens:limits.inputTokens+limits.outputTokens,pricing:model.price};
 }
-// A trusted foreground caller supplies the explicit canary decision; workspace
-// configuration and API-key presence cannot grant it. No unattended exception.
-export function managedForegroundPricing(predicted,{mode='unattended',foregroundCanary=false}={}) {
+// A trusted foreground caller supplies authorization; workspace configuration
+// and API-key presence cannot grant it. No unattended exception.
+export function managedForegroundPricing(predicted,{mode='unattended',foregroundCanary=false,foregroundAuthorized=false}={}) {
   if(mode!=='foreground')fail('managed_unattended_unqualified');
-  if(foregroundCanary!==true)fail('managed_foreground_canary_required');
+  if(foregroundCanary!==true&&foregroundAuthorized!==true)fail('managed_foreground_canary_required');
   if(predicted.controlRequests?.classification!=='unpriced_control_request')fail('managed_pricing_unproven');
   if(!Number.isFinite(predicted.inferenceUpperUsd)||predicted.inferenceUpperUsd>MANAGED_FOREGROUND_INFERENCE_MAX_USD)fail('managed_cost_limit');
-  return {version:'managed-foreground-pricing-v2',mode,foregroundCanary:true,publishedBillableInferenceMaximumUsd:predicted.inferenceUpperUsd,controlRequests:predicted.controlRequests,totalBilledAmount:'unknown',retry:false,opaqueFallback:false};
+  return {version:'managed-foreground-pricing-v3',mode,foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true,publishedBillableInferenceMaximumUsd:predicted.inferenceUpperUsd,controlRequests:predicted.controlRequests,totalBilledAmount:'unknown',retry:false,opaqueFallback:false};
 }
 export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS) {
   const ranked=registry.filter(m=>m.capabilities.includes('function-calling')&&m.capabilities.includes('small-code-patch')).map(model=>({model,predicted:managedCost(model,limits)})).sort((a,b)=>a.predicted.inferenceUpperUsd-b.predicted.inferenceUpperUsd);

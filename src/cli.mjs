@@ -9,8 +9,9 @@ import { engineeringConfig } from './core/engineering.mjs';
 // actions.allowWork / actions.rejectWork.
 import { workflowLines } from "./web/workflow.mjs";
 import { workflowDoctor, recoverWorkflow, repairWorkflow } from "./core/workflow-doctor.mjs";
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from 'node:url';
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { createRuntime } from "./runtime.mjs";
@@ -45,7 +46,10 @@ Commands:
   2f version        print the installed 0x2F version
   2f init
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
-  2f new <task> --foreground       opted-in engineering; existing subscription
+  2f new <task> --foreground       bounded managed engineering; no fallback
+  2f init --files <a,b> --write <a> --check '<JSON argv>'
+                                  approve engineering scope and local verifier
+  2f auth <status|import>          dedicated foreground macOS Keychain credential
   2f status
   2f workflow run <id> [trigger-key]
   2f workflow refresh <task-id>    adopt updated settings; preserve prior evidence/runs
@@ -137,6 +141,8 @@ function parseFlags(args) {
       flags.retryRun = Number(args[++i]);
     } else if (arg === "--digest") {
       flags.digest = args[++i];
+    } else if (['--files','--write','--check'].includes(arg)) {
+      flags[arg.slice(2)] = args[++i];
     } else {
       rest.push(arg);
     }
@@ -280,9 +286,15 @@ async function openRun(id, runNumber, base) {
   }
 }
 
-async function main() {
+export async function main({foregroundCandidate=false}={}) {
   const [command, ...args] = process.argv.slice(2);
   const base = process.cwd();
+
+  if(command==='auth') {
+    if(args.length!==1||!['status','import'].includes(args[0]))throw new Error('Usage: 2f-next auth <status|import>');
+    console.log(await (await import('./core/managed-keychain.mjs')).managedCredential(args[0],{foreground:true}));
+    return;
+  }
 
   if (!command || command === "status") {
     await status(base);
@@ -321,7 +333,19 @@ async function main() {
   }
 
   if (command === "init") {
+    const {flags}=parseFlags(args);
+    const hasConstraints=['files','write','check'].some(k=>flags[k]!==undefined);
+    if(hasConstraints&&!['files','write','check'].every(k=>typeof flags[k]==='string'&&flags[k]))throw new Error('Specify --files <a,b> --write <a> --check \'<JSON argv>\' together.');
     const wd = await initProject();
+    if(hasConstraints) {
+      await (await import('./core/engineering-setup.mjs')).configureForegroundEngineering(createRuntime(base).store,flags);
+      console.log(`Initialized ${wd}\nEngineering scope saved. Next: 2f-next new "<task>"`);
+      return;
+    }
+    if(foregroundCandidate) {
+      console.log(`Initialized ${wd}\nApprove constraints: 2f-next init --files <a,b> --write <a> --check '<JSON argv>'`);
+      return;
+    }
     console.log(`Initialized ${wd}`);
     console.log("  project.md     describe the project once — every task prompt starts from it");
     console.log("  rules.md       working rules for every run");
@@ -351,7 +375,9 @@ async function main() {
 
   if (command === "new") {
     await requireProject(base);
-    const { brief, provider, foreground } = parseNewArgs(args);
+    const parsed = parseNewArgs(args);
+    const {brief,provider}=parsed;
+    const foreground=foregroundCandidate||parsed.foreground;
     if (!brief) throw new Error('Usage: 2f new "Investigate ..." [--provider <id>]');
 
     const runtime = createRuntime(base);
@@ -682,7 +708,7 @@ async function main() {
   throw new Error(`Unknown command: ${command}`);
 }
 
-main().catch(error => {
+if(process.argv[1]&&realpathSync(process.argv[1])===fileURLToPath(import.meta.url))main().catch(error => {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });

@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { createRuntime } from '../src/runtime.mjs';
+import { snapshot } from '../src/tui/model.mjs';
+import { projectRow } from '../src/web/ledger.mjs';
+import { workflowLines } from '../src/web/workflow.mjs';
+const exec=promisify(execFile),root=new URL('..',import.meta.url).pathname;
+const cli=path.join(root,'src/foreground-cli.mjs'),hook=path.join(root,'test/fixtures/managed-missing-keychain.mjs');
+const env={PATH:process.env.PATH,HOME:process.env.HOME,OX2F_NATIVE_LAUNCHD:'0'};
+const run=(base,args)=>exec(process.execPath,['--import',hook,cli,...args],{cwd:base,env});
+
+test('candidate normal new auto-routes without model/harness choice and shares its safe-stop projection',async t=>{
+  const base=await fs.mkdtemp('/private/tmp/0x2f-foreground-cli-');t.after(()=>fs.rm(base,{recursive:true,force:true}));
+  await fs.writeFile(path.join(base,'id.mjs'),'export const id = () => null;\n');
+  await fs.writeFile(path.join(base,'check.mjs'),'import assert from "node:assert/strict"; import {id} from "./id.mjs"; assert.equal(id("014"),14);\n');
+  const git=argv=>exec('/usr/bin/git',['-C',base,...argv],{env});
+  await git(['init','-q']);await git(['add','id.mjs','check.mjs']);await git(['-c','user.name=Fixture','-c','user.email=fixture@localhost','commit','--no-verify','--no-gpg-sign','-qm','fixture']);
+  await run(base,['init','--files','id.mjs,check.mjs','--write','id.mjs','--check',JSON.stringify([process.execPath,'check.mjs'])]);
+  const {stdout}=await run(base,['new','Fix id("014") to return 14, preserving the API.']);
+  assert.match(stdout,/LANE MANAGED API.*NEEDS YOU/);assert.match(stdout,/MODEL gpt-5.4-mini-2026-03-17/);assert.match(stdout,/HTTP 0/);
+  const runtime=createRuntime(base),tasks=await runtime.actions.listWork();assert.equal(tasks.length,1);
+  const task=tasks[0];assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(task.engineering.managed.modelQueries,undefined);assert.equal(task.engineering.managed.requests,0);
+  assert.equal(task.runs.length,1);assert.equal(task.engineering.delivery,undefined);
+  for(const line of workflowLines(task))assert.ok(stdout.includes(line));
+  assert.deepEqual((await snapshot(runtime)).tasks[0].workflowLines,workflowLines(task));assert.deepEqual(projectRow(task,await runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));
+  await assert.rejects(runtime.actions.rerunWork(task.id,{foreground:true}),/bounded by its saved policy/);
+  let detached=0;runtime.node.startExecution=async()=>{detached++;};
+  const background=await runtime.actions.createWork({brief:'Background must not retrieve or dispatch'});
+  assert.equal(background.blockedOn.code,'managed_foreground_required');assert.equal(detached,0);
+  assert.equal((await fs.readFile(path.join(base,'id.mjs'),'utf8')),'export const id = () => null;\n');
+});
