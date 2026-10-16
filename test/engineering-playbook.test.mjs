@@ -5,6 +5,16 @@ import path from 'node:path';
 import { runEngineeringTask } from '../src/core/engineering.mjs';
 import { createRuntime } from '../src/runtime.mjs';
 import { playbookFixture, zeroUsage, brokenParser } from './engineering-playbook-fixture.mjs';
+import { handoffHash } from '../src/core/engineering-handoff.mjs';
+
+test('no-change diagnosis contradicted by verification becomes a verified patch after fix', async t => {
+  const f = await playbookFixture(t, { execute: async ({input,source}) => input.purpose === 'investigate' ? {status:'ready',result:'No change claim',usage:zeroUsage,engineering:{diagnosis:{confirmed:true,noChange:true,evidence:[{path:source,sha256:handoffHash(await fs.readFile(path.join(input.cwd,source)))}]}}} : null });
+  const task = await runEngineeringTask(f.args);
+  assert.equal(task.status,'ready',task.blockedOn?.text);
+  assert.deepEqual(f.calls.map(c=>c.purpose),['investigate','fix']);
+  assert.equal(task.engineering.outcome.kind,'patch_verified');
+  assert.equal(task.engineering.playbook.noChange,false);
+});
 
 test('engineering playbook reaches decide with one primary and no independent-review trigger', async t => {
   const f = await playbookFixture(t); const task = await runEngineeringTask(f.args);

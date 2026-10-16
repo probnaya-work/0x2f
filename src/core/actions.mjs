@@ -273,6 +273,7 @@ export function createActions(ctx) {
       if (task.engineering.playbook && task.status !== 'working') return (await import('./engineering-playbook.mjs')).resumeEngineeringPlaybook(ctx, task, options);
       throw new WorkError('Engineering task continuation is bounded by its saved policy. A blocked task requires a new approved scope; ordinary rerun cannot bypass its ceilings.');
     }
+    if (options.foreground) throw new WorkError('Foreground execution requires an engineering task; ordinary/workflow rerun cannot silently launch in the background.');
     if (!task.workflow) return rerunUnchecked(id, options);
     return workflowLock(store, async () => {
       const fresh = await store.findTask(id);

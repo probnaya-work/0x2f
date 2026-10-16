@@ -201,7 +201,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
             await store.writeJson(path.join(store.taskDir(slug), ref.path), diagnosis);
             await checkpoint(diagnosis.noChange ? 'verify' : 'implement', 'diagnosis_confirmed', { diagnosis: ref, noChange: Boolean(diagnosis.noChange), artifact, sourceDigest: after.digest });
           }
-        } else await checkpoint('verify', 'implementation_completed', { artifact, sourceDigest: after.digest });
+        } else await checkpoint('verify', 'implementation_completed', { artifact, noChange: false, sourceDigest: after.digest });
       }
       if (pauseAfterPurpose && await pauseAfterPurpose(purpose, task)) return stop('paused_boundary', 'Paused at a committed purpose boundary; explicit continuation is safe.');
     }

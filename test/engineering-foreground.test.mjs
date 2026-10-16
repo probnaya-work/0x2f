@@ -6,6 +6,15 @@ import { foregroundPreflight } from '../src/core/engineering-foreground.mjs';
 import { runEngineeringTask, engineeringQualified } from '../src/core/engineering.mjs';
 import { playbookFixture, validParser } from './engineering-playbook-fixture.mjs';
 
+test('foreground rerun refuses ordinary task before any detached launch', async t => {
+  const f=await playbookFixture(t);await fs.rm(path.join(f.base,'.work/engineering.json'));
+  const ordinary=await f.runtime.actions.createWork({brief:'Ordinary task',provider:'primary'});
+  await f.runtime.store.updateTask({...ordinary,status:'ready'});
+  let calls=0;f.runtime.node.startExecution=async()=>{calls++;return null;};
+  await assert.rejects(f.runtime.actions.rerunWork(ordinary.id,{foreground:true}),/requires an engineering task/);
+  assert.equal(calls,0);assert.equal((await f.runtime.store.findTask(ordinary.id)).runs.length,1);
+});
+
 test('foreground auth gate accepts existing ChatGPT metadata and refuses API/custom endpoints without calls', async t => {
   const home = await fs.mkdtemp('/private/tmp/0x2f-foreground-auth-'); t.after(() => fs.rm(home, {recursive:true,force:true}));
   await fs.mkdir(path.join(home, '.codex'));
