@@ -36,6 +36,17 @@ one patch, four input files, two writable files, 64 KiB source, 8 KiB packet,
 inference tokens and 120 seconds. The external verifier has its existing five
 second/output cap. No agent-owned shell, verifier, network tool or Git action.
 
+For a large approved source, the client-owned `search_task_file` performs a
+literal search in one tracked manifest file: 1–128 UTF-8 query bytes, at most
+six matching lines, 160-byte excerpts, one context line on either side, and
+at most 4 KiB serialized output including framing. It shares the six-tool and
+24 KiB result budgets. `read_task_file` can then select a 1-based start line and
+1–32 lines, retaining its 4 KiB content cap. Both operations enforce the same
+source identity, containment and digest checks. No search executable runs.
+With only two inference responses, the search must supply enough evidence for
+the targeted read and patch to be submitted together in the second response;
+insufficient evidence still stops for context rather than adding another call.
+
 Published billable inference maximum: **$0.024576**. Control requests: **3
 maximum, no separate published fee**. Complete billed cost remains unknown.
 Existing fresh-price/model/ownership/budget checks still apply; stale pricing

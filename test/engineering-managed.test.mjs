@@ -10,11 +10,11 @@ import {ensureEngineeringWorkspace} from '../src/core/engineering-workspace.mjs'
 import {mutateEngineering,assertEngineeringAccepted} from '../src/core/engineering.mjs';
 import {handoffHash as hash} from '../src/core/engineering-handoff.mjs';
 import {economicsPolicy} from '../src/core/engineering-economics.mjs';
-import {runManagedForeground,managedCheck} from '../src/core/engineering-managed.mjs';
+import {runManagedForeground,managedCheck,managedSearchResult} from '../src/core/engineering-managed.mjs';
 import {runForegroundEngineering} from '../src/core/engineering-foreground.mjs';
 import {credentialFreeEnvironment} from '../src/core/workflow-credentials.mjs';
 import {renderTasks} from '../src/render.mjs';
-import {MANAGED_LIMITS,MANAGED_MODELS,managedTransport,managedGuard,managedCost,managedForegroundPricing} from '../src/providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,managedTransport,managedGuard,managedCost,managedForegroundPricing,managedCalls} from '../src/providers/managed-openai.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 import {projectRow} from '../src/web/ledger.mjs';
 import {snapshot} from '../src/tui/model.mjs';
@@ -24,6 +24,7 @@ const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
 const read=(id='read')=>call('read_task_file',{file_id:'f1'},id);
+const search=(query='parseTaskId',id='search',file_id='f1')=>call('search_task_file',{file_id,query},id);
 async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS}={}){
  const f=await playbookFixture(t,{config:{limits:{moneyMicros:250000,tokens:20000,modelCalls:2,providerCalls:5,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
  const git=args=>execFileSync('/usr/bin/git',['-C',f.base,...args],{env:{PATH:'/usr/bin:/bin'},stdio:'pipe'});
@@ -40,6 +41,100 @@ async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},
  return {...f,task,workspace,requests,previews,port:server.address().port,options,run:opts=>runManagedForeground({store:f.runtime.store},task,{...options,...opts})};
 }
 async function artifacts(root){let text='';async function walk(dir){for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())await walk(p);else if(e.isFile())text+=await fs.readFile(p,'utf8');}}await walk(root);return text;}
+
+test('literal search and targeted reads validate IDs, queries and ranges before execution',()=>{
+ const state={limits:MANAGED_LIMITS,callIds:[],tools:0,reads:0,patches:0},manifest=[{id:'f1'}];
+ const validate=item=>managedCalls({status:'completed',output:[item]},state,manifest);
+ for(const id of ['f99','../outside','.work/task.json','credentials'])assert.throws(()=>validate(search('x','s',id)),/managed_file_id/);
+ for(const q of ['', 'x'.repeat(129),'🚀'.repeat(33),'x\ny','x\r','\0'])assert.throws(()=>validate(search(q)),/managed_search_query/);
+ assert.equal(validate(search('.*[]$')).length,1);
+ for(const args of [{start_line:0,line_count:1},{start_line:1,line_count:33},{start_line:1,line_count:0},{start_line:1,line_count:null},{start_line:1.5,line_count:1}])assert.throws(()=>validate(call('read_task_file',{file_id:'f1',...args})),/managed_read_range/);
+ assert.equal(validate(call('read_task_file',{file_id:'f1',start_line:1,line_count:32})).length,1);
+});
+
+test('literal search bounds matching lines, UTF-8 excerpts, context and entire serialized result',()=>{
+ const b=MANAGED_SEARCH_BOUNDS,text=Array.from({length:20},(_,i)=>`${i}: ${'🚀'.repeat(45)} literal.*[] ${'x'.repeat(300)}`).join('\r\n');
+ const result=managedSearchResult('f1',text,'literal.*[]','s'),out=JSON.parse(result.output);
+ assert.ok(out.matches.length>0&&out.matches.length<=6);assert.equal(out.truncated,true);
+ assert.equal(out.matches[0].line,1);assert.ok(Buffer.byteLength(JSON.stringify(result))<=4096);
+ for(const m of out.matches){assert.ok(Buffer.byteLength(m.excerpt)<=160);assert.ok(m.context.length<=2);for(const c of m.context){assert.equal(Math.abs(c.line-m.line),1);assert.ok(Buffer.byteLength(c.excerpt)<=160);}}
+ assert.equal(JSON.parse(managedSearchResult('f1','literalxxxx\n.*[]','.*[]','s').output).matches[0].line,2);
+ const escaped=managedSearchResult('f1',('"\\\t'.repeat(300)+' needle\n').repeat(10),'needle','s');
+ assert.ok(Buffer.byteLength(JSON.stringify(escaped))<=b.resultBytes);
+});
+
+for(const change of ['symlink','identity','bytes'])test(`search rejects ${change} after manifest capture without another inference`,async t=>{
+ const f=await fixture(t,{outputs:[[search()]],hook:async({req,workspace})=>{
+  if(req.url!=='/v1/responses')return;
+  const source=path.join(workspace.path,'src/id.mjs');
+  if(change==='bytes')await fs.writeFile(source,'changed');
+  else {const tmp=source+'.replacement';await fs.writeFile(tmp,await fs.readFile(source));if(change==='identity')await fs.rename(tmp,source);else {await fs.unlink(source);await fs.symlink(tmp,source);}}
+ }}),task=await f.run();
+ assert.equal(task.status,'needs_you');if(change==='identity')assert.equal(task.blockedOn.code,'managed_source_identity');
+ assert.equal(task.engineering.managed.inferences,1);assert.equal(task.engineering.managed.patches,0);
+ assert.equal(f.requests.length,3);assert.equal(f.calls.length,0);
+ assert.equal(await f.runtime.store.exists(path.join(f.runtime.store.taskDir(task.slug),'runs/1/managed/tool-1-receipt.json')),false);
+});
+
+test('ignored/untracked approved source is rejected at preflight before credential or requests',async t=>{
+ const f=await fixture(t,{config:{files:['src/id.mjs','test/id.test.mjs','src/ignored.mjs']}});
+ await fs.writeFile(path.join(f.workspace.path,'.gitignore'),'src/ignored.mjs\n');await fs.writeFile(path.join(f.workspace.path,'src/ignored.mjs'),'ignored');
+ assert.equal(execFileSync('/usr/bin/git',['-C',f.workspace.path,'check-ignore','src/ignored.mjs'],{env:{PATH:'/usr/bin:/bin'}}).toString().trim(),'src/ignored.mjs');
+ let credentials=0;const task=await f.run({credential:async()=>{credentials++;return key;}});
+ assert.equal(task.blockedOn.code,'managed_untracked_source');assert.equal(credentials,0);assert.equal(f.requests.length,0);
+});
+
+test('search shares tool/result ceilings and stops safely without continuation, retry or fallback',async t=>{
+ for(const limits of [{...MANAGED_LIMITS,toolResultBytes:1},{...MANAGED_LIMITS,tools:1}]){
+  const f=await fixture(t,{limits,outputs:[[search()],[read(),patch()]]}),task=await f.run();
+  assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,limits.toolResultBytes===1?'managed_payload_limit':'managed_tool_limit');
+  assert.equal(task.engineering.managed.patches,0);assert.ok(task.engineering.managed.resultBytes<=limits.toolResultBytes);
+  const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
+ }
+});
+
+test('search bytes contribute to exhaustion of the unchanged 24 KiB result ceiling',async t=>{
+ const f=await fixture(t,{outputs:[[search('needle'),read('r1'),read('r2'),read('r3')]]});
+ const source='a'.repeat(3000)+'"'.repeat(1096)+'\n'+Array.from({length:12},()=> 'needle '+'.'.repeat(200)).join('\n');
+ await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),source);
+ const task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_payload_limit');assert.equal(m.inferences,1);assert.equal(m.searches,1);assert.equal(m.reads,3);assert.equal(m.patches,0);
+ const root=f.runtime.store.taskDir(task.slug),receipts=await Promise.all([1,2,3].map(i=>f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`))));
+ assert.equal(m.resultBytes,receipts.reduce((n,r)=>n+r.bytes,0));assert.ok(m.resultBytes<=24576);
+ const readBytes=receipts[1].bytes;assert.ok(3*readBytes<24576);assert.ok(m.resultBytes+readBytes>24576,'search result uses the same ceiling');
+ assert.equal(await f.runtime.store.exists(path.join(root,'runs/1/managed/tool-4-receipt.json')),false);
+ const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);
+});
+
+test('scheduled/unattended managed search cannot retrieve a credential or dispatch a tool',async t=>{
+ const f=await fixture(t,{outputs:[[search()]]});let credentials=0;
+ const task=await f.run({foregroundCanary:false,foregroundAuthorized:false,credential:async()=>{credentials++;throw new Error('must not retrieve');}});
+ assert.equal(task.status,'needs_you');assert.equal(credentials,0);assert.equal(f.requests.length,0);assert.equal(task.engineering.managed.tools,0);assert.equal(task.engineering.managed.searches,0);
+});
+
+test('Task 001-shaped large source: search → targeted read → patch → verifier → READY, one bounded attempt',async t=>{
+ const targetLine=301,outputs=[[search()],[call('read_task_file',{file_id:'f1',start_line:targetLine,line_count:1},'targeted'),patch()]];
+ const f=await fixture(t,{count:1031,outputs,hook:({req,body,inf})=>{
+  if(req.url==='/v1/responses'&&inf===2){const result=body.input.find(i=>i.type==='function_call_output');assert.equal(JSON.parse(result.output).matches[0].line,targetLine);}
+ }});
+ const large='// filler '+ 'x'.repeat(90)+'\n',prefix=large.repeat(300),source=prefix+'export const parseTaskId = () => null;\n';
+ await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),source+'//'+'.'.repeat(31003-Buffer.byteLength(source)-3)+'\n');
+ const testFile=path.join(f.workspace.path,'test/id.test.mjs'),check=await fs.readFile(testFile,'utf8');await fs.writeFile(testFile,check+'//'+'.'.repeat(3046-Buffer.byteLength(check)-3)+'\n');
+ await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
+ const task=await f.run();assert.equal(task.status,'ready',task.blockedOn?.text);const m=task.engineering.managed;
+ assert.equal(m.searches,1);assert.equal(m.reads,1);assert.equal(m.tools,3);assert.equal(m.patches,1);assert.equal(m.inferences,2);assert.equal(m.counts,2);assert.equal(m.modelQueries,1);
+ assert.ok(m.resultBytes<1024);assert.ok(m.inputBytes<=MANAGED_LIMITS.serializedInputBytes);assert.ok(m.actualUsage.total<=MANAGED_LIMITS.inputTokens+MANAGED_LIMITS.outputTokens);
+ const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
+ assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<=8192);assert.deepEqual(attempt.limits,MANAGED_LIMITS);
+ const receipts=await Promise.all([1,2].map(i=>f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`))));
+ assert.deepEqual(receipts.map(r=>r.tool),['search_task_file','read_task_file']);assert.equal(receipts.reduce((n,r)=>n+r.bytes,0),m.resultBytes);
+ assert.equal(JSON.parse(receipts[1].result.output).start_line,targetLine);
+ const usage=await f.runtime.store.readJson(path.join(root,'runs/1/usage.json'));assert.equal(usage.sourceEvidence.find(e=>e.tool==='search_task_file').bytes,receipts[0].bytes);
+ assert.ok(workflowLines(task).some(l=>l.includes('1 searches')));assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
+ assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
+ const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);
+ if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'source-search.json'),JSON.stringify(managedGuard(key)({kind:'deterministic fake Responses fixture; no provider or Keychain calls',task,attempt,receipts,usage,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,bytes:Buffer.byteLength(JSON.stringify(r.body))}))}),null,2)+'\n');}
+});
 
 test('managed read → patch → external deterministic verifier, durable usage and shared projection',async t=>{
  const f=await fixture(t),task=await f.run();assert.equal(task.status,'ready',task.blockedOn?.text);assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,2);assert.equal(task.engineering.managed.requests,4);assert.equal(task.engineering.managed.patches,1);assert.equal(task.engineering.managed.actualUsage.total,240);assert.equal(task.engineering.managed.actualUsage.cachedInput,20);assert.equal(task.engineering.managed.providerReportedCost,'unknown');assert.equal(task.runs.at(-1).purpose,'verify');assert.equal(task.engineering.verification.code,0);const diff=await f.runtime.actions.getTaskDiff(task.id);assert.equal(diff.length,1);assert.equal(diff[0].path,'src/id.mjs');await assertEngineeringAccepted(f.runtime.store,task);
@@ -62,6 +157,7 @@ for(const [name,output,code] of [
  ['unknown item',[{type:'new_effectful_item'}],'managed_unknown_tool_or_item'],
  ['malformed arguments',[{type:'function_call',call_id:'bad',name:'read_task_file',arguments:'{'}],'managed_malformed_arguments'],
  ['arbitrary path',[call('read_task_file',{path:'../../secret'})],'managed_file_id'],
+ ['search outside scope',[search('x','s','f99')],'managed_file_id'],
  ['duplicate patch batch',[patch(),{...patch(),call_id:'second'}],'managed_patch_limit'],
  ['excessive reads',Array.from({length:5},(_,i)=>read('read'+i)),'managed_read_limit'],
  ['context expansion',[call('request_context_expansion',{reason:'Need more context'})],'context_expansion_required'],

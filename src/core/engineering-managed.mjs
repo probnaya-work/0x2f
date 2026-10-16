@@ -1,26 +1,71 @@
 // One foreground small-task attempt. The model never owns execution or retry.
 import path from 'node:path';
+import fs from 'node:fs/promises';
+import {constants} from 'node:fs';
 import {randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {withLock} from './lock.mjs';
-import {readBounded,durableWrite} from './durable.mjs';
+import {readBounded,durableWrite,safePath} from './durable.mjs';
 import {handoffHash as hash,engineeringIntent} from './engineering-handoff.mjs';
-import {engineeringDirectory,assertEngineeringWorkspace} from './engineering-workspace.mjs';
+import {engineeringDirectory,assertEngineeringWorkspace,engineeringTrackedFiles} from './engineering-workspace.mjs';
 import {mutateEngineering,engineeringInventory,freezeEngineering,engineeringRun,engineeringStop,verifyEngineeringArtifact} from './engineering.mjs';
 import {saveEngineeringUsage,economicsPolicy} from './engineering-economics.mjs';
 import {workEvent} from './events.mjs';
-import {MANAGED_LIMITS,MANAGED_MODELS,selectManagedModel,managedForegroundPricing,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,selectManagedModel,managedForegroundPricing,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
 
 const now=()=>new Date().toISOString();
 const int=n=>Number.isSafeInteger(n)&&n>=0;
+const privateSource=file=>/(^|\/)(\.env[^/]*|\.git|\.work|\.codex|\.aws|credentials|node_modules)(\/|$)/.test(file);
+// One shared source boundary for broad reads, targeted reads and literal search.
+// The descriptor and path must still identify the approved regular file.
+async function readManagedSource(cwd,file,guard,maxBytes,expected) {
+  const target=path.resolve(cwd,file);
+  if(privateSource(file)||!target.startsWith(cwd+path.sep))fail('managed_private_file');
+  await safePath(target);
+  const fd=await fs.open(target,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+  try{
+    const before=await fd.stat();
+    if(!before.isFile()||before.size>maxBytes)fail('managed_source_limit');
+    const identity={dev:before.dev,ino:before.ino};
+    if(expected&&hash(identity)!==hash(expected.identity))fail('managed_source_identity');
+    const buffer=Buffer.alloc(Math.min(before.size,maxBytes)+1);let length=0;
+    while(length<buffer.length){const {bytesRead}=await fd.read(buffer,length,buffer.length-length,length);if(!bytesRead)break;length+=bytesRead;}
+    const bytes=guard(buffer.subarray(0,length)),after=await fd.stat(),named=await fs.lstat(target);
+    if(bytes.length>maxBytes||bytes.includes(0))fail('managed_source_limit');
+    if(!named.isFile()||named.dev!==before.dev||named.ino!==before.ino||after.size!==before.size||after.mtimeMs!==before.mtimeMs||after.ctimeMs!==before.ctimeMs)fail('managed_source_identity');
+    if(expected&&hash(bytes)!==expected.sha256)fail('managed_source_drift');
+    return {bytes,identity};
+  }finally{await fd.close();}
+}
+const prefixBytes=(text,max)=>{let out='',size=0;for(const ch of text){const n=Buffer.byteLength(ch);if(size+n>max)break;out+=ch;size+=n;}return out;};
+const sourceLines=text=>text.split('\n').map(s=>s.endsWith('\r')?s.slice(0,-1):s);
+export function managedSearchResult(file_id,text,query,call_id) {
+  const b=MANAGED_SEARCH_BOUNDS,lines=sourceLines(text),matches=[];
+  const result={type:'function_call_output',call_id,output:''};
+  let truncated=false;
+  for(let i=0;i<lines.length;i++){
+    const column=lines[i].indexOf(query);if(column<0)continue;
+    if(matches.length===b.matches){truncated=true;break;}
+    // Center near the literal hit rather than returning a distant line prefix.
+    const start=Math.max(0,column-24),match={line:i+1,column:column+1,excerpt:prefixBytes(lines[i].slice(start),b.lineBytes),context:[]};
+    for(const j of [i-1,i+1])if(j>=0&&j<lines.length)match.context.push({line:j+1,excerpt:prefixBytes(lines[j],b.lineBytes)});
+    const candidate={file_id,matches:[...matches,match],truncated:false};
+    if(Buffer.byteLength(JSON.stringify({...result,output:JSON.stringify(candidate)}))>b.resultBytes){truncated=true;break;}
+    matches.push(match);
+  }
+  result.output=JSON.stringify({file_id,matches,truncated});
+  if(Buffer.byteLength(JSON.stringify(result))>b.resultBytes)fail('managed_payload_limit');
+  return result;
+}
 export async function managedPacket(store,task,guard,limits=MANAGED_LIMITS) {
   const cwd=engineeringDirectory(store,task),c=task.engineering.config;
   if(c.files.length>limits.files)fail('managed_file_limit');
-  let bytes=0;const manifest=[];
+  let bytes=0;const manifest=[],tracked=await engineeringTrackedFiles(cwd);
   for(const [i,file] of c.files.entries()){
-    if(/(^|\/)(\.env[^/]*|\.git|\.work|\.codex|\.aws|credentials)(\/|$)/.test(file))fail('managed_private_file');
-    let raw;try{raw=await readBounded(path.join(cwd,file),limits.sourceBytes);}catch{fail('managed_source_limit');}guard(raw);bytes+=raw.length;if(bytes>limits.sourceBytes||raw.includes(0))fail('managed_source_limit');
-    manifest.push({id:'f'+(i+1),path:file,bytes:raw.length,sha256:hash(raw),writable:c.writePaths.includes(file)});
+    if(privateSource(file))fail('managed_private_file');
+    if(!tracked.has(file))fail('managed_untracked_source');
+    let source;try{source=await readManagedSource(cwd,file,guard,limits.sourceBytes);}catch(e){if(e instanceof ManagedStop)throw e;fail('managed_source_limit');}const raw=source.bytes;bytes+=raw.length;if(bytes>limits.sourceBytes)fail('managed_source_limit');
+    manifest.push({id:'f'+(i+1),path:file,bytes:raw.length,sha256:hash(raw),identity:source.identity,writable:c.writePaths.includes(file)});
   }
   const names=new Set(['AGENTS.md']);for(const file of c.files){let dir=path.dirname(file);while(dir!=='.'){names.add(path.join(dir,'AGENTS.md'));dir=path.dirname(dir);}}
   const instructions=[];
@@ -63,10 +108,10 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
     };
     if(task.engineering.managed?.attempt)return task.status==='working'?stop('managed_uncertain'):task;
     if(task.status!=='working'||task.engineering.driver.state!=='pending')return task;
-    task=await update(t=>{claimed=true;return {...t,pid:process.pid,execution:{...t.execution,provider:'managed-openai'},engineering:{...t.engineering,driver:{token,pid:process.pid,state:'running'},managed:{lane:'managed-api',state:'PREFLIGHT',limits,attempt:randomUUID(),requests:0,inferences:0,tools:0,reads:0,patches:0,resultBytes:0,inputBytes:0},next:'implement'}};});
+    task=await update(t=>{claimed=true;return {...t,pid:process.pid,execution:{...t.execution,provider:'managed-openai'},engineering:{...t.engineering,driver:{token,pid:process.pid,state:'running'},managed:{lane:'managed-api',state:'PREFLIGHT',limits,attempt:randomUUID(),requests:0,inferences:0,tools:0,reads:0,searches:0,patches:0,resultBytes:0,inputBytes:0},next:'implement'}};});
     if(!claimed)return task;
     const attempt=task.engineering.managed.attempt,run=task.runs.at(-1).run,dir=`runs/${run}/managed`,cwd=engineeringDirectory(store,task),intent=engineeringIntent(task);
-    let state={limits,callIds:[],tools:0,reads:0,patches:0,resultBytes:0,inputBytes:0,inputTokens:0,inputReserved:0,outputTokens:0,outputReserved:0,requests:0,inferences:0,counts:0,modelQueries:0},usageEvents=[],knownUsage=true,model,predicted,packet,baseline,expected,patchSubmitted=false;
+    let state={limits,callIds:[],tools:0,reads:0,searches:0,patches:0,resultBytes:0,inputBytes:0,inputTokens:0,inputReserved:0,outputTokens:0,outputReserved:0,requests:0,inferences:0,counts:0,modelQueries:0},usageEvents=[],toolEvidence=[],knownUsage=true,model,predicted,packet,baseline,expected,patchSubmitted=false;
     const sync=async(extra={})=>{task=await update(t=>({...t,engineering:{...t.engineering,managed:{...t.engineering.managed,...state,callIds:undefined,limits,state:'RUNNING',...extra}}}));};
     let pendingRequest=false;
     async function rpc(kind,body){
@@ -90,7 +135,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       const tokens=usageEvents.reduce((n,e)=>n+e.usage.total_tokens,0),input=usageEvents.reduce((n,e)=>n+e.usage.input_tokens,0),output=usageEvents.reduce((n,e)=>n+e.usage.output_tokens,0);
       const cached=usageEvents.every(e=>int(e.usage.cached_input_tokens))?usageEvents.reduce((n,e)=>n+e.usage.cached_input_tokens,0):null;
       const cost=cached===null||!knownUsage?null:((input-cached)*model.price.perMillion.input+cached*model.price.perMillion.cachedInput+output*model.price.perMillion.output)/1e6;
-      const outcome={status,usageCostSource:'Calculated inference-only cost from versioned prices; other API fees unknown',usage:{tokens,modelCalls:state.inferences,providerCalls:state.requests+state.modelQueries,...(cost===null?{}:{moneyMicros:Math.ceil(cost*1e6)})},usageDetails:{events:usageEvents,semantics:'delta',model:model.id,complete:knownUsage,source:'OpenAI Responses usage; immutable managed request receipts',sources:usageEvents.map((e,i)=>({path:`${dir}/usage-${i+1}.json`,responseId:e.id}))}};
+      const outcome={status,usageCostSource:'Calculated inference-only cost from versioned prices; other API fees unknown',usage:{tokens,modelCalls:state.inferences,providerCalls:state.requests+state.modelQueries,...(cost===null?{}:{moneyMicros:Math.ceil(cost*1e6)})},usageDetails:{events:usageEvents,semantics:'delta',model:model.id,complete:knownUsage,source:'OpenAI Responses usage; immutable managed request receipts',sources:[...usageEvents.map((e,i)=>({path:`${dir}/usage-${i+1}.json`,responseId:e.id})),...toolEvidence]}};
       task=await saveEngineeringUsage(store,task,{run,boundary:attempt,provider:'managed-openai',proof:{maximum:{tokens:limits.inputTokens+limits.outputTokens},evidence:{version:'managed-responses-v1'}},outcome,handoff:{metrics:{contextManifest:{totalBytes:Buffer.byteLength(JSON.stringify(packet)),parts:[{name:'task-packet',bytes:Buffer.byteLength(JSON.stringify(packet)),reason:'current approved small task'}]}}},reason:'minimum-qualified-managed-model'});
       await sync({actualUsage:knownUsage?{input,cachedInput:cached,output,total:tokens}:null,calculatedInferenceCostUsd:cost,providerReportedCost:'unknown',controlCost:'no separate published fee; actual billed amount unknown',predicted});
     }
@@ -147,18 +192,27 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
         conversation.push(...response.output);
         for(const {item,args} of calls){
           active();state.tools++;state.callIds.push(item.call_id);
-          if(item.name==='read_task_file'){
-            state.reads++;const file=packet.files.find(f=>f.id===args.file_id),bytes=await readBounded(path.join(cwd,file.path),65536);guard(bytes);if(hash(bytes)!==file.sha256)fail('managed_source_drift');
+          if(['read_task_file','search_task_file'].includes(item.name)){
+            if(item.name==='search_task_file')state.searches++;else state.reads++;
+            const file=packet.files.find(f=>f.id===args.file_id),{bytes}=await readManagedSource(cwd,file.path,guard,limits.sourceBytes,file);
+            active();
             // Slice whole Unicode codepoints, including JSON framing in total cap.
-            let content='';for(const ch of bytes.toString()){if(Buffer.byteLength(content+ch)>limits.readResultBytes)break;content+=ch;}
-            const result={type:'function_call_output',call_id:item.call_id,output:JSON.stringify({file_id:file.id,content,truncated:Buffer.byteLength(content)<bytes.length})};const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;conversation.push(result);
-            await write(`${dir}/tool-${state.tools}-receipt.json`,{callId:item.call_id,tool:item.name,bytes:size,sourceDigest:file.sha256,result});await sync();
+            let result;
+            if(item.name==='search_task_file')result=managedSearchResult(file.id,bytes.toString(),args.query,item.call_id);
+            else {
+              const ranged=Number.isSafeInteger(args.start_line),lines=ranged?sourceLines(bytes.toString()).slice(args.start_line-1,args.start_line-1+args.line_count):null;
+              const selected=ranged?lines.join('\n'):bytes.toString(),content=prefixBytes(selected,limits.readResultBytes);
+              result={type:'function_call_output',call_id:item.call_id,output:JSON.stringify({file_id:file.id,...(ranged?{start_line:args.start_line,line_count:lines.length}:{}),content,truncated:Buffer.byteLength(content)<Buffer.byteLength(selected)})};
+            }
+            guard(result);const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;conversation.push(result);
+            const receipt=`${dir}/tool-${state.tools}-receipt.json`;
+            await write(receipt,{callId:item.call_id,tool:item.name,bytes:size,sourceDigest:file.sha256,result});toolEvidence.push({path:receipt,tool:item.name,bytes:size});await sync();
           }else{
             await assertEngineeringWorkspace(store,task,run);const fresh=await store.findTask(task.id);if(engineeringIntent(fresh)!==intent||fresh.status!=='working')fail('managed_input_drift');if((await engineeringInventory(cwd)).digest!==expected)fail('managed_source_drift');
             const updates=[];
-            for(const edit of args.edits){const file=packet.files.find(f=>f.id===edit.file_id),bytes=await readBounded(path.join(cwd,file.path),65536);guard(bytes);const text=bytes.toString();if(hash(bytes)!==file.sha256||text.split(edit.old_text).length!==2)fail('managed_patch_drift');const replacement=text.replace(edit.old_text,edit.new_text);guard(replacement);if(Buffer.byteLength(replacement)>65536)fail('managed_patch_size');updates.push({file,before:file.sha256,after:hash(replacement),replacement});}
+            for(const edit of args.edits){const file=packet.files.find(f=>f.id===edit.file_id),{bytes}=await readManagedSource(cwd,file.path,guard,limits.sourceBytes,file);const text=bytes.toString();if(text.split(edit.old_text).length!==2)fail('managed_patch_drift');const replacement=text.replace(edit.old_text,edit.new_text);guard(replacement);if(Buffer.byteLength(replacement)>65536)fail('managed_patch_size');updates.push({file,before:file.sha256,after:hash(replacement),replacement});}
             await write(`${dir}/tool-${state.tools}-intent.json`,{callId:item.call_id,tool:item.name,edits:updates});fault('before-patch');active();
-            for(const u of updates){active();if(hash(await readBounded(path.join(cwd,u.file.path),65536))!==u.before)fail('managed_patch_drift');await durableWrite(path.join(cwd,u.file.path),u.replacement);fault('after-file');}
+            for(const u of updates){active();if(hash((await readManagedSource(cwd,u.file.path,guard,limits.sourceBytes,u.file)).bytes)!==u.before)fail('managed_patch_drift');await durableWrite(path.join(cwd,u.file.path),u.replacement);fault('after-file');}
             state.patches++;patchSubmitted=true;expected=(await engineeringInventory(cwd)).digest;
             await write(`${dir}/tool-${state.tools}-receipt.json`,{callId:item.call_id,tool:item.name,edits:updates.map(u=>({file_id:u.file.id,before:u.before,after:u.after}))});await sync();
           }

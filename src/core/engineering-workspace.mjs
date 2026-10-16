@@ -14,6 +14,9 @@ const git = async (repository, args) => (await exec('git', ['-C', repository, ..
 const receiptPath = (store, task) => path.join(store.taskDir(task.slug), 'workspace.json');
 const lock = (store, task, fn) => withLock(path.join(store.taskDir(task.slug), 'workspace-lock'), fn);
 export const engineeringDirectory = (store, task) => task.engineering.workspace?.path ?? store.base;
+// Preflight only: approved sources must originate in the tracked workspace.
+// Source tools do not spawn Git (or any executable) during a model turn.
+export const engineeringTrackedFiles = async cwd => new Set((await git(cwd,['ls-files','-z','--cached'])).split('\0').filter(Boolean));
 
 const expectedHead = (task, receipt) => task.engineering.delivery?.state === 'committed' && task.engineering.delivery.commit === receipt.deliveredCommit ? receipt.deliveredCommit : receipt.commit;
 async function inspect(receipt, head = receipt.commit) {
