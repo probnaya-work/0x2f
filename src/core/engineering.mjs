@@ -8,6 +8,7 @@ import { withLock } from './lock.mjs';
 import { readBounded } from './durable.mjs';
 import { makeRunRecord } from './runs.mjs';
 import { workEvent } from './events.mjs';
+import { createHandoff, verifyHandoff } from './engineering-handoff.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hash = value => digest(JSON.stringify(value));
@@ -193,14 +194,19 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
       if (!reserved) return stop('budget_limit', 'Next run cannot reserve its hard envelope, or its boundary was already consumed. Existing uncertainty/reservations are retained.');
       const dir = path.join(store.taskDir(slug), 'runs', String(run));
       await store.writeJson(path.join(dir, 'input.json'), input);
-      await store.writeRunPrompt(task, run, JSON.stringify(input, null, 2));
-      await freeze(store, task, run, before, 'inputs');
+      const source = await freeze(store, task, run, before, 'inputs');
+      const handoff = await createHandoff(store, task, { run, purpose, source, artifact: previous, failedCheck: prior, executorFailure,
+        verification: prior && { path: prior.path, digest: prior.digest } });
+      await store.writeJson(path.join(dir, 'handoff.json'), handoff);
+      await store.writeRunPrompt(task, run, JSON.stringify(handoff.content, null, 2));
+      task = await update(t => ({ ...t, runs: t.runs.map(r => r.run === run ? { ...r, handoff: { path: `runs/${run}/handoff.json`, digest: handoff.digest, metrics: handoff.metrics } } : r) }));
+      await verifyHandoff(store, await store.findTask(task.id), handoff, { run, sourceDigest: (await inventory(store.base)).digest });
       await store.appendEvent(slug, workEvent('run.started', task.id, { run, purpose, provider: provider.id }));
       let outcome;
       const timer = setTimeout(() => proof.cancel?.(), Math.max(1, config.limits.wallClockMs - (Date.now() - start)));
       const abort = () => proof.cancel?.();
       signal.addEventListener('abort', abort, { once: true });
-      try { outcome = await proof.execute({ cwd: store.base, prompt: JSON.stringify(input), purpose, signal }); }
+      try { outcome = await proof.execute({ cwd: store.base, prompt: JSON.stringify(handoff.content), purpose, signal }); }
       finally { clearTimeout(timer); signal.removeEventListener('abort', abort); }
       if (!['ready', 'failed', 'needs_you'].includes(outcome?.status)) throw new Error('Executor returned an invalid outcome.');
       const usage = outcome.usage;
@@ -228,6 +234,9 @@ export async function runEngineeringTask({ store, slug, token, providers, qualif
       }
       const verifyRun = run + 1;
       task = await update(t => ({ ...t, runs: [...t.runs, { ...makeRunRecord({ run: verifyRun, provider: 'local-checks', node: 'local', workspace: 'local', startedAt: now() }), purpose: 'verify', executor: { kind: 'local' }, input: previous }], execution: { ...t.execution, provider: 'local-checks' }, engineering: { ...t.engineering, next: 'verify' } }));
+      const verificationHandoff = await createHandoff(store, task, { run: verifyRun, purpose: 'verify', artifact: previous });
+      await store.writeJson(path.join(store.taskDir(slug), 'runs', String(verifyRun), 'handoff.json'), verificationHandoff);
+      await verifyHandoff(store, task, verificationHandoff, { run: verifyRun });
       if (digest(await readBounded(config.check[0], 256000000)) !== config.checkDigest) return stop('check_drift', 'Verification executable changed.');
       await verifyFrozen(store, task, previous);
       await store.appendEvent(slug, workEvent('run.started', task.id, { run: verifyRun, purpose: 'verify', provider: 'local-checks' }));

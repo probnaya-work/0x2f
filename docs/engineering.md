@@ -33,6 +33,11 @@ Fix handoffs include intent/scope/constraints and the failed check/artifact, not
 all prior agent results. Unavailability handoffs reference the specific failure.
 The original prompt and previous run artifacts remain available for audit.
 
+Purpose-specific investigation/implementation/verification/review handoffs bind
+task intent, run identity, human decisions and immutable evidence. Their measured
+byte size is compared with saved audit history. Changed inputs or references
+cannot be dispatched through an old handoff.
+
 Limits: this is not managed worktree ownership, a sandbox, unattended supervision,
 independent review, delivery authorization or crash-safe external replay. Ambiguous
 effects/launches are never retried. A blocked engineering task cannot bypass its
