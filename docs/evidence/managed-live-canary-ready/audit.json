@@ -1,0 +1,473 @@
+{
+  "separatePostRunTreeScan": true,
+  "filesScanned": 91,
+  "secretFound": false,
+  "credentialFileReopenedByAudit": false,
+  "keyValuePrintedCopiedPersistedOrHashed": false,
+  "oneTask": true,
+  "oneManagedInvocation": true,
+  "oneAttemptIdentity": true,
+  "providerIds": [
+    "managed-openai",
+    "local-checks"
+  ],
+  "retryReplayContinuationFallback": false,
+  "cliTuiWebProjectionIdentical": true,
+  "artifacts": [
+    {
+      "path": "evidence/baseline-verifier.json",
+      "sha256": "f09ec44139c68e51ecdea86cf417dd0a5e5655b6947669c6a0116a00b8b70221",
+      "bytes": 2232
+    },
+    {
+      "path": "evidence/launch.json",
+      "sha256": "4f715d6d2d16fda96000fdccf70c54d3aefccb6009a9b8c093ef6f8e3853b3ab",
+      "bytes": 332
+    },
+    {
+      "path": "evidence/outcome.json",
+      "sha256": "4f634d4d01255a4c5035890f1ce6625530cf215f5caadeacf3f11d6c51bac4d9",
+      "bytes": 7219
+    },
+    {
+      "path": "evidence/patch.diff",
+      "sha256": "1578faebb72f44891683a11ea8bff8069d6a65ee48fc6ab0b81a1d2d63ef1586",
+      "bytes": 503
+    },
+    {
+      "path": "evidence/projection.txt",
+      "sha256": "08144cc560cadd25eefa624503de6feb7015cf4b82712f5712152176ef2e1482",
+      "bytes": 1302
+    },
+    {
+      "path": "location.json",
+      "sha256": "f3b1515c671a94d2815707a791a261e53f1ab076d1711defabf025c02b917b9c",
+      "bytes": 347
+    },
+    {
+      "path": "repo/.git/COMMIT_EDITMSG",
+      "sha256": "23bfca0f7d209b3a578adc8ecc49d5e1fe0d4b160faf957a9fa909f246e369a3",
+      "bytes": 44
+    },
+    {
+      "path": "repo/.git/HEAD",
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80",
+      "bytes": 21
+    },
+    {
+      "path": "repo/.git/config",
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda",
+      "bytes": 137
+    },
+    {
+      "path": "repo/.git/description",
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee",
+      "bytes": 73
+    },
+    {
+      "path": "repo/.git/hooks/applypatch-msg.sample",
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7",
+      "bytes": 478
+    },
+    {
+      "path": "repo/.git/hooks/commit-msg.sample",
+      "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b",
+      "bytes": 1972
+    },
+    {
+      "path": "repo/.git/hooks/fsmonitor-watchman.sample",
+      "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0",
+      "bytes": 4611
+    },
+    {
+      "path": "repo/.git/hooks/post-update.sample",
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5",
+      "bytes": 189
+    },
+    {
+      "path": "repo/.git/hooks/pre-applypatch.sample",
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475",
+      "bytes": 424
+    },
+    {
+      "path": "repo/.git/hooks/pre-commit.sample",
+      "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b",
+      "bytes": 1649
+    },
+    {
+      "path": "repo/.git/hooks/pre-merge-commit.sample",
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53",
+      "bytes": 416
+    },
+    {
+      "path": "repo/.git/hooks/pre-push.sample",
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a",
+      "bytes": 1374
+    },
+    {
+      "path": "repo/.git/hooks/pre-rebase.sample",
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3",
+      "bytes": 4898
+    },
+    {
+      "path": "repo/.git/hooks/pre-receive.sample",
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989",
+      "bytes": 544
+    },
+    {
+      "path": "repo/.git/hooks/prepare-commit-msg.sample",
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619",
+      "bytes": 1492
+    },
+    {
+      "path": "repo/.git/hooks/push-to-checkout.sample",
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f",
+      "bytes": 2783
+    },
+    {
+      "path": "repo/.git/hooks/sendemail-validate.sample",
+      "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92",
+      "bytes": 2308
+    },
+    {
+      "path": "repo/.git/hooks/update.sample",
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106",
+      "bytes": 3650
+    },
+    {
+      "path": "repo/.git/index",
+      "sha256": "b5b59349cbc46400b1dafa3d6c8f7fd9f8f49eda15cb0ad8390aa45759315f16",
+      "bytes": 370
+    },
+    {
+      "path": "repo/.git/info/exclude",
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1",
+      "bytes": 240
+    },
+    {
+      "path": "repo/.git/logs/HEAD",
+      "sha256": "9f8ad4148de893c04a192bb522c972b3959223bd78bba5da1a4d00fe271bd8fc",
+      "bytes": 200
+    },
+    {
+      "path": "repo/.git/logs/refs/heads/main",
+      "sha256": "9f8ad4148de893c04a192bb522c972b3959223bd78bba5da1a4d00fe271bd8fc",
+      "bytes": 200
+    },
+    {
+      "path": "repo/.git/objects/14/868a6e500522986879a11ac0884e2bb4c1c79b",
+      "sha256": "4dd78a0bec4a8dd895527955e18ba82923797f35cb0d43b6dddde0a7292982cc",
+      "bytes": 150
+    },
+    {
+      "path": "repo/.git/objects/3c/1b3b23b8dc3e84e17a69860ea4b5d95a6c9bdc",
+      "sha256": "e53c6d4fab7864af1d03db06052392011fa7fd99d73fe4d6577f234bc9881513",
+      "bytes": 22
+    },
+    {
+      "path": "repo/.git/objects/72/d3aca9e43443a279d62fe29ea8ed849c227e5b",
+      "sha256": "04256b4a9949313e5d59240ced8e0adb7002b14c48ba7dcb25204e199950168a",
+      "bytes": 408
+    },
+    {
+      "path": "repo/.git/objects/85/e9425f3d5517ed70d9e037aca6635506c704c2",
+      "sha256": "d7cfef44a3da7c18c8eb384ba15accb05d241825d862ce5dc3f47f8655d527df",
+      "bytes": 172
+    },
+    {
+      "path": "repo/.git/objects/95/46c6319e56f157392b765bb24f68c4f595958e",
+      "sha256": "80934df3bf8d7240967b6ee11ccd7779c06a83c4a37862e328a80d6b1e0127d2",
+      "bytes": 61
+    },
+    {
+      "path": "repo/.git/objects/a6/9bb091bf154be273fb62af2a7bad209dd89f7c",
+      "sha256": "87d872e9fb589d0891eab1f366ae2912e152dbfa0922ed9d2d24dd4b86a322ce",
+      "bytes": 113
+    },
+    {
+      "path": "repo/.git/objects/f8/1be9ea95faecd9863eb41fa80cc8314466de14",
+      "sha256": "a4c15a689798902a4332472f37eeaff47c8d41f7b1f38a0adcd8d76e47518205",
+      "bytes": 56
+    },
+    {
+      "path": "repo/.git/refs/heads/main",
+      "sha256": "cc56b16630dc6f5b52a0f96bab191ff9f1499608e260682a49830ede22c0622f",
+      "bytes": 41
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/HEAD",
+      "sha256": "cc56b16630dc6f5b52a0f96bab191ff9f1499608e260682a49830ede22c0622f",
+      "bytes": 41
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/ORIG_HEAD",
+      "sha256": "cc56b16630dc6f5b52a0f96bab191ff9f1499608e260682a49830ede22c0622f",
+      "bytes": 41
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/commondir",
+      "sha256": "340ddcb67a6204f742cd1e28e5b462622dde7daaa8ee36001897196aacdc6d47",
+      "bytes": 6
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/gitdir",
+      "sha256": "afa42a301ab47576084cf251eaa5f817f55eea12037719d12b5f6d6e47566757",
+      "bytes": 100
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/index",
+      "sha256": "19e4ebc1ac7a8d223e46715194f217968c19a7c90c2ee5d33718e59a6bae85f7",
+      "bytes": 370
+    },
+    {
+      "path": "repo/.git/worktrees/001-reject-partial-decimal-task-ids/logs/HEAD",
+      "sha256": "7186aefb492888acb565da2750d2e98e412228bfde595090d1c36b4c95f44d36",
+      "bytes": 148
+    },
+    {
+      "path": "repo/.gitignore",
+      "sha256": "035be897b00b2e4df85234618e91ae2c91213ba53b2bf492fc890efec505f2ae",
+      "bytes": 7
+    },
+    {
+      "path": "repo/.work/engineering.json",
+      "sha256": "2f5c2ad3287a9d4e958b35e117db826306fb631ab6fc7ae2e435293369aecedf",
+      "bytes": 702
+    },
+    {
+      "path": "repo/.work/task-create-lock/.mutex",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "repo/.work/task-sequence.json",
+      "sha256": "6c3f72193d5ff158688eced39b5c16646ffe0d8fe2b680078c023a92d2c3b11c",
+      "bytes": 40
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/engineering-lock/.mutex",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/events.jsonl",
+      "sha256": "a475c9f1d276cf52551566b74581ded2c5f4a066487a5b103c1d497779fa3b7e",
+      "bytes": 302
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/managed-lock/.mutex",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/prompt.md",
+      "sha256": "0fd3f260fa4e032a167a41da48e444d5035700f2b3c2e33473e6372d04063876",
+      "bytes": 539
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/result.md",
+      "sha256": "e28e41d6287c374fb21ff4ada56113c0816b0bbbb1944e187067abd2889101d8",
+      "bytes": 98
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/run.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/artifacts/files/src/task-id.mjs",
+      "sha256": "c920a08c115b2ac35591b30470fe9f4aed6e642294741ef6e87060c1a9a0404d",
+      "bytes": 311
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/artifacts/files/test/task-id.test.mjs",
+      "sha256": "3d0b21aa884ed80d640c487b7268921f82d52dd2ad6d30170b39ecda6172385f",
+      "bytes": 705
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/artifacts/manifest.json",
+      "sha256": "8d407ce7ae38c8524951929b3d387931ce080d5d5c249f35c235c483fe1e21a5",
+      "bytes": 553
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/inputs/files/src/task-id.mjs",
+      "sha256": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833",
+      "bytes": 218
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/inputs/files/test/task-id.test.mjs",
+      "sha256": "3d0b21aa884ed80d640c487b7268921f82d52dd2ad6d30170b39ecda6172385f",
+      "bytes": 705
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/inputs/manifest.json",
+      "sha256": "7e9d9f5fc8ca917b0ac0a0e2b4cb95f8d642187885fd6fd7b01393726f75676a",
+      "bytes": 553
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/attempt.json",
+      "sha256": "441fc1d2f945560bd7bed0afbfc1ed10e156158f8d07f2067bafa565f7db1ead",
+      "bytes": 3939
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/foreground-preview.json",
+      "sha256": "e5f08fca41e7697ee603867e75e016f0ecf62c87cb9bbbff94ca2e9d92b71252",
+      "bytes": 2028
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-1-intent.json",
+      "sha256": "18623ce5fc0ef803bf0722e6c612f0a3947d416d6964ea9450c6c198f0261baf",
+      "bytes": 805
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-1-receipt.json",
+      "sha256": "18cb67b0a2fac69cf04c40d6ec2943cfa2c6b0e6fabb59cb2bd6915efc0573da",
+      "bytes": 463
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-2-intent.json",
+      "sha256": "7c1e7a2861ad5ae1a44a4b7cc89f9a0e0dcb81f54157110704211c4fc522a4df",
+      "bytes": 4588
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-2-receipt.json",
+      "sha256": "72d89a5caf2cc9b59b7dd617d84a1c84d1c704679c69b525063a4bae59c16ea5",
+      "bytes": 387
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-3-intent.json",
+      "sha256": "ed715d96fd5852d209ca93272db05c95be8b928e750acf1a0ab7216b0ddb3139",
+      "bytes": 4847
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-3-receipt.json",
+      "sha256": "16778225482429af91eca95a760853bf8a56fcf860efd5cf30701e39dc6d6c8f",
+      "bytes": 4894
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-4-intent.json",
+      "sha256": "fd605223a8ba93fa57014a5d561519fc6fe64be74ddc1610cb9a2ccf61fe461f",
+      "bytes": 5285
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-4-receipt.json",
+      "sha256": "04add9bc62065df699d4b016601c7cb30cfc708c77c6b0db3ee4898c6ed4104e",
+      "bytes": 387
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-5-intent.json",
+      "sha256": "6cda7e07be3dea6fa35f76af6f0f5bf8f39ae92dab70cd8620d67c6c20a06501",
+      "bytes": 5541
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/request-5-receipt.json",
+      "sha256": "d9c18fef66773b16eedf29bca05cc9e1b7a4aa42a5c2e8ba358efe4926927628",
+      "bytes": 5500
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/tool-1-receipt.json",
+      "sha256": "759a181b141b0ab46b388967bba6eadca2ae9217c5c203fac60ea4bf36e5c119",
+      "bytes": 583
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/tool-2-intent.json",
+      "sha256": "a39b0dcd55eb4feb0be67781731375118186e616c3b5c6dc97abaa338390358c",
+      "bytes": 828
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/tool-2-receipt.json",
+      "sha256": "e4d9793b36059755ca4c48581cb67397383469d3178b775c256a7d476298cc66",
+      "bytes": 293
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/usage-1.json",
+      "sha256": "ddf365353abe70a87ae486c17cfbeebd6090f358b2608f303ccb2190e964f4cb",
+      "bytes": 385
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/managed/usage-2.json",
+      "sha256": "614cc600bbb54dce795a1b6cbedf5b352fdc5b33228d414dc0707b8d59a3bb84",
+      "bytes": 386
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/prompt.md",
+      "sha256": "0fd3f260fa4e032a167a41da48e444d5035700f2b3c2e33473e6372d04063876",
+      "bytes": 539
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/1/usage.json",
+      "sha256": "c8c60244b1acf399b1508c4f4376f3b572959be21d6492e49dccd9deebeb65a5",
+      "bytes": 2488
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/2/result.md",
+      "sha256": "b6913d85448b79c0e7856450ebc6cc38df7ac148effa3fb57f67f04e6b9bb6c8",
+      "bytes": 319
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/2/review.json",
+      "sha256": "f68bcbc2e1e3721c3c8161ea09afabf18a50c9996e33b8d5661ef7091fe09019",
+      "bytes": 560
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/runs/2/verification.json",
+      "sha256": "05adb7c8846cad832e798b2f4d2580ae14d5bc832dfa3104f5d4e08d6361044f",
+      "bytes": 1092
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/task.json",
+      "sha256": "7965b1244241e89b01641aa9f2a08fa4fbe4576ca340a49d35775b0429a5798f",
+      "bytes": 14314
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/usage/task-after-1.json",
+      "sha256": "7d4235e48b3d14fde33310a210ef0d201d9f1bb19205967d0c78cfd6ca67fa84",
+      "bytes": 893
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/workspace-lock/.mutex",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "repo/.work/tasks/001-reject-partial-decimal-task-ids/workspace.json",
+      "sha256": "5e352c1b128a970113eacb20661f77d5116fb2aa2135dd2ed1050254191f0778",
+      "bytes": 509
+    },
+    {
+      "path": "repo/.work/worktrees/001-reject-partial-decimal-task-ids/.git",
+      "sha256": "487d80901b492a194bc73d81c37f0b7bc63fc3838aac75f0efd8843c7d3916f8",
+      "bytes": 102
+    },
+    {
+      "path": "repo/.work/worktrees/001-reject-partial-decimal-task-ids/.gitignore",
+      "sha256": "035be897b00b2e4df85234618e91ae2c91213ba53b2bf492fc890efec505f2ae",
+      "bytes": 7
+    },
+    {
+      "path": "repo/.work/worktrees/001-reject-partial-decimal-task-ids/src/task-id.mjs",
+      "sha256": "c920a08c115b2ac35591b30470fe9f4aed6e642294741ef6e87060c1a9a0404d",
+      "bytes": 311
+    },
+    {
+      "path": "repo/.work/worktrees/001-reject-partial-decimal-task-ids/test/task-id.test.mjs",
+      "sha256": "3d0b21aa884ed80d640c487b7268921f82d52dd2ad6d30170b39ecda6172385f",
+      "bytes": 705
+    },
+    {
+      "path": "repo/src/task-id.mjs",
+      "sha256": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833",
+      "bytes": 218
+    },
+    {
+      "path": "repo/test/task-id.test.mjs",
+      "sha256": "3d0b21aa884ed80d640c487b7268921f82d52dd2ad6d30170b39ecda6172385f",
+      "bytes": 705
+    },
+    {
+      "path": "run-canary.mjs",
+      "sha256": "bf020be4b566aca4ad93115ec1ef0a413afc02d5eaba8ada725039a478b69259",
+      "bytes": 8575
+    }
+  ]
+}

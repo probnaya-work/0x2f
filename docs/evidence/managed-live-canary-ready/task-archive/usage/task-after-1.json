@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "afterRun": 1,
+  "attempts": [
+    {
+      "run": 1,
+      "path": "runs/1/usage.json",
+      "digest": "2a0b9846df4709444450c282a79a7a23dcc8a28a4826948d63cdb63c75a1e9b0"
+    }
+  ],
+  "aggregate": {
+    "attempts": 1,
+    "metrics": {
+      "input": {
+        "value": 1161,
+        "observed": 1161,
+        "unknownAttempts": 0
+      },
+      "cachedInput": {
+        "value": 0,
+        "observed": 0,
+        "unknownAttempts": 0
+      },
+      "output": {
+        "value": 202,
+        "observed": 202,
+        "unknownAttempts": 0
+      },
+      "reasoning": {
+        "value": 0,
+        "observed": 0,
+        "unknownAttempts": 0
+      },
+      "total": {
+        "value": 1363,
+        "observed": 1363,
+        "unknownAttempts": 0
+      }
+    },
+    "money": {
+      "value": 1780,
+      "currency": "USD"
+    },
+    "partial": false
+  }
+}

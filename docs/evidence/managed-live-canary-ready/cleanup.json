@@ -1,0 +1,12 @@
+{
+  "fixtureServersStarted": 0,
+  "backgroundWorkersStarted": 0,
+  "providerProcessesStarted": 0,
+  "ownedVerifierGroupClosed": true,
+  "repositoryRetained": true,
+  "managedWorktreeRetained": true,
+  "managedInvocationReturned": true,
+  "oneOffGlobalLocatorRemoved": true,
+  "bootstrapScriptRetainedInsideCanaryDirectory": true,
+  "foregroundProcessExitCode": 0
+}

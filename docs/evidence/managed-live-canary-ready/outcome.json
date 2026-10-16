@@ -1,0 +1,205 @@
+{
+  "verdict": "GO",
+  "root": "/private/tmp/0x2f-managed-live-YKqcyw",
+  "repository": "/private/tmp/0x2f-managed-live-YKqcyw/repo",
+  "taskId": 1,
+  "slug": "001-reject-partial-decimal-task-ids",
+  "attempt": "4aee9858-5002-420c-87e7-12a5fa96e899",
+  "managedInvocations": 1,
+  "elapsedMs": 8078,
+  "ready": true,
+  "status": "ready",
+  "blockedOn": null,
+  "model": "gpt-5.4-mini-2026-03-17",
+  "observedModel": "gpt-5.4-mini-2026-03-17",
+  "requests": [
+    {
+      "number": 1,
+      "requestId": "b2574af7-35ee-4ac1-829c-46b21168aee5",
+      "kind": "model",
+      "requestType": "unpriced_control_request",
+      "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "intent": "request-1-intent.json",
+      "receipt": "request-1-receipt.json",
+      "responseId": "gpt-5.4-mini-2026-03-17",
+      "usage": null
+    },
+    {
+      "number": 2,
+      "requestId": "593af2c6-bbf9-444f-b1fb-0f5e54ae069b",
+      "kind": "count",
+      "requestType": "unpriced_control_request",
+      "inputDigest": "d3ea21b8678362d42434a3bcd3ec2a70d2a4b79b5b7608f02c565a6a8bba1cbb",
+      "intent": "request-2-intent.json",
+      "receipt": "request-2-receipt.json",
+      "responseId": null,
+      "usage": null
+    },
+    {
+      "number": 3,
+      "requestId": "54de797c-7814-4dd9-a3e6-915f1526f475",
+      "kind": "inference",
+      "requestType": "published_billable_inference",
+      "inputDigest": "e27ee8b0b05bba09b1483579358a8761d3b006b94999c429bfb5d4e8c213d8b8",
+      "intent": "request-3-intent.json",
+      "receipt": "request-3-receipt.json",
+      "responseId": "resp_048ca2f13a03a217016ad258ff842487d286948f58b6766443",
+      "usage": {
+        "input_tokens": 528,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 21,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 549
+      }
+    },
+    {
+      "number": 4,
+      "requestId": "daa42d8a-d7fa-43af-bb0b-9e4cdd019028",
+      "kind": "count",
+      "requestType": "unpriced_control_request",
+      "inputDigest": "b622891c38b680e82143bf49b7135bbef3ab86e46c847e0c61eb331307c9760c",
+      "intent": "request-4-intent.json",
+      "receipt": "request-4-receipt.json",
+      "responseId": null,
+      "usage": null
+    },
+    {
+      "number": 5,
+      "requestId": "5ee0b423-4275-43cb-889c-f5b917dec91e",
+      "kind": "inference",
+      "requestType": "published_billable_inference",
+      "inputDigest": "8b820e9397c1111abe0c6897fcb7832c2d1689a0aeae8a23bee8ccaf70c3d831",
+      "intent": "request-5-intent.json",
+      "receipt": "request-5-receipt.json",
+      "responseId": "resp_048ca2f13a03a217016ad259017b9887d2a1c6f147febf45a3",
+      "usage": {
+        "input_tokens": 633,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 181,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 814
+      }
+    }
+  ],
+  "counts": {
+    "inference": 2,
+    "tokenCount": 2,
+    "modelAvailability": 1,
+    "total": 5
+  },
+  "actualUsage": {
+    "input": 1161,
+    "cachedInput": 0,
+    "output": 202,
+    "total": 1363
+  },
+  "usageLedger": {
+    "attempts": 1,
+    "metrics": {
+      "input": {
+        "value": 1161,
+        "observed": 1161,
+        "unknownAttempts": 0
+      },
+      "cachedInput": {
+        "value": 0,
+        "observed": 0,
+        "unknownAttempts": 0
+      },
+      "output": {
+        "value": 202,
+        "observed": 202,
+        "unknownAttempts": 0
+      },
+      "reasoning": {
+        "value": 0,
+        "observed": 0,
+        "unknownAttempts": 0
+      },
+      "total": {
+        "value": 1363,
+        "observed": 1363,
+        "unknownAttempts": 0
+      }
+    },
+    "money": {
+      "value": 1780,
+      "currency": "USD"
+    },
+    "partial": false
+  },
+  "publishedInferenceMaximumUsd": 0.024576,
+  "calculatedInferenceCostUsd": 0.00177975,
+  "providerReportedCost": "unknown",
+  "completeBilledAmount": "unknown",
+  "controlRequests": {
+    "classification": "unpriced_control_request",
+    "maximum": 3,
+    "tokenCountMaximum": 2,
+    "availabilityMaximum": 1,
+    "separatePublishedFee": false,
+    "contractualZeroFee": false,
+    "includedInInferenceMaximum": false
+  },
+  "filesChanged": [
+    "src/task-id.mjs"
+  ],
+  "patchDigest": "1578faebb72f44891683a11ea8bff8069d6a65ee48fc6ab0b81a1d2d63ef1586",
+  "verification": {
+    "schemaVersion": 1,
+    "run": 2,
+    "artifact": {
+      "path": "runs/1/artifacts/manifest.json",
+      "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+      "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+    },
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "--test",
+      "test/task-id.test.mjs"
+    ],
+    "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+    "cwd": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids",
+    "code": 0,
+    "error": null,
+    "output": "✔ positive decimal IDs, leading zeros and safe integer boundary (0.375417ms)\n✔ reject partial, signed, padded, fractional and non-decimal strings (0.362458ms)\n✔ API accepts strings only (0.044875ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 64.822833\n",
+    "groupClosed": true,
+    "sourceUnchanged": true,
+    "outputDigest": "b6913d85448b79c0e7856450ebc6cc38df7ac148effa3fb57f67f04e6b9bb6c8"
+  },
+  "projection": [
+    "PURPOSE VERIFY · EXECUTOR local-checks · RUN 2",
+    "NEXT ACCEPT · REASON EXPLICIT_SINGLE_FOREGROUND_CANARY",
+    "COST TOTAL UNKNOWN · inference calculation and provider charge are separate",
+    "LANE MANAGED API · READY · MODEL gpt-5.4-mini-2026-03-17 · NO OPAQUE FALLBACK",
+    "ENVELOPE 1 attempt · 2 inference + 2 count requests · 6 tools · 4 reads · 1 patch",
+    "MANAGED USAGE 4 Responses HTTP · 2 inference · 2 tools · 1 reads · 1 patches · 370 result bytes",
+    "BOUND 12288 inference tokens",
+    "PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576",
+    "CONTROL REQUESTS: 3 maximum, no separate published fee · 3 dispatched · contractual zero fee not claimed",
+    "ACTUAL TOKENS 1363 · CALCULATED INFERENCE USD 0.00177975 · PROVIDER COST UNKNOWN",
+    "USAGE TOTAL 1363 · INPUT 1161 · CACHED 0 · OUTPUT 202 · REASONING 0 · ATTEMPTS 1",
+    "USAGE COST USD 1780 micros",
+    "RESULT PATCH VERIFIED · 3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e",
+    "ARTIFACT runs/1/artifacts/manifest.json",
+    "REVIEW runs/2/review.json · 2e8ea256f0aec6f70654ff0b7d7348ae507c3da4e2480ac7807ab781c8e22650",
+    "WORKSPACE /private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids · ref 14868a6e500522986879a11ac0884e2bb4c1c79b · task-owned worktree",
+    "ROUTING implement → managed-openai · minimum-qualified-managed-model"
+  ],
+  "retries": 0,
+  "continuations": 0,
+  "replays": 0,
+  "fallbacks": 0,
+  "deliveryEffects": 0,
+  "fullSuitesRun": 0
+}

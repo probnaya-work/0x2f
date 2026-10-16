@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-16T17:03:56.550Z",
+  "credentialPresent": true,
+  "source": "authorized non-interactive foreground subshell",
+  "credentialFileMetadata": {
+    "regularFile": true,
+    "symlink": false,
+    "ownedByCurrentUser": true,
+    "mode": "0600"
+  },
+  "parentEnvironmentModified": false,
+  "attemptInvocationLimit": 1
+}

@@ -1,0 +1,3 @@
+{"type":"task.created","at":"2026-10-16T17:01:56.139Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-10-16T17:03:57.988Z","taskId":1,"run":1,"provider":"managed-openai","purpose":"implement"}
+{"type":"task.updated","at":"2026-10-16T17:04:04.620Z","taskId":1,"status":"ready","run":2}

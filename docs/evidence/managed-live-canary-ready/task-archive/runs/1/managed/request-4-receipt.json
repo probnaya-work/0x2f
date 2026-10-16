@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "requestId": "daa42d8a-d7fa-43af-bb0b-9e4cdd019028",
+  "kind": "count",
+  "requestType": "unpriced_control_request",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "inputDigest": "b622891c38b680e82143bf49b7135bbef3ab86e46c847e0c61eb331307c9760c",
+  "response": {
+    "object": "response.input_tokens",
+    "input_tokens": 633
+  },
+  "at": "2026-10-16T17:04:01.080Z"
+}

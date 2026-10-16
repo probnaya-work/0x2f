@@ -1,0 +1,17 @@
+{
+  "responseId": "resp_048ca2f13a03a217016ad258ff842487d286948f58b6766443",
+  "usage": {
+    "input_tokens": 528,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 21,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 549
+  },
+  "counterInput": 528,
+  "semantics": "response-delta"
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "run": 1,
+  "attempt": "4aee9858-5002-420c-87e7-12a5fa96e899",
+  "requestId": "b2574af7-35ee-4ac1-829c-46b21168aee5",
+  "number": 1,
+  "kind": "model",
+  "requestType": "unpriced_control_request",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "attemptInferenceReservationUsd": 0.024576,
+  "attemptTotalCostReservationUsd": null,
+  "reservation": null,
+  "remaining": {
+    "responses": 4,
+    "inputTokens": 8192,
+    "outputTokens": 4096,
+    "publishedInferenceUsd": 0.225424,
+    "totalCostUsd": null,
+    "controlRequests": 3
+  },
+  "allowedTools": [
+    "read_task_file",
+    "submit_patch",
+    "request_context_expansion"
+  ],
+  "body": {},
+  "at": "2026-10-16T17:03:56.831Z"
+}

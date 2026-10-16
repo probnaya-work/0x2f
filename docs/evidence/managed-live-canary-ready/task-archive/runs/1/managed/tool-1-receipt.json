@@ -1,0 +1,11 @@
+{
+  "callId": "call_LI2XWm0EtBWE8HCIjqtHo96W",
+  "tool": "read_task_file",
+  "bytes": 370,
+  "sourceDigest": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833",
+  "result": {
+    "type": "function_call_output",
+    "call_id": "call_LI2XWm0EtBWE8HCIjqtHo96W",
+    "output": "{\"file_id\":\"f1\",\"content\":\"// Parse a positive decimal task ID; invalid values return null.\\nexport function parseTaskId(value) {\\n  const parsed = Number.parseInt(value, 10);\\n  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;\\n}\\n\",\"truncated\":false}"
+  }
+}

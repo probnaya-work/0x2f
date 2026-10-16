@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "independentReceiptAndArtifactAudit": true,
+  "attempt": "4aee9858-5002-420c-87e7-12a5fa96e899",
+  "managedAttempts": 1,
+  "requestIds": 5,
+  "inferences": 2,
+  "controls": 3,
+  "totals": {
+    "input": 1161,
+    "cachedInput": 0,
+    "output": 202,
+    "reasoning": 0,
+    "total": 1363
+  },
+  "serializedApiInputBytes": 12282,
+  "actualTools": 2,
+  "actualReads": 1,
+  "actualPatches": 1,
+  "toolResultBytes": 370,
+  "elapsedMs": 8078,
+  "limitsUnchanged": true,
+  "usageMathVerified": true,
+  "verifiedArtifactAndCurrentBytesAgree": true,
+  "archiveFilesCompared": 38,
+  "archiveMatchesSecretScannedOriginals": true,
+  "sourceSecretScanFiles": 91,
+  "credentialFileReadByThisAudit": false,
+  "fixtureParentAndWorktreeHeadUnchanged": true,
+  "resultDeliveryCommits": 0,
+  "retries": 0,
+  "fallbacks": 0
+}

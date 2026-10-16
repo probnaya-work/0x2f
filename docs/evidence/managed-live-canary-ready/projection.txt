@@ -1,0 +1,17 @@
+PURPOSE VERIFY · EXECUTOR local-checks · RUN 2
+NEXT ACCEPT · REASON EXPLICIT_SINGLE_FOREGROUND_CANARY
+COST TOTAL UNKNOWN · inference calculation and provider charge are separate
+LANE MANAGED API · READY · MODEL gpt-5.4-mini-2026-03-17 · NO OPAQUE FALLBACK
+ENVELOPE 1 attempt · 2 inference + 2 count requests · 6 tools · 4 reads · 1 patch
+MANAGED USAGE 4 Responses HTTP · 2 inference · 2 tools · 1 reads · 1 patches · 370 result bytes
+BOUND 12288 inference tokens
+PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576
+CONTROL REQUESTS: 3 maximum, no separate published fee · 3 dispatched · contractual zero fee not claimed
+ACTUAL TOKENS 1363 · CALCULATED INFERENCE USD 0.00177975 · PROVIDER COST UNKNOWN
+USAGE TOTAL 1363 · INPUT 1161 · CACHED 0 · OUTPUT 202 · REASONING 0 · ATTEMPTS 1
+USAGE COST USD 1780 micros
+RESULT PATCH VERIFIED · 3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e
+ARTIFACT runs/1/artifacts/manifest.json
+REVIEW runs/2/review.json · 2e8ea256f0aec6f70654ff0b7d7348ae507c3da4e2480ac7807ab781c8e22650
+WORKSPACE /private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids · ref 14868a6e500522986879a11ac0884e2bb4c1c79b · task-owned worktree
+ROUTING implement → managed-openai · minimum-qualified-managed-model

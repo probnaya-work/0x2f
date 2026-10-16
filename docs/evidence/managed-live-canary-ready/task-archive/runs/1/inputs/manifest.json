@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "run": 1,
+  "files": {
+    ".gitignore": {
+      "bytes": 7,
+      "sha256": "035be897b00b2e4df85234618e91ae2c91213ba53b2bf492fc890efec505f2ae"
+    },
+    "src/task-id.mjs": {
+      "bytes": 218,
+      "sha256": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833"
+    },
+    "test/task-id.test.mjs": {
+      "bytes": 705,
+      "sha256": "3d0b21aa884ed80d640c487b7268921f82d52dd2ad6d30170b39ecda6172385f"
+    }
+  },
+  "digest": "d204efb780355236debda803f0089a552079a283a10c4170758e646cd5b1b4c3"
+}

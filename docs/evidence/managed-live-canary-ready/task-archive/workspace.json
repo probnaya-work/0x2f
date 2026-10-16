@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "slug": "001-reject-partial-decimal-task-ids",
+  "repository": "/private/tmp/0x2f-managed-live-YKqcyw/repo",
+  "commonDir": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.git",
+  "requestedRef": "HEAD",
+  "commit": "14868a6e500522986879a11ac0884e2bb4c1c79b",
+  "path": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids",
+  "identity": "1ede22aa8af75296c282eca163457e0f481d9d1405cebf5d15f21f8977eaa7db",
+  "state": "ready"
+}

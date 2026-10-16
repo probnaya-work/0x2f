@@ -1,0 +1,18 @@
+{
+  "callId": "call_icBCZn32DKjDDqff9BoNSWcf",
+  "tool": "submit_patch",
+  "edits": [
+    {
+      "file": {
+        "id": "f1",
+        "path": "src/task-id.mjs",
+        "bytes": 218,
+        "sha256": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833",
+        "writable": true
+      },
+      "before": "6172294a71778030876cfa2ecdef03a0ff1f4a9e49bf3880c68d0fdade965833",
+      "after": "c920a08c115b2ac35591b30470fe9f4aed6e642294741ef6e87060c1a9a0404d",
+      "replacement": "// Parse a positive decimal task ID; invalid values return null.\nexport function parseTaskId(value) {\n  if (typeof value !== 'string' || value.length === 0 || !/^[0-9]+$/.test(value)) {\n    return null;\n  }\n\n  const parsed = Number(value);\n  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;\n}\n"
+    }
+  ]
+}

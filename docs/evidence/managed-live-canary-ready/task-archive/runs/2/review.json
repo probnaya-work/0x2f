@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "run": 2,
+  "artifact": {
+    "path": "runs/1/artifacts/manifest.json",
+    "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+    "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+  },
+  "verification": {
+    "path": "runs/2/verification.json",
+    "digest": "df25bc20ad40f7e45a3787601a62b3bcad95db10fcb3dbf6d750da7a1eb3aa6d"
+  },
+  "mode": "deterministic-policy",
+  "findings": [],
+  "reason": "Small scope; verifier outside model loop; no independent-review trigger."
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "requestId": "b2574af7-35ee-4ac1-829c-46b21168aee5",
+  "kind": "model",
+  "requestType": "unpriced_control_request",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "response": {
+    "id": "gpt-5.4-mini-2026-03-17",
+    "object": "model",
+    "created": 1773451076,
+    "owned_by": "system",
+    "shutdown_date": null
+  },
+  "at": "2026-10-16T17:03:57.819Z"
+}

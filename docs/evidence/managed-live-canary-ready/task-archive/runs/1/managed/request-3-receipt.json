@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "requestId": "54de797c-7814-4dd9-a3e6-915f1526f475",
+  "kind": "inference",
+  "requestType": "published_billable_inference",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "inputDigest": "e27ee8b0b05bba09b1483579358a8761d3b006b94999c429bfb5d4e8c213d8b8",
+  "response": {
+    "id": "resp_048ca2f13a03a217016ad258ff842487d286948f58b6766443",
+    "object": "response",
+    "created_at": 1792170239,
+    "status": "completed",
+    "access_programs": null,
+    "background": false,
+    "billing": {
+      "payer": "developer"
+    },
+    "completed_at": 1792170240,
+    "error": null,
+    "frequency_penalty": 0,
+    "incomplete_details": null,
+    "instructions": "Make only the requested small patch using the approved logical file IDs. Read necessary files in parallel, then submit_patch. At most two inference responses. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. If context is insufficient, request_context_expansion. Return a short result.",
+    "max_output_tokens": 2048,
+    "max_tool_calls": null,
+    "model": "gpt-5.4-mini-2026-03-17",
+    "moderation": null,
+    "output": [
+      {
+        "id": "fc_048ca2f13a03a217016ad2590044a087d285f5fb7057b3518f",
+        "type": "function_call",
+        "status": "completed",
+        "arguments": "{\"file_id\":\"f1\"}",
+        "call_id": "call_LI2XWm0EtBWE8HCIjqtHo96W",
+        "name": "read_task_file"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "presence_penalty": 0,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "prompt_cache_retention": "24h",
+    "reasoning": {
+      "context": "current_turn",
+      "effort": "none",
+      "mode": "standard",
+      "summary": null
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": false,
+    "temperature": 1,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tool_usage": {
+      "image_gen": {
+        "input_tokens": 0,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "output_tokens": 0,
+        "output_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 0
+        },
+        "total_tokens": 0
+      },
+      "web_search": {
+        "num_requests": 0
+      }
+    },
+    "tools": [
+      {
+        "type": "function",
+        "description": "Read only an approved logical file ID. No paths or commands.",
+        "name": "read_task_file",
+        "output_schema": null,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "file_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "file_id"
+          ],
+          "additionalProperties": false
+        },
+        "strict": true
+      },
+      {
+        "type": "function",
+        "description": "Submit one scoped replacement patch, then stop. Each old_text must match exactly once.",
+        "name": "submit_patch",
+        "output_schema": null,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "edits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file_id": {
+                    "type": "string"
+                  },
+                  "old_text": {
+                    "type": "string"
+                  },
+                  "new_text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file_id",
+                  "old_text",
+                  "new_text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "edits"
+          ],
+          "additionalProperties": false
+        },
+        "strict": true
+      },
+      {
+        "type": "function",
+        "description": "Stop for a user decision. No automatic context expansion or retry.",
+        "name": "request_context_expansion",
+        "output_schema": null,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "strict": true
+      }
+    ],
+    "top_logprobs": 0,
+    "top_p": 0.98,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 528,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 21,
+      "output_tokens_details": {
+        "reasoning_tokens": 0
+      },
+      "total_tokens": 549
+    },
+    "user": null,
+    "metadata": {}
+  },
+  "at": "2026-10-16T17:04:00.431Z"
+}

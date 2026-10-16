@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "developmentBase": "a9d81716f41bb0e7846b81e3407a2a79f11a691e",
+  "baselineBefore": {
+    "path": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.single-live-before.json",
+    "sha256": "4bbaa23a636620f35f904d36ecd53c38863b5ba8d0ba029160098c3d891f5fed",
+    "bytes": 183827
+  },
+  "baselineAfter": {
+    "path": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.single-live-after.json",
+    "sha256": "d11898c1cebe93451bb83d0736e6257b542183551f01458f90974952d88cd3bc",
+    "bytes": 183827
+  },
+  "mainHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "mainHeadStatusTrackedUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "stableUnchanged": true,
+  "task2Unchanged": true,
+  "task2Historical": {
+    "baselineCount": 105,
+    "actualCount": 105,
+    "missing": [],
+    "extra": [],
+    "changed": []
+  },
+  "task3Unchanged": true,
+  "task3Files": 24,
+  "protectedPackagesMatchBaseline": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "launchAgentFileAndBindingUnchanged": true,
+  "schedulerInstallationUnchanged": true,
+  "editorialSchedulesUnchanged": true,
+  "changedWorkFiles": [],
+  "extraWorkFiles": [],
+  "missingWorkFiles": [],
+  "schedulerHealthSuccess": true,
+  "naturalSchedulerRuns": {
+    "before": "135",
+    "after": "135",
+    "lastExit": "0"
+  },
+  "productionActivated": false,
+  "schedulerActionsPerformed": false,
+  "launchAgentActionsPerformed": false,
+  "previousCredentialFailureCommitPreserved": "a9d81716f41bb0e7846b81e3407a2a79f11a691e",
+  "existingDeliveryReceipt": {
+    "digest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+    "unchanged": true,
+    "newDeliveryEffects": 0
+  }
+}

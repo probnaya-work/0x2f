@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "taskId": 1,
+  "run": 1,
+  "boundary": "4aee9858-5002-420c-87e7-12a5fa96e899",
+  "attempt": 1,
+  "harness": "managed-responses-v1",
+  "provider": "managed-openai",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "routingReason": "minimum-qualified-managed-model",
+  "continuationReason": null,
+  "outcome": "ready",
+  "counterScope": "attempt",
+  "counterId": "4aee9858-5002-420c-87e7-12a5fa96e899",
+  "complete": true,
+  "tokens": {
+    "values": {
+      "input": 1161,
+      "cachedInput": 0,
+      "output": 202,
+      "reasoning": 0,
+      "total": 1363
+    },
+    "semantics": "delta",
+    "compatible": true,
+    "acceptedEvents": 2
+  },
+  "metricSources": {
+    "input": "OpenAI Responses usage; immutable managed request receipts",
+    "cachedInput": "OpenAI Responses usage; immutable managed request receipts",
+    "output": "OpenAI Responses usage; immutable managed request receipts",
+    "reasoning": "OpenAI Responses usage; immutable managed request receipts",
+    "total": "OpenAI Responses usage; immutable managed request receipts"
+  },
+  "sourceEvidence": [
+    {
+      "path": "runs/1/managed/usage-1.json",
+      "responseId": "resp_048ca2f13a03a217016ad258ff842487d286948f58b6766443"
+    },
+    {
+      "path": "runs/1/managed/usage-2.json",
+      "responseId": "resp_048ca2f13a03a217016ad259017b9887d2a1c6f147febf45a3"
+    }
+  ],
+  "money": {
+    "value": 1780,
+    "currency": "USD",
+    "unit": "micros",
+    "source": "Calculated inference-only cost from versioned prices; other API fees unknown"
+  },
+  "contextManifest": {
+    "totalBytes": 1179,
+    "parts": [
+      {
+        "name": "task-packet",
+        "bytes": 1179,
+        "reason": "current approved small task"
+      }
+    ]
+  },
+  "limits": {
+    "controller": {
+      "version": "engineering-economics-v1",
+      "classification": "small",
+      "signals": {
+        "writeFiles": 1,
+        "relevantFiles": 2,
+        "directories": 1,
+        "sensitive": false
+      },
+      "hard": {
+        "inputBytes": 8192,
+        "attempts": 1,
+        "driverDeadlineMs": 120000
+      },
+      "soft": {
+        "totalTokens": 8000,
+        "toolOutputBytes": 4096
+      },
+      "unknown": [
+        "providerMoney",
+        "internalCalls",
+        "harnessInjectedContext",
+        "agentToolOutputLimit",
+        "processTreeTermination"
+      ]
+    },
+    "qualifiedMaximum": {
+      "tokens": 12288
+    },
+    "providerTotalTokenCeiling": "hard-qualified"
+  },
+  "at": null
+}

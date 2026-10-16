@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "task": {
+    "id": 1,
+    "brief": "Fix parseTaskId in src/task-id.mjs so it accepts only strings consisting entirely of ASCII decimal digits whose numeric value is a positive safe integer. Preserve leading-zero IDs: \"014\" must return 14. Invalid strings (partial suffixes, whitespace, signs, fractions, exponent/hex notation, empty or zero) and non-string inputs must return null. Keep the named export and API. Modify only src/task-id.mjs; do not change the verifier, run commands, commit or deliver. Use the existing approved logical-file tools and submit one small patch."
+  },
+  "model": "gpt-5.4-mini-2026-03-17",
+  "hardLimits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 2,
+    "countRequests": 2,
+    "responsesRequests": 4,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "pricingPolicy": {
+    "version": "managed-foreground-pricing-v2",
+    "mode": "foreground",
+    "foregroundCanary": true,
+    "publishedBillableInferenceMaximumUsd": 0.024576,
+    "controlRequests": {
+      "classification": "unpriced_control_request",
+      "maximum": 3,
+      "tokenCountMaximum": 2,
+      "availabilityMaximum": 1,
+      "separatePublishedFee": false,
+      "contractualZeroFee": false,
+      "includedInInferenceMaximum": false
+    },
+    "totalBilledAmount": "unknown",
+    "retry": false,
+    "opaqueFallback": false
+  },
+  "pricingSource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+  "controlPricingSource": "https://developers.openai.com/api/docs/pricing",
+  "pricingObservedAt": "2026-10-16T15:54:35Z",
+  "notice": "Control requests: no separate published fee; contractual zero fee and complete billed amount are not claimed."
+}

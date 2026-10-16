@@ -1,0 +1,428 @@
+{
+  "id": 1,
+  "slug": "001-reject-partial-decimal-task-ids",
+  "title": "Reject partial decimal task IDs",
+  "brief": "Fix parseTaskId in src/task-id.mjs so it accepts only strings consisting entirely of ASCII decimal digits whose numeric value is a positive safe integer. Preserve leading-zero IDs: \"014\" must return 14. Invalid strings (partial suffixes, whitespace, signs, fractions, exponent/hex notation, empty or zero) and non-string inputs must return null. Keep the named export and API. Modify only src/task-id.mjs; do not change the verifier, run commands, commit or deliver. Use the existing approved logical-file tools and submit one small patch.",
+  "engineering": {
+    "schemaVersion": 1,
+    "revision": 28,
+    "config": {
+      "schemaVersion": 1,
+      "enabled": true,
+      "playbook": true,
+      "currency": "USD",
+      "providers": [
+        "managed-openai"
+      ],
+      "files": [
+        "src/task-id.mjs",
+        "test/task-id.test.mjs"
+      ],
+      "writePaths": [
+        "src/task-id.mjs"
+      ],
+      "check": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "--test",
+        "test/task-id.test.mjs"
+      ],
+      "limits": {
+        "moneyMicros": 250000,
+        "tokens": 12288,
+        "modelCalls": 2,
+        "providerCalls": 5,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "investigationAttempts": 1,
+        "reviewCycles": 0,
+        "agentRuns": 1
+      },
+      "workspace": {
+        "repository": "/private/tmp/0x2f-managed-live-YKqcyw/repo",
+        "ref": "HEAD"
+      },
+      "policy": "engineering-continuity-v1",
+      "checkDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+      "reviewCheckPins": {}
+    },
+    "configDigest": "4dd39106bd722aa8b2f134d8f28466fe39196f5d6682a5d3b880daf6745dbc13",
+    "driver": {
+      "token": "104bd45c-b1d5-446c-a750-136c1ae0e7e3",
+      "pid": 32678,
+      "state": "completed"
+    },
+    "decisions": [
+      {
+        "purpose": "implement",
+        "provider": "managed-openai",
+        "model": "gpt-5.4-mini-2026-03-17",
+        "reason": "minimum-qualified-managed-model",
+        "lane": "managed-api",
+        "opaqueFallback": false
+      }
+    ],
+    "budget": {
+      "limits": {
+        "moneyMicros": 250000,
+        "tokens": 12288,
+        "modelCalls": 2,
+        "providerCalls": 5,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "investigationAttempts": 1,
+        "reviewCycles": 0,
+        "agentRuns": 1
+      },
+      "confirmed": {
+        "moneyMicros": 0,
+        "tokens": 0,
+        "modelCalls": 0,
+        "providerCalls": 0
+      },
+      "reservations": [],
+      "uncertain": []
+    },
+    "verification": {
+      "schemaVersion": 1,
+      "run": 2,
+      "artifact": {
+        "path": "runs/1/artifacts/manifest.json",
+        "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+        "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+      },
+      "argv": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "--test",
+        "test/task-id.test.mjs"
+      ],
+      "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+      "cwd": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids",
+      "code": 0,
+      "error": null,
+      "output": "✔ positive decimal IDs, leading zeros and safe integer boundary (0.375417ms)\n✔ reject partial, signed, padded, fractional and non-decimal strings (0.362458ms)\n✔ API accepts strings only (0.044875ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 64.822833\n",
+      "groupClosed": true,
+      "sourceUnchanged": true,
+      "outputDigest": "b6913d85448b79c0e7856450ebc6cc38df7ac148effa3fb57f67f04e6b9bb6c8"
+    },
+    "next": "accept",
+    "playbook": {
+      "nextPurpose": "implement",
+      "reason": "explicit_single_foreground_canary",
+      "agentRuns": 0,
+      "implementationAttempts": 0,
+      "investigationAttempts": 0,
+      "reviewCycles": 0,
+      "dispatch": null,
+      "review": {
+        "path": "runs/2/review.json",
+        "digest": "2e8ea256f0aec6f70654ff0b7d7348ae507c3da4e2480ac7807ab781c8e22650"
+      }
+    },
+    "workspace": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "slug": "001-reject-partial-decimal-task-ids",
+      "repository": "/private/tmp/0x2f-managed-live-YKqcyw/repo",
+      "commonDir": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.git",
+      "requestedRef": "HEAD",
+      "commit": "14868a6e500522986879a11ac0884e2bb4c1c79b",
+      "path": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids",
+      "identity": "1ede22aa8af75296c282eca163457e0f481d9d1405cebf5d15f21f8977eaa7db",
+      "state": "ready"
+    },
+    "economics": {
+      "policy": {
+        "version": "engineering-economics-v1",
+        "classification": "small",
+        "signals": {
+          "writeFiles": 1,
+          "relevantFiles": 2,
+          "directories": 1,
+          "sensitive": false
+        },
+        "hard": {
+          "inputBytes": 8192,
+          "attempts": 1,
+          "driverDeadlineMs": 120000
+        },
+        "soft": {
+          "totalTokens": 8000,
+          "toolOutputBytes": 4096
+        },
+        "unknown": [
+          "providerMoney",
+          "internalCalls",
+          "harnessInjectedContext",
+          "agentToolOutputLimit",
+          "processTreeTermination"
+        ]
+      },
+      "attempts": [
+        {
+          "run": 1,
+          "path": "runs/1/usage.json",
+          "digest": "2a0b9846df4709444450c282a79a7a23dcc8a28a4826948d63cdb63c75a1e9b0"
+        }
+      ],
+      "aggregate": {
+        "attempts": 1,
+        "metrics": {
+          "input": {
+            "value": 1161,
+            "observed": 1161,
+            "unknownAttempts": 0
+          },
+          "cachedInput": {
+            "value": 0,
+            "observed": 0,
+            "unknownAttempts": 0
+          },
+          "output": {
+            "value": 202,
+            "observed": 202,
+            "unknownAttempts": 0
+          },
+          "reasoning": {
+            "value": 0,
+            "observed": 0,
+            "unknownAttempts": 0
+          },
+          "total": {
+            "value": 1363,
+            "observed": 1363,
+            "unknownAttempts": 0
+          }
+        },
+        "money": {
+          "value": 1780,
+          "currency": "USD"
+        },
+        "partial": false
+      },
+      "aggregateRef": {
+        "path": "usage/task-after-1.json",
+        "digest": "02604c1c0b18f841ec8898e446734baa7268d37f3fe9e299f2fadf2b5b37ecc2"
+      }
+    },
+    "managed": {
+      "lane": "managed-api",
+      "state": "READY",
+      "limits": {
+        "attempts": 1,
+        "packetBytes": 8192,
+        "files": 4,
+        "sourceBytes": 65536,
+        "reads": 4,
+        "patches": 1,
+        "tools": 6,
+        "toolResultBytes": 24576,
+        "readResultBytes": 4096,
+        "serializedInputBytes": 32768,
+        "inferenceRequests": 2,
+        "countRequests": 2,
+        "responsesRequests": 4,
+        "inputTokens": 8192,
+        "inputTokensPerRequest": 4096,
+        "outputTokens": 4096,
+        "outputTokensPerRequest": 2048,
+        "deadlineMs": 120000,
+        "costUsd": 0.25
+      },
+      "attempt": "4aee9858-5002-420c-87e7-12a5fa96e899",
+      "requests": 4,
+      "inferences": 2,
+      "tools": 2,
+      "reads": 1,
+      "patches": 1,
+      "resultBytes": 370,
+      "inputBytes": 12282,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "predicted": {
+        "currency": "USD",
+        "inferenceUpperUsd": 0.024576,
+        "totalUpperUsd": null,
+        "controlRequests": {
+          "classification": "unpriced_control_request",
+          "maximum": 3,
+          "tokenCountMaximum": 2,
+          "availabilityMaximum": 1,
+          "separatePublishedFee": false,
+          "contractualZeroFee": false,
+          "includedInInferenceMaximum": false
+        },
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "totalInferenceTokens": 12288,
+        "pricing": {
+          "currency": "USD",
+          "perMillion": {
+            "input": 0.75,
+            "cachedInput": 0.075,
+            "output": 4.5
+          },
+          "observedAt": "2026-10-16T15:54:35Z",
+          "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+          "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+          "controlRequestPolicy": "unpriced_control_request"
+        }
+      },
+      "inputTokens": 1161,
+      "inputReserved": 1161,
+      "outputTokens": 202,
+      "outputReserved": 4096,
+      "counts": 2,
+      "modelQueries": 1,
+      "pricingPolicy": {
+        "version": "managed-foreground-pricing-v2",
+        "mode": "foreground",
+        "foregroundCanary": true,
+        "publishedBillableInferenceMaximumUsd": 0.024576,
+        "controlRequests": {
+          "classification": "unpriced_control_request",
+          "maximum": 3,
+          "tokenCountMaximum": 2,
+          "availabilityMaximum": 1,
+          "separatePublishedFee": false,
+          "contractualZeroFee": false,
+          "includedInInferenceMaximum": false
+        },
+        "totalBilledAmount": "unknown",
+        "retry": false,
+        "opaqueFallback": false
+      },
+      "pendingRequest": null,
+      "baseline": {
+        "path": "runs/1/inputs/manifest.json",
+        "digest": "4855a12b6e6f3c66f15a423e46ddca30474a84d8d203330ae86854be5bf020bb",
+        "contentDigest": "d204efb780355236debda803f0089a552079a283a10c4170758e646cd5b1b4c3"
+      },
+      "pendingInputTokens": 0,
+      "actualUsage": {
+        "input": 1161,
+        "cachedInput": 0,
+        "output": 202,
+        "total": 1363
+      },
+      "calculatedInferenceCostUsd": 0.00177975,
+      "providerReportedCost": "unknown",
+      "controlCost": "no separate published fee; actual billed amount unknown",
+      "artifact": {
+        "path": "runs/1/artifacts/manifest.json",
+        "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+        "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+      }
+    },
+    "review": {
+      "path": "runs/2/review.json",
+      "digest": "2e8ea256f0aec6f70654ff0b7d7348ae507c3da4e2480ac7807ab781c8e22650"
+    }
+  },
+  "status": "ready",
+  "execution": {
+    "provider": "managed-openai",
+    "launchToken": "104bd45c-b1d5-446c-a750-136c1ae0e7e3",
+    "node": "local",
+    "workspace": "local"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "managed-openai",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-16T17:01:55.989Z",
+      "requestedProvider": "auto",
+      "outcome": "ready",
+      "attempts": 1,
+      "purpose": "implement",
+      "executor": {
+        "kind": "managed",
+        "harness": "0x2f-responses-v1",
+        "requestedModel": "gpt-5.4-mini-2026-03-17",
+        "observedModel": "gpt-5.4-mini-2026-03-17"
+      },
+      "usage": {
+        "confirmed": null,
+        "estimated": null,
+        "uncertainty": "not_started"
+      },
+      "permissions": {
+        "tools": [
+          "read_task_file",
+          "submit_patch",
+          "request_context_expansion"
+        ],
+        "writePaths": [
+          "src/task-id.mjs"
+        ],
+        "externalActions": false
+      },
+      "usageLedger": {
+        "run": 1,
+        "path": "runs/1/usage.json",
+        "digest": "2a0b9846df4709444450c282a79a7a23dcc8a28a4826948d63cdb63c75a1e9b0"
+      },
+      "completedAt": "2026-10-16T17:04:04.135Z",
+      "artifact": {
+        "path": "runs/1/artifacts/manifest.json",
+        "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+        "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+      },
+      "input": {
+        "path": "runs/1/inputs/manifest.json",
+        "digest": "4855a12b6e6f3c66f15a423e46ddca30474a84d8d203330ae86854be5bf020bb",
+        "contentDigest": "d204efb780355236debda803f0089a552079a283a10c4170758e646cd5b1b4c3"
+      }
+    },
+    {
+      "run": 2,
+      "provider": "local-checks",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-16T17:04:04.179Z",
+      "requestedProvider": "auto",
+      "outcome": "ready",
+      "attempts": 1,
+      "purpose": "verify",
+      "executor": {
+        "kind": "local"
+      },
+      "usage": {
+        "confirmed": null,
+        "estimated": null,
+        "uncertainty": "not_started"
+      },
+      "input": {
+        "path": "runs/1/artifacts/manifest.json",
+        "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+        "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+      },
+      "completedAt": "2026-10-16T17:04:04.556Z",
+      "verification": {
+        "schemaVersion": 1,
+        "run": 2,
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "86106e7cbc5f8d55dac08d8d5d45af7a912c1d120990fe744b057120e58b0a1c",
+          "contentDigest": "3f1b248d57082fd5c7d4c2cf0af479e9bddefa807689dd9228bf97397dada72e"
+        },
+        "argv": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/task-id.test.mjs"
+        ],
+        "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+        "cwd": "/private/tmp/0x2f-managed-live-YKqcyw/repo/.work/worktrees/001-reject-partial-decimal-task-ids",
+        "code": 0,
+        "error": null,
+        "output": "✔ positive decimal IDs, leading zeros and safe integer boundary (0.375417ms)\n✔ reject partial, signed, padded, fractional and non-decimal strings (0.362458ms)\n✔ API accepts strings only (0.044875ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 64.822833\n",
+        "groupClosed": true,
+        "sourceUnchanged": true,
+        "outputDigest": "b6913d85448b79c0e7856450ebc6cc38df7ac148effa3fb57f67f04e6b9bb6c8"
+      }
+    }
+  ],
+  "createdAt": "2026-10-16T17:01:56.075Z",
+  "updatedAt": "2026-10-16T17:04:04.608Z",
+  "pid": 32678
+}
