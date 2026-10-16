@@ -7,13 +7,18 @@ export function engineeringLines(task) {
   const e = task.engineering;
   if (e.delivery?.reconciliation) return [`TASK ${String(task.id).padStart(3,'0')}`, 'ACTION LOCAL COMMIT', `STATE ${e.delivery.reconciliation.result === 'UNCERTAIN' ? 'UNCERTAIN' : 'RECONCILED'}`, 'RECONCILE READ ONLY', `RESULT ${e.delivery.reconciliation.result.replaceAll('_',' ')}`, `COMMIT ${e.delivery.reconciliation.commit ?? '—'}`, `REACHABLE ${e.delivery.reconciliation.reachableFromHead === null ? 'UNKNOWN' : e.delivery.reconciliation.reachableFromHead ? 'YES' : 'NO'} · observed ${e.delivery.reconciliation.at}`, `NEXT ${e.delivery.reconciliation.result === 'APPLIED' ? 'READY' : 'NEEDS YOU'}`, ...e.delivery.reconciliation.reasons.map(r=>`EVIDENCE ${r}`)];
   const b = e.budget;
+  const economics=e.economics,usage=economics?.aggregate;
+  const metric=k=>usage?.metrics[k]?.value??'?';
   const reason = task.blockedOn?.code ?? e.playbook?.reason ?? e.decisions.at(-1)?.reason;
   const review = e.playbook?.review ?? e.review;
-  const unknown = b.uncertain.length || b.reservations.some(r => Object.values(r.maximum ?? {}).some(v => v === null));
+  const unknown = Boolean(economics?.policy&&!usage)||usage?.money.value===null||b.uncertain.length || b.reservations.some(r => Object.values(r.maximum ?? {}).some(v => v === null));
   return [
     `PURPOSE ${(run?.purpose ?? 'unknown').toUpperCase()} · EXECUTOR ${run?.provider ?? 'unknown'} · RUN ${run?.run ?? 1}`,
     `NEXT ${e.next.toUpperCase()}${reason ? ' · REASON ' + reason.toUpperCase() : ''}`,
     `COST ${unknown ? 'UNKNOWN · reservation retained' : 'USD ' + (b.confirmed.moneyMicros / 1000000).toFixed(6) + ' confirmed'} · ${b.reservations.length} reserved`,
+    ...(economics?.policy&&!usage?['USAGE NOT DISPATCHED · PROVIDER ATTEMPTS 0 · COST UNKNOWN']:[]),
+    ...(usage?[`USAGE ${usage.partial?'PARTIAL ':''}TOTAL ${metric('total')} · INPUT ${metric('input')} · CACHED ${metric('cachedInput')} · OUTPUT ${metric('output')} · REASONING ${metric('reasoning')} · ATTEMPTS ${usage.attempts}`,`USAGE COST ${usage.money.value===null?'UNKNOWN':usage.money.currency+' '+usage.money.value+' micros'}`]:[]),
+    ...(economics?.policy?[`AUTO ${economics.policy.classification.toUpperCase()} · INPUT ≤${economics.policy.hard.inputBytes} bytes hard · TOKENS ${economics.policy.soft.totalTokens} soft · ${task.blockedOn?.code??'bounded'}`]:[]),
     ...(e.verification ? [`RESULT ${e.verification.code === 0 && !e.verification.error && e.verification.sourceUnchanged ? e.outcome?.kind === 'no_change' ? 'NO CHANGE REQUIRED' : 'PATCH VERIFIED' : 'CHECK FAILED'} · ${e.verification.artifact.contentDigest}`, `ARTIFACT ${e.verification.artifact.path}`] : []),
     ...(review ? [`REVIEW ${review.path} · ${review.digest}`] : []),
     ...task.runs.filter(r => r.review?.findings?.length).flatMap(r => r.review.findings.map(f => `FINDING ${f.severity.toUpperCase()} · ${f.confirmed ? 'CONFIRMED' : 'NEEDS DECISION'} · ${f.message}`)),

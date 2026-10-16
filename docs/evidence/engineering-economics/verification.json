@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "targetedBeforeFull": {
+    "tests": 85,
+    "passed": 85,
+    "failures": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-cost-targeted-final3.log",
+      "sha256": "3ef4639cc1ae456d7436323378b141636b7529885da761fada80b76266339e27",
+      "bytes": 7864
+    }
+  },
+  "ledgerInterruptedExecutionChecks": {
+    "tests": 20,
+    "passed": 20,
+    "failures": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-cost-targeted-ledger.log",
+      "sha256": "5078ed181e1857efff364b21d937b1e49ef35d2957b212bf9ff72b973ec49a12",
+      "bytes": 2076
+    }
+  },
+  "fullSuite": {
+    "command": "OX2F_NATIVE_LAUNCHD=0 npm test",
+    "runs": 1,
+    "exitCode": 0,
+    "tests": 915,
+    "passed": 796,
+    "skippedNative": 119,
+    "failures": 0,
+    "durationMs": 85898.318042,
+    "log": {
+      "path": "/private/tmp/0x2f-cost-full-suite.log",
+      "sha256": "6b9371513cc74c3784a36696413e5ba77ae1f955de178a1acbafae110bfd85a8",
+      "bytes": 84936
+    },
+    "scope": "Implementation before final post-call READY guard; final narrow delta verified separately below"
+  },
+  "finalBoundaryChecks": {
+    "command": "node --test test/engineering-economics.test.mjs test/engineering.test.mjs test/engineering-playbook.test.mjs",
+    "tests": 50,
+    "passed": 50,
+    "failures": 0,
+    "newEconomicsRegressions": 22,
+    "log": {
+      "path": "/private/tmp/0x2f-cost-final-boundary.log",
+      "sha256": "7f3d150fc7f65bbe5645b6e5404ad80659dcb26b94c14a0bb255226e0228fd3a",
+      "bytes": 4915
+    },
+    "changeAfterFullSuite": "Block READY when completed attempt reports unknown/partial tokens or exceeds economic token target; both drivers covered. Full suite intentionally not repeated."
+  },
+  "syntax": {
+    "javascriptFiles": 199,
+    "pythonFiles": 7,
+    "exitCodesChecked": true,
+    "failures": 0,
+    "npmRunCheckExit": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-cost-final-syntax.log",
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+      "bytes": 274
+    }
+  },
+  "newProviderAttempts": 0,
+  "realSmoke": "NOT RUN: installed Codex has no qualified economical total-token ceiling or sufficient economic tier",
+  "fixtureQualification": "offline only; does not qualify native harness",
+  "productionActivated": false,
+  "externalActions": 0,
+  "rollback": "Separate revert of this development commit; retain immutable usage archives and existing receipts.",
+  "codeFiles": {
+    "src/core/engineering-economics.mjs": "43e5baedd3e80b42bfba19f5df452282fc5ea1765162b5097c2050894a0e4c87",
+    "src/providers/codex-usage.mjs": "baeb3c6b2b80c7425de5d7f25547abb36d4440140fc59c818bc6fc2f0e9969c1",
+    "src/core/engineering.mjs": "8bad1ad3d1c6c636df0bdda1d4599d9905135d86f1bf1dd945489485b2fe5d3c",
+    "src/core/engineering-playbook.mjs": "717cc109b57667d82bfc844eb1e4e7ddfd2e7b784ffa44bcaca6d5468a03810b",
+    "src/core/engineering-handoff.mjs": "82e7623a0e15d8f138add8a5df4b2c85f5fb132e2a968903ebace96871cbf2a2",
+    "src/core/engineering-foreground.mjs": "b991218f817d1f951f2cee8cbd4dde8f6b97bc1718912c17f2135afd8379d952",
+    "src/web/workflow.mjs": "e23046d943822fdb1057b25e3f4cab63d7f5ae308eefb7e4321fd029dcc33804",
+    "test/engineering-economics.test.mjs": "43df9c2d7062d50ddfd9490f05fb63583592c54893d281ab2b855ee83b118a21"
+  },
+  "cleanup": {
+    "playbookFixtureDirectoriesRemaining": 0,
+    "preexistingDemoDirectoryRetained": "/private/tmp/0x2f-playbook-demo-EdFEJp",
+    "originalCanaryRetained": true
+  }
+}

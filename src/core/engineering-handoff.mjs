@@ -58,16 +58,53 @@ export async function createHandoff(store, task, { run, purpose, source, artifac
     ...(purpose === 'verify' ? { check: task.engineering.config.check, claimedOutcome: 'Check the exact saved artifact.' } : {}),
     ...(purpose === 'review' ? { freshContext: true, questions, permittedChecks: Object.keys(task.engineering.config.reviewChecks ?? {}), outputContract: { review: { findings: [{ severity: 'low|medium|high|critical', message: 'concrete defect', evidence: { path: 'affected path', sha256: 'exact artifact file hash', artifactDigest: 'exact artifact content digest' }, checkId: 'preapproved reproduction check, if available' }] } }, instruction: 'Review only the approved changes and receipts. Return JSON matching outputContract. Do not implement or change files.' } : {})
   };
+  let auditRefs;
+  if(task.engineering.economics?.policy) {
+    delete refs.original;
+    auditRefs=structuredClone(refs);
+    const lean={};
+    for(const [key,ref] of Object.entries(refs)) {
+      const reason=key==='source'?'current approved inputs':key==='priorFailure'?'observable predecessor failure':key==='baseline'?'exact review comparison':key==='artifact'?'verify or correct exact artifact':'required '+purpose+' evidence';
+      if(ref.manifest) {
+        const manifest=await store.readJson(path.join(store.taskDir(task.slug),ref.path));
+        lean[key]={reason,contentDigest:ref.contentDigest,files:(ref.files??[]).filter(p=>manifest.files[p]).map(p=>({path:p,...manifest.files[p],snapshotPath:path.join(path.dirname(ref.path),'files',p)}))};
+      } else {
+        lean[key]={reason,archive:{path:ref.path,digest:ref.digest}};
+        if(key==='priorFailure')lean[key].summary=(await store.readText(path.join(store.taskDir(task.slug),ref.path),'')).slice(-512);
+      }
+    }
+    content.schemaVersion=2;content.refs=lean;content.evidenceDigest=handoffHash(auditRefs);
+    delete content.files;delete content.previousArtifact;delete content.executorFailure;
+    const cwd=task.engineering.workspace?.path??store.base;
+    const instructionFiles=new Set(['AGENTS.md']);
+    for(const file of task.engineering.config.files){let dir=path.dirname(file);while(dir!=='.'){instructionFiles.add(path.join(dir,'AGENTS.md'));dir=path.dirname(dir);}}
+    content.instructions=[];
+    for(const file of instructionFiles){const target=path.join(cwd,file);try{const bytes=await readBounded(target,8192);content.instructions.push({path:file,digest:handoffHash(bytes),text:bytes.toString(),reason:'applicable repository instructions'});}catch(e){if(e.code!=='ENOENT')throw Object.assign(e,{code:'context_limit'});}}
+    if(content.failedCheck?.output){
+      const output=String(content.failedCheck.output),file=`runs/${run}/context/failed-check-output.txt`;
+      await store.writeText(path.join(store.taskDir(task.slug),file),output);
+      auditRefs.failedCheckOutput={path:file,digest:handoffHash(output),encoding:'text'};
+      content.evidenceDigest=handoffHash(auditRefs);
+      content.failedCheck={...content.failedCheck,output:Buffer.from(output).subarray(-1024).toString(),fullOutput:{path:file,digest:handoffHash(output)},inclusionReason:'exact failing check for focused correction'};
+    }
+    content.contextPolicy={toolOutputBytes:task.engineering.economics.policy.soft.toolOutputBytes,instruction:'Read only approved source/snapshots and necessary instructions. Save full tool/test output as a local artifact; return at most this many bytes and a concise failure. No broad repository dump or full previous reports.',harnessEnforcement:'unknown'};
+  }
   let fullHistoryBytes = Buffer.byteLength(original) + Buffer.byteLength(JSON.stringify(events));
   for (const r of task.runs) fullHistoryBytes += Buffer.byteLength(await store.readRunResult(task, r));
   const bytes = Buffer.byteLength(JSON.stringify(content));
-  return { content, digest: handoffHash(content), metrics: { bytes, fullHistoryBytes, smallerThanHistory: bytes < fullHistoryBytes } };
+  const parts=Object.entries(content).map(([name,value])=>({name,bytes:Buffer.byteLength(JSON.stringify(value)),reason:name==='refs'?'purpose-specific evidence':name==='instructions'?'repository contract':'current task contract'}));
+  const contextManifest={totalBytes:bytes,parts,overheadBytes:bytes-parts.reduce((n,p)=>n+p.bytes,0),harnessInjectedContext:'unknown'};
+  if(task.engineering.economics?.policy&&bytes>task.engineering.economics.policy.hard.inputBytes)throw Object.assign(new Error('Controller input exceeds hard byte budget; no provider call.'),{code:'context_limit'});
+  return { content, ...(auditRefs?{auditRefs}:{}), digest: handoffHash(content), metrics: { bytes, fullHistoryBytes, smallerThanHistory: bytes < fullHistoryBytes,contextManifest } };
 }
 
 export async function verifyHandoff(store, task, handoff, { run, sourceDigest } = {}) {
   const c = handoff.content;
   if (handoffHash(c) !== handoff.digest || c.taskId !== task.id || c.slug !== task.slug || c.intentDigest !== engineeringIntent(task) || c.run !== (run ?? task.runs.at(-1).run)) throw new Error('Stale engineering handoff; task intent or run changed.');
-  if (sourceDigest && c.refs.source?.contentDigest !== sourceDigest) throw new Error('Stale engineering handoff; workspace bytes changed.');
-  for (const ref of Object.values(c.refs)) await refBytes(store, task, ref);
+  const refs=handoff.auditRefs??c.refs;
+  if(handoff.auditRefs&&handoffHash(handoff.auditRefs)!==c.evidenceDigest)throw new Error('Handoff audit references changed.');
+  if (sourceDigest && refs.source?.contentDigest !== sourceDigest) throw new Error('Stale engineering handoff; workspace bytes changed.');
+  for (const ref of Object.values(refs)) await refBytes(store, task, ref);
+  for(const instruction of c.instructions??[]){const bytes=await readBounded(path.join(task.engineering.workspace?.path??store.base,instruction.path),8192);if(handoffHash(bytes)!==instruction.digest)throw new Error('Repository instructions changed before dispatch.');}
   return c;
 }

@@ -7,6 +7,7 @@ import { workEvent } from './events.mjs';
 import { createHandoff, verifyHandoff, handoffHash as hash, engineeringIntent } from './engineering-handoff.mjs';
 import { engineeringDirectory, assertEngineeringWorkspace } from './engineering-workspace.mjs';
 import { engineeringInventory as inventory, freezeEngineering as freeze, verifyEngineeringArtifact as verifyArtifact, mutateEngineering as mutate, engineeringRun as makeRun, engineeringStop as stopped } from './engineering.mjs';
+import { economicDispatchBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
 import { confirmEngineeringReview } from './engineering-review.mjs';
 import { engineeringQualified, engineeringReservationFits, engineeringSettleUsage, executeEngineeringCall } from './engineering.mjs';
 
@@ -28,18 +29,19 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     // A foreground budget of one provider run must spend it on the patch.
     // Investigation can happen inside implementation; exact checks and the
     // existing risk-triggered review boundary still decide readiness.
-    const direct = foreground && t.engineering.config.limits.agentRuns === 1 && t.engineering.playbook.agentRuns === 0 && t.engineering.playbook.nextPurpose === 'investigate' && !t.engineering.playbook.dispatch;
+    const direct = foreground && (t.engineering.config.limits.agentRuns === 1 || Boolean(t.engineering.economics?.policy)) && t.engineering.playbook.agentRuns === 0 && t.engineering.playbook.nextPurpose === 'investigate' && !t.engineering.playbook.dispatch;
     return { ...t, pid: process.pid, engineering: { ...t.engineering, ...(foreground ? { trustClass } : {}), ...(direct ? { playbook: { ...t.engineering.playbook, nextPurpose: 'implement', reason: 'single_provider_budget' } } : {}), driver: { token, state: 'running', pid: process.pid } } };
   });
   if (!claimed) return task;
   const config = task.engineering.config;
+  const economicPolicy=task.engineering.economics?.policy;
   const cwd = engineeringDirectory(store, task);
   const started = Date.now();
   const spentBefore = task.engineering.playbook.activeMs ?? 0;
   const limit = { investigationAttempts: 2, reviewCycles: 2, agentRuns: 10, ...config.limits };
   const originalIntent = engineeringIntent(task);
   let initial;
-  const remaining = () => config.limits.wallClockMs - spentBefore - (Date.now() - started);
+  const remaining = () => Math.min(config.limits.wallClockMs,economicPolicy?.hard.driverDeadlineMs??Infinity) - spentBefore - (Date.now() - started);
   const update = fn => mutate(store, slug, token, t => {
     if (t.status !== 'working' || t.engineering.driver.state !== 'running') throw new Error('Engineering owner lost its active task.');
     return fn(t);
@@ -80,7 +82,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     if (['implement', 'fix'].includes(purpose) && s.implementationAttempts >= limit.implementationAttempts) return stop('attempt_limit', 'Implementation attempts exhausted.');
     if (!foreground && task.engineering.budget.uncertain.length) return stop('usage_unknown', 'Unconfirmed usage reservation blocks another executor call.');
     const considered = [];
-    let selected;
+    let selected;const qualified=[];
     const candidates = preferredCandidates ?? (s.primary ? [s.primary, ...config.providers.filter(id => id !== s.primary)] : config.providers);
     for (const id of candidates.filter(id => !(s.unavailable ?? []).includes(id))) {
       const p = providers.getProvider(id);
@@ -88,23 +90,37 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
       const proof = capable && providers.available(id) ? await qualify(p, config, { purpose }) : null;
       const valid = engineeringQualified(proof, foreground);
       considered.push({ provider: id, reason: !capable ? 'capability_mismatch' : !providers.available(id) ? 'unavailable' : !valid ? 'execution_unqualified' : 'qualified' });
+      if(valid)qualified.push({provider:p,proof});
       if (!selected && valid) selected = { provider: p, proof };
     }
+    if(economicPolicy&&qualified.length)selected=rankEconomicCandidates(qualified,economicPolicy)[0]??qualified[0];
     if (!selected) return stop('execution_unqualified', 'No executor is qualified for this trust class and purpose; unattended remains blocked.');
     const { provider, proof } = selected;
+    const costBlock=economicDispatchBlock(task,proof,0);
+    if(costBlock){
+      task=await update(t=>({...t,engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose,provider:provider.id,reason:costBlock,considered,economics:{classification:economicPolicy.classification,tier:selected.tier??null,selection:'minimum-qualified-tier'}}]}}));
+      return stop(costBlock,'AUTO cannot reserve a proven economical envelope: '+costBlock+'. No provider call.');}
     const maximum = proof.maximum ?? Object.fromEntries(dimensions.map(k => [k, null]));
     const budget = task.engineering.budget;
     if (!engineeringReservationFits(budget, maximum, limit)) return stop('budget_limit', 'Next executor reservation exceeds its available envelope.');
     const { run, handoff } = await prepare(purpose, provider.id, before);
+    const contextBlock=economicDispatchBlock(task,proof,Buffer.byteLength(JSON.stringify(handoff.content)));
+    if(contextBlock)return stop(contextBlock,'Bounded context/remaining budget prevents dispatch.');
     const boundary = hash({ taskId: task.id, run, purpose, input: handoff.digest });
-    task = await update(t => ({ ...t, engineering: { ...t.engineering, decisions: [...t.engineering.decisions, { boundary, purpose, provider: provider.id, reason: purpose === 'review' ? 'risk_policy' : s.reason, considered }], budget: { ...t.engineering.budget, reservations: [...t.engineering.budget.reservations, { boundary, maximum }] }, playbook: { ...t.engineering.playbook, dispatch: { run, boundary, input: handoff.digest }, agentRuns: s.agentRuns + 1, implementationAttempts: s.implementationAttempts + (purpose === 'implement' || purpose === 'fix' ? 1 : 0), investigationAttempts: s.investigationAttempts + (purpose === 'investigate' ? 1 : 0), primary: purpose === 'review' ? s.primary : provider.id } } }));
+    task = await update(t => ({ ...t, engineering: { ...t.engineering, decisions: [...t.engineering.decisions, { boundary, purpose, provider: provider.id, reason: purpose === 'review' ? 'risk_policy' : s.reason, ...(economicPolicy?{economics:{classification:economicPolicy.classification,tier:selected.tier??null,selection:'minimum-qualified-tier',signals:economicPolicy.signals}}:{}), considered }], budget: { ...t.engineering.budget, reservations: [...t.engineering.budget.reservations, { boundary, maximum }] }, playbook: { ...t.engineering.playbook, dispatch: { run, boundary, input: handoff.digest }, agentRuns: s.agentRuns + 1, implementationAttempts: s.implementationAttempts + (purpose === 'implement' || purpose === 'fix' ? 1 : 0), investigationAttempts: s.investigationAttempts + (purpose === 'investigate' ? 1 : 0), primary: purpose === 'review' ? s.primary : provider.id } } }));
     await record('run.started', { run, purpose, provider: provider.id });
     const fresh = await store.findTask(task.id);
     if (remaining() <= 0 || signal.aborted || await store.readCancelRequest(fresh)) return stop('deadline', 'Dispatch stopped at the deadline/cancellation boundary.');
     if (engineeringIntent(fresh) !== originalIntent) return stop('input_changed', 'Task intent changed during dispatch preparation.');
     await verifyHandoff(store, fresh, handoff, { run, sourceDigest: (await inventory(cwd)).digest });
     if (remaining() <= 0 || signal.aborted) return stop('deadline', 'Dispatch preparation exhausted its deadline.');
-    const outcome = await executeEngineeringCall(proof, { cwd, prompt: JSON.stringify(handoff.content), purpose, signal }, remaining());
+    let outcome;
+    try {
+      outcome = await executeEngineeringCall(proof, { cwd, prompt: JSON.stringify(handoff.content), purpose, signal }, remaining());
+    } catch (error) {
+      task=await saveEngineeringUsage(store,task,{run,boundary,provider:provider.id,proof,outcome:{status:'uncertain',usageDetails:{complete:false}},handoff,reason:purpose==='review'?'risk_policy':s.reason});
+      throw error;
+    }
     if (!['ready', 'failed', 'needs_you'].includes(outcome?.status)) throw new Error('Invalid executor outcome.');
     const result = String(outcome.result ?? outcome.error ?? '');
     await store.writeText(path.join(store.taskDir(slug), 'runs', String(run), 'result.md'), result);
@@ -115,6 +131,8 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     const settled = engineeringSettleUsage(task.engineering.budget, boundary, outcome.usage, maximum, foreground);
     task = await update(t => ({ ...t, engineering: { ...t.engineering, budget: settled.budget } }));
     await finish(run, outcome.status, { artifact, outcomeRef, qualification: proof.evidence ?? null, externalSessionId: outcome.externalSessionId ?? null, usage: { confirmed: settled.confirmed, estimated: maximum, reported: outcome.usageEvidence ?? null, uncertainty: settled.known ? null : 'unconfirmed' } });
+    task=await saveEngineeringUsage(store,task,{run,boundary,provider:provider.id,proof,outcome,handoff,reason:purpose==='review'?'risk_policy':s.reason});
+    if(outcome.status==='ready'&&economicOutcomeBlock(task))return stop('economic_usage_unknown_or_exhausted','Observed token usage is unknown or exceeds its economic target; no READY claim or automatic continuation.');
     if (!settled.known && !foreground) return stop('usage_unknown', 'Completed call has unconfirmed usage; preserved reservation prevents further model calls.');
     if (!engineeringReservationFits(task.engineering.budget, null, limit)) return stop('budget_limit', 'Reported usage exceeds the configured foreground limit.');
     if (['investigate', 'review'].includes(purpose) && before.digest !== after.digest) return stop('read_only_violation', 'A read-only purpose changed workspace bytes.');
@@ -209,7 +227,7 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
       }
       if (pauseAfterPurpose && await pauseAfterPurpose(purpose, task)) return stop('paused_boundary', 'Paused at a committed purpose boundary; explicit continuation is safe.');
     }
-  } catch (error) { return stop('execution_uncertain', `${error.message} No automatic replay.`); }
+  } catch (error) { return stop(error.code==='context_limit'?'context_limit':'execution_uncertain', `${error.message} No automatic replay.`); }
 }
 
 // Explicit user retry of one *completed*, unchanged capacity failure. This is
@@ -219,6 +237,10 @@ export async function prepareCapacityContinuation(ctx, task, { foreground, retry
   return mutate(ctx.store, task.slug, task.engineering.driver.token, async t => {
     const s=t.engineering.playbook, last=t.runs.at(-1), limits=t.engineering.config.limits;
     if (t.status!=='needs_you' || t.blockedOn?.code!=='executor_failed' || t.engineering.trustClass!=='foreground-subscription' || t.engineering.delivery || last?.run!==retryRun || last.outcome!=='failed' || !last.completedAt || !['implement','fix'].includes(last.purpose) || !s?.dispatch || s.dispatch.run!==retryRun || last.capacityContinuation) throw new Error('No matching completed capacity failure; uncertain/consumed boundaries cannot continue.');
+    if(t.engineering.economics?.policy) {
+      const p=t.engineering.economics.policy,a=t.engineering.economics.aggregate;
+      if((t.engineering.economics.attempts?.length??0)>=p.hard.attempts||!a||a.partial||a.metrics.total.unknownAttempts||a.metrics.total.observed>=p.soft.totalTokens)throw new Error('Economic continuation budget exhausted or unproven; NEEDS YOU requires a new bounded scope.');
+    }
     const root=ctx.store.taskDir(t.slug);
     const handoff=await ctx.store.readJson(path.join(root,last.handoff.path));
     const outcome=await ctx.store.readJson(path.join(root,last.outcomeRef.path));

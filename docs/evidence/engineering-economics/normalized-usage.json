@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "scope": "Diagnostic archive only; original Task and receipts unchanged",
+  "attempts": [
+    {
+      "attempt": 1,
+      "boundary": "decec5314f12308c4af67e272992e3822561b0a5b6aef9c052c372a655b8cfe2",
+      "provider": "codex",
+      "harness": "codex-cli 0.149.1",
+      "model": "gpt-5.6-sol",
+      "routingReason": "single_provider_budget",
+      "continuationReason": null,
+      "outcome": "failed",
+      "complete": false,
+      "counterScope": "session",
+      "counterId": "01a144a6-de4d-7cb0-a560-25c9a43326b8",
+      "semantics": "session-cumulative",
+      "tokens": {
+        "values": {
+          "input": 19944,
+          "cachedInput": 11136,
+          "output": 185,
+          "reasoning": 0,
+          "total": 20129
+        },
+        "semantics": "session-cumulative",
+        "compatible": true,
+        "acceptedEvents": 1
+      },
+      "metricSource": "codex.session.total_token_usage",
+      "sources": [
+        {
+          "path": "rollout-2026-10-16T13-19-09-01a144a6-de4d-7cb0-a560-25c9a43326b8.jsonl",
+          "sha256": "484d9971e28c83a7b75878086535bd04d2b661ced711647c956f5cb2e894bfcf",
+          "lines": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ]
+        }
+      ],
+      "money": {
+        "value": null,
+        "currency": "unknown"
+      },
+      "originalRecords": [
+        {
+          "path": "/private/tmp/0x2f-canary-3vlJUt/repo/.work/tasks/001-fix-invalid-utf-16-in-truncated-task-titles/runs/1/handoff.json",
+          "sha256": "e4902f96d17f7bba2696e02fbd79f565aaf2a3ddfd691827f14bda289d0791bf",
+          "inputDigest": "decec5314f12308c4af67e272992e3822561b0a5b6aef9c052c372a655b8cfe2"
+        },
+        {
+          "path": "/private/tmp/0x2f-canary-3vlJUt/repo/.work/tasks/001-fix-invalid-utf-16-in-truncated-task-titles/runs/1/outcome.json",
+          "sha256": "4c4b7367874c6e2878620e60375db2177e65062cfcace4763cadd1a9d7408462"
+        }
+      ],
+      "controllerInputManifest": {
+        "bytes": 2403,
+        "parts": [
+          {
+            "name": "schemaVersion",
+            "bytes": 1
+          },
+          {
+            "name": "taskId",
+            "bytes": 1
+          },
+          {
+            "name": "slug",
+            "bytes": 49
+          },
+          {
+            "name": "run",
+            "bytes": 1
+          },
+          {
+            "name": "purpose",
+            "bytes": 11
+          },
+          {
+            "name": "intentDigest",
+            "bytes": 66
+          },
+          {
+            "name": "brief",
+            "bytes": 1250
+          },
+          {
+            "name": "scope",
+            "bytes": 44
+          },
+          {
+            "name": "constraints",
+            "bytes": 2
+          },
+          {
+            "name": "decisions",
+            "bytes": 2
+          },
+          {
+            "name": "prohibited",
+            "bytes": 80
+          },
+          {
+            "name": "taskDirectory",
+            "bytes": 98
+          },
+          {
+            "name": "workspace",
+            "bytes": 102
+          },
+          {
+            "name": "refs",
+            "bytes": 448
+          },
+          {
+            "name": "files",
+            "bytes": 71
+          }
+        ],
+        "harnessInjectedContext": "see diagnosis.json; per-part tokens unknown"
+      },
+      "historicalLimits": {
+        "agentRuns": 1,
+        "tokenCeiling": "unknown",
+        "moneyCeiling": "unknown"
+      }
+    },
+    {
+      "attempt": 2,
+      "boundary": "6161681bce4cbca859403e94601b15b4d029ef9f314d526eb983742f46afb6c9",
+      "provider": "codex",
+      "harness": "codex-cli 0.149.1",
+      "model": "gpt-5.6-sol",
+      "routingReason": "explicit_capacity_continuation",
+      "continuationReason": "user-authorized completed capacity failure",
+      "outcome": "ready",
+      "complete": true,
+      "counterScope": "session",
+      "counterId": "01a144b0-43ff-76c2-8e60-4284b68bfd80",
+      "semantics": "session-cumulative",
+      "tokens": {
+        "values": {
+          "input": 239563,
+          "cachedInput": 214016,
+          "output": 1949,
+          "reasoning": 479,
+          "total": 241512
+        },
+        "semantics": "session-cumulative",
+        "compatible": true,
+        "acceptedEvents": 7
+      },
+      "metricSource": "codex.session.total_token_usage",
+      "sources": [
+        {
+          "path": "rollout-2026-10-16T13-29-24-01a144b0-43ff-76c2-8e60-4284b68bfd80.jsonl",
+          "sha256": "385b27b9daabe6f4a42bfb4fe5f6ff9788d10180776f6591031201adc3177fdb",
+          "lines": [
+            16,
+            22,
+            30,
+            36,
+            42,
+            46,
+            49
+          ]
+        }
+      ],
+      "money": {
+        "value": null,
+        "currency": "unknown"
+      },
+      "originalRecords": [
+        {
+          "path": "/private/tmp/0x2f-canary-3vlJUt/repo/.work/tasks/001-fix-invalid-utf-16-in-truncated-task-titles/runs/2/handoff.json",
+          "sha256": "7e273bf298f71f62cf6b6993c4971e6088ee9b36a65bc720bf9aacaecb82145b",
+          "inputDigest": "6161681bce4cbca859403e94601b15b4d029ef9f314d526eb983742f46afb6c9"
+        },
+        {
+          "path": "/private/tmp/0x2f-canary-3vlJUt/repo/.work/tasks/001-fix-invalid-utf-16-in-truncated-task-titles/runs/2/outcome.json",
+          "sha256": "66ebe05fec3e86d48a357efd35a071c3ebaeb97acb99cc604888eb7ea5d268a6"
+        }
+      ],
+      "controllerInputManifest": {
+        "bytes": 3041,
+        "parts": [
+          {
+            "name": "schemaVersion",
+            "bytes": 1
+          },
+          {
+            "name": "taskId",
+            "bytes": 1
+          },
+          {
+            "name": "slug",
+            "bytes": 49
+          },
+          {
+            "name": "run",
+            "bytes": 1
+          },
+          {
+            "name": "purpose",
+            "bytes": 11
+          },
+          {
+            "name": "intentDigest",
+            "bytes": 66
+          },
+          {
+            "name": "brief",
+            "bytes": 1250
+          },
+          {
+            "name": "scope",
+            "bytes": 44
+          },
+          {
+            "name": "constraints",
+            "bytes": 183
+          },
+          {
+            "name": "decisions",
+            "bytes": 142
+          },
+          {
+            "name": "prohibited",
+            "bytes": 80
+          },
+          {
+            "name": "taskDirectory",
+            "bytes": 98
+          },
+          {
+            "name": "workspace",
+            "bytes": 102
+          },
+          {
+            "name": "refs",
+            "bytes": 585
+          },
+          {
+            "name": "files",
+            "bytes": 71
+          },
+          {
+            "name": "executorFailure",
+            "bytes": 161
+          }
+        ],
+        "harnessInjectedContext": "see diagnosis.json; per-part tokens unknown"
+      },
+      "historicalLimits": {
+        "agentRuns": 2,
+        "tokenCeiling": "unknown",
+        "moneyCeiling": "unknown"
+      }
+    }
+  ],
+  "aggregate": {
+    "attempts": 2,
+    "metrics": {
+      "input": {
+        "value": 259507,
+        "observed": 259507,
+        "unknownAttempts": 0
+      },
+      "cachedInput": {
+        "value": 225152,
+        "observed": 225152,
+        "unknownAttempts": 0
+      },
+      "output": {
+        "value": 2134,
+        "observed": 2134,
+        "unknownAttempts": 0
+      },
+      "reasoning": {
+        "value": 479,
+        "observed": 479,
+        "unknownAttempts": 0
+      },
+      "total": {
+        "value": 261641,
+        "observed": 261641,
+        "unknownAttempts": 0
+      }
+    },
+    "money": {
+      "value": null,
+      "currency": "unknown"
+    },
+    "partial": true
+  },
+  "observedTotalIsLowerBound": true
+}

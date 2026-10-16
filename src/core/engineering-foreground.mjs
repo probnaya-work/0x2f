@@ -6,7 +6,9 @@ import os from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { codexProvider, codexBin } from '../providers/codex.mjs';
-import { runEngineeringTask } from './engineering.mjs';
+import { economicsPolicy } from './engineering-economics.mjs';
+import { readCodexSessionUsage } from '../providers/codex-usage.mjs';
+import { runEngineeringTask, mutateEngineering } from './engineering.mjs';
 import { handoffHash } from './engineering-handoff.mjs';
 const exec = promisify(execFile);
 
@@ -29,6 +31,9 @@ export async function foregroundPreflight({ env = process.env, home = os.homedir
 }
 
 export async function runForegroundEngineering(ctx, task) {
+  if (!task.engineering.economics?.policy) {
+    task = await mutateEngineering(ctx.store,task.slug,task.engineering.driver.token,t=>({...t,engineering:{...t.engineering,economics:{...t.engineering.economics,policy:economicsPolicy(t)}}}));
+  }
   const preflight = await foregroundPreflight();
   const controller = new AbortController();
   const abort = () => controller.abort();
@@ -44,6 +49,8 @@ export async function runForegroundEngineering(ctx, task) {
       let bytes = 0;
       const outcome = await p.startForeground({ ...input, binary: current.evidence.binary, onEvent: e => { const line = JSON.stringify(e); bytes += Buffer.byteLength(line); if (bytes <= 1000000) events.push(line); } });
       await ctx.store.writeText(path.join(ctx.store.taskDir(task.slug), 'runs', String(run), 'run.log'), events.join('\n'));
+      const telemetry = await readCodexSessionUsage({root:process.env.CODEX_HOME??path.join(os.homedir(),'.codex'),sessionId:outcome.externalSessionId,cwd:input.cwd,complete:outcome.status==='ready'});
+      if(telemetry)outcome.usageDetails=telemetry;
       if (outcome.status === 'ready' && ['investigate', 'review'].includes(input.purpose)) {
         try { outcome.engineering = JSON.parse(outcome.result.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { /* saved prose remains evidence; structured diagnosis/review must qualify */ }
       }

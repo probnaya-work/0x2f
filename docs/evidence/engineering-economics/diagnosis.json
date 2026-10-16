@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only diagnosis of preserved canary; no new provider calls or receipt changes",
+  "attempts": [
+    {
+      "attempt": 1,
+      "outcome": "failed",
+      "session": {
+        "basename": "rollout-2026-10-16T13-19-09-01a144a6-de4d-7cb0-a560-25c9a43326b8.jsonl",
+        "sha256": "484d9971e28c83a7b75878086535bd04d2b661ced711647c956f5cb2e894bfcf",
+        "models": [
+          {
+            "line": 8,
+            "model": "gpt-5.6-sol",
+            "effort": null
+          }
+        ]
+      },
+      "usageSourceEvents": [
+        {
+          "line": 16,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 17,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 18,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 19,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 20,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 21,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 22,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 23,
+          "total_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "last_token_usage": {
+            "input_tokens": 19944,
+            "cached_input_tokens": 11136,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 185,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20129
+          },
+          "model_context_window": 258400
+        }
+      ],
+      "distinctCumulativeIncreases": 1,
+      "lastReported": {
+        "input_tokens": 19944,
+        "cached_input_tokens": 11136,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 185,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 20129
+      },
+      "isFinal": false,
+      "repeatedCountersNotAdded": 7,
+      "handoff": {
+        "relativePath": "runs/1/handoff.json",
+        "digest": "decec5314f12308c4af67e272992e3822561b0a5b6aef9c052c372a655b8cfe2",
+        "dispatchBytes": 2403,
+        "partsBytes": {
+          "schemaVersion": 1,
+          "taskId": 1,
+          "slug": 49,
+          "run": 1,
+          "purpose": 11,
+          "intentDigest": 66,
+          "brief": 1250,
+          "scope": 44,
+          "constraints": 2,
+          "decisions": 2,
+          "prohibited": 80,
+          "taskDirectory": 98,
+          "workspace": 102,
+          "refs": 448,
+          "files": 71
+        },
+        "sourceFileCount": 3
+      },
+      "harnessContext": {
+        "baseInstructionsJsonBytes": 18014,
+        "additionalMessages": [
+          {
+            "line": 3,
+            "role": "developer",
+            "bytes": 24470,
+            "sha256": "4c5ed62611fa266df7fc36c9866a46ea0d8a910c5b32da5e784328afbb244f1a"
+          },
+          {
+            "line": 4,
+            "role": "developer",
+            "bytes": 2264,
+            "sha256": "af60719c7b64906bd05733aec72a96726712fe25d382a7bc9e05a6733cfd67dc"
+          },
+          {
+            "line": 5,
+            "role": "developer",
+            "bytes": 271,
+            "sha256": "6ded806e3cdbb35599ecaf8742574bc5274908472b1729090010c404c2151e8e"
+          },
+          {
+            "line": 6,
+            "role": "user",
+            "bytes": 4159,
+            "sha256": "abcc1fbbe16cbc2efce2d105a54b8169e980a213530fb94a2726268faa5cdb06"
+          }
+        ]
+      },
+      "toolEvents": [
+        {
+          "line": 13,
+          "kind": "source/instructions-read",
+          "commandBytes": 398,
+          "requestedOutputTokens": 30000
+        },
+        {
+          "line": 15,
+          "type": "custom_tool_call_output",
+          "outputBytes": 41090
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "outcome": "ready",
+      "session": {
+        "basename": "rollout-2026-10-16T13-29-24-01a144b0-43ff-76c2-8e60-4284b68bfd80.jsonl",
+        "sha256": "385b27b9daabe6f4a42bfb4fe5f6ff9788d10180776f6591031201adc3177fdb",
+        "models": [
+          {
+            "line": 8,
+            "model": "gpt-5.6-sol",
+            "effort": null
+          }
+        ]
+      },
+      "usageSourceEvents": [
+        {
+          "line": 16,
+          "total_token_usage": {
+            "input_tokens": 20142,
+            "cached_input_tokens": 17408,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 195,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20337
+          },
+          "last_token_usage": {
+            "input_tokens": 20142,
+            "cached_input_tokens": 17408,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 195,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 20337
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 22,
+          "total_token_usage": {
+            "input_tokens": 50501,
+            "cached_input_tokens": 37376,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 322,
+            "reasoning_output_tokens": 12,
+            "total_tokens": 50823
+          },
+          "last_token_usage": {
+            "input_tokens": 30359,
+            "cached_input_tokens": 19968,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 127,
+            "reasoning_output_tokens": 12,
+            "total_tokens": 30486
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 30,
+          "total_token_usage": {
+            "input_tokens": 85144,
+            "cached_input_tokens": 67584,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1279,
+            "reasoning_output_tokens": 331,
+            "total_tokens": 86423
+          },
+          "last_token_usage": {
+            "input_tokens": 34643,
+            "cached_input_tokens": 30208,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 957,
+            "reasoning_output_tokens": 319,
+            "total_tokens": 35600
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 36,
+          "total_token_usage": {
+            "input_tokens": 120768,
+            "cached_input_tokens": 102016,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1391,
+            "reasoning_output_tokens": 347,
+            "total_tokens": 122159
+          },
+          "last_token_usage": {
+            "input_tokens": 35624,
+            "cached_input_tokens": 34432,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 112,
+            "reasoning_output_tokens": 16,
+            "total_tokens": 35736
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 42,
+          "total_token_usage": {
+            "input_tokens": 159052,
+            "cached_input_tokens": 137472,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1681,
+            "reasoning_output_tokens": 479,
+            "total_tokens": 160733
+          },
+          "last_token_usage": {
+            "input_tokens": 38284,
+            "cached_input_tokens": 35456,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 290,
+            "reasoning_output_tokens": 132,
+            "total_tokens": 38574
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 46,
+          "total_token_usage": {
+            "input_tokens": 197650,
+            "cached_input_tokens": 175616,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1810,
+            "reasoning_output_tokens": 479,
+            "total_tokens": 199460
+          },
+          "last_token_usage": {
+            "input_tokens": 38598,
+            "cached_input_tokens": 38144,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 129,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 38727
+          },
+          "model_context_window": 258400
+        },
+        {
+          "line": 49,
+          "total_token_usage": {
+            "input_tokens": 239563,
+            "cached_input_tokens": 214016,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1949,
+            "reasoning_output_tokens": 479,
+            "total_tokens": 241512
+          },
+          "last_token_usage": {
+            "input_tokens": 41913,
+            "cached_input_tokens": 38400,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 139,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 42052
+          },
+          "model_context_window": 258400
+        }
+      ],
+      "distinctCumulativeIncreases": 7,
+      "lastReported": {
+        "input_tokens": 239563,
+        "cached_input_tokens": 214016,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1949,
+        "reasoning_output_tokens": 479,
+        "total_tokens": 241512
+      },
+      "isFinal": true,
+      "repeatedCountersNotAdded": 0,
+      "handoff": {
+        "relativePath": "runs/2/handoff.json",
+        "digest": "6161681bce4cbca859403e94601b15b4d029ef9f314d526eb983742f46afb6c9",
+        "dispatchBytes": 3041,
+        "partsBytes": {
+          "schemaVersion": 1,
+          "taskId": 1,
+          "slug": 49,
+          "run": 1,
+          "purpose": 11,
+          "intentDigest": 66,
+          "brief": 1250,
+          "scope": 44,
+          "constraints": 183,
+          "decisions": 142,
+          "prohibited": 80,
+          "taskDirectory": 98,
+          "workspace": 102,
+          "refs": 585,
+          "files": 71,
+          "executorFailure": 161
+        },
+        "sourceFileCount": 3
+      },
+      "harnessContext": {
+        "baseInstructionsJsonBytes": 18014,
+        "additionalMessages": [
+          {
+            "line": 3,
+            "role": "developer",
+            "bytes": 24470,
+            "sha256": "4c5ed62611fa266df7fc36c9866a46ea0d8a910c5b32da5e784328afbb244f1a"
+          },
+          {
+            "line": 4,
+            "role": "developer",
+            "bytes": 2264,
+            "sha256": "af60719c7b64906bd05733aec72a96726712fe25d382a7bc9e05a6733cfd67dc"
+          },
+          {
+            "line": 5,
+            "role": "developer",
+            "bytes": 271,
+            "sha256": "6ded806e3cdbb35599ecaf8742574bc5274908472b1729090010c404c2151e8e"
+          },
+          {
+            "line": 6,
+            "role": "user",
+            "bytes": 4159,
+            "sha256": "abcc1fbbe16cbc2efce2d105a54b8169e980a213530fb94a2726268faa5cdb06"
+          }
+        ]
+      },
+      "toolEvents": [
+        {
+          "line": 13,
+          "kind": "source/instructions-read",
+          "commandBytes": 421,
+          "requestedOutputTokens": 30000
+        },
+        {
+          "line": 15,
+          "type": "custom_tool_call_output",
+          "outputBytes": 41128
+        },
+        {
+          "line": 19,
+          "kind": "source/instructions-read",
+          "commandBytes": 320,
+          "requestedOutputTokens": 20000
+        },
+        {
+          "line": 21,
+          "type": "custom_tool_call_output",
+          "outputBytes": 18257
+        },
+        {
+          "line": 27,
+          "kind": "patch",
+          "commandBytes": 1826,
+          "requestedOutputTokens": null
+        },
+        {
+          "line": 29,
+          "type": "custom_tool_call_output",
+          "outputBytes": 124
+        },
+        {
+          "line": 33,
+          "kind": "targeted-tests",
+          "commandBytes": 281,
+          "requestedOutputTokens": 20000
+        },
+        {
+          "line": 35,
+          "type": "custom_tool_call_output",
+          "outputBytes": 10488
+        },
+        {
+          "line": 39,
+          "kind": "patch",
+          "commandBytes": 504,
+          "requestedOutputTokens": null
+        },
+        {
+          "line": 41,
+          "type": "custom_tool_call_output",
+          "outputBytes": 124
+        },
+        {
+          "line": 43,
+          "kind": "targeted-tests",
+          "commandBytes": 419,
+          "requestedOutputTokens": 20000
+        },
+        {
+          "line": 45,
+          "type": "custom_tool_call_output",
+          "outputBytes": 12735
+        }
+      ]
+    }
+  ],
+  "successfulAttemptTokens": 241512,
+  "successfulInput": 239563,
+  "successfulCachedInputSubset": 214016,
+  "successfulUncachedInputDerived": 25547,
+  "successfulOutput": 1949,
+  "successfulReasoningReportedOverlap": 479,
+  "failedAttemptPartialTotal": 20129,
+  "taskObservedLowerBound": 261641,
+  "money": "unknown",
+  "categoryTokenAttributionToContextParts": "unknown",
+  "internalBillableCalls": "unknown",
+  "autoSelectedProvider": "only qualified foreground subscription executor",
+  "modelSelection": "delegated installed CLI default; exact internal reason unknown",
+  "continuation": "new exec session; no resume; narrow controller handoff plus re-injected harness context",
+  "duplicateUsageAddedByOldAdapter": false
+}
