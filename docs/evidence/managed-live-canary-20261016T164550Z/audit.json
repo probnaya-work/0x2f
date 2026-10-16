@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "method": "Separate post-write inspection of allowlisted new evidence files; JSON validation, secret-shaped/Bearer/assignment scans and unchanged source checks. No environment value or credential file was read by this audit.",
+  "filesInspected": [
+    "preflight.json",
+    "preservation.json",
+    "report.md"
+  ],
+  "secretShapedMaterialFound": false,
+  "exactKeyComparison": "Not possible or necessary: execution environment reported key absent and no secret value was obtained. This is not a scan of unrelated pre-existing user files.",
+  "sourceTestsPackagesUnchanged": true,
+  "credentialPreflights": 1,
+  "managedAttempts": 0,
+  "providerRequests": 0,
+  "retryReplayContinuationFallback": false,
+  "fullSuitesRun": 0,
+  "productionPreservation": "PASS"
+}

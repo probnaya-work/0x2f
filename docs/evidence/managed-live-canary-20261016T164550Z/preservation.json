@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "comparisonBaseline": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.control-pricing-after.json",
+  "mainHeadUnchanged": true,
+  "mainStatusUnchanged": true,
+  "stableHeadUnchanged": true,
+  "stableStatusUnchanged": true,
+  "protectedPackagesUnchanged": {
+    "package.json": true,
+    "package-lock.json": true
+  },
+  "task2": {
+    "baselineFiles": 105,
+    "changed": [],
+    "missing": [],
+    "extra": []
+  },
+  "task3": {
+    "baselineFiles": 24,
+    "changed": [],
+    "missing": [],
+    "extra": []
+  },
+  "launchAgentPlistUnchanged": true,
+  "schedulerInstallationAndScheduleFilesUnchanged": true,
+  "productionWritesPerformed": false,
+  "schedulerActionsPerformed": false,
+  "launchAgentActionsPerformed": false,
+  "existingReceiptsModified": false,
+  "existingDeliveryReceipt": {
+    "digest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+    "unchanged": true
+  }
+}
