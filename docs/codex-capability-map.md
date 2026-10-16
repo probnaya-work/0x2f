@@ -197,3 +197,28 @@ Thus these tested feature switches/hooks do not qualify an all-call interaction
 or returned-payload budget. Deadline/cancel after an event cannot retrospectively
 enforce it. No bounded foreground adapter or canary was enabled. See
 [qualification report](evidence/bounded-foreground-qualification/report.md).
+
+## App-server qualification (2026-10-16, 0.149.1)
+
+The real installed stdio app-server was tested against a local deterministic
+Responses mock, without user credentials. Stable lifecycle works. Stable
+`thread/start` rejects `dynamicTools`; explicit experimental opt-in permits
+registered client tools and waits for their `item/tool/call` replies. The client
+can deny those calls, truncate their results, count before replying, interrupt
+pending turns and close its owned process group. Restart/resume did not replay an
+unresolved tool call in the fixture. Usage distinguishes cumulative `total` and
+per-response `last` under synthetic counters.
+
+**Qualification failed:** an unregistered tool bypasses the client callback;
+app-server constructs its error output and starts another model request itself.
+A reproduced rejection returned 26,026 bytes without `item/tool/call` or a tool
+item visible to the client. No all-call/payload gate is qualified, even on the
+experimental surface. No production app-server adapter or real canary was added.
+[Process tests and evidence](evidence/app-server-qualification/report.md).
+
+The existing exec descriptor now declares `opaqueAgentLoop: true`, unavailable
+hard interaction/model-call/token ceilings, and explicit-opaque-foreground-only
+eligibility. Both engineering drivers exclude it from bounded small-task AUTO
+before qualification/dispatch, preserving the rejection in Task decisions. This
+metadata grants no execution permission. Ordinary legacy adapter calls remain
+compatible; no new opaque-mode entry point or unattended qualification is enabled.

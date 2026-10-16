@@ -50,10 +50,12 @@ export function candidateTier(proof) {
 }
 export function rankEconomicCandidates(candidates,policy) {
   const rank={deterministic:0,small:1,standard:2,'high-risk':3},required={small:1,standard:2,'high-risk':3}[policy?.classification]??0;
-  return candidates.map((c,index)=>({...c,index,tier:candidateTier(c.proof)})).filter(c=>!policy||c.tier==='deterministic'||rank[c.tier]>=required).sort((a,b)=>(rank[a.tier]??99)-(rank[b.tier]??99)||a.index-b.index);
+  return candidates.filter(c=>!economicProviderBlock(c.provider,policy)).map((c,index)=>({...c,index,tier:candidateTier(c.proof)})).filter(c=>!policy||c.tier==='deterministic'||rank[c.tier]>=required).sort((a,b)=>(rank[a.tier]??99)-(rank[b.tier]??99)||a.index-b.index);
 }
+export const economicProviderBlock=(provider,policy)=>policy?.classification==='small'&&provider?.capabilities?.opaqueAgentLoop?'opaque_agent_loop':null;
 export function economicDispatchBlock(task,proof,promptBytes) {
   const policy=task.engineering.economics?.policy;if(!policy)return null;
+  if(policy.classification==='small'&&proof?.evidence?.opaqueAgentLoop)return 'opaque_agent_loop';
   const attempts=task.engineering.economics.attempts??[],aggregate=task.engineering.economics.aggregate;
   if(attempts.length>=policy.hard.attempts)return 'economic_attempt_limit';
   if(promptBytes>policy.hard.inputBytes)return 'context_limit';

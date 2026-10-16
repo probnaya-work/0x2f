@@ -1,0 +1,142 @@
+{
+  "version": "codex-cli 0.149.1",
+  "experimental": true,
+  "disabledFeatures": [
+    "shell_tool",
+    "multi_agent",
+    "multi_agent_v2",
+    "plugins",
+    "apps",
+    "tool_suggest",
+    "skill_search",
+    "image_generation",
+    "in_app_browser",
+    "view_image",
+    "goals",
+    "browser_use",
+    "computer_use",
+    "code_mode_host",
+    "hooks",
+    "enable_request_compression",
+    "shell_snapshot",
+    "workspace_dependencies"
+  ],
+  "mockModelRequests": 2,
+  "liveProviderCalls": 0,
+  "events": [
+    {
+      "responseId": 1
+    },
+    {
+      "method": "remoteControl/status/changed"
+    },
+    {
+      "responseId": 2
+    },
+    {
+      "method": "thread/started"
+    },
+    {
+      "method": "warning"
+    },
+    {
+      "responseId": 3
+    },
+    {
+      "method": "thread/status/changed"
+    },
+    {
+      "method": "turn/started"
+    },
+    {
+      "method": "item/started",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/completed",
+      "itemType": "userMessage"
+    },
+    {
+      "method": "item/started",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "item/tool/call",
+      "request": true
+    },
+    {
+      "method": "item/completed",
+      "itemType": "dynamicToolCall"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "usage": {
+        "total": {
+          "totalTokens": 10,
+          "inputTokens": 8,
+          "cachedInputTokens": 3,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 2,
+          "reasoningOutputTokens": 1
+        },
+        "last": {
+          "totalTokens": 10,
+          "inputTokens": 8,
+          "cachedInputTokens": 3,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 2,
+          "reasoningOutputTokens": 1
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "method": "account/rateLimits/updated"
+    },
+    {
+      "method": "item/started",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "item/agentMessage/delta"
+    },
+    {
+      "method": "item/completed",
+      "itemType": "agentMessage"
+    },
+    {
+      "method": "thread/tokenUsage/updated",
+      "usage": {
+        "total": {
+          "totalTokens": 30,
+          "inputTokens": 26,
+          "cachedInputTokens": 6,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 4,
+          "reasoningOutputTokens": 2
+        },
+        "last": {
+          "totalTokens": 20,
+          "inputTokens": 18,
+          "cachedInputTokens": 3,
+          "cacheWriteInputTokens": 0,
+          "outputTokens": 2,
+          "reasoningOutputTokens": 1
+        },
+        "modelContextWindow": 258400
+      }
+    },
+    {
+      "method": "account/rateLimits/updated"
+    },
+    {
+      "method": "thread/status/changed"
+    },
+    {
+      "method": "turn/completed",
+      "status": "completed"
+    }
+  ],
+  "semantics": "thread cumulative total; last response separate; synthetic fixture counters",
+  "money": "unknown"
+}

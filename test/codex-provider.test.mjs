@@ -400,3 +400,9 @@ test('foreground delegates model to installed CLI default while keeping subscrip
     assert.ok(!argv.some(a=>a.includes('bypass')));
   } finally { await fs.rm(dir,{recursive:true,force:true});await fs.rm(f.dir,{recursive:true,force:true}); }
 });
+
+test('Codex exec explicitly declares its opaque loop and unavailable hard interaction ceilings',()=>{
+ assert.equal(codexProvider.capabilities.opaqueAgentLoop,true);
+ for(const key of ['supportsHardInteractionLimits','supportsHardModelCallLimits','supportsHardTokenLimits','costBoundedSmallTasks'])assert.equal(codexProvider.capabilities[key],false);
+ assert.equal(codexProvider.capabilities.opaqueForegroundOnly,true);
+});

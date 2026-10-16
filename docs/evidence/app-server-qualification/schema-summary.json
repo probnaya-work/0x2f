@@ -1,0 +1,150 @@
+{
+  "stable": {
+    "v2/ThreadStartParams.json": {
+      "source": "/private/tmp/0x2f-appserver-stable-schema/v2/ThreadStartParams.json",
+      "sha256": "792e2f32e37cece971bd616664ea2053741acbed4e9c92e9d1766427718f2ecd",
+      "properties": [
+        "approvalPolicy",
+        "approvalsReviewer",
+        "baseInstructions",
+        "config",
+        "cwd",
+        "developerInstructions",
+        "ephemeral",
+        "model",
+        "modelProvider",
+        "personality",
+        "sandbox",
+        "serviceName",
+        "serviceTier",
+        "sessionStartSource",
+        "threadSource"
+      ]
+    },
+    "v2/TurnStartParams.json": {
+      "source": "/private/tmp/0x2f-appserver-stable-schema/v2/TurnStartParams.json",
+      "sha256": "ff2e7e0796fbe2ad99e5ec7d489cc8c8630b75f2ab8f17857711107587e3197d",
+      "properties": [
+        "approvalPolicy",
+        "approvalsReviewer",
+        "clientUserMessageId",
+        "cwd",
+        "effort",
+        "input",
+        "model",
+        "outputSchema",
+        "personality",
+        "sandboxPolicy",
+        "serviceTier",
+        "summary",
+        "threadId"
+      ]
+    },
+    "ServerRequest.json": {
+      "source": "/private/tmp/0x2f-appserver-stable-schema/ServerRequest.json",
+      "sha256": "e5ae9078cddac333262ae392fe25558d6054b77e4beb00784b77cf606849d063",
+      "properties": []
+    },
+    "v2/ThreadTokenUsageUpdatedNotification.json": {
+      "source": "/private/tmp/0x2f-appserver-stable-schema/v2/ThreadTokenUsageUpdatedNotification.json",
+      "sha256": "aba4f6c7e4a19b2b842c08ee793b57000c07dafd57b922ad0d8e7c76609108c2",
+      "properties": [
+        "threadId",
+        "tokenUsage",
+        "turnId"
+      ]
+    }
+  },
+  "experimental": {
+    "v2/ThreadStartParams.json": {
+      "source": "/private/tmp/0x2f-appserver-experimental-schema/v2/ThreadStartParams.json",
+      "sha256": "25f490368ec6df52a2a3b82a5469d2413307eb93439121b309f415b5648eee7a",
+      "properties": [
+        "allowProviderModelFallback",
+        "approvalPolicy",
+        "approvalsReviewer",
+        "baseInstructions",
+        "config",
+        "cwd",
+        "developerInstructions",
+        "dynamicTools",
+        "environments",
+        "ephemeral",
+        "experimentalRawEvents",
+        "historyMode",
+        "mockExperimentalField",
+        "model",
+        "modelProvider",
+        "multiAgentMode",
+        "permissions",
+        "personality",
+        "projectId",
+        "runtimeWorkspaceRoots",
+        "sandbox",
+        "selectedCapabilityRoots",
+        "serviceName",
+        "serviceTier",
+        "sessionStartSource",
+        "threadSource"
+      ]
+    },
+    "v2/TurnStartParams.json": {
+      "source": "/private/tmp/0x2f-appserver-experimental-schema/v2/TurnStartParams.json",
+      "sha256": "95f35a9f01beea390cc4e478b4030e46ef37e5d769438d50f40b7aeabbf1ad74",
+      "properties": [
+        "additionalContext",
+        "approvalPolicy",
+        "approvalsReviewer",
+        "clientUserMessageId",
+        "collaborationMode",
+        "cwd",
+        "effort",
+        "environments",
+        "input",
+        "model",
+        "multiAgentMode",
+        "outputSchema",
+        "permissions",
+        "personality",
+        "responsesapiClientMetadata",
+        "runtimeWorkspaceRoots",
+        "sandboxPolicy",
+        "serviceTier",
+        "summary",
+        "threadId"
+      ]
+    },
+    "ServerRequest.json": {
+      "source": "/private/tmp/0x2f-appserver-experimental-schema/ServerRequest.json",
+      "sha256": "41187d1422afe9890b528749d13c497fbfecb8cb1ae6dd3de1a2a82d7b4ba687",
+      "properties": []
+    },
+    "v2/ThreadTokenUsageUpdatedNotification.json": {
+      "source": "/private/tmp/0x2f-appserver-experimental-schema/v2/ThreadTokenUsageUpdatedNotification.json",
+      "sha256": "aba4f6c7e4a19b2b842c08ee793b57000c07dafd57b922ad0d8e7c76609108c2",
+      "properties": [
+        "threadId",
+        "tokenUsage",
+        "turnId"
+      ]
+    }
+  },
+  "commands": [
+    "codex app-server generate-json-schema --out <stable>",
+    "codex app-server generate-json-schema --experimental --out <experimental>"
+  ],
+  "stableHasDynamicTools": false,
+  "experimentalOnlyThreadStartFields": [
+    "allowProviderModelFallback",
+    "dynamicTools",
+    "environments",
+    "experimentalRawEvents",
+    "historyMode",
+    "mockExperimentalField",
+    "multiAgentMode",
+    "permissions",
+    "projectId",
+    "runtimeWorkspaceRoots",
+    "selectedCapabilityRoots"
+  ]
+}

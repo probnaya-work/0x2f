@@ -26,7 +26,7 @@ export async function foregroundPreflight({ env = process.env, home = os.homedir
     if (!/Logged in using ChatGPT/.test(login.stdout + login.stderr)) return { eligible: false, reason: 'Harness did not confirm ChatGPT authentication.' };
     if (!help.stdout.includes('--ignore-user-config')) return { eligible: false, reason: 'Installed CLI cannot select its default without inheriting a possibly incompatible user model.' };
     const ignoredUserModel = config.match(/^model\s*=\s*"([^"\n]+)"/m)?.[1] ?? null;
-    return { eligible: true, evidence: { authMethod: 'chatgpt', binary, binaryDigest: handoffHash(bytes), version: version.stdout.trim(), configDigest: handoffHash(config), modelResolution: { source: 'installed-cli-default', option: '--ignore-user-config', ignoredUserModel, requestedModel: null, reason: 'Delegate account default to the installed CLI; do not translate product/UI model names.' }, trustClass: 'foreground-subscription', hardSpendingCeilings: false, sandbox: 'workspace-write' } };
+    return { eligible: true, evidence: { authMethod: 'chatgpt', binary, binaryDigest: handoffHash(bytes), version: version.stdout.trim(), configDigest: handoffHash(config), modelResolution: { source: 'installed-cli-default', option: '--ignore-user-config', ignoredUserModel, requestedModel: null, reason: 'Delegate account default to the installed CLI; do not translate product/UI model names.' }, trustClass: 'foreground-subscription', opaqueAgentLoop: true, hardSpendingCeilings: false, sandbox: 'workspace-write' } };
   } catch { return { eligible: false, reason: 'Existing subscription/configuration could not be established without credential changes.' }; }
 }
 

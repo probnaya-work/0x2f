@@ -7,7 +7,7 @@ import { workEvent } from './events.mjs';
 import { createHandoff, verifyHandoff, handoffHash as hash, engineeringIntent } from './engineering-handoff.mjs';
 import { engineeringDirectory, assertEngineeringWorkspace } from './engineering-workspace.mjs';
 import { engineeringInventory as inventory, freezeEngineering as freeze, verifyEngineeringArtifact as verifyArtifact, mutateEngineering as mutate, engineeringRun as makeRun, engineeringStop as stopped } from './engineering.mjs';
-import { economicDispatchBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
+import { economicDispatchBlock,economicProviderBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
 import { confirmEngineeringReview } from './engineering-review.mjs';
 import { engineeringQualified, engineeringReservationFits, engineeringSettleUsage, executeEngineeringCall } from './engineering.mjs';
 
@@ -87,13 +87,18 @@ export async function runEngineeringPlaybook({ store, slug, token, providers, qu
     for (const id of candidates.filter(id => !(s.unavailable ?? []).includes(id))) {
       const p = providers.getProvider(id);
       const capable = p && (!p.capabilities?.engineeringPurposes || p.capabilities.engineeringPurposes.includes(purpose));
-      const proof = capable && providers.available(id) ? await qualify(p, config, { purpose }) : null;
+      const excluded=economicProviderBlock(p,economicPolicy);
+      const proof = capable && !excluded && providers.available(id) ? await qualify(p, config, { purpose }) : null;
       const valid = engineeringQualified(proof, foreground);
-      considered.push({ provider: id, reason: !capable ? 'capability_mismatch' : !providers.available(id) ? 'unavailable' : !valid ? 'execution_unqualified' : 'qualified' });
+      considered.push({ provider: id, reason: excluded ?? (!capable ? 'capability_mismatch' : !providers.available(id) ? 'unavailable' : !valid ? 'execution_unqualified' : 'qualified') });
       if(valid)qualified.push({provider:p,proof});
       if (!selected && valid) selected = { provider: p, proof };
     }
     if(economicPolicy&&qualified.length)selected=rankEconomicCandidates(qualified,economicPolicy)[0]??qualified[0];
+    if(!selected&&considered.some(c=>c.reason==='opaque_agent_loop')) {
+      task=await update(t=>({...t,engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose,provider:null,reason:'opaque_agent_loop',considered}]}}));
+      return stop('opaque_agent_loop','Opaque executors cannot enter bounded small-task AUTO. No provider was called.');
+    }
     if (!selected) return stop('execution_unqualified', 'No executor is qualified for this trust class and purpose; unattended remains blocked.');
     const { provider, proof } = selected;
     const costBlock=economicDispatchBlock(task,proof,0);

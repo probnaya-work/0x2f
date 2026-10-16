@@ -1,0 +1,43 @@
+{
+  "version": "codex-cli 0.149.1",
+  "experimental": true,
+  "disabledFeatures": [
+    "shell_tool",
+    "multi_agent",
+    "multi_agent_v2",
+    "plugins",
+    "apps",
+    "tool_suggest",
+    "skill_search",
+    "image_generation",
+    "in_app_browser",
+    "view_image",
+    "goals",
+    "browser_use",
+    "computer_use",
+    "code_mode_host",
+    "hooks",
+    "enable_request_compression",
+    "shell_snapshot",
+    "workspace_dependencies"
+  ],
+  "mockModelRequests": 1,
+  "liveProviderCalls": 0,
+  "events": [
+    {
+      "responseId": 1
+    },
+    {
+      "method": "remoteControl/status/changed"
+    },
+    {
+      "method": "thread/status/changed"
+    },
+    {
+      "responseId": 2
+    }
+  ],
+  "automaticTurnReplay": false,
+  "automaticToolReplay": false,
+  "originalUnresolvedCallPreservedAsUncertain": true
+}

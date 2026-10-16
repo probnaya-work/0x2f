@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "ccef3dc585716d6c9fc23bd29ea74a655313604e",
+  "verdict": "NO-GO — app-server также не предоставляет необходимую boundary",
+  "missingPrimitive": "Mandatory all-call dispatch/rejection and serialized-result gate before next internal model request",
+  "harness": {
+    "version": "codex-cli 0.149.1",
+    "nativeBinaryPath": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "sha256": "f0d8762236594359b60cfbe17f4c7e945a3ce8d1c91e74778838c968d250fb6c"
+  },
+  "processQualification": {
+    "passed": 9,
+    "failures": 0,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-appserver-targeted.log",
+      "sha256": "42b02e3afa49b1a4235455fb4994c809e88d1ba87d5a81c697d928e7db7a9604",
+      "bytes": 986
+    },
+    "experimentalTools": "qualification only; not registered in runtime"
+  },
+  "compatibilityTargeted": {
+    "passed": 62,
+    "failures": 0,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-appserver-compatibility.log",
+      "sha256": "94f9e66f08e76305a75e402fc811a14aad2d43ff06bec600e344c6b90dec9dc4",
+      "bytes": 5600
+    }
+  },
+  "finalRoutingTargeted": {
+    "passed": 26,
+    "failures": 0,
+    "exitCode": 0,
+    "overlapsCompatibilitySet": true,
+    "log": {
+      "path": "/private/tmp/0x2f-appserver-routing-final.log",
+      "sha256": "7ac95dd4b8ae013b703a88335f50bf89f25523b68418b3d1595183b35139b857",
+      "bytes": 2631
+    }
+  },
+  "fullSuite": {
+    "command": "OX2F_NATIVE_LAUNCHD=0 npm test",
+    "runs": 1,
+    "exitCode": 0,
+    "tests": 935,
+    "passed": 816,
+    "skippedNative": 119,
+    "failures": 0,
+    "durationMs": 86714.485916,
+    "log": {
+      "path": "/private/tmp/0x2f-appserver-full-suite.log",
+      "sha256": "8e4999a8c3f4990017ed073a582b58fe8a7fce0cfd742d6497bf1c1586994c06",
+      "bytes": 86881
+    }
+  },
+  "syntax": {
+    "javascriptFiles": 202,
+    "pythonFiles": 7,
+    "exitCodesChecked": true,
+    "failures": 0,
+    "npmRunCheckExit": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-appserver-syntax.log",
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+      "bytes": 274
+    }
+  },
+  "runtimeChanges": "Opaque capability facts and exclusion from both bounded small-task engineering AUTO drivers; no app-server adapter",
+  "codeFiles": {
+    "src/providers/codex.mjs": "baed7ea7af921e93904e2a9e0c8aa6c13bf34418ffd21f08b52f63a6fd036cb8",
+    "src/core/engineering-economics.mjs": "bd776716e5fedfb35feb111dded1f1d965388f836dbe0d0f721e3f49dadedcc8",
+    "src/core/engineering-foreground.mjs": "30d8758f84ea1297c78e8a50b77d6c4116a97a7f758b568d2762410c32687d15",
+    "src/core/engineering-playbook.mjs": "1eae01598dd02f28a3f6c4a9b7f1b3b6b008c724cd55986c67c609e40b85c74e",
+    "src/core/engineering.mjs": "118b52c9cd4e6f7ccb585e9fd2e37aa7a7cd0742ef9d46f305130b84560bca2b",
+    "test/codex-provider.test.mjs": "51e2f56dd5543e5c06b56225c2319612c3bffa461bc9ee196f11bc9e4f937a13",
+    "test/engineering-economics.test.mjs": "87ebee30bc4450b4ae99ab5581ba7aead32fa4b849e007fe857308e179d16446",
+    "test/codex-app-server-qualification.test.mjs": "d9659074b807d24ae71e9a2903da9cc500df1f794ddfc6e0d76a9724ec107d29",
+    "test/fixtures/codex-app-server-qualification.mjs": "ce017641c4be54fc657010fd103df4c610da1182ca23c17912295259c32f1ecd"
+  },
+  "liveProviderAttempts": 0,
+  "canary": "NOT RUN: full interaction boundary failed qualification",
+  "actualCanaryUsage": "not measured",
+  "money": "unknown",
+  "existingTokensExtractedCopiedOrPrinted": false,
+  "oauthFlowCreated": false,
+  "apiBillingConfigured": false,
+  "userManagedAuthInheritance": "not exercised; no credentials integration introduced",
+  "productionActivated": false,
+  "deliveryEffects": 0,
+  "qualificationFixtureDirectoriesRemaining": 0
+}

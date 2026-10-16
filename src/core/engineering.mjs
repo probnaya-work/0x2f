@@ -6,7 +6,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { withLock } from './lock.mjs';
 import { readBounded } from './durable.mjs';
-import { economicDispatchBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
+import { economicDispatchBlock,economicProviderBlock,economicOutcomeBlock,rankEconomicCandidates,saveEngineeringUsage } from './engineering-economics.mjs';
 import { makeRunRecord } from './runs.mjs';
 import { workEvent } from './events.mjs';
 import { createHandoff, verifyHandoff } from './engineering-handoff.mjs';
@@ -228,16 +228,21 @@ export async function runEngineeringTask(args) {
       if (deadline() || await cancelled()) return stop('deadline', 'Execution stopped at its wall-clock/cancellation boundary.');
       let selected = null;const qualified=[];
       const considered = [];
+      const economicPolicy=task.engineering.economics?.policy;
       for (const id of preferred) {
         const p = providers.getProvider(id);
-        const proof = p && providers.available(id) ? await qualify(p, config) : null;
+        const excluded=economicProviderBlock(p,economicPolicy);
+        const proof = p && !excluded && providers.available(id) ? await qualify(p, config) : null;
         const valid = engineeringQualified(proof, foreground);
-        considered.push({ provider: id, reason: !p || !providers.available(id) ? 'unavailable' : !valid ? 'hard_ceiling_unqualified' : 'qualified' });
+        considered.push({ provider: id, reason: excluded ?? (!p || !providers.available(id) ? 'unavailable' : !valid ? 'hard_ceiling_unqualified' : 'qualified') });
         if(valid)qualified.push({provider:p,proof});
         if (valid && !selected) selected = { provider: p, proof };
       }
-      const economicPolicy=task.engineering.economics?.policy;
       if(economicPolicy&&qualified.length)selected=rankEconomicCandidates(qualified,economicPolicy)[0]??qualified[0];
+      if(!selected&&considered.some(c=>c.reason==='opaque_agent_loop')) {
+        task=await update(t=>({...t,engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose:prior?'fix':'implement',provider:null,reason:'opaque_agent_loop',considered}]}}));
+        return stop('opaque_agent_loop','Opaque executors cannot enter bounded small-task AUTO. No provider was called.');
+      }
       if (!selected) return stop('execution_unqualified', 'No executor proves the required money/token/model-call/provider-call hard ceilings. No provider was called.');
       const { provider, proof } = selected;
       const costBlock=economicDispatchBlock(task,proof,0);

@@ -116,3 +116,17 @@ for(const playbook of [true,false])test(`observed token overrun blocks READY in 
  const f=await economicFixture(t,{config:{playbook},execute:async()=>({status:'ready',result:'Claimed completion',usage:{...zeroUsage,tokens:9000}})});
  const task=await runEngineeringTask({...f.args,trustClass:'foreground-subscription',qualify:qualified});assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'economic_usage_unknown_or_exhausted');assert.equal(f.calls.length,1);assert.equal(task.engineering.economics.aggregate.metrics.total.value,9000);
 });
+
+for(const playbook of [true,false])test(`bounded small AUTO excludes opaque executor before qualification in ${playbook?'playbook':'minimal'} driver`,async t=>{
+ const f=await economicFixture(t,{config:{playbook,providers:['primary']}});f.extra[0].capabilities.opaqueAgentLoop=true;let qualifications=0;
+ const task=await runEngineeringTask({...f.args,trustClass:'foreground-subscription',qualify:p=>{qualifications++;return qualified(p);}});
+ assert.equal(qualifications,0);assert.equal(f.calls.length,0);assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'opaque_agent_loop');assert.equal(task.engineering.decisions.at(-1).considered[0].reason,'opaque_agent_loop');
+});
+test('opaque proof cannot enter bounded small execution even with a zero-token maximum',async t=>{
+ const f=await economicFixture(t);assert.equal(economicDispatchBlock(f.task,{maximum:zeroUsage,evidence:{opaqueAgentLoop:true}},0),'opaque_agent_loop');
+});
+test('bounded small AUTO skips opaque primary and completes through qualified alternative',async t=>{
+ const f=await economicFixture(t);f.extra[0].capabilities.opaqueAgentLoop=true;const qualifications=[];
+ const task=await runEngineeringTask({...f.args,trustClass:'foreground-subscription',qualify:p=>{qualifications.push(p.id);return qualified(p);}});
+ assert.equal(task.status,'ready',task.blockedOn?.text);assert.deepEqual(qualifications,['secondary']);assert.deepEqual(f.calls.map(c=>c.id),['secondary']);assert.equal(task.engineering.decisions[0].considered[0].reason,'opaque_agent_loop');
+});

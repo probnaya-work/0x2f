@@ -117,6 +117,13 @@ export const codexProvider = {
   id: "codex",
   displayName: "Codex",
   capabilities: {
+    // exec owns its internal loop; these are eligibility facts, not guards.
+    opaqueAgentLoop: true,
+    supportsHardInteractionLimits: false,
+    supportsHardModelCallLimits: false,
+    supportsHardTokenLimits: false,
+    costBoundedSmallTasks: false,
+    opaqueForegroundOnly: true,
     // Honest declaration, verified against codex-cli 0.149.1: resume
     // continues the same thread with prior context; exec reports structured
     // events and commands; but it never emits file_change items and has no
