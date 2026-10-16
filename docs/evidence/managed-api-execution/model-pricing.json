@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "scope": "Official documentation snapshot; account access and live patch quality not measured",
+  "models": [
+    {
+      "id": "gpt-5.4-mini-2026-03-17",
+      "capabilities": [
+        "responses",
+        "function-calling",
+        "small-code-patch"
+      ],
+      "reasoningEffort": "none",
+      "price": {
+        "currency": "USD",
+        "perMillion": {
+          "input": 0.75,
+          "cachedInput": 0.075,
+          "output": 4.5
+        },
+        "observedAt": "2026-10-16T15:03:51Z",
+        "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+        "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+        "counterFee": "unknown"
+      },
+      "capabilitySource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+    }
+  ],
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 2,
+    "countRequests": 2,
+    "responsesRequests": 4,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "predicted": {
+    "currency": "USD",
+    "inferenceUpperUsd": 0.024576,
+    "counterFee": "unknown",
+    "totalUpperUsd": null,
+    "inputTokens": 8192,
+    "outputTokens": 4096,
+    "totalInferenceTokens": 12288,
+    "pricing": {
+      "currency": "USD",
+      "perMillion": {
+        "input": 0.75,
+        "cachedInput": 0.075,
+        "output": 4.5
+      },
+      "observedAt": "2026-10-16T15:03:51Z",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+      "counterFee": "unknown"
+    }
+  },
+  "countingSource": "https://developers.openai.com/api/docs/guides/token-counting",
+  "countEndpointSource": "https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count",
+  "liveGate": "Unknown complete attempt cost blocks all native HTTP; zero counter fee exists only in qualification fixtures."
+}

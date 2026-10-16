@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "9a674180270c35764b9e612e569a680b97efc89c",
+  "implementationCommit": "5cf2b3a567c1fb14a8cb3b673b6a3c49da1825d5",
+  "offlineVerdict": "GO: offline managed lane implementation and mock qualification",
+  "liveForegroundVerdict": "NO-GO / not exercised: OPENAI_API_KEY absent and complete cost proof unavailable",
+  "unattendedVerdict": "NO-GO",
+  "targetedCompatibility": {
+    "tests": 102,
+    "passed": 102,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 78710.794542,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-targeted-final.log",
+      "sha256": "61755d0e450cc1db59916a31d548fc5b09d13d7cee4c24519b4dc8773b2e8986",
+      "bytes": 9462
+    }
+  },
+  "opaqueAndProjectionCompatibility": {
+    "tests": 23,
+    "passed": 23,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 2258.930959,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-provider-compat.log",
+      "sha256": "e89f5315744efe52ce372c15342902a5e05ebf86272983cf32958fbbe2caa717",
+      "bytes": 2026
+    }
+  },
+  "finalCandidateTargeted": {
+    "tests": 5,
+    "passed": 5,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 23158.385333,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-final-candidate.log",
+      "sha256": "d0c46af5c51ca220a4ec103ca7e83933d21c0e8534fa05f2d7036cf3bcb72e2b",
+      "bytes": 616
+    }
+  },
+  "finalCredentialIntentGuards": {
+    "tests": 2,
+    "passed": 2,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 8984.254875,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-final-guards.log",
+      "sha256": "5656afa93a65b522e58cccd0af3ed89ab58ce283b9576d376842703373935751",
+      "bytes": 283
+    }
+  },
+  "postFullSuiteTargeted": {
+    "tests": 7,
+    "passed": 7,
+    "failures": 0,
+    "skipped": 0,
+    "durationMs": 11417.476708,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-post-suite-budget.log",
+      "sha256": "e70ad98ff34b2dfc0213e83abb396922afaed04eaad55a186457b903d6e780c9",
+      "bytes": 790
+    }
+  },
+  "targetedSetsOverlap": true,
+  "fullSuite": {
+    "tests": 973,
+    "passed": 854,
+    "failures": 0,
+    "skipped": 119,
+    "durationMs": 140220.802125,
+    "exitCode": 0,
+    "log": {
+      "path": "/private/tmp/0x2f-managed-full-suite.log",
+      "sha256": "a743629785f3a480f6fd3965c456ea41d4099b47007a028db86ac3c5f690f91f",
+      "bytes": 90261
+    },
+    "runs": 1,
+    "command": "env -u OPENAI_API_KEY OX2F_NATIVE_LAUNCHD=0 OX2F_MANAGED_EVIDENCE_DIR=/private/tmp/0x2f-managed-offline-evidence node --test 'test/*.test.mjs'",
+    "sameRunnerAsNpmTest": true,
+    "finalDeltaNotIncluded": "Two-line managed_existing_usage preflight guard refusing previous runs/ledgers/spent/uncertain Task budget, plus its regression. Final delta passes 7 post-suite targeted tests; full suite intentionally not repeated."
+  },
+  "syntax": {
+    "npmRunCheckExit": 0,
+    "javascriptFiles": 206,
+    "pythonFiles": 7,
+    "exitCodesChecked": true,
+    "failures": 0,
+    "logs": [
+      {
+        "path": "/private/tmp/0x2f-managed-syntax-final.log",
+        "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+        "bytes": 274
+      },
+      {
+        "path": "/private/tmp/0x2f-managed-exit-checked-syntax.log",
+        "sha256": "8b61b03dd210ace3fc299e502592ab8c75f6ebf7c3a9f323f817406d714561e6",
+        "bytes": 51
+      }
+    ]
+  },
+  "finalCodeHashes": {
+    "src/core/engineering-diff.mjs": "9a46464ac53d4d145db0b2b9ecace2d4d892ca5de0541244799491e97ee9eb7a",
+    "src/core/engineering-economics.mjs": "f05083508622aea1dda414b52ffc0dd8759ad9bc9a0ae7cac72650fbb0bcd0a9",
+    "src/core/engineering-foreground.mjs": "7f15ef91e14f17664de93228d4ea8cd6a244df2fd8f1d9ff508edbfb0fb98c36",
+    "src/core/engineering-managed.mjs": "1fc742027671863f08ce783b80cffae509196593844969e1cb3e92d57191be62",
+    "src/core/engineering-workspace.mjs": "180cc4f0330d1052961aac7c942f2e8da393d1bfabf6b4d0dd782bdc10fa55f8",
+    "src/core/engineering.mjs": "3b68abeb659224d52a9a81b36c5478fc7834ae6bb0dba049505b516091b77602",
+    "src/core/lock.mjs": "097c6eb5bc773d9633dec727ed7f4675103369e9f4705bd3006239151b16a5f0",
+    "src/core/workflow-credentials.mjs": "bb254d3f65305e9cff6d6f4862c8f821fe541ac213799bd2f0c4acdb627efb28",
+    "src/providers/managed-openai.mjs": "2bf20bc2dd70fa8e013e48ce3bca557043ec8c4c91db039d53d820cf9f30d8ec",
+    "src/providers/opencode.mjs": "09ca23b4b5f9a331839ece3b5265950adb05415aba8a3d3324cba392f17db229",
+    "src/recover.mjs": "cd7d3b410e53ebef062f78bc5ae95a7ec53da079c0945c34fafcd407f5869303",
+    "src/web/workflow.mjs": "bc864c50d8a903be6a6bc8b18eb00a505e6a4d9f5188b5c1ae3bc7d956ffe2bd",
+    "test/engineering-managed.test.mjs": "f2ca964db4244dc24b6f3e2568faa74769dd5bb4669296eeeac66c4b19915b91",
+    "test/fixtures/managed-crash-worker.mjs": "d6018378be9559e8719e728b0083739d61a984727eb04495c3dd5da9763923c6"
+  },
+  "normalFlow": {
+    "path": "docs/evidence/managed-api-execution/normal-flow.json",
+    "sha256": "3b991f1403cdc2de5e9f579bb07a5b5fa8524cfb231f41b39a51da69b17be420",
+    "bytes": 44800
+  },
+  "actualLiveProviderRequests": 0,
+  "actualLiveInferenceRequests": 0,
+  "liveCanary": "NOT RUN",
+  "actualCanaryTokens": null,
+  "actualCanaryCost": null,
+  "apiKeyPresent": false,
+  "oauthAccessedForManagedLane": false,
+  "productionActivated": false,
+  "deliveryEffects": 0,
+  "providerMonthlyProjectSpendingLimit": "not implemented; required before unattended"
+}

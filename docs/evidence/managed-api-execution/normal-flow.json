@@ -1,0 +1,1264 @@
+{
+  "kind": "offline mock only; counter fee zero is a fixture assumption",
+  "task": {
+    "id": 1,
+    "slug": "001-fix-parser-without-changing-public-api-or-delive",
+    "title": "Fix parser without changing public API or delivering it.",
+    "brief": "Fix parser without changing public API or delivering it.",
+    "engineering": {
+      "schemaVersion": 1,
+      "revision": 27,
+      "config": {
+        "schemaVersion": 1,
+        "enabled": true,
+        "playbook": true,
+        "currency": "USD",
+        "providers": [
+          "primary",
+          "secondary"
+        ],
+        "reviewProviders": [
+          "reviewer"
+        ],
+        "files": [
+          "src/id.mjs",
+          "test/id.test.mjs"
+        ],
+        "writePaths": [
+          "src/id.mjs"
+        ],
+        "check": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/id.test.mjs"
+        ],
+        "limits": {
+          "moneyMicros": 250000,
+          "tokens": 20000,
+          "modelCalls": 2,
+          "providerCalls": 5,
+          "wallClockMs": 30000,
+          "implementationAttempts": 1,
+          "agentRuns": 1
+        },
+        "policy": "engineering-continuity-v1",
+        "checkDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+        "reviewCheckPins": {},
+        "workspace": {
+          "repository": "/private/tmp/0x2f-playbook-5pMrbg",
+          "ref": "HEAD"
+        }
+      },
+      "configDigest": "42c382a8c840f28b7ea26965690f339724fb6d8210f4fd7c4c294b40dc27ceca",
+      "driver": {
+        "token": "6699e902-a0fe-48c1-96c0-006a626fe7d8",
+        "pid": 20081,
+        "state": "completed"
+      },
+      "decisions": [
+        {
+          "purpose": "implement",
+          "provider": "managed-openai",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "reason": "minimum-qualified-managed-model",
+          "lane": "managed-api",
+          "opaqueFallback": false
+        }
+      ],
+      "budget": {
+        "limits": {
+          "moneyMicros": 250000,
+          "tokens": 20000,
+          "modelCalls": 2,
+          "providerCalls": 5,
+          "wallClockMs": 30000,
+          "implementationAttempts": 1,
+          "agentRuns": 1
+        },
+        "confirmed": {
+          "moneyMicros": 0,
+          "tokens": 0,
+          "modelCalls": 0,
+          "providerCalls": 0
+        },
+        "reservations": [],
+        "uncertain": []
+      },
+      "verification": {
+        "schemaVersion": 1,
+        "run": 2,
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+          "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+        },
+        "argv": [
+          "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+          "--test",
+          "test/id.test.mjs"
+        ],
+        "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+        "cwd": "/private/tmp/0x2f-playbook-5pMrbg/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+        "code": 0,
+        "error": null,
+        "output": "✔ test/id.test.mjs (61.547042ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.535208\n",
+        "groupClosed": true,
+        "sourceUnchanged": true,
+        "outputDigest": "2341c5c7391b97a1196dd7eada96570b35251cda4e8704645a5672254f6374b0"
+      },
+      "next": "accept",
+      "playbook": {
+        "nextPurpose": "investigate",
+        "reason": "initial_executor",
+        "agentRuns": 0,
+        "implementationAttempts": 0,
+        "investigationAttempts": 0,
+        "reviewCycles": 0,
+        "dispatch": null,
+        "review": {
+          "path": "runs/2/review.json",
+          "digest": "473d53cd4c43d85e876220264cd92f617963caf70928c99434b7422de34611c2"
+        }
+      },
+      "workspace": {
+        "schemaVersion": 1,
+        "taskId": 1,
+        "slug": "001-fix-parser-without-changing-public-api-or-delive",
+        "repository": "/private/tmp/0x2f-playbook-5pMrbg",
+        "commonDir": "/private/tmp/0x2f-playbook-5pMrbg/.git",
+        "requestedRef": "HEAD",
+        "commit": "804fe5374657c9b4e1ef4d6acd8f620a319dd992",
+        "path": "/private/tmp/0x2f-playbook-5pMrbg/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+        "identity": "301dc624f49aab5686a50e6cf2b23f48d1e591d9b94425e7b5f341d885312eae",
+        "state": "ready"
+      },
+      "economics": {
+        "policy": {
+          "version": "engineering-economics-v1",
+          "classification": "small",
+          "signals": {
+            "writeFiles": 1,
+            "relevantFiles": 2,
+            "directories": 1,
+            "sensitive": false
+          },
+          "hard": {
+            "inputBytes": 8192,
+            "attempts": 1,
+            "driverDeadlineMs": 30000
+          },
+          "soft": {
+            "totalTokens": 8000,
+            "toolOutputBytes": 4096
+          },
+          "unknown": [
+            "providerMoney",
+            "internalCalls",
+            "harnessInjectedContext",
+            "agentToolOutputLimit",
+            "processTreeTermination"
+          ]
+        },
+        "attempts": [
+          {
+            "run": 1,
+            "path": "runs/1/usage.json",
+            "digest": "3030fbc4a47982b25a67f699378ad52cb8fe1e345a74e39f3e74b0d722075140"
+          }
+        ],
+        "aggregate": {
+          "attempts": 1,
+          "metrics": {
+            "input": {
+              "value": 200,
+              "observed": 200,
+              "unknownAttempts": 0
+            },
+            "cachedInput": {
+              "value": 20,
+              "observed": 20,
+              "unknownAttempts": 0
+            },
+            "output": {
+              "value": 40,
+              "observed": 40,
+              "unknownAttempts": 0
+            },
+            "reasoning": {
+              "value": null,
+              "observed": 0,
+              "unknownAttempts": 1
+            },
+            "total": {
+              "value": 240,
+              "observed": 240,
+              "unknownAttempts": 0
+            }
+          },
+          "money": {
+            "value": 317,
+            "currency": "USD"
+          },
+          "partial": false
+        },
+        "aggregateRef": {
+          "path": "usage/task-after-1.json",
+          "digest": "c512aa037d14cad344da39fe0e53d5ced8ab5e0ad9b3d4e0b3ca023a025c7b37"
+        }
+      },
+      "managed": {
+        "lane": "managed-api",
+        "state": "READY",
+        "limits": {
+          "attempts": 1,
+          "packetBytes": 8192,
+          "files": 4,
+          "sourceBytes": 65536,
+          "reads": 4,
+          "patches": 1,
+          "tools": 6,
+          "toolResultBytes": 24576,
+          "readResultBytes": 4096,
+          "serializedInputBytes": 32768,
+          "inferenceRequests": 2,
+          "countRequests": 2,
+          "responsesRequests": 4,
+          "inputTokens": 8192,
+          "inputTokensPerRequest": 4096,
+          "outputTokens": 4096,
+          "outputTokensPerRequest": 2048,
+          "deadlineMs": 120000,
+          "costUsd": 0.25
+        },
+        "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+        "requests": 4,
+        "inferences": 2,
+        "tools": 2,
+        "reads": 1,
+        "patches": 1,
+        "resultBytes": 158,
+        "inputBytes": 9604,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "predicted": {
+          "currency": "USD",
+          "inferenceUpperUsd": 0.024576,
+          "counterFee": 0,
+          "totalUpperUsd": 0.024576,
+          "inputTokens": 8192,
+          "outputTokens": 4096,
+          "totalInferenceTokens": 12288,
+          "pricing": {
+            "currency": "USD",
+            "perMillion": {
+              "input": 0.75,
+              "cachedInput": 0.075,
+              "output": 4.5
+            },
+            "observedAt": "2026-10-16T15:03:51Z",
+            "source": "offline fixture price qualification",
+            "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+            "counterFee": 0
+          }
+        },
+        "inputTokens": 200,
+        "inputReserved": 200,
+        "outputTokens": 40,
+        "outputReserved": 4096,
+        "counts": 2,
+        "modelQueries": 1,
+        "pendingRequest": null,
+        "baseline": {
+          "path": "runs/1/inputs/manifest.json",
+          "digest": "a34c910decb5963ef8380f8abfd54419038ec8015dbbd4acd0613a9c08150ebd",
+          "contentDigest": "a0775210a01a5a6cf3449e863b72e1f5d90dac33d0c28029e225ab0bcf20364d"
+        },
+        "pendingInputTokens": 0,
+        "actualUsage": {
+          "input": 200,
+          "cachedInput": 20,
+          "output": 40,
+          "total": 240
+        },
+        "calculatedInferenceCostUsd": 0.0003165,
+        "providerReportedCost": "unknown",
+        "counterCost": "unknown",
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+          "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+        }
+      },
+      "review": {
+        "path": "runs/2/review.json",
+        "digest": "473d53cd4c43d85e876220264cd92f617963caf70928c99434b7422de34611c2"
+      }
+    },
+    "status": "ready",
+    "execution": {
+      "provider": "managed-openai",
+      "launchToken": "6699e902-a0fe-48c1-96c0-006a626fe7d8",
+      "node": "local",
+      "workspace": "local"
+    },
+    "runs": [
+      {
+        "run": 1,
+        "provider": "managed-openai",
+        "node": "local",
+        "workspace": "local",
+        "startedAt": "2026-10-16T15:19:05.200Z",
+        "requestedProvider": "auto",
+        "outcome": "ready",
+        "attempts": 1,
+        "purpose": "implement",
+        "executor": {
+          "kind": "managed",
+          "harness": "0x2f-responses-v1",
+          "requestedModel": "gpt-5.4-mini-2026-03-17",
+          "observedModel": "gpt-5.4-mini-2026-03-17"
+        },
+        "usage": {
+          "confirmed": null,
+          "estimated": null,
+          "uncertainty": "not_started"
+        },
+        "permissions": {
+          "tools": [
+            "read_task_file",
+            "submit_patch",
+            "request_context_expansion"
+          ],
+          "writePaths": [
+            "src/id.mjs"
+          ],
+          "externalActions": false
+        },
+        "usageLedger": {
+          "run": 1,
+          "path": "runs/1/usage.json",
+          "digest": "3030fbc4a47982b25a67f699378ad52cb8fe1e345a74e39f3e74b0d722075140"
+        },
+        "completedAt": "2026-10-16T15:19:10.389Z",
+        "artifact": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+          "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+        },
+        "input": {
+          "path": "runs/1/inputs/manifest.json",
+          "digest": "a34c910decb5963ef8380f8abfd54419038ec8015dbbd4acd0613a9c08150ebd",
+          "contentDigest": "a0775210a01a5a6cf3449e863b72e1f5d90dac33d0c28029e225ab0bcf20364d"
+        }
+      },
+      {
+        "run": 2,
+        "provider": "local-checks",
+        "node": "local",
+        "workspace": "local",
+        "startedAt": "2026-10-16T15:19:10.500Z",
+        "requestedProvider": "auto",
+        "outcome": "ready",
+        "attempts": 1,
+        "purpose": "verify",
+        "executor": {
+          "kind": "local"
+        },
+        "usage": {
+          "confirmed": null,
+          "estimated": null,
+          "uncertainty": "not_started"
+        },
+        "input": {
+          "path": "runs/1/artifacts/manifest.json",
+          "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+          "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+        },
+        "completedAt": "2026-10-16T15:19:10.902Z",
+        "verification": {
+          "schemaVersion": 1,
+          "run": 2,
+          "artifact": {
+            "path": "runs/1/artifacts/manifest.json",
+            "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+            "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+          },
+          "argv": [
+            "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+            "--test",
+            "test/id.test.mjs"
+          ],
+          "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+          "cwd": "/private/tmp/0x2f-playbook-5pMrbg/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+          "code": 0,
+          "error": null,
+          "output": "✔ test/id.test.mjs (61.547042ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.535208\n",
+          "groupClosed": true,
+          "sourceUnchanged": true,
+          "outputDigest": "2341c5c7391b97a1196dd7eada96570b35251cda4e8704645a5672254f6374b0"
+        }
+      }
+    ],
+    "createdAt": "2026-10-16T15:19:05.302Z",
+    "updatedAt": "2026-10-16T15:19:11.041Z",
+    "pid": 20081
+  },
+  "journal": {
+    "attempt.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "model": {
+        "id": "gpt-5.4-mini-2026-03-17",
+        "capabilities": [
+          "responses",
+          "function-calling",
+          "small-code-patch"
+        ],
+        "reasoningEffort": "none",
+        "price": {
+          "currency": "USD",
+          "perMillion": {
+            "input": 0.75,
+            "cachedInput": 0.075,
+            "output": 4.5
+          },
+          "observedAt": "2026-10-16T15:03:51Z",
+          "source": "offline fixture price qualification",
+          "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+          "counterFee": 0
+        },
+        "capabilitySource": "https://developers.openai.com/api/docs/models/gpt-5.4-mini"
+      },
+      "limits": {
+        "attempts": 1,
+        "packetBytes": 8192,
+        "files": 4,
+        "sourceBytes": 65536,
+        "reads": 4,
+        "patches": 1,
+        "tools": 6,
+        "toolResultBytes": 24576,
+        "readResultBytes": 4096,
+        "serializedInputBytes": 32768,
+        "inferenceRequests": 2,
+        "countRequests": 2,
+        "responsesRequests": 4,
+        "inputTokens": 8192,
+        "inputTokensPerRequest": 4096,
+        "outputTokens": 4096,
+        "outputTokensPerRequest": 2048,
+        "deadlineMs": 120000,
+        "costUsd": 0.25
+      },
+      "predicted": {
+        "currency": "USD",
+        "inferenceUpperUsd": 0.024576,
+        "counterFee": 0,
+        "totalUpperUsd": 0.024576,
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "totalInferenceTokens": 12288,
+        "pricing": {
+          "currency": "USD",
+          "perMillion": {
+            "input": 0.75,
+            "cachedInput": 0.075,
+            "output": 4.5
+          },
+          "observedAt": "2026-10-16T15:03:51Z",
+          "source": "offline fixture price qualification",
+          "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+          "counterFee": 0
+        }
+      },
+      "packet": {
+        "schemaVersion": 1,
+        "brief": "Fix parser without changing public API or delivering it.",
+        "constraints": [],
+        "acceptance": {
+          "check": [
+            "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+            "--test",
+            "test/id.test.mjs"
+          ],
+          "scope": [
+            "src/id.mjs"
+          ]
+        },
+        "instructions": [],
+        "files": [
+          {
+            "id": "f1",
+            "path": "src/id.mjs",
+            "bytes": 39,
+            "sha256": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+            "writable": true
+          },
+          {
+            "id": "f2",
+            "path": "test/id.test.mjs",
+            "bytes": 121,
+            "sha256": "36f37ce53cb7dab7e00f86165aaded6e7c3eb4d61150bc77fb4e22e61d52fd68",
+            "writable": false
+          }
+        ],
+        "prohibited": [
+          "shell",
+          "network",
+          "tests",
+          "Git",
+          "commit",
+          "delivery"
+        ],
+        "loop": "read necessary IDs, then submit one patch; context expansion stops"
+      },
+      "inputDigest": "79a59eab578cbe0ce85d89933fd9c36dca384dfc4231e7f7f0003087b937c2b3",
+      "intent": "a9ab3212feb13f375bb2726c3cf70cb6cceaea009d465bae067aceaee96b23a2",
+      "at": "2026-10-16T15:19:06.800Z"
+    },
+    "request-1-intent.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "requestId": "31a7d7cc-8903-4a13-8efe-447cac9f3074",
+      "number": 1,
+      "kind": "model",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "attemptCostReservationUsd": 0.024576,
+      "reservation": null,
+      "remaining": {
+        "responses": 4,
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "costUsd": 0.225424
+      },
+      "allowedTools": [
+        "read_task_file",
+        "submit_patch",
+        "request_context_expansion"
+      ],
+      "body": {},
+      "at": "2026-10-16T15:19:06.997Z"
+    },
+    "request-1-receipt.json": {
+      "schemaVersion": 1,
+      "requestId": "31a7d7cc-8903-4a13-8efe-447cac9f3074",
+      "kind": "model",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "response": {
+        "id": "gpt-5.4-mini-2026-03-17"
+      },
+      "at": "2026-10-16T15:19:07.171Z"
+    },
+    "request-2-intent.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "requestId": "48bb80dc-a9c1-43c8-9e0b-e4c6eda536df",
+      "number": 2,
+      "kind": "count",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "78fbe9139f3a76041e5e025b4e550091ad746e9b388a0680e356400dcbffd70d",
+      "attemptCostReservationUsd": 0.024576,
+      "reservation": null,
+      "remaining": {
+        "responses": 4,
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "costUsd": 0.225424
+      },
+      "allowedTools": [
+        "read_task_file",
+        "submit_patch",
+        "request_context_expansion"
+      ],
+      "body": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "instructions": "Make only the requested small patch using the approved logical file IDs. Read necessary files in parallel, then submit_patch. At most two inference responses. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. If context is insufficient, request_context_expansion. Return a short result.",
+        "input": [
+          {
+            "role": "user",
+            "content": "{\"schemaVersion\":1,\"brief\":\"Fix parser without changing public API or delivering it.\",\"constraints\":[],\"acceptance\":{\"check\":[\"/opt/homebrew/Cellar/node/26.11.1/bin/node\",\"--test\",\"test/id.test.mjs\"],\"scope\":[\"src/id.mjs\"]},\"instructions\":[],\"files\":[{\"id\":\"f1\",\"path\":\"src/id.mjs\",\"bytes\":39,\"sha256\":\"168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db\",\"writable\":true},{\"id\":\"f2\",\"path\":\"test/id.test.mjs\",\"bytes\":121,\"sha256\":\"36f37ce53cb7dab7e00f86165aaded6e7c3eb4d61150bc77fb4e22e61d52fd68\",\"writable\":false}],\"prohibited\":[\"shell\",\"network\",\"tests\",\"Git\",\"commit\",\"delivery\"],\"loop\":\"read necessary IDs, then submit one patch; context expansion stops\"}"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "read_task_file",
+            "description": "Read only an approved logical file ID. No paths or commands.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "submit_patch",
+            "description": "Submit one scoped replacement patch, then stop. Each old_text must match exactly once.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "edits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file_id": {
+                        "type": "string"
+                      },
+                      "old_text": {
+                        "type": "string"
+                      },
+                      "new_text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file_id",
+                      "old_text",
+                      "new_text"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "edits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "request_context_expansion",
+            "description": "Stop for a user decision. No automatic context expansion or retry.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "at": "2026-10-16T15:19:07.625Z"
+    },
+    "request-2-receipt.json": {
+      "schemaVersion": 1,
+      "requestId": "48bb80dc-a9c1-43c8-9e0b-e4c6eda536df",
+      "kind": "count",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "78fbe9139f3a76041e5e025b4e550091ad746e9b388a0680e356400dcbffd70d",
+      "response": {
+        "object": "response.input_tokens",
+        "input_tokens": 100
+      },
+      "at": "2026-10-16T15:19:07.751Z"
+    },
+    "request-3-intent.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "requestId": "7385e190-21f2-4b9a-aa28-77af695414c0",
+      "number": 3,
+      "kind": "inference",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "783830841ab2d91b61c895da724283e40ac080cb2a4227bf28d1d709891002e0",
+      "attemptCostReservationUsd": 0.024576,
+      "reservation": {
+        "inputTokens": 100,
+        "outputTokens": 2048,
+        "inferenceCostUpperUsd": 0.024576,
+        "totalCostUpperUsd": 0.024576
+      },
+      "remaining": {
+        "responses": 3,
+        "inputTokens": 8092,
+        "outputTokens": 2048,
+        "costUsd": 0.225424
+      },
+      "allowedTools": [
+        "read_task_file",
+        "submit_patch",
+        "request_context_expansion"
+      ],
+      "body": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "instructions": "Make only the requested small patch using the approved logical file IDs. Read necessary files in parallel, then submit_patch. At most two inference responses. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. If context is insufficient, request_context_expansion. Return a short result.",
+        "input": [
+          {
+            "role": "user",
+            "content": "{\"schemaVersion\":1,\"brief\":\"Fix parser without changing public API or delivering it.\",\"constraints\":[],\"acceptance\":{\"check\":[\"/opt/homebrew/Cellar/node/26.11.1/bin/node\",\"--test\",\"test/id.test.mjs\"],\"scope\":[\"src/id.mjs\"]},\"instructions\":[],\"files\":[{\"id\":\"f1\",\"path\":\"src/id.mjs\",\"bytes\":39,\"sha256\":\"168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db\",\"writable\":true},{\"id\":\"f2\",\"path\":\"test/id.test.mjs\",\"bytes\":121,\"sha256\":\"36f37ce53cb7dab7e00f86165aaded6e7c3eb4d61150bc77fb4e22e61d52fd68\",\"writable\":false}],\"prohibited\":[\"shell\",\"network\",\"tests\",\"Git\",\"commit\",\"delivery\"],\"loop\":\"read necessary IDs, then submit one patch; context expansion stops\"}"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "read_task_file",
+            "description": "Read only an approved logical file ID. No paths or commands.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "submit_patch",
+            "description": "Submit one scoped replacement patch, then stop. Each old_text must match exactly once.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "edits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file_id": {
+                        "type": "string"
+                      },
+                      "old_text": {
+                        "type": "string"
+                      },
+                      "new_text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file_id",
+                      "old_text",
+                      "new_text"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "edits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "request_context_expansion",
+            "description": "Stop for a user decision. No automatic context expansion or retry.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "tool_choice": "auto",
+        "store": false,
+        "max_output_tokens": 2048,
+        "reasoning": {
+          "effort": "none"
+        },
+        "service_tier": "default"
+      },
+      "at": "2026-10-16T15:19:07.904Z"
+    },
+    "request-3-receipt.json": {
+      "schemaVersion": 1,
+      "requestId": "7385e190-21f2-4b9a-aa28-77af695414c0",
+      "kind": "inference",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "783830841ab2d91b61c895da724283e40ac080cb2a4227bf28d1d709891002e0",
+      "response": {
+        "id": "resp_1",
+        "model": "gpt-5.4-mini-2026-03-17",
+        "status": "completed",
+        "output": [
+          {
+            "type": "function_call",
+            "call_id": "read",
+            "name": "read_task_file",
+            "arguments": "{\"file_id\":\"f1\"}"
+          }
+        ],
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 20,
+          "total_tokens": 120,
+          "input_tokens_details": {
+            "cached_tokens": 10
+          }
+        }
+      },
+      "at": "2026-10-16T15:19:08.030Z"
+    },
+    "request-4-intent.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "requestId": "d6156206-24ac-429b-a2f0-650dfc99a228",
+      "number": 4,
+      "kind": "count",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "503addc964185ad5e3bcd980941a2cf10b01eb3bc8dcbe20fdcf59a60cec5f29",
+      "attemptCostReservationUsd": 0.024576,
+      "reservation": null,
+      "remaining": {
+        "responses": 2,
+        "inputTokens": 8092,
+        "outputTokens": 2048,
+        "costUsd": 0.225424
+      },
+      "allowedTools": [
+        "read_task_file",
+        "submit_patch",
+        "request_context_expansion"
+      ],
+      "body": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "instructions": "Make only the requested small patch using the approved logical file IDs. Read necessary files in parallel, then submit_patch. At most two inference responses. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. If context is insufficient, request_context_expansion. Return a short result.",
+        "input": [
+          {
+            "role": "user",
+            "content": "{\"schemaVersion\":1,\"brief\":\"Fix parser without changing public API or delivering it.\",\"constraints\":[],\"acceptance\":{\"check\":[\"/opt/homebrew/Cellar/node/26.11.1/bin/node\",\"--test\",\"test/id.test.mjs\"],\"scope\":[\"src/id.mjs\"]},\"instructions\":[],\"files\":[{\"id\":\"f1\",\"path\":\"src/id.mjs\",\"bytes\":39,\"sha256\":\"168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db\",\"writable\":true},{\"id\":\"f2\",\"path\":\"test/id.test.mjs\",\"bytes\":121,\"sha256\":\"36f37ce53cb7dab7e00f86165aaded6e7c3eb4d61150bc77fb4e22e61d52fd68\",\"writable\":false}],\"prohibited\":[\"shell\",\"network\",\"tests\",\"Git\",\"commit\",\"delivery\"],\"loop\":\"read necessary IDs, then submit one patch; context expansion stops\"}"
+          },
+          {
+            "type": "function_call",
+            "call_id": "read",
+            "name": "read_task_file",
+            "arguments": "{\"file_id\":\"f1\"}"
+          },
+          {
+            "type": "function_call_output",
+            "call_id": "read",
+            "output": "{\"file_id\":\"f1\",\"content\":\"export const parseTaskId = () => null;\\n\",\"truncated\":false}"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "read_task_file",
+            "description": "Read only an approved logical file ID. No paths or commands.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "submit_patch",
+            "description": "Submit one scoped replacement patch, then stop. Each old_text must match exactly once.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "edits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file_id": {
+                        "type": "string"
+                      },
+                      "old_text": {
+                        "type": "string"
+                      },
+                      "new_text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file_id",
+                      "old_text",
+                      "new_text"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "edits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "request_context_expansion",
+            "description": "Stop for a user decision. No automatic context expansion or retry.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "at": "2026-10-16T15:19:08.561Z"
+    },
+    "request-4-receipt.json": {
+      "schemaVersion": 1,
+      "requestId": "d6156206-24ac-429b-a2f0-650dfc99a228",
+      "kind": "count",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "503addc964185ad5e3bcd980941a2cf10b01eb3bc8dcbe20fdcf59a60cec5f29",
+      "response": {
+        "object": "response.input_tokens",
+        "input_tokens": 100
+      },
+      "at": "2026-10-16T15:19:08.722Z"
+    },
+    "request-5-intent.json": {
+      "schemaVersion": 1,
+      "taskId": 1,
+      "run": 1,
+      "attempt": "22c0d781-d31f-4569-8cac-7c5bcd4a68c4",
+      "requestId": "70c18ee9-cdc2-4b79-ab43-c2bb14deed3b",
+      "number": 5,
+      "kind": "inference",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "33e9104bb7b86e32433fb95b187012e9c001d099efeab213b95f2de44d88b2de",
+      "attemptCostReservationUsd": 0.024576,
+      "reservation": {
+        "inputTokens": 100,
+        "outputTokens": 2048,
+        "inferenceCostUpperUsd": 0.024576,
+        "totalCostUpperUsd": 0.024576
+      },
+      "remaining": {
+        "responses": 1,
+        "inputTokens": 7992,
+        "outputTokens": 0,
+        "costUsd": 0.225424
+      },
+      "allowedTools": [
+        "read_task_file",
+        "submit_patch",
+        "request_context_expansion"
+      ],
+      "body": {
+        "model": "gpt-5.4-mini-2026-03-17",
+        "instructions": "Make only the requested small patch using the approved logical file IDs. Read necessary files in parallel, then submit_patch. At most two inference responses. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. If context is insufficient, request_context_expansion. Return a short result.",
+        "input": [
+          {
+            "role": "user",
+            "content": "{\"schemaVersion\":1,\"brief\":\"Fix parser without changing public API or delivering it.\",\"constraints\":[],\"acceptance\":{\"check\":[\"/opt/homebrew/Cellar/node/26.11.1/bin/node\",\"--test\",\"test/id.test.mjs\"],\"scope\":[\"src/id.mjs\"]},\"instructions\":[],\"files\":[{\"id\":\"f1\",\"path\":\"src/id.mjs\",\"bytes\":39,\"sha256\":\"168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db\",\"writable\":true},{\"id\":\"f2\",\"path\":\"test/id.test.mjs\",\"bytes\":121,\"sha256\":\"36f37ce53cb7dab7e00f86165aaded6e7c3eb4d61150bc77fb4e22e61d52fd68\",\"writable\":false}],\"prohibited\":[\"shell\",\"network\",\"tests\",\"Git\",\"commit\",\"delivery\"],\"loop\":\"read necessary IDs, then submit one patch; context expansion stops\"}"
+          },
+          {
+            "type": "function_call",
+            "call_id": "read",
+            "name": "read_task_file",
+            "arguments": "{\"file_id\":\"f1\"}"
+          },
+          {
+            "type": "function_call_output",
+            "call_id": "read",
+            "output": "{\"file_id\":\"f1\",\"content\":\"export const parseTaskId = () => null;\\n\",\"truncated\":false}"
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "read_task_file",
+            "description": "Read only an approved logical file ID. No paths or commands.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "file_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "submit_patch",
+            "description": "Submit one scoped replacement patch, then stop. Each old_text must match exactly once.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "edits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "file_id": {
+                        "type": "string"
+                      },
+                      "old_text": {
+                        "type": "string"
+                      },
+                      "new_text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "file_id",
+                      "old_text",
+                      "new_text"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "edits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "type": "function",
+            "name": "request_context_expansion",
+            "description": "Stop for a user decision. No automatic context expansion or retry.",
+            "strict": true,
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ],
+        "tool_choice": "auto",
+        "store": false,
+        "max_output_tokens": 2048,
+        "reasoning": {
+          "effort": "none"
+        },
+        "service_tier": "default"
+      },
+      "at": "2026-10-16T15:19:08.851Z"
+    },
+    "request-5-receipt.json": {
+      "schemaVersion": 1,
+      "requestId": "70c18ee9-cdc2-4b79-ab43-c2bb14deed3b",
+      "kind": "inference",
+      "model": "gpt-5.4-mini-2026-03-17",
+      "inputDigest": "33e9104bb7b86e32433fb95b187012e9c001d099efeab213b95f2de44d88b2de",
+      "response": {
+        "id": "resp_2",
+        "model": "gpt-5.4-mini-2026-03-17",
+        "status": "completed",
+        "output": [
+          {
+            "type": "function_call",
+            "call_id": "submit_patch",
+            "name": "submit_patch",
+            "arguments": "{\"edits\":[{\"file_id\":\"f1\",\"old_text\":\"() => null\",\"new_text\":\"s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null\"}]}"
+          }
+        ],
+        "usage": {
+          "input_tokens": 100,
+          "output_tokens": 20,
+          "total_tokens": 120,
+          "input_tokens_details": {
+            "cached_tokens": 10
+          }
+        }
+      },
+      "at": "2026-10-16T15:19:08.972Z"
+    },
+    "tool-1-receipt.json": {
+      "callId": "read",
+      "tool": "read_task_file",
+      "bytes": 158,
+      "sourceDigest": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "read",
+        "output": "{\"file_id\":\"f1\",\"content\":\"export const parseTaskId = () => null;\\n\",\"truncated\":false}"
+      }
+    },
+    "tool-2-intent.json": {
+      "callId": "submit_patch",
+      "tool": "submit_patch",
+      "edits": [
+        {
+          "file": {
+            "id": "f1",
+            "path": "src/id.mjs",
+            "bytes": 39,
+            "sha256": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+            "writable": true
+          },
+          "before": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+          "after": "de333a57e227ec278293e610a70152dccf7ef17be8557301048c4c0ccee48de6",
+          "replacement": "export const parseTaskId = s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null;\n"
+        }
+      ]
+    },
+    "tool-2-receipt.json": {
+      "callId": "submit_patch",
+      "tool": "submit_patch",
+      "edits": [
+        {
+          "file_id": "f1",
+          "before": "168938d4c7d371f9918d4a732d4c17cb3712ba94112c2b7743fb7ce25537f2db",
+          "after": "de333a57e227ec278293e610a70152dccf7ef17be8557301048c4c0ccee48de6"
+        }
+      ]
+    },
+    "usage-1.json": {
+      "responseId": "resp_1",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 20,
+        "total_tokens": 120,
+        "input_tokens_details": {
+          "cached_tokens": 10
+        }
+      },
+      "counterInput": 100,
+      "semantics": "response-delta"
+    },
+    "usage-2.json": {
+      "responseId": "resp_2",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 20,
+        "total_tokens": 120,
+        "input_tokens_details": {
+          "cached_tokens": 10
+        }
+      },
+      "counterInput": 100,
+      "semantics": "response-delta"
+    }
+  },
+  "projection": [
+    "PURPOSE VERIFY · EXECUTOR local-checks · RUN 2",
+    "NEXT ACCEPT · REASON INITIAL_EXECUTOR",
+    "COST TOTAL UNKNOWN · inference calculation and provider charge are separate",
+    "LANE MANAGED API · READY · MODEL gpt-5.4-mini-2026-03-17 · NO OPAQUE FALLBACK",
+    "ENVELOPE 1 attempt · 2 inference + 2 count requests · 6 tools · 4 reads · 1 patch",
+    "MANAGED USAGE 4 Responses HTTP · 2 inference · 2 tools · 1 reads · 1 patches · 158 result bytes",
+    "BOUND 12288 inference tokens · TOTAL COST 0.024576 USD · INFERENCE COST ≤0.024576 USD",
+    "ACTUAL TOKENS 240 · CALCULATED INFERENCE USD 0.0003165 · PROVIDER COST UNKNOWN",
+    "USAGE TOTAL 240 · INPUT 200 · CACHED 20 · OUTPUT 40 · REASONING ? · ATTEMPTS 1",
+    "USAGE COST USD 317 micros",
+    "RESULT PATCH VERIFIED · ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b",
+    "ARTIFACT runs/1/artifacts/manifest.json",
+    "REVIEW runs/2/review.json · 473d53cd4c43d85e876220264cd92f617963caf70928c99434b7422de34611c2",
+    "WORKSPACE /private/tmp/0x2f-playbook-5pMrbg/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive · ref 804fe5374657c9b4e1ef4d6acd8f620a319dd992 · task-owned worktree",
+    "ROUTING implement → managed-openai · minimum-qualified-managed-model"
+  ],
+  "requests": [
+    {
+      "url": "/v1/models/gpt-5.4-mini-2026-03-17",
+      "inputDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "serializedBytes": 2
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "inputDigest": "78fbe9139f3a76041e5e025b4e550091ad746e9b388a0680e356400dcbffd70d",
+      "serializedBytes": 2224
+    },
+    {
+      "url": "/v1/responses",
+      "inputDigest": "783830841ab2d91b61c895da724283e40ac080cb2a4227bf28d1d709891002e0",
+      "serializedBytes": 2318
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "inputDigest": "503addc964185ad5e3bcd980941a2cf10b01eb3bc8dcbe20fdcf59a60cec5f29",
+      "serializedBytes": 2484
+    },
+    {
+      "url": "/v1/responses",
+      "inputDigest": "33e9104bb7b86e32433fb95b187012e9c001d099efeab213b95f2de44d88b2de",
+      "serializedBytes": 2578
+    }
+  ],
+  "verification": {
+    "schemaVersion": 1,
+    "run": 2,
+    "artifact": {
+      "path": "runs/1/artifacts/manifest.json",
+      "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+      "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+    },
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "--test",
+      "test/id.test.mjs"
+    ],
+    "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+    "cwd": "/private/tmp/0x2f-playbook-5pMrbg/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+    "code": 0,
+    "error": null,
+    "output": "✔ test/id.test.mjs (61.547042ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.535208\n",
+    "groupClosed": true,
+    "sourceUnchanged": true,
+    "outputDigest": "2341c5c7391b97a1196dd7eada96570b35251cda4e8704645a5672254f6374b0"
+  }
+}
