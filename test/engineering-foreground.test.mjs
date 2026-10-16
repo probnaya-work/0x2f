@@ -12,7 +12,7 @@ test('foreground auth gate accepts existing ChatGPT metadata and refuses API/cus
   const authFile = path.join(home, '.codex/auth.json');
   await fs.writeFile(authFile, JSON.stringify({ auth_mode: 'chatgpt', tokens: { access_token: 'FAKE_TEST_TOKEN' } }));
   const old = await fs.readFile(authFile); let calls = 0;
-  const run = async (_binary, argv) => { calls++; return { stdout: argv[0] === '--version' ? 'codex-cli fixture' : 'Logged in using ChatGPT', stderr: '' }; };
+  const run = async (_binary, argv) => { calls++; return { stdout: argv[0] === '--version' ? 'codex-cli fixture' : argv[0] === 'exec' ? '--ignore-user-config' : 'Logged in using ChatGPT', stderr: '' }; };
   const env = { CODEX_BIN: process.execPath };
   const ok = await foregroundPreflight({home, env, run});
   assert.equal(ok.eligible, true); assert.equal(ok.evidence.hardSpendingCeilings, false);

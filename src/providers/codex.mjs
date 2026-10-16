@@ -143,8 +143,8 @@ export const codexProvider = {
 
   // Explicit foreground engineering entry; never inherit a bypass sandbox or
   // silently fall back to API-key billing. Ordinary adapter behavior is intact.
-  async startForeground({ cwd, prompt, onEvent = () => {} }) {
-    return runCodex({ cwd, args: ['exec', '--json', '--skip-git-repo-check', '-s', 'workspace-write', '-c', 'forced_login_method="chatgpt"', '-c', 'sandbox_workspace_write.writable_roots=[]', '-c', 'sandbox_workspace_write.network_access=false', '-c', 'sandbox_workspace_write.exclude_tmpdir_env_var=true', '-c', 'sandbox_workspace_write.exclude_slash_tmp=true', prompt], onEvent });
+  async startForeground({ cwd, prompt, binary, onEvent = () => {} }) {
+    return runCodex({ cwd, binary, args: ['exec', '--json', '--skip-git-repo-check', '--ignore-user-config', '-s', 'workspace-write', '-c', 'forced_login_method="chatgpt"', '-c', 'sandbox_workspace_write.writable_roots=[]', '-c', 'sandbox_workspace_write.network_access=false', '-c', 'sandbox_workspace_write.exclude_tmpdir_env_var=true', '-c', 'sandbox_workspace_write.exclude_slash_tmp=true', prompt], onEvent });
   },
 
   async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {} }) {
@@ -267,11 +267,11 @@ function consumeCodexItem(state, kind, item) {
   }
 }
 
-function runCodex({ cwd, args, onEvent }) {
+function runCodex({ cwd, args, onEvent, binary = codexBin() }) {
   return new Promise((resolve, reject) => {
     let child;
     try {
-      child = spawn(codexBin(), args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+      child = spawn(binary, args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
       activeChild.bind(child);
     } catch (error) {
       resolve({

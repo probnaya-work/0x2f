@@ -385,3 +385,18 @@ test("start() fails cleanly when codex is not installed", async () => {
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+test('foreground delegates model to installed CLI default while keeping subscription/sandbox boundaries', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'codex-foreground-'));
+  const argsLog = path.join(dir, 'args.json');
+  const f = await fakeCodex({ stdout: await fixture('codex-events.jsonl'), argsLogPath: argsLog });
+  try {
+    const outcome = await codexProvider.startForeground({ cwd: dir, binary: f.bin, prompt: 'fixture handoff' });
+    assert.equal(outcome.status, 'ready');
+    const argv = JSON.parse(await fs.readFile(argsLog, 'utf8'));
+    assert.ok(argv.includes('--ignore-user-config'));assert.ok(!argv.includes('-m'));
+    assert.ok(argv.includes('forced_login_method="chatgpt"'));assert.ok(argv.includes('workspace-write'));
+    assert.ok(argv.includes('sandbox_workspace_write.network_access=false'));
+    assert.ok(!argv.some(a=>a.includes('bypass')));
+  } finally { await fs.rm(dir,{recursive:true,force:true});await fs.rm(f.dir,{recursive:true,force:true}); }
+});

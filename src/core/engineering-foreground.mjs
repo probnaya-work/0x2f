@@ -20,9 +20,11 @@ export async function foregroundPreflight({ env = process.env, home = os.homedir
     if (/^\s*\[(?:model_providers|profiles)[.\]]|^\s*(?:base_url|chatgpt_base_url|profile)\s*=/m.test(config) || /^\s*model_provider\s*=\s*"(?!openai")/m.test(config) || /^\s*forced_login_method\s*=\s*"(?!chatgpt")/m.test(config)) return { eligible: false, reason: 'Custom provider/profile configuration needs separate qualification.' };
     const requested = env.CODEX_BIN ?? codexBin();
     const binary = path.isAbsolute(requested) ? requested : (await run('/usr/bin/which', [requested], { timeout: 5000 })).stdout.trim();
-    const [login, version, bytes] = await Promise.all([run(binary, ['login', 'status'], { timeout: 5000 }), run(binary, ['--version'], { timeout: 5000 }), fs.readFile(binary)]);
+    const [login, version, help, bytes] = await Promise.all([run(binary, ['login', 'status'], { timeout: 5000 }), run(binary, ['--version'], { timeout: 5000 }), run(binary, ['exec', '--help'], { timeout: 5000 }), fs.readFile(binary)]);
     if (!/Logged in using ChatGPT/.test(login.stdout + login.stderr)) return { eligible: false, reason: 'Harness did not confirm ChatGPT authentication.' };
-    return { eligible: true, evidence: { authMethod: 'chatgpt', binary, binaryDigest: handoffHash(bytes), version: version.stdout.trim(), configDigest: handoffHash(config), trustClass: 'foreground-subscription', hardSpendingCeilings: false, sandbox: 'workspace-write' } };
+    if (!help.stdout.includes('--ignore-user-config')) return { eligible: false, reason: 'Installed CLI cannot select its default without inheriting a possibly incompatible user model.' };
+    const ignoredUserModel = config.match(/^model\s*=\s*"([^"\n]+)"/m)?.[1] ?? null;
+    return { eligible: true, evidence: { authMethod: 'chatgpt', binary, binaryDigest: handoffHash(bytes), version: version.stdout.trim(), configDigest: handoffHash(config), modelResolution: { source: 'installed-cli-default', option: '--ignore-user-config', ignoredUserModel, requestedModel: null, reason: 'Delegate account default to the installed CLI; do not translate product/UI model names.' }, trustClass: 'foreground-subscription', hardSpendingCeilings: false, sandbox: 'workspace-write' } };
   } catch { return { eligible: false, reason: 'Existing subscription/configuration could not be established without credential changes.' }; }
 }
 
@@ -40,7 +42,7 @@ export async function runForegroundEngineering(ctx, task) {
       const run = fresh.runs.at(-1).run;
       const events = [];
       let bytes = 0;
-      const outcome = await p.startForeground({ ...input, onEvent: e => { const line = JSON.stringify(e); bytes += Buffer.byteLength(line); if (bytes <= 1000000) events.push(line); } });
+      const outcome = await p.startForeground({ ...input, binary: current.evidence.binary, onEvent: e => { const line = JSON.stringify(e); bytes += Buffer.byteLength(line); if (bytes <= 1000000) events.push(line); } });
       await ctx.store.writeText(path.join(ctx.store.taskDir(task.slug), 'runs', String(run), 'run.log'), events.join('\n'));
       if (outcome.status === 'ready' && ['investigate', 'review'].includes(input.purpose)) {
         try { outcome.engineering = JSON.parse(outcome.result.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { /* saved prose remains evidence; structured diagnosis/review must qualify */ }
