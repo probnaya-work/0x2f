@@ -1,0 +1,19 @@
+✔ Task 002-shaped two-file searches → targeted reads → one multi-file patch → verifier → READY (3009.354125ms)
+✔ four inference requests share the unchanged 8192 input + 4096 output ceiling and cost maximum (2853.566375ms)
+✔ next cumulative input reservation over 8192 stops before its inference dispatch (1824.853167ms)
+✔ exhausted cumulative output stops before another count or inference (2407.980167ms)
+✔ simple one-response patch remains one response under the four-response allowance (1855.1055ms)
+✔ existing stricter project request caps remain a pre-credential gate and are never rewritten (563.878667ms)
+✔ four responses cannot dispatch a fifth or start a fresh attempt (2678.194292ms)
+✔ range denials use the result ceiling and never mask an unknown tool (1521.024834ms)
+✔ a targeted read retains search locations it has not covered (2607.267875ms)
+✔ stale real-price preflight remains before credential access and all requests (540.88275ms)
+✔ a rejected search sibling remains a denial when a later targeted read succeeds (2867.023417ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22863.772125

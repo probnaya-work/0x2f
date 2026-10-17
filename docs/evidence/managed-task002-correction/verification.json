@@ -1,0 +1,55 @@
+{
+  "implementation": "3aba2b672656693bb9c7ea354d2a0541dac65a05",
+  "commands": {
+    "focused": "env -u OPENAI_API_KEY -u CODEX_API_KEY -u CODEX_ACCESS_TOKEN OX2F_NATIVE_LAUNCHD=0 node --test test/engineering-managed.test.mjs test/engineering-economics.test.mjs test/engineering-projection.test.mjs test/engineering-foreground.test.mjs test/engineering-foreground-cli.test.mjs",
+    "finalDelta": "Final targeted checks after the CLI-shaped fixture and rejected-search guard changed; see final-delta.txt and committed regression tests.",
+    "syntax": "npm run check",
+    "full": "env -u OPENAI_API_KEY -u CODEX_API_KEY -u CODEX_ACCESS_TOKEN OX2F_NATIVE_LAUNCHD=0 npm test"
+  },
+  "results": {
+    "focused": {
+      "log": "focused.txt",
+      "exitCode": 0,
+      "sha256": "ddb7c0bbb7c5d75d533f80e9f46c83bb180ab418ef30b2e6cd7dcad03814f909",
+      "tests": 111,
+      "pass": 111,
+      "fail": 0,
+      "skipped": 0
+    },
+    "finalDelta": {
+      "log": "final-delta.txt",
+      "exitCode": 0,
+      "sha256": "557bb1c7b2fd3f3eee59ee245e7866eac1ee63b30112ffef6133a413bef42b34",
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "skipped": 0
+    },
+    "syntax": {
+      "log": "check.txt",
+      "exitCode": 0,
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f"
+    },
+    "full": {
+      "log": "full.txt",
+      "exitCode": 0,
+      "sha256": "88584ac8a466d6ff68c75fa09a11a514569f5d5263e5418a202b6a6aad0226e0",
+      "tests": 1007,
+      "pass": 888,
+      "fail": 0,
+      "skipped": 119
+    }
+  },
+  "finalFullSuiteInvocations": 1,
+  "successfulFullSuiteRepeated": false,
+  "fixturesOnly": true,
+  "realProviderRequests": 0,
+  "keychainReads": 0,
+  "priceEvidenceRefreshed": false,
+  "missingCredentialTestsUseFreshClockFixture": true,
+  "verdict": {
+    "historicalLiveBoundedCanary": "GO (prior accepted evidence, unchanged)",
+    "ordinaryTwoFileForeground": "OFFLINE CANDIDATE; synthetic Task 002-shaped flow READY; no renewed live GO",
+    "unattended": "NO-GO"
+  }
+}

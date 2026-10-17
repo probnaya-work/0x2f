@@ -1,0 +1,241 @@
+{
+  "kind": "offline fake Responses only; no provider or Keychain calls",
+  "task": {
+    "id": 1,
+    "status": "ready",
+    "brief": "After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.",
+    "runs": [
+      {
+        "run": 1,
+        "purpose": "implement",
+        "outcome": "ready"
+      },
+      {
+        "run": 2,
+        "purpose": "verify",
+        "outcome": "ready"
+      }
+    ]
+  },
+  "files": [
+    {
+      "id": "f1",
+      "path": "src/cli.mjs",
+      "bytes": 31003,
+      "sha256": "6b519b2f4912bb4769138c77bc1cab85b577bf17c4fd82d1c121400bbd186bd4",
+      "identity": {
+        "dev": 16777233,
+        "ino": 57169581
+      },
+      "writable": true
+    },
+    {
+      "id": "f2",
+      "path": "test/engineering-foreground-cli.test.mjs",
+      "bytes": 3046,
+      "sha256": "32bf0814451223d7fdb0d70391a5189eef54ebb443571168d49a27daff86be54",
+      "identity": {
+        "dev": 16777233,
+        "ino": 57169584
+      },
+      "writable": true
+    }
+  ],
+  "packetBytes": 3346,
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 4,
+    "countRequests": 4,
+    "responsesRequests": 8,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "model": "gpt-5.4-mini-2026-03-17",
+  "requests": [
+    {
+      "url": "/v1/models/gpt-5.4-mini-2026-03-17",
+      "bytes": 2
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "bytes": 4482
+    },
+    {
+      "url": "/v1/responses",
+      "bytes": 4576
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "bytes": 5821
+    },
+    {
+      "url": "/v1/responses",
+      "bytes": 5915
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "bytes": 5510
+    },
+    {
+      "url": "/v1/responses",
+      "bytes": 5604
+    }
+  ],
+  "counts": {
+    "inferences": 3,
+    "counts": 3,
+    "modelQueries": 1,
+    "requests": 6,
+    "searches": 2,
+    "reads": 2,
+    "patches": 1,
+    "tools": 5,
+    "resultBytes": 1807,
+    "inputBytes": 31908
+  },
+  "actualSyntheticUsage": {
+    "input": 3093,
+    "cachedInput": 30,
+    "output": 60,
+    "total": 3153
+  },
+  "calculatedSyntheticInferenceCostUsd": 0.0025695,
+  "publishedInferenceMaximumUsd": 0.024576,
+  "controlRequests": {
+    "classification": "unpriced_control_request",
+    "maximum": 5,
+    "tokenCountMaximum": 4,
+    "availabilityMaximum": 1,
+    "separatePublishedFee": false,
+    "contractualZeroFee": false,
+    "includedInInferenceMaximum": false
+  },
+  "providerReportedTotalCost": "unknown; fixture only",
+  "attempts": 1,
+  "toolReceipts": [
+    {
+      "callId": "source-search",
+      "tool": "search_task_file",
+      "bytes": 488,
+      "sourceDigest": "6b519b2f4912bb4769138c77bc1cab85b577bf17c4fd82d1c121400bbd186bd4",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "source-search",
+        "output": "{\"file_id\":\"f1\",\"matches\":[{\"line\":398,\"column\":14,\"excerpt\":\"console.log(`Created #${String(task.id).padStart(3, \\\"0\\\")}: ${task.title}`);\",\"context\":[{\"line\":397,\"excerpt\":\"\"},{\"line\":399,\"excerpt\":\"//..............................................................................................................................................................\"}]}],\"truncated\":false}"
+      }
+    },
+    {
+      "callId": "test-search",
+      "tool": "search_task_file",
+      "bytes": 578,
+      "sourceDigest": "32bf0814451223d7fdb0d70391a5189eef54ebb443571168d49a27daff86be54",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "test-search",
+        "output": "{\"file_id\":\"f2\",\"matches\":[{\"line\":20,\"column\":53,\"excerpt\":\"ed #001: Fixture/m); // foreground\",\"context\":[{\"line\":19,\"excerpt\":\"const output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\"},{\"line\":21,\"excerpt\":\"//..............................................................................................................................................................\"}]}],\"truncated\":false}"
+      }
+    },
+    {
+      "callId": "source-read",
+      "tool": "read_task_file",
+      "bytes": 283,
+      "sourceDigest": "6b519b2f4912bb4769138c77bc1cab85b577bf17c4fd82d1c121400bbd186bd4",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "source-read",
+        "output": "{\"file_id\":\"f1\",\"start_line\":396,\"line_count\":3,\"content\":\"const task = {id:1,title:'Fixture'};\\n\\nconsole.log(`Created #${String(task.id).padStart(3, \\\"0\\\")}: ${task.title}`);\",\"truncated\":false}"
+      }
+    },
+    {
+      "callId": "test-read",
+      "tool": "read_task_file",
+      "bytes": 458,
+      "sourceDigest": "32bf0814451223d7fdb0d70391a5189eef54ebb443571168d49a27daff86be54",
+      "result": {
+        "type": "function_call_output",
+        "call_id": "test-read",
+        "output": "{\"file_id\":\"f2\",\"start_line\":17,\"line_count\":4,\"content\":\"import assert from 'node:assert/strict';\\nimport {execFileSync} from 'node:child_process';\\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\\nassert.match(output, /^Created #001: Fixture/m); // foreground\",\"truncated\":false}"
+      }
+    },
+    {
+      "callId": "submit_patch",
+      "tool": "submit_patch",
+      "edits": [
+        {
+          "file_id": "f1",
+          "before": "6b519b2f4912bb4769138c77bc1cab85b577bf17c4fd82d1c121400bbd186bd4",
+          "after": "951e03419d0b10af57c7d8593f9ba4dd5d63165b2aa35c3114712470551916da"
+        },
+        {
+          "file_id": "f2",
+          "before": "32bf0814451223d7fdb0d70391a5189eef54ebb443571168d49a27daff86be54",
+          "after": "2cd61d0db02e4c5df8e897adace63f530ebbf9e9c9d41e367b2a49ee17c03ded"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "schemaVersion": 1,
+    "run": 2,
+    "artifact": {
+      "path": "runs/1/artifacts/manifest.json",
+      "digest": "68f568919319cb99c4d16e577847f5765c9943eeaf2469bb11906a0a41bdd298",
+      "contentDigest": "6754c74ae97aa265fe966229d26e4f5ac8ee5ccce1b2d4777248c9921605d6de"
+    },
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "--test",
+      "test/engineering-foreground-cli.test.mjs"
+    ],
+    "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+    "cwd": "/private/tmp/0x2f-playbook-JpQnc4/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+    "code": 0,
+    "error": null,
+    "output": "\u2714 test/engineering-foreground-cli.test.mjs (97.697583ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 101.1965\n",
+    "groupClosed": true,
+    "sourceUnchanged": true,
+    "outputDigest": "e909d8f2c8f2be8268c2f4e9333fe367b422387939edb0962a8f4c7d037e811f"
+  },
+  "projection": [
+    "STATE READY",
+    "PURPOSE VERIFY \u00b7 EXECUTOR local-checks \u00b7 RUN 2",
+    "NEXT ACCEPT \u00b7 REASON INITIAL_EXECUTOR",
+    "COST TOTAL UNKNOWN \u00b7 inference calculation and provider charge are separate",
+    "LANE MANAGED API \u00b7 READY \u00b7 MODEL gpt-5.4-mini-2026-03-17 \u00b7 NO OPAQUE FALLBACK",
+    "OBSERVED MODEL gpt-5.4-mini-2026-03-17",
+    "FOREGROUND ONLY \u00b7 UNATTENDED NO-GO \u00b7 NO AUTOMATIC RETRY OR DELIVERY",
+    "ENVELOPE 1 attempt \u00b7 4 inference + 4 count requests \u00b7 6 tools \u00b7 4 reads \u00b7 1 patch",
+    "MANAGED USAGE 7 HTTP \u00b7 6 Responses HTTP \u00b7 3 inference \u00b7 3 count \u00b7 1 availability GET \u00b7 5 tools \u00b7 2 reads \u00b7 2 searches \u00b7 1 patches \u00b7 1807 result bytes",
+    "BOUND 12288 inference tokens",
+    "LIMITS 4 files \u00b7 65536 source bytes \u00b7 8192 packet bytes \u00b7 120000 ms deadline",
+    "PAYLOAD 4096 bytes/read \u00b7 24576 result bytes \u00b7 32768 serialized API input bytes",
+    "PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576",
+    "CONTROL REQUESTS: 5 maximum, no separate published fee \u00b7 4 dispatched \u00b7 contractual zero fee not claimed",
+    "ACTUAL TOKENS 3153 \u00b7 CALCULATED INFERENCE USD 0.0025695 \u00b7 PROVIDER COST UNKNOWN",
+    "USAGE TOTAL 3153 \u00b7 INPUT 3093 \u00b7 CACHED 30 \u00b7 OUTPUT 60 \u00b7 REASONING ? \u00b7 ATTEMPTS 1",
+    "USAGE COST USD 2570 micros",
+    "RESULT PATCH VERIFIED \u00b7 6754c74ae97aa265fe966229d26e4f5ac8ee5ccce1b2d4777248c9921605d6de",
+    "ARTIFACT runs/1/artifacts/manifest.json",
+    "REVIEW runs/2/review.json \u00b7 bba6074f35d45bbf1100a6f58a8080acbd322cdfa42fcb744f0fadee5fb5a1e1",
+    "WORKSPACE /private/tmp/0x2f-playbook-JpQnc4/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive \u00b7 ref 611ea29853ac0f2747130cc46d59e59c2ef5d32c \u00b7 task-owned worktree",
+    "ROUTING implement \u2192 managed-openai \u00b7 minimum-qualified-managed-model"
+  ],
+  "delivery": null,
+  "opaqueFallback": false,
+  "retry": false,
+  "providerCalls": 0,
+  "keychainReads": 0
+}

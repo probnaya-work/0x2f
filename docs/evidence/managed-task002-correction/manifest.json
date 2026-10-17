@@ -1,0 +1,16 @@
+{
+  "implementation": "3aba2b672656693bb9c7ea354d2a0541dac65a05",
+  "files": {
+    "check.txt": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+    "diagnosis.json": "094464ebb59925ef982bfcfe7d1f716c66797db4cbd7777844167db8a2517f76",
+    "final-delta.txt": "557bb1c7b2fd3f3eee59ee245e7866eac1ee63b30112ffef6133a413bef42b34",
+    "focused.txt": "ddb7c0bbb7c5d75d533f80e9f46c83bb180ab418ef30b2e6cd7dcad03814f909",
+    "full.txt": "88584ac8a466d6ff68c75fa09a11a514569f5d5263e5418a202b6a6aad0226e0",
+    "offline-fixture.json": "478a543e72e795659c38ecbc134f08efbd470bfe3643e96a9c4f92fbdf440ec4",
+    "preservation-audit.py": "ef27e18aed535ad0e0dd255c9eb75a2572044df133295f01cfa055ac3d998863",
+    "preservation.json": "7e5dd75181288eef4559231d456f7697c5ddd51f630ca6e2c1027c8dacfc6ec6",
+    "report.md": "02561234c5a1c72e2c4d7c0e76d82373612eab3aff8005d6b6101b571b70e75f",
+    "verification.json": "eba9f171e6ee003ff714ee6e3f59f4de9c9c6d39e79646a3f565b4dc75fd89db",
+    "work-manifest.json": "903a33782f153a07613c12521a416fa89573766eeb543b3e39206edbeb0f7cd1"
+  }
+}

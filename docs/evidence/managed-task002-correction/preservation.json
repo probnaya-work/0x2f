@@ -1,0 +1,84 @@
+{
+  "candidateWorkUnchanged": true,
+  "canonicalBeforeManifestDigest": "4bdfa91d7a5de97b62f433d4dd597ce3ed853d7bfe0b805026e5d913c05ccdd2",
+  "canonicalAfterManifestDigest": "4bdfa91d7a5de97b62f433d4dd597ce3ed853d7bfe0b805026e5d913c05ccdd2",
+  "committedBeforeManifest": "work-manifest.json",
+  "candidateWorkFiles": 914,
+  "beforeManifest": "/private/tmp/0x2f-task002-correction/work-before.json",
+  "beforeManifestSha256": "903a33782f153a07613c12521a416fa89573766eeb543b3e39206edbeb0f7cd1",
+  "afterManifest": "/private/tmp/0x2f-task002-correction/work-after.json",
+  "afterManifestSha256": "05e9c4800094b3f27b6881d82cb19a85cd39354127154b38c81b62da3c1cb8c6",
+  "tasks": [
+    {
+      "id": 1,
+      "status": "needs_you",
+      "reason": "managed_input_limit",
+      "unchangedFiles": 25,
+      "taskJsonSha256": "d9d0ef1a95aaedf36097258bfc3bf4f509077ede6a1f4e13068160b3e5d6ae62",
+      "managedAttempt": "c10b81cc-cc92-46cf-a1c7-c27e6ccc0563"
+    },
+    {
+      "id": 2,
+      "status": "needs_you",
+      "reason": "managed_read_range",
+      "unchangedFiles": 30,
+      "taskJsonSha256": "60fa70365ef0475710b1418a15d8bb4f2069dadb35b16040b04c665df506a0e7",
+      "managedAttempt": "ff8663d7-5ac4-4525-8f2b-a39978ccd83b"
+    }
+  ],
+  "task003Created": false,
+  "productionBaselineBefore": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.task002-before.json",
+  "productionBaselineAfter": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.task002-after.json",
+  "productionTrackedBytesPackagesAndTasksUnchanged": true,
+  "productionPackageHashes": {
+    "package.json": "f7f6f6c9e3b98feb2f54edb3541d21c8c6f97c1bff2740bc494c565cd799db9d",
+    "package-lock.json": "aad90a953d00a3bdf043ddc2ae7046afe3e8314d96ecab8563a55c4f3df2bd7c"
+  },
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "stableUnchanged": true,
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "productionTask2Files": 105,
+  "productionTask3Files": 24,
+  "launchAgentScheduleAndRuntimeBindingUnchanged": true,
+  "schedulerHealthy": true,
+  "naturalSchedulerWake": {
+    "before": {
+      "queryExit": 0,
+      "state": "not running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "231",
+      "last exit code": "0"
+    },
+    "after": {
+      "queryExit": 0,
+      "state": "not running",
+      "program": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "working directory": "/Users/bogart/Dev/PROBNAYA/work-cli-v0",
+      "runs": "232",
+      "last exit code": "0"
+    },
+    "changedOnly": [
+      "scheduler.log",
+      "scheduler/health.json"
+    ],
+    "phaseInvokedSchedulerControl": false
+  },
+  "existing2fAnd2fNextLaunchersUnchanged": true,
+  "priorTrackedEvidenceUnchanged": true,
+  "priorDeliveryReceiptDigest": "e7d83198ad294db44483b514e1cae3eb673fbd2c129e7df806002e5996613e7b",
+  "projectPolicyUnchanged": true,
+  "projectPolicyLimits": {
+    "moneyMicros": 24576,
+    "tokens": 12288,
+    "modelCalls": 2,
+    "providerCalls": 5,
+    "wallClockMs": 120000,
+    "implementationAttempts": 1,
+    "agentRuns": 1,
+    "reviewCycles": 0
+  },
+  "realProviderRequests": 0,
+  "keychainReads": 0,
+  "keychainModifications": 0
+}
