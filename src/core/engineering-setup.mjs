@@ -10,7 +10,7 @@ export async function configureForegroundEngineering(store,{files,write,check}) 
   if(await store.exists(target))throw new Error('Engineering constraints already exist; review .work/engineering.json before changing them.');
   let argv;try{argv=JSON.parse(check);}catch{throw new Error('Check must be a JSON argv array with an absolute executable.');}
   const c={schemaVersion:1,enabled:true,currency:'USD',providers:['managed-openai'],files:files.split(','),writePaths:write.split(','),check:argv,
-    limits:{moneyMicros:Math.ceil(MANAGED_FOREGROUND_INFERENCE_MAX_USD*1e6),tokens:MANAGED_LIMITS.inputTokens+MANAGED_LIMITS.outputTokens,modelCalls:2,providerCalls:5,wallClockMs:120000,implementationAttempts:1,agentRuns:1,reviewCycles:0},workspace:{repository:store.base,ref:'HEAD'}};
+    limits:{moneyMicros:Math.ceil(MANAGED_FOREGROUND_INFERENCE_MAX_USD*1e6),tokens:MANAGED_LIMITS.inputTokens+MANAGED_LIMITS.outputTokens,modelCalls:MANAGED_LIMITS.inferenceRequests,providerCalls:MANAGED_LIMITS.responsesRequests+1,wallClockMs:120000,implementationAttempts:1,agentRuns:1,reviewCycles:0},workspace:{repository:store.base,ref:'HEAD'}};
   // Validate with the existing parser before writing the real policy. The
   // temporary store is an in-memory view, not a second persistence mechanism.
   await engineeringConfig({workDir:()=>store.workDir(),exists:async()=>true,readJson:async()=>c});

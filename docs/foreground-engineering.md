@@ -29,8 +29,8 @@ meet the existing small-inventory limits. Larger or sensitive scope stops at
 NEEDS YOU, without opaque fallback.
 
 `new` authorizes one foreground attempt. 0x2F selects the existing qualified
-`gpt-5.4-mini-2026-03-17` Responses lane. It permits at most two inference
-requests, two token counts, one availability GET, six tool calls, four reads,
+`gpt-5.4-mini-2026-03-17` Responses lane. It permits at most four inference
+requests, four token counts, one availability GET, six tool calls, four reads,
 one patch, four input files, two writable files, 64 KiB source, 8 KiB packet,
 4 KiB/read, 24 KiB total tool results, 32 KiB serialized API input, 12,288
 inference tokens and 120 seconds. The external verifier has its existing five
@@ -43,11 +43,19 @@ at most 4 KiB serialized output including framing. It shares the six-tool and
 24 KiB result budgets. `read_task_file` can then select a 1-based start line and
 1–32 lines, retaining its 4 KiB content cap. Both operations enforce the same
 source identity, containment and digest checks. No search executable runs.
-With only two inference responses, the search must supply enough evidence for
-the targeted read and patch to be submitted together in the second response;
-insufficient evidence still stops for context rather than adding another call.
+The same attempt can batch searches, inspect targeted reads, then submit one
+multi-file patch within four inference responses. A range error rejects the
+entire tool batch before effects, records bounded denial results in the same
+six-tool/result ledger, and can be corrected only if a response remains.
+Known unused output reservations are released after validated usage; all
+requests share 8,192 input and 4,096 output tokens. Exact immutable identities
+stay in attempt inputs; repeated model packets retain full intent, constraints
+and repository instructions without redundant fencing/check metadata.
+Existing saved project request caps are still enforced before credential access;
+init never upgrades an existing 2-inference/5-HTTP policy. Using the new maximum
+in that project requires a separately approved policy edit.
 
-Published billable inference maximum: **$0.024576**. Control requests: **3
+Published billable inference maximum: **$0.024576**. Control requests: **5
 maximum, no separate published fee**. Complete billed cost remains unknown.
 Existing fresh-price/model/ownership/budget checks still apply; stale pricing
 stops execution rather than assuming yesterday's price. No pricing refresh or

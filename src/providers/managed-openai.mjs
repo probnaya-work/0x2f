@@ -1,6 +1,6 @@
 // One small-task Responses lane. No SDK retries, hosted tools or OAuth access.
 import {rejectCredentialValues} from '../core/workflow-credentials.mjs';
-export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,sourceBytes:65536,reads:4,patches:1,tools:6,toolResultBytes:24576,readResultBytes:4096,serializedInputBytes:32768,inferenceRequests:2,countRequests:2,responsesRequests:4,inputTokens:8192,inputTokensPerRequest:4096,outputTokens:4096,outputTokensPerRequest:2048,deadlineMs:120000,costUsd:0.25});
+export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,sourceBytes:65536,reads:4,patches:1,tools:6,toolResultBytes:24576,readResultBytes:4096,serializedInputBytes:32768,inferenceRequests:4,countRequests:4,responsesRequests:8,inputTokens:8192,inputTokensPerRequest:4096,outputTokens:4096,outputTokensPerRequest:2048,deadlineMs:120000,costUsd:0.25});
 export const MANAGED_FOREGROUND_INFERENCE_MAX_USD=0.024576;
 export const MANAGED_SEARCH_BOUNDS=Object.freeze({queryBytes:128,matches:6,lineBytes:160,contextLines:1,resultBytes:4096,readLines:32});
 export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-16T15:54:35Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',controlRequestPolicy:'unpriced_control_request'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
@@ -30,12 +30,12 @@ export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS
   return ranked[0];
 }
 export const managedTools=[
-  {type:'function',name:'read_task_file',description:'Read an approved file ID. Use start_line and line_count for a targeted read (1-based, at most 32 lines); null for a broad read.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},start_line:{type:['integer','null']},line_count:{type:['integer','null']}},required:['file_id','start_line','line_count'],additionalProperties:false}},
-  {type:'function',name:'search_task_file',description:'Literal search in one approved file ID. Query: 1–128 UTF-8 bytes, single line. At most 6 matching lines, 160-byte excerpts, one context line each side; serialized result at most 4096 bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},query:{type:'string'}},required:['file_id','query'],additionalProperties:false}},
-  {type:'function',name:'submit_patch',description:'Submit one scoped replacement patch, then stop. Each old_text must match exactly once.',strict:true,parameters:{type:'object',properties:{edits:{type:'array',items:{type:'object',properties:{file_id:{type:'string'},old_text:{type:'string'},new_text:{type:'string'}},required:['file_id','old_text','new_text'],additionalProperties:false}}},required:['edits'],additionalProperties:false}},
-  {type:'function',name:'request_context_expansion',description:'Stop for a user decision. No automatic context expansion or retry.',strict:true,parameters:{type:'object',properties:{reason:{type:'string'}},required:['reason'],additionalProperties:false}}
+  {type:'function',name:'read_task_file',description:'Read approved ID; 1–32 lines, ≤4096 content bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},start_line:{type:'integer',minimum:1,maximum:Number.MAX_SAFE_INTEGER},line_count:{type:'integer',minimum:1,maximum:MANAGED_SEARCH_BOUNDS.readLines}},required:['file_id','start_line','line_count'],additionalProperties:false}},
+  {type:'function',name:'search_task_file',description:'Literal approved-ID search: 1–128 UTF-8 query bytes, single line; ≤4096 bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},query:{type:'string'}},required:['file_id','query'],additionalProperties:false}},
+  {type:'function',name:'submit_patch',description:'One multi-file patch; each old_text matches once.',strict:true,parameters:{type:'object',properties:{edits:{type:'array',items:{type:'object',properties:{file_id:{type:'string'},old_text:{type:'string'},new_text:{type:'string'}},required:['file_id','old_text','new_text'],additionalProperties:false}}},required:['edits'],additionalProperties:false}},
+  {type:'function',name:'request_context_expansion',description:'Stop; no expansion or retry.',strict:true,parameters:{type:'object',properties:{reason:{type:'string'}},required:['reason'],additionalProperties:false}}
 ];
-export const managedInstructions='Make only the requested small patch using approved file IDs. For large files, search_task_file first; use matching line numbers for a targeted read_task_file. At most two inference responses: when search excerpts suffice, request the targeted read and submit_patch together in the remaining response. Otherwise request_context_expansion; never assume another response. Never request shell, tests, network, Git or delivery. Deterministic verification belongs to 0x2F. Return a short result.';
+export const managedInstructions='One attempt, ≤4 responses. Batch precise searches → reads (1–32 lines) → one multi-file patch. Correct range errors within remaining turns. Context expansion stops. No shell/tests/network/Git/delivery; 0x2F verifies.';
 
 // Test seam is fetch, not a user-configurable API endpoint/provider gateway.
 export function managedTransport(key,{fetchImpl=fetch}={}) {
@@ -56,7 +56,7 @@ export function managedTransport(key,{fetchImpl=fetch}={}) {
 }
 
 // Validate the complete batch BEFORE any tool effect or synthesized result.
-export function managedCalls(response,state,manifest) {
+export function managedCalls(response,state,manifest,{rangeErrors=false}={}) {
   if(response.status!=='completed'||!Array.isArray(response.output))fail('managed_response_incomplete');
   const calls=[],ids=new Set(state.callIds);
   for(const item of response.output){
@@ -68,11 +68,13 @@ export function managedCalls(response,state,manifest) {
     if(typeof item.call_id!=='string'||!item.call_id||ids.has(item.call_id)||typeof item.arguments!=='string')fail('managed_duplicate_or_malformed_call');ids.add(item.call_id);
     let args;try{args=JSON.parse(item.arguments);}catch{fail('managed_malformed_arguments');}
     if(!args||typeof args!=='object'||Array.isArray(args))fail('managed_malformed_arguments');
-    const keys=Object.keys(args).sort().join(',');
+    const keys=Object.keys(args).sort().join(',');let error;
     if(['read_task_file','search_task_file'].includes(item.name)&&!manifest.some(f=>f.id===args.file_id))fail('managed_file_id');
     if(item.name==='read_task_file'){
-      if(!['file_id','file_id,line_count,start_line'].includes(keys))fail('managed_file_id');
-      if(keys!=='file_id'&&!(args.start_line===null&&args.line_count===null)&&(!Number.isSafeInteger(args.start_line)||args.start_line<1||!Number.isSafeInteger(args.line_count)||args.line_count<1||args.line_count>MANAGED_SEARCH_BOUNDS.readLines))fail('managed_read_range');
+      if(keys!=='file_id,line_count,start_line')fail('managed_read_range');
+      if(!Number.isSafeInteger(args.start_line)||args.start_line<1||!Number.isSafeInteger(args.line_count)||args.line_count<1||args.line_count>MANAGED_SEARCH_BOUNDS.readLines){
+        if(!rangeErrors)fail('managed_read_range');error='managed_read_range';
+      }
     }
     if(item.name==='search_task_file'&&(keys!=='file_id,query'||typeof args.query!=='string'||!args.query.length||Buffer.byteLength(args.query)>MANAGED_SEARCH_BOUNDS.queryBytes||/[\r\n\0]/.test(args.query)))fail('managed_search_query');
     if(item.name==='submit_patch'){
@@ -80,7 +82,7 @@ export function managedCalls(response,state,manifest) {
       const files=new Set();for(const edit of args.edits){if(!edit||Object.keys(edit).sort().join(',')!=='file_id,new_text,old_text'||typeof edit.old_text!=='string'||!edit.old_text||typeof edit.new_text!=='string'||!manifest.some(f=>f.id===edit.file_id&&f.writable)||files.has(edit.file_id))fail('managed_patch_scope');files.add(edit.file_id);}
     }
     if(item.name==='request_context_expansion'&&(keys!=='reason'||typeof args.reason!=='string'||args.reason.length>1024))fail('managed_malformed_arguments');
-    calls.push({item,args});
+    calls.push({item,args,...(error?{error}:{})});
   }
   if(state.tools+calls.length>state.limits.tools)fail('managed_tool_limit');
   if(state.reads+calls.filter(c=>c.item.name==='read_task_file').length>state.limits.reads)fail('managed_read_limit');

@@ -43,7 +43,7 @@ export async function runForegroundEngineering(ctx, task) {
   }
   return (await import('./engineering-managed.mjs')).runManagedForeground(ctx,task,{
     foregroundAuthorized:true,credential:ctx.managedCredential??(()=>managedCredential('retrieve',{foreground:true})),
-    onPreview:p=>console.log(`AUTO → managed · ${p.model}\nPUBLISHED BILLABLE INFERENCE MAXIMUM: $${p.pricingPolicy.publishedBillableInferenceMaximumUsd}\nCONTROL REQUESTS: 3 maximum, no separate published fee · TOTAL COST UNKNOWN`)
+    onPreview:p=>console.log(`AUTO → managed · ${p.model}\nPUBLISHED BILLABLE INFERENCE MAXIMUM: $${p.pricingPolicy.publishedBillableInferenceMaximumUsd}\nCONTROL REQUESTS: ${p.pricingPolicy.controlRequests.maximum} maximum, no separate published fee · TOTAL COST UNKNOWN`)
   });
 }
 

@@ -122,7 +122,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       const fresh=await store.findTask(task.id);if(engineeringIntent(fresh)!==intent||fresh.status!=='working')fail('managed_input_drift');
       if((await engineeringInventory(cwd)).digest!==expected)fail('managed_source_drift');
       const number=state.requests+state.modelQueries+1,requestId=randomUUID();
-      const reservation={schemaVersion:1,taskId:task.id,run,attempt,requestId,number,kind,requestType:kind==='inference'?'published_billable_inference':'unpriced_control_request',model:model.id,inputDigest:hash(body),attemptInferenceReservationUsd:predicted.inferenceUpperUsd,attemptTotalCostReservationUsd:null,reservation:kind==='inference'?{inputTokens:state.pendingInputTokens,outputTokens:body.max_output_tokens,inferenceCostUpperUsd:predicted.inferenceUpperUsd,totalCostUpperUsd:predicted.totalUpperUsd}:null,remaining:{responses:limits.responsesRequests-state.requests,inputTokens:limits.inputTokens-state.inputReserved,outputTokens:limits.outputTokens-state.outputReserved,publishedInferenceUsd:limits.costUsd-predicted.inferenceUpperUsd,totalCostUsd:null,controlRequests:predicted.controlRequests.maximum-state.counts-state.modelQueries},allowedTools:managedTools.map(t=>t.name),body,at:now()};
+      const reservation={schemaVersion:1,taskId:task.id,run,attempt,requestId,number,kind,requestType:kind==='inference'?'published_billable_inference':'unpriced_control_request',model:model.id,inputDigest:hash(body),attemptInferenceReservationUsd:predicted.inferenceUpperUsd,attemptTotalCostReservationUsd:null,reservation:kind==='inference'?{inputTokens:state.pendingInputTokens,outputTokens:body.max_output_tokens,inferenceCostUpperUsd:predicted.inferenceUpperUsd,totalCostUpperUsd:predicted.totalUpperUsd}:null,remaining:{responses:limits.responsesRequests-state.requests,inputTokens:limits.inputTokens-state.inputReserved,outputTokens:limits.outputTokens-state.outputReserved,publishedInferenceUsd:((limits.inputTokens-state.inputReserved)*Math.max(model.price.perMillion.input,model.price.perMillion.cachedInput)+(limits.outputTokens-state.outputReserved)*model.price.perMillion.output)/1e6,totalCostUsd:null,controlRequests:predicted.controlRequests.maximum-state.counts-state.modelQueries},allowedTools:managedTools.map(t=>t.name),body,at:now()};
       await write(`${dir}/request-${number}-intent.json`,reservation);fault('before-request',kind);active();pendingRequest=true;
       if(kind==='model')state.modelQueries++;else {state.requests++;state.inputBytes+=byteCount;if(kind==='count')state.counts++;else state.inferences++;}
       await sync({pendingRequest:requestId});
@@ -170,7 +170,10 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       if(transport.live&&Date.now()-Date.parse(model.price.observedAt)>86400000)fail('managed_pricing_stale');
       const available=await rpc('model',{});if(available.id!==model.id)fail('managed_model_unavailable');
       const source=await freezeEngineering(store,task,run,baseline,'inputs');await sync({baseline:source});await event('run.started',{run,provider:'managed-openai',purpose:'implement'});
-      let conversation=[{role:'user',content:JSON.stringify(packet)}];
+      // Fencing/check identities stay in immutable attempt inputs, not repeated model
+      // context. Preserve the complete brief, constraints and repository instructions.
+      const modelPacket={brief:packet.brief,constraints:packet.constraints,instructions:packet.instructions.map(({path,text})=>({path,text})),files:packet.files.map(({id,path,bytes,writable})=>({id,path,bytes,writable}))};
+      let conversation=[{role:'user',content:JSON.stringify(modelPacket)}];
       while(!patchSubmitted){
         active();if(state.inferences>=limits.inferenceRequests)fail('managed_request_limit');
         const prompt={model:model.id,instructions:managedInstructions,input:conversation,tools:managedTools,tool_choice:'auto'};guard(prompt);
@@ -184,12 +187,28 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
         state.outputReserved+=outputMax;state.inputReserved+=counted.input_tokens;state.pendingInputTokens=counted.input_tokens;
         const response=await rpc('inference',body),u=response.usage;
         if(response.model!==model.id||!u||!int(u.input_tokens)||!int(u.output_tokens)||u.input_tokens!==counted.input_tokens||u.output_tokens>outputMax||!int(u.total_tokens)||u.total_tokens!==u.input_tokens+u.output_tokens||typeof response.id!=='string'||!response.id||(u.input_tokens_details?.cached_tokens!==undefined&&(!int(u.input_tokens_details.cached_tokens)||u.input_tokens_details.cached_tokens>u.input_tokens))||(u.output_tokens_details?.reasoning_tokens!==undefined&&(!int(u.output_tokens_details.reasoning_tokens)||u.output_tokens_details.reasoning_tokens>u.output_tokens))||usageEvents.some(e=>e.id===response.id)){knownUsage=false;fail('managed_usage_uncertain');}
-        state.pendingInputTokens=0;state.inputTokens+=u.input_tokens;state.outputTokens+=u.output_tokens;
+        // Settle only a validated response. Unknown usage retains its reservation
+        // and stops; known unused output can fund a later turn in this attempt.
+        state.pendingInputTokens=0;state.inputTokens+=u.input_tokens;state.outputTokens+=u.output_tokens;state.outputReserved-=outputMax-u.output_tokens;
         usageEvents.push({id:response.id,usage:{input_tokens:u.input_tokens,output_tokens:u.output_tokens,total_tokens:u.total_tokens,cached_input_tokens:u.input_tokens_details?.cached_tokens??null,reasoning_output_tokens:u.output_tokens_details?.reasoning_tokens??null}});
         await write(`${dir}/usage-${state.inferences}.json`,{responseId:response.id,usage:u,counterInput:counted.input_tokens,semantics:'response-delta'});task=await update(t=>({...t,runs:t.runs.map(r=>r.run===run?{...r,executor:{...r.executor,observedModel:response.model}}:r)}));await sync();
-        const calls=managedCalls(response,state,packet.files);if(!calls.length)fail('managed_patch_missing');
+        const calls=managedCalls(response,state,packet.files,{rangeErrors:true});if(!calls.length)fail('managed_patch_missing');
         if(calls.some(c=>c.item.name==='request_context_expansion'))fail('context_expansion_required');
         conversation.push(...response.output);
+        // Reject the complete batch before ANY source/patch effect if a range is
+        // invalid. Every denial consumes the same tool/result budgets and has an
+        // immutable receipt. Unknown tools, drift and ownership never enter here.
+        if(calls.some(c=>c.error)){
+          for(const {item,error} of calls){
+            active();state.tools++;state.callIds.push(item.call_id);
+            const code=error??'managed_batch_rejected',result={type:'function_call_output',call_id:item.call_id,output:JSON.stringify({error:code,...(error?{start_line:{minimum:1,maximum:Number.MAX_SAFE_INTEGER},line_count:{minimum:1,maximum:MANAGED_SEARCH_BOUNDS.readLines}}:{})})};
+            const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;
+            const receipt=`${dir}/tool-${state.tools}-receipt.json`;
+            await write(receipt,{callId:item.call_id,tool:item.name,status:'rejected',code,bytes:size,result});toolEvidence.push({path:receipt,tool:item.name,status:'rejected',bytes:size});conversation.push(result);await sync();
+          }
+          if(state.inferences>=limits.inferenceRequests)fail('managed_read_range');
+          continue;
+        }
         for(const {item,args} of calls){
           active();state.tools++;state.callIds.push(item.call_id);
           if(['read_task_file','search_task_file'].includes(item.name)){
@@ -204,7 +223,20 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
               const selected=ranged?lines.join('\n'):bytes.toString(),content=prefixBytes(selected,limits.readResultBytes);
               result={type:'function_call_output',call_id:item.call_id,output:JSON.stringify({file_id:file.id,...(ranged?{start_line:args.start_line,line_count:lines.length}:{}),content,truncated:Buffer.byteLength(content)<Buffer.byteLength(selected)})};
             }
-            guard(result);const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;conversation.push(result);
+            guard(result);const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;
+            // A targeted read supersedes fully covered locator excerpts in the
+            // next stateless request. Exact prior requests/results remain in
+            // immutable receipts; no source or instruction is silently clipped.
+            if(item.name==='read_task_file'){
+              const locators=new Set(conversation.filter(i=>{
+                if(i.type!=='function_call'||i.name!=='search_task_file'||JSON.parse(i.arguments).file_id!==file.id)return false;
+                const out=conversation.find(r=>r.type==='function_call_output'&&r.call_id===i.call_id);
+                const matches=out&&JSON.parse(out.output).matches;
+                return Array.isArray(matches)&&matches.every(m=>m.line>=args.start_line&&m.line<args.start_line+args.line_count);
+              }).map(i=>i.call_id));
+              conversation=conversation.filter(i=>!locators.has(i.call_id));
+            }
+            conversation.push(result);
             const receipt=`${dir}/tool-${state.tools}-receipt.json`;
             await write(receipt,{callId:item.call_id,tool:item.name,bytes:size,sourceDigest:file.sha256,result});toolEvidence.push({path:receipt,tool:item.name,bytes:size});await sync();
           }else{

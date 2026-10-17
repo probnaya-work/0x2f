@@ -14,7 +14,7 @@ import {runManagedForeground,managedCheck,managedSearchResult} from '../src/core
 import {runForegroundEngineering} from '../src/core/engineering-foreground.mjs';
 import {credentialFreeEnvironment} from '../src/core/workflow-credentials.mjs';
 import {renderTasks} from '../src/render.mjs';
-import {MANAGED_LIMITS,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,managedTransport,managedGuard,managedCost,managedForegroundPricing,managedCalls} from '../src/providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,managedTransport,managedGuard,managedCost,managedForegroundPricing,managedCalls,managedTools} from '../src/providers/managed-openai.mjs';
 import {workflowLines} from '../src/web/workflow.mjs';
 import {projectRow} from '../src/web/ledger.mjs';
 import {snapshot} from '../src/tui/model.mjs';
@@ -23,17 +23,17 @@ const key='sk-fake-managed-qualification-key';
 const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
-const read=(id='read')=>call('read_task_file',{file_id:'f1'},id);
+const read=(id='read')=>call('read_task_file',{file_id:'f1',start_line:1,line_count:32},id);
 const search=(query='parseTaskId',id='search',file_id='f1')=>call('search_task_file',{file_id,query},id);
-async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS}={}){
- const f=await playbookFixture(t,{config:{limits:{moneyMicros:250000,tokens:20000,modelCalls:2,providerCalls:5,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
+async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS,setup}={}){
+ const f=await playbookFixture(t,{setup,config:{limits:{moneyMicros:24576,tokens:12288,modelCalls:4,providerCalls:9,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
  const git=args=>execFileSync('/usr/bin/git',['-C',f.base,...args],{env:{PATH:'/usr/bin:/bin'},stdio:'pipe'});
  git(['init','-q']);git(['add','src','test']);git(['-c','user.name=Fixture','-c','user.email=fixture@localhost','commit','--no-gpg-sign','--no-verify','-qm','fixture base']);
  const spec={repository:f.base,ref:'HEAD'};let task=await f.runtime.store.findTask(f.task.id);const c={...task.engineering.config,workspace:spec};task=await f.runtime.store.updateTask({...task,engineering:{...task.engineering,config:c,configDigest:hash(c)}});
  const workspace=await ensureEngineeringWorkspace(f.runtime.store,task,spec);task=await mutateEngineering(f.runtime.store,task.slug,task.engineering.driver.token,t=>({...t,engineering:{...t.engineering,workspace,economics:{policy:economicsPolicy(t)}}}));
  const requests=[];let inf=0;const server=http.createServer(async(req,res)=>{let raw='';for await(const b of req)raw+=b;const body=raw?JSON.parse(raw):{};requests.push({url:req.url,body,hasAuth:req.headers.authorization==='Bearer '+key});
   if(transportFailure){res.writeHead(429);return res.end(JSON.stringify({error:key}));}
-  let result;if(req.url.startsWith('/v1/models/'))result={id:registry[0].id};else if(req.url.endsWith('/input_tokens'))result={object:'response.input_tokens',input_tokens:count};else {inf++;result={id:'resp_'+inf,model:registry[0].id,status:'completed',output:outputs[inf-1]??[read('extra')],usage:{input_tokens:count,output_tokens:20,total_tokens:count+20,input_tokens_details:{cached_tokens:10}}};}
+  let result;if(req.url.startsWith('/v1/models/'))result={id:registry[0].id};else if(req.url.endsWith('/input_tokens'))result={object:'response.input_tokens',input_tokens:typeof count==='function'?count(inf+1):count};else {inf++;result={id:'resp_'+inf,model:registry[0].id,status:'completed',output:outputs[inf-1]??[read('extra')],usage:{input_tokens:typeof count==='function'?count(inf):count,output_tokens:20,total_tokens:(typeof count==='function'?count(inf):count)+20,input_tokens_details:{cached_tokens:10}}};}
   if(hook)result=await hook({req,body,result,f,workspace,inf})??result;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result));
  });await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>server.close(r)));
  const transport=managedTransport(key,{fetchImpl:(url,init)=>fetch('http://127.0.0.1:'+server.address().port+new URL(url).pathname,init)});transport.live=false;
@@ -166,7 +166,7 @@ for(const [name,output,code] of [
  const f=await fixture(t,{outputs:[output]}),task=await f.run();assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,code);assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,1);assert.equal(await fs.readFile(path.join(f.workspace.path,'src/id.mjs'),'utf8'),'export const parseTaskId = () => null;\n');
 });
 test('managed request ceiling stops after two inference requests without a third',async t=>{
- const f=await fixture(t,{outputs:[[read('a')],[read('b')]]}),task=await f.run();assert.equal(task.blockedOn.code,'managed_request_limit');assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,2);assert.equal(task.engineering.managed.requests,4);
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,inferenceRequests:2,countRequests:2,responsesRequests:4},outputs:[[read('a')],[read('b')]]}),task=await f.run();assert.equal(task.blockedOn.code,'managed_request_limit');assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,2);assert.equal(task.engineering.managed.requests,4);
 });
 test('managed provider counter blocks over-budget input before inference',async t=>{
  const f=await fixture(t,{count:5000}),task=await f.run();assert.equal(task.blockedOn.code,'managed_token_limit');assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,0);
@@ -182,7 +182,7 @@ test('managed expensive worst-case and missing explicit foreground decision bloc
 test('foreground pricing permits unpriced controls only with explicit foreground authorization, never unattended',()=>{
  const predicted=managedCost(MANAGED_MODELS[0]);
  assert.equal(predicted.inferenceUpperUsd,0.024576);assert.equal(predicted.totalUpperUsd,null);
- assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:3,tokenCountMaximum:2,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
+ assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:5,tokenCountMaximum:4,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'foreground'}),/managed_foreground_canary_required/);
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundCanary:true}),/managed_unattended_unqualified/);
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundAuthorized:true}),/managed_unattended_unqualified/);
@@ -202,7 +202,7 @@ test('foreground pricing saves and shows the preview before HTTP; controls remai
  const freshRegistry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,observedAt:new Date().toISOString()}}));
  const task=await f.run({registry:freshRegistry});assert.equal(task.status,'ready');assert.equal(f.previews.length,1);
  const preview=f.previews[0];assert.equal(preview.pricingPolicy.publishedBillableInferenceMaximumUsd,0.024576);
- assert.equal(preview.pricingPolicy.controlRequests.maximum,3);assert.equal(preview.model,MANAGED_MODELS[0].id);
+ assert.equal(preview.pricingPolicy.controlRequests.maximum,5);assert.equal(preview.model,MANAGED_MODELS[0].id);
  assert.equal(preview.pricingSource,MANAGED_MODELS[0].price.source);assert.ok(preview.pricingObservedAt);assert.match(preview.notice,/no separate published fee/);
  const saved=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),'runs/1/managed/foreground-preview.json'));assert.deepEqual(saved,preview);
  assert.equal(f.requests.filter(r=>r.url.startsWith('/v1/models/')).length,1);assert.equal(f.requests.filter(r=>r.url.endsWith('/input_tokens')).length,2);assert.equal(f.requests.length,5);
@@ -211,7 +211,7 @@ test('foreground pricing saves and shows the preview before HTTP; controls remai
   assert.equal(receipt.requestType,receipt.kind==='inference'?'published_billable_inference':'unpriced_control_request');
  }
  const lines=workflowLines(task);assert.ok(lines.includes('PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576'));
- assert.ok(lines.some(l=>l.startsWith('CONTROL REQUESTS: 3 maximum, no separate published fee')));
+ assert.ok(lines.some(l=>l.startsWith('CONTROL REQUESTS: 5 maximum, no separate published fee')));
  assert.ok(lines.some(l=>l.startsWith('COST TOTAL UNKNOWN')));assert.ok(!lines.some(l=>l.includes('TOTAL COST 0.024576')));
  assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,lines);assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,lines);
  await f.run();assert.equal(f.requests.length,5);assert.equal(f.calls.length,0);
@@ -328,6 +328,8 @@ test('managed source/packet budgets stop before HTTP',async t=>{
 
 test('managed foreground AUTO stops without key and never enters opaque preflight',async t=>{
  assert.equal(Boolean(process.env.OPENAI_API_KEY),false,'test runner must unset real credentials');
+ // Credential-path regression uses a fresh clock fixture, not refreshed prices.
+ t.mock.method(Date,'now',()=>Date.parse(MANAGED_MODELS[0].price.observedAt)+1000);
  const f=await fixture(t),task=await runForegroundEngineering({store:f.runtime.store,managedCredential:async()=>null},f.task);
  assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(task.execution.provider,'managed-openai');
  assert.equal(task.runs[0].executor.observedModel,null);assert.equal(f.calls.length,0);assert.equal(f.requests.length,0);
@@ -398,4 +400,137 @@ for(const point of ['before-request','in-flight','after-response'])test('managed
  const before=f.requests.length,task=await f.run();assert.equal(task.engineering.managed.state,'UNCERTAIN');assert.equal(f.requests.length,before);
  assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,point==='before-request'?0:1);
  assert.equal(await fs.readFile(path.join(f.workspace.path,'src/id.mjs'),'utf8'),'export const parseTaskId = () => null;\n');
+});
+
+
+test('read range schema and runtime agree at every advertised boundary',()=>{
+ const properties=managedTools.find(t=>t.name==='read_task_file').parameters.properties;
+ assert.deepEqual(properties.start_line,{type:'integer',minimum:1,maximum:Number.MAX_SAFE_INTEGER});
+ assert.deepEqual(properties.line_count,{type:'integer',minimum:1,maximum:32});
+ for(const start_line of [null,0,1,Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER+1,1.5])for(const line_count of [null,0,1,32,33,1.5]){
+  const valid=Number.isSafeInteger(start_line)&&start_line>=1&&Number.isSafeInteger(line_count)&&line_count>=1&&line_count<=32;
+  const run=()=>managedCalls({status:'completed',output:[call('read_task_file',{file_id:'f1',start_line,line_count})]},{limits:MANAGED_LIMITS,callIds:[],tools:0,reads:0,patches:0},[{id:'f1'}]);
+  if(valid)assert.equal(run().length,1);else assert.throws(run,/managed_read_range/);
+ }
+});
+
+test('Task 002-shaped two-file searches → targeted reads → one multi-file patch → verifier → READY',async t=>{
+ const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
+ const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);';
+ const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);';
+ const testOriginal="assert.match(output, /^Created #001: Fixture/m); // foreground";
+ const testReplacement=testOriginal+"\nassert.ok(output.includes('Next #001: 2f-next open 1'));";
+ const source=('// filler '+'.'.repeat(60)+'\n').repeat(395)+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n';
+ const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
+ const pad=(text,size)=>text+'//'+'.'.repeat(size-Buffer.byteLength(text)-3)+'\n';
+ const outputs=[[search('Created #','source-search'),search('foreground','test-search','f2')],[call('read_task_file',{file_id:'f1',start_line:396,line_count:3},'source-read'),call('read_task_file',{file_id:'f2',start_line:17,line_count:4},'test-read')],[call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]})]];
+ const f=await fixture(t,{count:1031,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},outputs,setup:async({base})=>{
+  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
+ },hook:({req,body,inf})=>{
+  if(req.url!=='/v1/responses')return;
+  if(inf===2)assert.equal(body.input.filter(i=>i.type==='function_call_output').length,2);
+  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>JSON.parse(i.output));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
+ }});
+ await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
+ const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
+ const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.searches,m.reads,m.patches,m.tools],[3,3,1,2,2,1,5]);
+ assert.ok(m.actualUsage.total<=12288);assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.equal(m.predicted.totalUpperUsd,null);
+ assert.ok(m.resultBytes<8192);assert.ok(m.inputBytes<=32768);assert.equal(m.limits.toolResultBytes,24576);assert.equal(m.limits.readResultBytes,4096);
+ const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
+ assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);assert.deepEqual(attempt.packet.files.map(f=>f.bytes),[31003,3046]);
+ assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
+ const diff=await f.runtime.actions.getTaskDiff(task.id);assert.deepEqual(diff.map(d=>d.path).sort(),[sourcePath,testPath]);
+ assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
+ assert.ok(workflowLines(task).some(l=>l.includes('4 inference + 4 count')));assert.ok(workflowLines(task).some(l=>l.includes('5 maximum, no separate published fee')));
+ assert.ok(workflowLines(task).some(l=>l.includes('7 HTTP')));
+ const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);assert.equal(task.engineering.managed.attempt,(await f.runtime.store.findTask(task.id)).engineering.managed.attempt);
+ if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});const receipts=[];for(let i=1;i<=5;i++)receipts.push(await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`)));await fs.writeFile(path.join(dir,'task002-shape.json'),JSON.stringify(managedGuard(key)({kind:'offline fake Responses only; no provider or Keychain calls',task,attempt,receipts,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,bytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification}),null,2)+'\n');}
+});
+
+test('four inference requests share the unchanged 8192 input + 4096 output ceiling and cost maximum',async t=>{
+ const f=await fixture(t,{count:2048,outputs:[[search('parseTaskId','s1')],[search('014','s2','f2')],[read('r')],[patch()]],hook:({req,result})=>req.url==='/v1/responses'?{...result,usage:{...result.usage,output_tokens:1024,total_tokens:3072}}:result});
+ const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',task.blockedOn?.text);
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.requests],[4,4,1,8]);assert.equal(f.requests.length,9);
+ assert.deepEqual(m.actualUsage,{input:8192,cachedInput:40,output:4096,total:12288});assert.equal(m.outputReserved,4096);assert.equal(m.inputReserved,8192);
+ assert.deepEqual(f.requests.filter(r=>r.url==='/v1/responses').map(r=>r.body.max_output_tokens),[2048,2048,2048,1024]);
+ const root=f.runtime.store.taskDir(task.slug);
+ for(const n of [1,3,5,7,9]){const intent=await f.runtime.store.readJson(path.join(root,`runs/1/managed/request-${n}-intent.json`));assert.ok(intent.remaining.publishedInferenceUsd>=0&&intent.remaining.publishedInferenceUsd<=0.024576);}
+ assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/request-9-intent.json'))).remaining.publishedInferenceUsd,0);
+ assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.ok(m.calculatedInferenceCostUsd<=0.024576);assert.equal(m.pricingPolicy.controlRequests.maximum,5);assert.equal(m.providerReportedCost,'unknown');
+ assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
+ const lines=workflowLines(task);assert.ok(lines.some(l=>l.includes('9 HTTP')));assert.ok(lines.some(l=>l.includes('5 dispatched')));
+});
+
+test('next cumulative input reservation over 8192 stops before its inference dispatch',async t=>{
+ const f=await fixture(t,{count:2731,outputs:[[search('x','s1')],[search('y','s2')],[patch()]]}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_token_limit');assert.deepEqual([m.inferences,m.counts,m.patches],[2,3,0]);assert.equal(m.actualUsage.input,5462);assert.equal(m.actualUsage.total,5502);
+ assert.equal(f.requests.length,6);const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
+});
+
+test('exhausted cumulative output stops before another count or inference',async t=>{
+ const f=await fixture(t,{outputs:[[search('x','s1')],[search('y','s2')],[read('r')],[patch()]],hook:({req,result,inf})=>req.url==='/v1/responses'?{...result,usage:{...result.usage,output_tokens:inf<3?2000:96,total_tokens:100+(inf<3?2000:96)}}:result});
+ const task=await f.run(),m=task.engineering.managed;assert.equal(task.blockedOn.code,'managed_output_limit');assert.deepEqual([m.inferences,m.counts,m.actualUsage.output,m.patches],[3,3,4096,0]);
+});
+
+test('invalid 220-line read is bounded, recorded and corrected within the same attempt',async t=>{
+ const bad=call('read_task_file',{file_id:'f1',start_line:1,line_count:220},'bad');
+ const f=await fixture(t,{outputs:[[bad],[read('corrected')],[patch()]],hook:({req,body,inf})=>{
+  if(req.url==='/v1/responses'&&inf===2){const out=body.input.find(i=>i.type==='function_call_output');assert.equal(JSON.parse(out.output).error,'managed_read_range');assert.ok(Buffer.byteLength(out.output)<256);}
+ }}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.status,'ready',task.blockedOn?.text);assert.deepEqual([m.inferences,m.tools,m.reads,m.patches],[3,3,1,1]);
+ const receipt=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),'runs/1/managed/tool-1-receipt.json'));assert.equal(receipt.status,'rejected');assert.equal(receipt.code,'managed_read_range');assert.equal(receipt.sourceDigest,undefined);assert.ok(receipt.bytes<512);
+ assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
+});
+
+test('invalid read in the last turn denies the whole batch without patch effect or another call',async t=>{
+ const bad=call('read_task_file',{file_id:'f2',start_line:1,line_count:220},'bad');
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,inferenceRequests:2,countRequests:2,responsesRequests:4},outputs:[[search()],[bad,patch()]]}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'managed_read_range');assert.deepEqual([m.inferences,m.reads,m.patches,m.tools],[2,0,0,3]);assert.equal(f.requests.length,5);
+ assert.equal(await fs.readFile(path.join(f.workspace.path,'src/id.mjs'),'utf8'),'export const parseTaskId = () => null;\n');
+ const root=f.runtime.store.taskDir(task.slug);for(const [n,code] of [[2,'managed_read_range'],[3,'managed_batch_rejected']])assert.equal((await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${n}-receipt.json`))).code,code);
+ const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
+});
+
+test('simple one-response patch remains one response under the four-response allowance',async t=>{
+ const f=await fixture(t,{outputs:[[patch()]]}),task=await f.run();assert.equal(task.status,'ready');assert.deepEqual([task.engineering.managed.inferences,task.engineering.managed.counts,f.requests.length],[1,1,3]);assert.equal(task.engineering.economics.attempts.length,1);
+});
+
+test('existing stricter project request caps remain a pre-credential gate and are never rewritten',async t=>{
+ const limits={moneyMicros:24576,tokens:12288,modelCalls:2,providerCalls:5,wallClockMs:120000,implementationAttempts:1,agentRuns:1,reviewCycles:0};
+ const f=await fixture(t,{config:{limits}}),file=path.join(f.base,'.work/engineering.json'),before=await fs.readFile(file);let credentials=0;
+ const task=await f.run({credential:async()=>{credentials++;return key;}});assert.equal(task.blockedOn.code,'managed_configured_budget');assert.equal(credentials,0);assert.equal(f.requests.length,0);assert.deepEqual(await fs.readFile(file),before);
+});
+
+
+test('four responses cannot dispatch a fifth or start a fresh attempt',async t=>{
+ const f=await fixture(t,{outputs:[1,2,3,4].map(n=>[read('r'+n)])}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_request_limit');assert.deepEqual([m.inferences,m.counts,m.reads,m.patches],[4,4,4,0]);assert.equal(f.requests.length,9);
+ const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
+});
+
+test('range denials use the result ceiling and never mask an unknown tool',async t=>{
+ const bad=call('read_task_file',{file_id:'f1',start_line:1,line_count:220},'bad');
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,toolResultBytes:1},outputs:[[bad],[patch()]]}),task=await f.run();
+ assert.equal(task.blockedOn.code,'managed_payload_limit');assert.equal(task.engineering.managed.inferences,1);assert.equal(task.engineering.managed.resultBytes,0);assert.equal(task.engineering.managed.patches,0);
+ assert.throws(()=>managedCalls({status:'completed',output:[bad,call('shell',{command:'forbidden'})]},{limits:MANAGED_LIMITS,callIds:[],tools:0,reads:0,patches:0},[{id:'f1'}],{rangeErrors:true}),/managed_unknown_tool_or_item/);
+});
+
+test('a targeted read retains search locations it has not covered',async t=>{
+ const f=await fixture(t,{outputs:[[search('export','locator')],[call('read_task_file',{file_id:'f1',start_line:2,line_count:1},'targeted')],[patch()]],hook:({req,body,inf})=>{
+  if(req.url==='/v1/responses'&&inf===3)assert.ok(body.input.some(i=>i.type==='function_call_output'&&JSON.parse(i.output).matches));
+ }}),task=await f.run();assert.equal(task.status,'ready',task.blockedOn?.text);
+});
+
+test('stale real-price preflight remains before credential access and all requests',async t=>{
+ const f=await fixture(t);f.options.transport.live=true;let credentials=0;
+ const registry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,observedAt:new Date(Date.now()-86401000).toISOString()}}));
+ const task=await f.run({registry,credential:async()=>{credentials++;return key;}});assert.equal(task.blockedOn.code,'managed_pricing_stale');assert.equal(credentials,0);assert.equal(f.requests.length,0);
+});
+
+
+test('a rejected search sibling remains a denial when a later targeted read succeeds',async t=>{
+ const f=await fixture(t,{outputs:[[call('read_task_file',{file_id:'f1',start_line:1,line_count:220},'bad'),search('export','denied-search')],[read('corrected')],[patch()]]}),task=await f.run();
+ assert.equal(task.status,'ready',task.blockedOn?.text);assert.deepEqual([task.engineering.managed.tools,task.engineering.managed.searches,task.engineering.managed.reads,task.engineering.managed.patches],[4,0,1,1]);
+ const root=f.runtime.store.taskDir(task.slug);assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/tool-2-receipt.json'))).code,'managed_batch_rejected');
 });

@@ -21,7 +21,7 @@ export function engineeringLines(task) {
       `OBSERVED MODEL ${task.runs.find(r=>r.executor?.kind==='managed')?.executor?.observedModel??'UNKNOWN'}`,
       'FOREGROUND ONLY · UNATTENDED NO-GO · NO AUTOMATIC RETRY OR DELIVERY',
       `ENVELOPE 1 attempt · ${e.managed.limits.inferenceRequests} inference + ${e.managed.limits.countRequests} count requests · ${e.managed.limits.tools} tools · ${e.managed.limits.reads} reads · 1 patch`,
-      `MANAGED USAGE ${e.managed.requests} Responses HTTP · ${e.managed.inferences} inference · ${e.managed.tools} tools · ${e.managed.reads} reads · ${e.managed.searches??0} searches · ${e.managed.patches} patches · ${e.managed.resultBytes} result bytes`,
+      `MANAGED USAGE ${e.managed.requests+(e.managed.modelQueries??0)} HTTP · ${e.managed.requests} Responses HTTP · ${e.managed.inferences} inference · ${e.managed.counts??0} count · ${e.managed.modelQueries??0} availability GET · ${e.managed.tools} tools · ${e.managed.reads} reads · ${e.managed.searches??0} searches · ${e.managed.patches} patches · ${e.managed.resultBytes} result bytes`,
       `BOUND ${e.managed.limits.inputTokens+e.managed.limits.outputTokens} inference tokens`,
       `LIMITS ${e.managed.limits.files} files · ${e.managed.limits.sourceBytes} source bytes · ${e.managed.limits.packetBytes} packet bytes · ${e.managed.limits.deadlineMs} ms deadline`,
       `PAYLOAD ${e.managed.limits.readResultBytes} bytes/read · ${e.managed.limits.toolResultBytes} result bytes · ${e.managed.limits.serializedInputBytes} serialized API input bytes`,
