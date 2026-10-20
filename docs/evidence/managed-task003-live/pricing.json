@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-20T22:11:34Z",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "currency": "USD",
+  "perMillion": {
+    "input": 0.75,
+    "cachedInput": 0.075,
+    "output": 4.5
+  },
+  "publishedBillableInferenceMaximumUsd": 0.024576,
+  "cumulativeInputTokens": 8192,
+  "cumulativeOutputTokens": 4096,
+  "cumulativeInferenceTokens": 12288,
+  "controlRequests": {
+    "classification": "unpriced_control_request",
+    "maximum": 5,
+    "tokenCountMaximum": 4,
+    "availabilityMaximum": 1,
+    "separatePublishedFee": false,
+    "contractualZeroFee": false,
+    "includedInInferenceMaximum": false
+  },
+  "totalProviderBilling": "unknown",
+  "serviceTier": "default",
+  "regionalProcessing": false,
+  "sources": [
+    {
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "finding": "Same registered dated snapshot is listed; standard text input/cached-input/output prices match registry."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "finding": "Responses has no separate API tariff; tokens and paid tools determine inference pricing. No distinct input-token-count or availability-request fee was found; this is not a contractual zero-fee guarantee."
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/token-counting",
+      "finding": "The documented control endpoint returns input_tokens; output limits cover all generated tokens."
+    }
+  ],
+  "authorization": {
+    "tasks": 1,
+    "expectedTaskId": 3,
+    "attempts": 1,
+    "inferenceMaximum": 4,
+    "tokenCountsMaximum": 4,
+    "availabilityMaximum": 1,
+    "retry": false,
+    "opaqueFallback": false,
+    "delivery": false,
+    "source": "User authorized 4/9 project caps, fresh pricing evidence and exactly one foreground Task #003."
+  }
+}
