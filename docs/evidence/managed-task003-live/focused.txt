@@ -1,0 +1,18 @@
+✔ foreground pricing permits unpriced controls only with explicit foreground authorization, never unattended (1.275083ms)
+✔ foreground pricing saves and shows the preview before HTTP; controls remain separately bounded (1979.101292ms)
+✔ foreground pricing control-count ceiling stops without retry or fallback (1242.737541ms)
+✔ four inference requests share the unchanged 8192 input + 4096 output ceiling and cost maximum (2573.184708ms)
+✔ next cumulative input reservation over 8192 stops before its inference dispatch (1692.731292ms)
+✔ exhausted cumulative output stops before another count or inference (1886.826041ms)
+✔ simple one-response patch remains one response under the four-response allowance (1626.079542ms)
+✔ existing stricter project request caps remain a pre-credential gate and are never rewritten (523.520417ms)
+✔ four responses cannot dispatch a fifth or start a fresh attempt (2290.476042ms)
+✔ stale real-price preflight remains before credential access and all requests (492.452583ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14393.290667

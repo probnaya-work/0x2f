@@ -1,0 +1,74 @@
+{
+  "pricingCommit": "43538ec2d9775b6f6c575ab33ffdd68f3290a589",
+  "results": {
+    "focused": {
+      "file": "focused.txt",
+      "sha256": "9e67027879eff46178df16257866a63226527c7aaaab626923e8902963401d95",
+      "exitCode": 0,
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skipped": 0
+    },
+    "syntax": {
+      "file": "check.txt",
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+      "exitCode": 0
+    },
+    "full": {
+      "file": "full.txt",
+      "sha256": "6764edfc7a27ead0bc107ec2f7235dae01de5a45117a91cd5ae3a7ba89bdd17f",
+      "exitCode": 0,
+      "tests": 1007,
+      "pass": 888,
+      "fail": 0,
+      "skipped": 119
+    }
+  },
+  "fullSuiteInvocations": 1,
+  "liveForegroundInvocations": 1,
+  "attempts": 1,
+  "observedModel": "gpt-5.4-mini-2026-03-17",
+  "requestCounts": {
+    "inference": 2,
+    "tokenCount": 2,
+    "availability": 1,
+    "total": 5,
+    "control": 3
+  },
+  "toolCounts": {
+    "proposed": 8,
+    "executed": 4,
+    "searches": 4,
+    "reads": 0,
+    "patches": 0,
+    "secondBatchExecuted": false
+  },
+  "actualUsage": {
+    "input": 1969,
+    "cachedInput": 0,
+    "output": 215,
+    "total": 2184,
+    "reasoning": 0
+  },
+  "publishedInferenceMaximumUsd": 0.024576,
+  "calculatedInferenceCostUsd": 0.00244425,
+  "providerBilledTotal": "unknown",
+  "state": "needs_you",
+  "reason": "managed_tool_limit",
+  "reachedReady": false,
+  "verifierRan": false,
+  "delivery": false,
+  "retry": false,
+  "fallback": false,
+  "cliTuiWebProjectionAgreement": true,
+  "credentialBoundary": "Existing dedicated foreground Keychain; one metadata presence query and one credential retrieval in the managed foreground call path; no import or write; no environment/file/Codex credential read.",
+  "secretValueExposedOrPersisted": false,
+  "secretVerification": "Existing exact-value/encoded-value guard covered request, response, source and artifact writes. Independent key-pattern scan plus clean owned worktree found no persisted key material. No second credential retrieval or key hash was used for audit.",
+  "verdict": {
+    "historicalLiveCanary": "GO, prior accepted evidence only",
+    "ordinaryTwoFileLiveForeground": "NO-GO \u2014 Task #003 MANAGED_TOOL_LIMIT, no patch or verification",
+    "offlineTwoFileFixture": "Prior deterministic READY evidence remains valid; does not substitute for live success",
+    "unattended": "NO-GO"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "pricingCommit": "43538ec2d9775b6f6c575ab33ffdd68f3290a589",
+  "taskId": 3,
+  "attempt": "d19e9a97-30fd-443b-a206-c5227123697d",
+  "files": {
+    "check.txt": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+    "focused.txt": "9e67027879eff46178df16257866a63226527c7aaaab626923e8902963401d95",
+    "foreground.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "foreground.txt": "80bcd2b2d9d2f6daba4f7b887be26a811b56cfdeb733c437aaafe93563681aa2",
+    "full.txt": "6764edfc7a27ead0bc107ec2f7235dae01de5a45117a91cd5ae3a7ba89bdd17f",
+    "launch-authorization.json": "1a02d5919ab1b58e1caa87ba1b67ed67cb928fe3dbc1f7d35efe72f57e1580a5",
+    "launch-intent.json": "4091e0e9f6c5d262730dca1fe509359dc8ef715ad4db7506e8250c418df6de10",
+    "launch-receipt.json": "919d56ea55d5754d947e94ba6f2a081733a1bbc7236ba69bf26b961bd09c6fc2",
+    "preservation.json": "87e527081ba86055e993eb9bc6c316afca376f7452a45ce0b93bbf79c9b9b6bc",
+    "pricing.json": "9e8cc00a5207f2ce5a286b0244d55bf2c4e9a6c31207d1269cafe6928f1a805e",
+    "project-policy-after.json": "d08ee257b19f1ae93a0dbafe8d1fa5fc81ede135ce51042bdc8536785b5d027d",
+    "project-policy-before.json": "f6bbf981d41761c16319d41d50eece018598eae4b7600b7a332301b3799b5d53",
+    "projection.txt": "0f5a2f3dab57e73d169ff0b43d3ab0372c0b1d0f762500d8464776c2893b4079",
+    "report.md": "dce14735175768f747655fa34ca9b2412ef31d3924fd771ebcf212a925a59161",
+    "requests.json": "d35b36e826dffba32d1fd61a897429b051c74715f4811f4cf864f2c958d05d81",
+    "task.json": "7e886f7e983beb2796b79952e1c1d3532c6022072375d0a5956aa8968d4a8184",
+    "verification.json": "2e5fff47afb4cdf679e8490f9be654927c0eaf37df22f2b786d5325d782c2e8f"
+  }
+}

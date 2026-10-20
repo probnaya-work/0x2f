@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "currency": "USD",
+  "providers": [
+    "managed-openai"
+  ],
+  "files": [
+    "src/cli.mjs",
+    "test/engineering-foreground-cli.test.mjs"
+  ],
+  "writePaths": [
+    "src/cli.mjs",
+    "test/engineering-foreground-cli.test.mjs"
+  ],
+  "check": [
+    "/Users/bogart/.n/bin/node",
+    "--test",
+    "test/engineering-foreground-cli.test.mjs"
+  ],
+  "limits": {
+    "moneyMicros": 24576,
+    "tokens": 12288,
+    "modelCalls": 4,
+    "providerCalls": 9,
+    "wallClockMs": 120000,
+    "implementationAttempts": 1,
+    "agentRuns": 1,
+    "reviewCycles": 0
+  },
+  "workspace": {
+    "repository": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+    "ref": "HEAD"
+  }
+}

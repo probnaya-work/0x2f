@@ -1,0 +1,24 @@
+{
+  "head": "43538ec2d9775b6f6c575ab33ffdd68f3290a589",
+  "expectedTaskId": 3,
+  "attemptMaximum": 1,
+  "command": [
+    "/Users/bogart/.n/bin/2f-next",
+    "new",
+    "After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests."
+  ],
+  "limits": {
+    "moneyMicros": 24576,
+    "tokens": 12288,
+    "modelCalls": 4,
+    "providerCalls": 9,
+    "wallClockMs": 120000,
+    "implementationAttempts": 1,
+    "agentRuns": 1,
+    "reviewCycles": 0
+  },
+  "retry": false,
+  "fallback": false,
+  "delivery": false,
+  "startedAt": 1792534735.045269
+}

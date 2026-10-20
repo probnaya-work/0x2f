@@ -1,0 +1,48 @@
+{
+  "candidateOldFilesBefore": 914,
+  "candidateOldFilesPreserved": 912,
+  "authorizedExistingChangesOnly": [
+    "engineering.json",
+    "task-sequence.json"
+  ],
+  "beforeCanonicalManifestDigest": "4bdfa91d7a5de97b62f433d4dd597ce3ed853d7bfe0b805026e5d913c05ccdd2",
+  "beforeCommittedManifestReference": "../managed-task002-correction/work-manifest.json",
+  "tasks001002AndOwnedWorktreesByteAndModeIdentical": true,
+  "task003CreatedOnce": true,
+  "task004Created": false,
+  "task003Workspace": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground/.work/worktrees/003-after-creating-a-task-print-one-concise-next-act",
+  "task003WorkspaceHead": "43538ec2d9775b6f6c575ab33ffdd68f3290a589",
+  "task003WorkspaceClean": true,
+  "productionBefore": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.task003-before.json",
+  "productionAfter": "/private/tmp/0x2f-phase0-20261016T001558Z-1ncn11k6/baseline.task003-after.json",
+  "productionProtectedStateUnchanged": true,
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "productionTask2Files": 105,
+  "productionTask3Files": 24,
+  "productionPackageHashes": {
+    "package.json": "f7f6f6c9e3b98feb2f54edb3541d21c8c6f97c1bff2740bc494c565cd799db9d",
+    "package-lock.json": "aad90a953d00a3bdf043ddc2ae7046afe3e8314d96ecab8563a55c4f3df2bd7c"
+  },
+  "launchAgentScheduleAndRuntimeBindingUnchanged": true,
+  "existing2fAnd2fNextLaunchersUnchanged": true,
+  "priorTrackedEvidenceUnchanged": true,
+  "naturalSchedulerWake": {
+    "runsBefore": "473",
+    "runsAfter": "474",
+    "changedOnly": [
+      "scheduler.log",
+      "scheduler/health.json"
+    ],
+    "schedulerControlInvoked": false,
+    "healthy": true
+  },
+  "codeFilesChangedByTask003": [],
+  "delivery": false,
+  "retries": false,
+  "fallback": false,
+  "oldTaskJsonHashes": {
+    "001-after-creating-a-task-print-one-concise-next-act": "d9d0ef1a95aaedf36097258bfc3bf4f509077ede6a1f4e13068160b3e5d6ae62",
+    "002-after-creating-a-task-print-one-concise-next-act": "60fa70365ef0475710b1418a15d8bb4f2069dadb35b16040b04c665df506a0e7"
+  }
+}
