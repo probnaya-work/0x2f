@@ -176,7 +176,10 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       let conversation=[{role:'user',content:JSON.stringify(modelPacket)}];
       while(!patchSubmitted){
         active();if(state.inferences>=limits.inferenceRequests)fail('managed_request_limit');
-        const prompt={model:model.id,instructions:managedInstructions,input:conversation,tools:managedTools,tool_choice:'auto'};guard(prompt);
+        // Give the model the actual remaining allowance before it chooses a
+        // batch. These are the existing ledgers, not another execution budget.
+        const instructions=managedInstructions+` Left: ${limits.inferenceRequests-state.inferences} turns, ${limits.tools-state.tools} tools, ${limits.reads-state.reads} reads, ${limits.patches-state.patches} patch.`;
+        const prompt={model:model.id,instructions,input:conversation,tools:managedTools,tool_choice:'auto'};guard(prompt);
         // Reserve serialized bytes for BOTH count and inference before counting.
         const outputMax=Math.min(limits.outputTokensPerRequest,limits.outputTokens-state.outputReserved);
         if(outputMax<1)fail('managed_output_limit');

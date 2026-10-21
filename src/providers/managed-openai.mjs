@@ -35,7 +35,7 @@ export const managedTools=[
   {type:'function',name:'submit_patch',description:'One multi-file patch; each old_text matches once.',strict:true,parameters:{type:'object',properties:{edits:{type:'array',items:{type:'object',properties:{file_id:{type:'string'},old_text:{type:'string'},new_text:{type:'string'}},required:['file_id','old_text','new_text'],additionalProperties:false}}},required:['edits'],additionalProperties:false}},
   {type:'function',name:'request_context_expansion',description:'Stop; no expansion or retry.',strict:true,parameters:{type:'object',properties:{reason:{type:'string'}},required:['reason'],additionalProperties:false}}
 ];
-export const managedInstructions='One attempt, ≤4 responses. Batch precise searches → reads (1–32 lines) → one multi-file patch. Correct range errors within remaining turns. Context expansion stops. No shell/tests/network/Git/delivery; 0x2F verifies.';
+export const managedInstructions='One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery.';
 
 // Test seam is fetch, not a user-configurable API endpoint/provider gateway.
 export function managedTransport(key,{fetchImpl=fetch}={}) {
