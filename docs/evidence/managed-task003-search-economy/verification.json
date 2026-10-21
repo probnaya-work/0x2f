@@ -1,0 +1,81 @@
+{
+  "implementationCommit": "acdde2e5c47b4aa38f5143cc45b6dd62b58a0e70",
+  "recordedAtUtc": "2026-10-21T00:05:55.620488+00:00",
+  "environment": "OPENAI_API_KEY/CODEX_API_KEY/CODEX_ACCESS_TOKEN unset; OX2F_NATIVE_LAUNCHD=0; deterministic fixtures only",
+  "focused": {
+    "command": "node --test test/engineering-managed.test.mjs test/engineering-economics.test.mjs test/engineering-projection.test.mjs test/engineering-foreground.test.mjs test/engineering-foreground-cli.test.mjs",
+    "exitCode": 0,
+    "summary": {
+      "tests": 114,
+      "pass": 114,
+      "fail": 0,
+      "skipped": 0
+    },
+    "log": "/private/tmp/0x2f-managed-search-economy-20261020/focused.log",
+    "logSha256": "5886127472936c35c5468fb748d5dbc0b552af4376920bc35e6ff66bb2c78d17",
+    "durationMs": 133631.664792
+  },
+  "check": {
+    "command": "npm run check",
+    "exitCode": 0,
+    "summary": {},
+    "log": "/private/tmp/0x2f-managed-search-economy-20261020/check.log",
+    "logSha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+    "durationMs": null
+  },
+  "explicitSyntaxChecks": {
+    "files": [
+      "src/core/engineering-managed.mjs",
+      "src/providers/managed-openai.mjs",
+      "test/engineering-managed.test.mjs"
+    ],
+    "exitCodes": [
+      0,
+      0,
+      0
+    ]
+  },
+  "full": {
+    "command": "npm test",
+    "exitCode": 1,
+    "summary": {
+      "tests": 1009,
+      "pass": 889,
+      "fail": 1,
+      "skipped": 119
+    },
+    "log": "/private/tmp/0x2f-managed-search-economy-20261020/full.log",
+    "logSha256": "19254f18b64238694a4bfbf701f6e368f534cdea9b0e17ccfc1520e19b5840ad",
+    "durationMs": 958545.316542
+  },
+  "fullSuiteInvocations": 1,
+  "isolatedFailureDiagnostic": {
+    "command": "node --test --test-name-pattern='simple one-response patch remains' test/engineering-managed.test.mjs",
+    "exitCode": 0,
+    "summary": {
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "skipped": 0
+    },
+    "log": "/private/tmp/0x2f-managed-search-economy-20261020/full-failure-isolated.log",
+    "logSha256": "2f036bd56a1ad191499730c875b2e9f52528935179170170a6a1e2d661b52676",
+    "durationMs": 1875.374875
+  },
+  "fullFailure": {
+    "test": "simple one-response patch remains one response under the four-response allowance",
+    "actual": "needs_you",
+    "expected": "ready",
+    "testDurationMs": 33916.1915,
+    "fixtureDeadlineMs": 30000,
+    "blockedReason": "not retained by this assertion; deadline suspected from elapsed time, not proven",
+    "isolatedOutcome": "pass; not a clean full-suite verdict"
+  },
+  "newTask003CasesInFull": [
+    "✔ Task 003-shaped discovery: targeted test read + code locator → targeted source read → patch → READY (2620.764291ms)",
+    "✔ Task 003 exact guessed-search batches still stop before an oversized second batch (1841.212667ms)"
+  ],
+  "providerCalls": 0,
+  "realKeychainReads": 0,
+  "liveVerdictChanged": false
+}

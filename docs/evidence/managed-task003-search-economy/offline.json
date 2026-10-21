@@ -1,0 +1,208 @@
+{
+  "kind": "deterministic scripted fake Responses; not real model compliance or live provider usage",
+  "finalState": "ready",
+  "attempt": "1a95ceff-45f1-4fca-a7f7-8ff83d78f2c0",
+  "implementationAttempts": 1,
+  "model": "gpt-5.4-mini-2026-03-17",
+  "requestCounts": {
+    "inference": 3,
+    "tokenCount": 3,
+    "availability": 1,
+    "http": 7
+  },
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 4,
+    "countRequests": 4,
+    "responsesRequests": 8,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "publishedBillableInferenceMaximumUsd": 0.024576,
+  "controlRequests": {
+    "classification": "unpriced_control_request",
+    "maximum": 5,
+    "tokenCountMaximum": 4,
+    "availabilityMaximum": 1,
+    "separatePublishedFee": false,
+    "contractualZeroFee": false,
+    "includedInInferenceMaximum": false
+  },
+  "totalProviderBilling": "unknown",
+  "syntheticUsage": {
+    "input": 3093,
+    "cachedInput": 30,
+    "output": 60,
+    "total": 3153
+  },
+  "syntheticCalculatedInferenceCostUsd": 0.0025695,
+  "packetBytes": 3346,
+  "serializedInputBytes": 31906,
+  "resultBytes": 1199,
+  "tools": {
+    "total": 4,
+    "reads": 2,
+    "searches": 1,
+    "patches": 1
+  },
+  "toolSequence": [
+    {
+      "tool": "read_task_file",
+      "callId": "small-test",
+      "bytes": 451,
+      "sourceDigest": "3ea2833c8162f4dee445a01b702f7926a7f10957426b1ebc544f7d7728aa0739",
+      "resultDigest": "a59f80fdb26b1e1f3b7303dcbe75c97a967632f7a59ad0c485d89d09ab7cb0a6",
+      "file_id": "f2",
+      "start_line": 17,
+      "line_count": 4,
+      "truncated": false
+    },
+    {
+      "tool": "search_task_file",
+      "callId": "code-locator",
+      "bytes": 407,
+      "sourceDigest": "7992c564b548a7b0b0476cf25199cfe63b6771c7696f0eb8413838c682936296",
+      "resultDigest": "5d5db7726442046ff1ebcf3134fbef72da537fc4393ce49668166750f9a231cc",
+      "file_id": "f1",
+      "matchLines": [
+        395
+      ],
+      "truncated": false
+    },
+    {
+      "tool": "read_task_file",
+      "callId": "source-read",
+      "bytes": 341,
+      "sourceDigest": "7992c564b548a7b0b0476cf25199cfe63b6771c7696f0eb8413838c682936296",
+      "resultDigest": "c262b052ac22aded53a4e06a542aa32eaba866f95be2581924ff94909cdcc148",
+      "file_id": "f1",
+      "start_line": 395,
+      "line_count": 4,
+      "truncated": false
+    },
+    {
+      "tool": "submit_patch",
+      "callId": "submit_patch",
+      "edits": [
+        {
+          "file_id": "f1",
+          "before": "7992c564b548a7b0b0476cf25199cfe63b6771c7696f0eb8413838c682936296",
+          "after": "599a7ea1e6e7876cd3dcf89549249ed041570c37d096b5e55dbaf409a58a1f50"
+        },
+        {
+          "file_id": "f2",
+          "before": "3ea2833c8162f4dee445a01b702f7926a7f10957426b1ebc544f7d7728aa0739",
+          "after": "b02f2b4bf8d32ed81aff35e6dc1396291d2d98e15e7a9bc23d7d06ba71370fba"
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "url": "/v1/models/gpt-5.4-mini-2026-03-17",
+      "bytes": 2
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 4 turns, 6 tools, 4 reads, 1 patch.",
+      "bytes": 4531
+    },
+    {
+      "url": "/v1/responses",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 4 turns, 6 tools, 4 reads, 1 patch.",
+      "bytes": 4625
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 3 turns, 4 tools, 3 reads, 1 patch.",
+      "bytes": 5670
+    },
+    {
+      "url": "/v1/responses",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 3 turns, 4 tools, 3 reads, 1 patch.",
+      "bytes": 5764
+    },
+    {
+      "url": "/v1/responses/input_tokens",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 2 turns, 3 tools, 2 reads, 1 patch.",
+      "bytes": 5611
+    },
+    {
+      "url": "/v1/responses",
+      "instructions": "One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery. Left: 2 turns, 3 tools, 2 reads, 1 patch.",
+      "bytes": 5705
+    }
+  ],
+  "artifact": {
+    "path": "runs/1/artifacts/manifest.json",
+    "digest": "e60e0133d41bc3cd61ef9e4720f388fc367f7b5296cd06d5ae1a12e05e7ca70f",
+    "contentDigest": "22c20cfd700c0c0394682f7204cf1ec11ee722cb449d76c95e4d1aad52fe6f78"
+  },
+  "verification": {
+    "schemaVersion": 1,
+    "run": 2,
+    "artifact": {
+      "path": "runs/1/artifacts/manifest.json",
+      "digest": "e60e0133d41bc3cd61ef9e4720f388fc367f7b5296cd06d5ae1a12e05e7ca70f",
+      "contentDigest": "22c20cfd700c0c0394682f7204cf1ec11ee722cb449d76c95e4d1aad52fe6f78"
+    },
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "--test",
+      "test/engineering-foreground-cli.test.mjs"
+    ],
+    "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+    "cwd": "/private/tmp/0x2f-playbook-CP3Rw6/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+    "code": 0,
+    "error": null,
+    "output": "✔ test/engineering-foreground-cli.test.mjs (85.00175ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 88.171125\n",
+    "groupClosed": true,
+    "sourceUnchanged": true,
+    "outputDigest": "5f5c671015badafe7addcf2128db37872f2ecb0c6dc5f2ca06824c6c8ee65495"
+  },
+  "projection": [
+    "STATE READY",
+    "PURPOSE VERIFY · EXECUTOR local-checks · RUN 2",
+    "NEXT ACCEPT · REASON INITIAL_EXECUTOR",
+    "COST TOTAL UNKNOWN · inference calculation and provider charge are separate",
+    "LANE MANAGED API · READY · MODEL gpt-5.4-mini-2026-03-17 · NO OPAQUE FALLBACK",
+    "OBSERVED MODEL gpt-5.4-mini-2026-03-17",
+    "FOREGROUND ONLY · UNATTENDED NO-GO · NO AUTOMATIC RETRY OR DELIVERY",
+    "ENVELOPE 1 attempt · 4 inference + 4 count requests · 6 tools · 4 reads · 1 patch",
+    "MANAGED USAGE 7 HTTP · 6 Responses HTTP · 3 inference · 3 count · 1 availability GET · 4 tools · 2 reads · 1 searches · 1 patches · 1199 result bytes",
+    "BOUND 12288 inference tokens",
+    "LIMITS 4 files · 65536 source bytes · 8192 packet bytes · 120000 ms deadline",
+    "PAYLOAD 4096 bytes/read · 24576 result bytes · 32768 serialized API input bytes",
+    "PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576",
+    "CONTROL REQUESTS: 5 maximum, no separate published fee · 4 dispatched · contractual zero fee not claimed",
+    "ACTUAL TOKENS 3153 · CALCULATED INFERENCE USD 0.0025695 · PROVIDER COST UNKNOWN",
+    "USAGE TOTAL 3153 · INPUT 3093 · CACHED 30 · OUTPUT 60 · REASONING ? · ATTEMPTS 1",
+    "USAGE COST USD 2570 micros",
+    "RESULT PATCH VERIFIED · 22c20cfd700c0c0394682f7204cf1ec11ee722cb449d76c95e4d1aad52fe6f78",
+    "ARTIFACT runs/1/artifacts/manifest.json",
+    "REVIEW runs/2/review.json · e6f9fb025df53397828b48616d643b35f9dd201982cf9674e9dbc84250ed8961",
+    "WORKSPACE /private/tmp/0x2f-playbook-CP3Rw6/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive · ref fc8c0405c1a54cb913ddc6769e11ebb5bb79c522 · task-owned worktree",
+    "ROUTING implement → managed-openai · minimum-qualified-managed-model"
+  ],
+  "delivery": false,
+  "opaqueFallback": false,
+  "automaticRetry": false,
+  "duplicateDispatchEffect": false,
+  "sourceSizes": [
+    31003,
+    3046
+  ]
+}

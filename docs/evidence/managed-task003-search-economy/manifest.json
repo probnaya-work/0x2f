@@ -1,0 +1,10 @@
+{
+  "implementationCommit": "acdde2e5c47b4aa38f5143cc45b6dd62b58a0e70",
+  "files": {
+    "diagnosis.json": "4f89795cc26ea550ee574707742fdbb38439f763647a78d0e66a1222b451a81d",
+    "offline.json": "c16a923062a5dbb4e4fb53726129bed9df1981f8cd01d6dc3de838887d648f1c",
+    "preservation.json": "8c8213195691d1f15c1fad65cd2b1584c1a8a4fc0266b0eac6bc710875a47ba1",
+    "report.md": "adf3e00f67b476cd4731472d6c8daf9993a4e7322bc87653f93a4dcbc81bc161",
+    "verification.json": "598cd446d7708ab3f71765f8f3955f21ff1e1503b941458d584a2d9062c40914"
+  }
+}

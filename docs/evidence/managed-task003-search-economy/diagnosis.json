@@ -1,0 +1,200 @@
+{
+  "source": {
+    "path": "docs/evidence/managed-task003-live/requests.json",
+    "sha256": "d35b36e826dffba32d1fd61a897429b051c74715f4811f4cf864f2c958d05d81"
+  },
+  "attempt": "d19e9a97-30fd-443b-a206-c5227123697d",
+  "status": "needs_you",
+  "blockedOn": "managed_tool_limit",
+  "rootCause": "Four guessed literal UI searches returned no matches. Next batch of four exceeded remaining two tool slots and was rejected pre-effect. No read/schema/parser mismatch.",
+  "requests": [
+    {
+      "number": 1,
+      "kind": "model",
+      "calls": []
+    },
+    {
+      "number": 2,
+      "kind": "count",
+      "calls": []
+    },
+    {
+      "number": 3,
+      "kind": "inference",
+      "calls": [
+        {
+          "callId": "call_7JkeSQ1JN6RTjfzvzcz2pPNE",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "After creating a Task"
+          }
+        },
+        {
+          "callId": "call_MNxSw6Y7gwnbJpFLw0HTEkaO",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "open it"
+          }
+        },
+        {
+          "callId": "call_hcXmHw0EhBgcIqRl7tsOh0MT",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "Created Task"
+          }
+        },
+        {
+          "callId": "call_Jxc14xWtkezNEbM0VF6cBHs5",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f2",
+            "query": "Task"
+          }
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "kind": "count",
+      "calls": []
+    },
+    {
+      "number": 5,
+      "kind": "inference",
+      "calls": [
+        {
+          "callId": "call_xbyofq8OXMx79GqgdbLSKvt3",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "task id"
+          }
+        },
+        {
+          "callId": "call_KeJ8IdU8hy8Z3acdEKWOxvW9",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "task.json"
+          }
+        },
+        {
+          "callId": "call_oJrpV9cU9G4rY9wju19JlmwC",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f1",
+            "query": "print"
+          }
+        },
+        {
+          "callId": "call_i7zUibyrENQuoU1tuZWMwDvV",
+          "name": "search_task_file",
+          "arguments": {
+            "file_id": "f2",
+            "query": "open"
+          }
+        }
+      ]
+    }
+  ],
+  "completedTools": [
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-1-receipt.json",
+      "sha256": "30e3a04b4536abdf67d8e473c9d47f84286e80da4f99f589ac548336c2b24831",
+      "tool": "search_task_file",
+      "bytes": 140,
+      "matches": 0
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-2-receipt.json",
+      "sha256": "77cbbba07dc96de47b987bbc2c517e053cdf37be8ef0834e7a10a5edeaefcf92",
+      "tool": "search_task_file",
+      "bytes": 140,
+      "matches": 0
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-3-receipt.json",
+      "sha256": "b68f22aebddf37b7933566f595c9ba0ee391aa9fabb3b1a8e2c6960eaaeb3cba",
+      "tool": "search_task_file",
+      "bytes": 140,
+      "matches": 0
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-4-receipt.json",
+      "sha256": "9889b2ee55537267aa5f3cb1254d9a58c8a63e1ad8cc4cfcc8daf0bee6ba49b0",
+      "tool": "search_task_file",
+      "bytes": 140,
+      "matches": 0
+    }
+  ],
+  "proposedCalls": 8,
+  "executedTools": 4,
+  "secondBatchExecuted": false,
+  "actualUsage": {
+    "input": 1969,
+    "cachedInput": 0,
+    "output": 215,
+    "total": 2184
+  },
+  "matchedNativeEvidence": [
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-1-intent.json",
+      "sha256": "0061bfaa232085efaa077c567eab8cd1702e64c04d65c992aa2a502853886e51"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-1-receipt.json",
+      "sha256": "40a8eaecfc36351c5b3d4e840057ebedefcc771efe2badf97563ed839408f258"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-2-intent.json",
+      "sha256": "74fe86e3146fa3f292154c9e22ddcb8577ff696041d899dcb61cdf159d86f05d"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-2-receipt.json",
+      "sha256": "97b633a4539b20018dfd243372a697efa2118356d010eec477d8674bdc55134b"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-3-intent.json",
+      "sha256": "0ed75b1bdb1877250b7ed2a483307331129eddbbd044be07973817c9142c8fe0"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-3-receipt.json",
+      "sha256": "07ad198accd34871dff37560b0532899f5bcc3763a97b7b736d939b0d429737b"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-4-intent.json",
+      "sha256": "2063100ea139ed3c9420ef708a152ad4aab78bef99288e1db6dec78116769d24"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-4-receipt.json",
+      "sha256": "da98e9a410546fe8dd1f86ecd8ba7a27088971e01e3010e2f4d042a8df1b2afb"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-intent.json",
+      "sha256": "e2d5eebd6218e2d7bd516586756b72b4c3422bf2558f04deacad48f085b06d9c"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-receipt.json",
+      "sha256": "6fe65859c3b4c9e92a90b01b9aeb6e99f06cb98ec440915e74bae1d02fe63169"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-1-receipt.json",
+      "sha256": "30e3a04b4536abdf67d8e473c9d47f84286e80da4f99f589ac548336c2b24831"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-2-receipt.json",
+      "sha256": "77cbbba07dc96de47b987bbc2c517e053cdf37be8ef0834e7a10a5edeaefcf92"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-3-receipt.json",
+      "sha256": "b68f22aebddf37b7933566f595c9ba0ee391aa9fabb3b1a8e2c6960eaaeb3cba"
+    },
+    {
+      "path": ".work/tasks/003-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-4-receipt.json",
+      "sha256": "9889b2ee55537267aa5f3cb1254d9a58c8a63e1ad8cc4cfcc8daf0bee6ba49b0"
+    }
+  ]
+}
