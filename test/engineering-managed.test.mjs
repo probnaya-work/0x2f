@@ -549,7 +549,37 @@ test('invalid read in the last turn denies the whole batch without patch effect 
 });
 
 test('simple one-response patch remains one response under the four-response allowance',async t=>{
- const f=await fixture(t,{outputs:[[patch()]]}),task=await f.run();assert.equal(task.status,'ready');assert.deepEqual([task.engineering.managed.inferences,task.engineering.managed.counts,f.requests.length],[1,1,3]);assert.equal(task.engineering.economics.attempts.length,1);
+ const f=await fixture(t,{outputs:[[patch()]]});
+ // Request cardinality must not depend on wall time lost to other test files
+ // or host suspension. The deadline boundary is exercised separately below;
+ // the same real patch, persistence and credential-free verifier still run.
+ t.mock.timers.enable({apis:['Date','setTimeout'],now:Date.now()});
+ try{
+  const task=await f.run(),m=task.engineering.managed;
+  const diagnostic={status:task.status,blockedOn:task.blockedOn??null,managedState:m.state,limits:m.limits,projectDeadlineMs:f.task.engineering.config.limits.wallClockMs,inferences:m.inferences,counts:m.counts,requests:f.requests.length,patches:m.patches,attempts:task.engineering.economics.attempts.length,verification:task.engineering.verification};
+  if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'one-response.json'),JSON.stringify(diagnostic,null,2)+'\n');}
+  assert.equal(task.status,'ready',JSON.stringify(diagnostic));assert.deepEqual([m.inferences,m.counts,f.requests.length],[1,1,3]);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.verification.groupClosed,true);
+ }finally{t.mock.timers.reset();}
+});
+
+test('one-response patch at the unchanged deadline records managed_deadline without replay or READY',async t=>{
+ const f=await fixture(t,{outputs:[[patch()]]});
+ t.mock.timers.enable({apis:['Date','setTimeout'],now:Date.now()});
+ try{
+  let deadline;
+  const task=await f.run({checkRunner:async({timeout,signal})=>{
+   assert.ok(timeout>0&&timeout<=5000);assert.equal(signal.aborted,false);
+   deadline=f.task.engineering.config.limits.wallClockMs;assert.equal(deadline,30000);
+   t.mock.timers.tick(deadline);assert.equal(signal.aborted,true);
+   return {code:0,error:null,output:'late verifier success\n',groupClosed:true};
+  }}),m=task.engineering.managed;
+  const diagnostic={status:task.status,blockedOn:task.blockedOn,managedState:m.state,limits:m.limits,advancedMs:deadline,projectDeadlineMs:f.task.engineering.config.limits.wallClockMs,inferences:m.inferences,counts:m.counts,requests:f.requests.length,patches:m.patches,attempts:task.engineering.economics.attempts.length,verification:task.engineering.verification};
+  if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'one-response-deadline.json'),JSON.stringify(diagnostic,null,2)+'\n');}
+  assert.equal(task.status,'needs_you',JSON.stringify(diagnostic));assert.equal(task.blockedOn.code,'managed_deadline');assert.equal(m.state,'NEEDS YOU');
+  assert.deepEqual([m.inferences,m.counts,f.requests.length,m.patches],[1,1,3,1]);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification,null);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
+  const root=f.runtime.store.taskDir(task.slug);assert.equal(await f.runtime.store.exists(path.join(root,'runs/2/verification.json')),false);
+  const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);
+ }finally{t.mock.timers.reset();}
 });
 
 test('existing stricter project request caps remain a pre-credential gate and are never rewritten',async t=>{
