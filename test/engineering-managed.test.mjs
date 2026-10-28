@@ -10,7 +10,7 @@ import {ensureEngineeringWorkspace} from '../src/core/engineering-workspace.mjs'
 import {mutateEngineering,assertEngineeringAccepted} from '../src/core/engineering.mjs';
 import {handoffHash as hash} from '../src/core/engineering-handoff.mjs';
 import {economicsPolicy} from '../src/core/engineering-economics.mjs';
-import {runManagedForeground,managedCheck,managedSearchResult} from '../src/core/engineering-managed.mjs';
+import {runManagedForeground,managedCheck,managedSearchResult,managedModelContext,managedWireInput} from '../src/core/engineering-managed.mjs';
 import {runForegroundEngineering} from '../src/core/engineering-foreground.mjs';
 import {credentialFreeEnvironment} from '../src/core/workflow-credentials.mjs';
 import {renderTasks} from '../src/render.mjs';
@@ -20,11 +20,26 @@ import {projectRow} from '../src/web/ledger.mjs';
 import {snapshot} from '../src/tui/model.mjs';
 import {recoverInterruptedRuns} from '../src/recover.mjs';
 const key='sk-fake-managed-qualification-key';
+const wireResult=item=>{const n=item.output.indexOf('\n');return n<0?JSON.parse(item.output):{...JSON.parse(item.output.slice(0,n)),content:item.output.slice(n+1)};};
 const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
 const read=(id='read')=>call('read_task_file',{file_id:'f1',start_line:1,line_count:32},id);
 const search=(query='parseTaskId',id='search',file_id='f1')=>call('search_task_file',{file_id,query},id);
+test('wire context preserves every instruction, constraint and source byte without nested source JSON',()=>{
+ const packet={brief:'Keep API "014"\nAdd regression',constraints:['No delivery','Keep checks'],files:[{id:'f1',path:'src/x.mjs',bytes:50,writable:true,sha256:'audit-only'}],instructions:[{path:'AGENTS.md',text:'Keep .work atomic\n```\n"quotes"\\slashes\n```'}]};
+ const context=managedModelContext(packet);
+ assert.ok(context.includes(packet.brief));assert.ok(context.includes(JSON.stringify(packet.constraints)));
+ assert.ok(context.includes(packet.instructions[0].text));assert.ok(context.includes('src/x.mjs'));assert.ok(!context.includes('audit-only'));
+ const content='const a = "\\\\";\n🚀\r\n{"error":"not metadata"}\n';
+ const result={type:'function_call_output',call_id:'x',output:JSON.stringify({file_id:'f1',start_line:2,line_count:4,content,truncated:false})};
+ const sourceCall={...call('read_task_file',{file_id:'f1',start_line:2,line_count:4},'x'),id:'provider-item-audit-id',status:'completed'};
+ const denial={type:'function_call_output',call_id:'denied',output:'{"error":"managed_read_range"}'};
+ const original=structuredClone([sourceCall,result,denial]),wire=managedWireInput(original);
+ assert.deepEqual(original,[sourceCall,result,denial]);assert.deepEqual(wireResult(wire[1]),JSON.parse(result.output));
+ assert.equal(wireResult(wire[1]).content,content);assert.deepEqual(wire[0],call('read_task_file',{file_id:'f1',start_line:2,line_count:4},'x'));assert.deepEqual(wire[2],denial);
+ assert.ok(Buffer.byteLength(JSON.stringify(wire))<Buffer.byteLength(JSON.stringify(original)));
+});
 async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS,setup}={}){
  const f=await playbookFixture(t,{setup,config:{limits:{moneyMicros:24576,tokens:12288,modelCalls:4,providerCalls:9,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
  const git=args=>execFileSync('/usr/bin/git',['-C',f.base,...args],{env:{PATH:'/usr/bin:/bin'},stdio:'pipe'});
@@ -115,7 +130,7 @@ test('scheduled/unattended managed search cannot retrieve a credential or dispat
 test('Task 001-shaped large source: search → targeted read → patch → verifier → READY, one bounded attempt',async t=>{
  const targetLine=301,outputs=[[search()],[call('read_task_file',{file_id:'f1',start_line:targetLine,line_count:1},'targeted'),patch()]];
  const f=await fixture(t,{count:1031,outputs,hook:({req,body,inf})=>{
-  if(req.url==='/v1/responses'&&inf===2){const result=body.input.find(i=>i.type==='function_call_output');assert.equal(JSON.parse(result.output).matches[0].line,targetLine);}
+  if(req.url==='/v1/responses'&&inf===2){const result=body.input.find(i=>i.type==='function_call_output');assert.equal(wireResult(result).matches[0].line,targetLine);}
  }});
  const large='// filler '+ 'x'.repeat(90)+'\n',prefix=large.repeat(300),source=prefix+'export const parseTaskId = () => null;\n';
  await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),source+'//'+'.'.repeat(31003-Buffer.byteLength(source)-3)+'\n');
@@ -243,7 +258,7 @@ test('managed provider rate limit has no retry or opaque fallback',async t=>{
  const f=await fixture(t,{transportFailure:true}),task=await f.run();assert.equal(task.status,'needs_you');assert.equal(task.engineering.managed.state,'UNCERTAIN');assert.equal(f.requests.length,1);assert.equal(f.calls.length,0);
 });
 test('managed oversized read result is truncated before model input and counted with wrapping',async t=>{
- const f=await fixture(t,{outputs:[[read()],[call('request_context_expansion',{reason:'Truncated source'})]]});await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),'x'.repeat(50000));const task=await f.run();assert.equal(task.blockedOn.code,'context_expansion_required');const next=f.requests.filter(r=>r.url==='/v1/responses')[1].body;const out=next.input.find(i=>i.type==='function_call_output');assert.equal(JSON.parse(out.output).content.length,4096);assert.ok(Buffer.byteLength(JSON.stringify(out))<24576);assert.ok(!JSON.stringify(next).includes('x'.repeat(10000)));
+ const f=await fixture(t,{outputs:[[read()],[call('request_context_expansion',{reason:'Truncated source'})]]});await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),'x'.repeat(50000));const task=await f.run();assert.equal(task.blockedOn.code,'context_expansion_required');const next=f.requests.filter(r=>r.url==='/v1/responses')[1].body;const out=next.input.find(i=>i.type==='function_call_output');assert.equal(wireResult(out).content.length,4096);assert.ok(Buffer.byteLength(JSON.stringify(out))<24576);assert.ok(!JSON.stringify(next).includes('x'.repeat(10000)));
 });
 test('managed concurrent duplicate driver cannot dispatch or patch twice',async t=>{
  const f=await fixture(t),tasks=await Promise.all([f.run(),f.run()]);assert.ok(tasks.every(t=>t.status==='ready'));assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,2);assert.equal(tasks[1].engineering.managed.patches,1);
@@ -429,7 +444,7 @@ test('Task 002-shaped two-file searches → targeted reads → one multi-file pa
  },hook:({req,body,inf})=>{
   if(req.url!=='/v1/responses')return;
   if(inf===2)assert.equal(body.input.filter(i=>i.type==='function_call_output').length,2);
-  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>JSON.parse(i.output));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
+  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
  }});
  await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
  const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
@@ -466,12 +481,12 @@ test('Task 003-shaped discovery: targeted test read + code locator → targeted 
   await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
  },hook:({req,body,inf})=>{
   if(req.url!=='/v1/responses')return;
-  assert.match(body.instructions,/Read small tests before guessed UI searches/);
-  assert.match(body.instructions,/one search\/file\/batch/);assert.match(body.instructions,/No hits: read, not synonyms/);
+  assert.match(body.instructions,/Read short test windows/);
+  assert.match(body.instructions,/Batch literal code locators/);assert.match(body.instructions,/No hits: read, not synonyms/);
   const remaining=['4 turns, 6 tools, 4 reads, 1 patch.','3 turns, 4 tools, 3 reads, 1 patch.','2 turns, 3 tools, 2 reads, 1 patch.'];
   assert.ok(body.instructions.endsWith('Left: '+remaining[inf-1]));
-  if(inf===2){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>JSON.parse(i.output));assert.ok(results.some(r=>r.content?.includes("'new'")));assert.equal(results.find(r=>r.matches).matches[0].line,395);}
-  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>JSON.parse(i.output));assert.ok(results.some(r=>r.content?.includes(original)));}
+  if(inf===2){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes("'new'")));assert.equal(results.find(r=>r.matches).matches[0].line,395);}
+  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes(original)));}
  }});
  await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
  const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
@@ -604,7 +619,7 @@ test('range denials use the result ceiling and never mask an unknown tool',async
 
 test('a targeted read retains search locations it has not covered',async t=>{
  const f=await fixture(t,{outputs:[[search('export','locator')],[call('read_task_file',{file_id:'f1',start_line:2,line_count:1},'targeted')],[patch()]],hook:({req,body,inf})=>{
-  if(req.url==='/v1/responses'&&inf===3)assert.ok(body.input.some(i=>i.type==='function_call_output'&&JSON.parse(i.output).matches));
+  if(req.url==='/v1/responses'&&inf===3)assert.ok(body.input.some(i=>i.type==='function_call_output'&&wireResult(i).matches));
  }}),task=await f.run();assert.equal(task.status,'ready',task.blockedOn?.text);
 });
 
@@ -619,4 +634,80 @@ test('a rejected search sibling remains a denial when a later targeted read succ
  const f=await fixture(t,{outputs:[[call('read_task_file',{file_id:'f1',start_line:1,line_count:220},'bad'),search('export','denied-search')],[read('corrected')],[patch()]]}),task=await f.run();
  assert.equal(task.status,'ready',task.blockedOn?.text);assert.deepEqual([task.engineering.managed.tools,task.engineering.managed.searches,task.engineering.managed.reads,task.engineering.managed.patches],[4,0,1,1]);
  const root=f.runtime.store.taskDir(task.slug);assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/tool-2-receipt.json'))).code,'managed_batch_rejected');
+});
+
+test('Task 004-shaped compact discovery retains source and fits both serialized bodies before real verification',async t=>{
+ const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
+ const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);',testOriginal='assert.match(output, /^Created #001: Fixture/m);';
+ const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);',testReplacement=testOriginal+"\nassert.ok(output.includes('Next #001: 2f-next open 1'));";
+ const source=('// filler '+'.'.repeat(60)+'\n').repeat(395)+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n';
+ const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
+ const pad=(s,n)=>s+'//'+'.'.repeat(n-Buffer.byteLength(s)-3)+'\n';
+ const item=(name,args,i)=>({...call(name,args,'call_'+String(i).padStart(24,'0')),id:'fc_'+String(i).padStart(58,'0'),status:'completed'});
+ const outputs=[
+  [item('search_task_file',{file_id:'f1',query:'console.log('},1),item('search_task_file',{file_id:'f2',query:'assert.match('},2)],
+  [item('read_task_file',{file_id:'f1',start_line:396,line_count:3},3),item('read_task_file',{file_id:'f2',start_line:17,line_count:4},4)],
+  [item('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]},5)]
+ ];
+ const instructions=await fs.readFile(new URL('../AGENTS.md',import.meta.url),'utf8');
+ const f=await fixture(t,{outputs,count:1031,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},setup:async({base})=>{
+  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
+ },hook:async({req,body,f,inf})=>{
+  if(req.url!=='/v1/responses')return;
+  assert.equal((await f.runtime.store.findTask(f.task.id)).status,'working','READY cannot precede verifier');
+  assert.ok(body.input[0].content.includes(instructions));
+  assert.match(body.input[0].content,/Preserve existing output compatibility/);
+  if(inf===3){const r=body.input.filter(i=>i.type==='function_call_output').map(wireResult);assert.equal(r.length,2);assert.ok(r.some(x=>x.content.includes(original)));assert.ok(r.some(x=>x.content.includes(testOriginal)));}
+ }});
+ await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),instructions);
+ const brief='After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.';
+ await f.runtime.store.updateTask({...await f.runtime.store.findTask(f.task.id),brief});
+ const task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
+ const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
+ const oldInstructions='One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery.';
+ const legacy=r=>{
+  const b=structuredClone(r.body);b.tools[0].description='Read approved ID; 1–32 lines, ≤4096 content bytes.';b.instructions=b.instructions.replace(b.instructions.slice(0,b.instructions.indexOf(' Left:')),oldInstructions);
+  b.input=b.input.map(i=>{
+   if(i.role==='user')return {...i,content:JSON.stringify({brief:attempt.packet.brief,constraints:attempt.packet.constraints,instructions:attempt.packet.instructions.map(({path,text})=>({path,text})),files:attempt.packet.files.map(({id,path,bytes,writable})=>({id,path,bytes,writable}))})};
+   if(i.type==='function_call')return outputs.flat().find(o=>o.call_id===i.call_id);
+   if(i.type==='function_call_output'){const d=wireResult(i);return {...i,output:JSON.stringify(d.content===undefined?d:{file_id:d.file_id,start_line:d.start_line,line_count:d.line_count,content:d.content,truncated:d.truncated})};}
+   return i;
+  });return b;
+ };
+ const counted=f.requests.filter(r=>!r.url.includes('/models/'));
+ const byteRows=counted.map(r=>({kind:r.url.endsWith('input_tokens')?'count':'inference',before:Buffer.byteLength(JSON.stringify(legacy(r))),after:Buffer.byteLength(JSON.stringify(r.body))}));
+ const before=byteRows.reduce((n,r)=>n+r.before,0),after=byteRows.reduce((n,r)=>n+r.after,0);
+ assert.equal(after,m.inputBytes);assert.ok(after<=32768);assert.ok(after<before);assert.ok(before>32768,'same fixture under prior serialization would block pair three');
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.reads,m.searches,m.patches],[3,3,1,5,2,2,1]);
+ assert.deepEqual(m.limits,MANAGED_LIMITS);assert.ok(m.actualUsage.total<=12288);assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.equal(m.predicted.totalUpperUsd,null);
+ assert.ok(m.resultBytes<8192);assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);
+ assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.verification.groupClosed,true);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
+ assert.deepEqual((await f.runtime.actions.getTaskDiff(task.id)).map(d=>d.path).sort(),[sourcePath,testPath]);
+ assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
+ const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests,'no replay');
+ if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'task004-compact.json'),JSON.stringify({kind:'offline mock; changed discovery strategy, not a replay of the live model',byteRows,before,after,margin:32768-after,resultBytes:m.resultBytes,packetBytes:Buffer.byteLength(JSON.stringify(attempt.packet)),usage:m.actualUsage,publishedInferenceMaximum:m.predicted.inferenceUpperUsd,limits:m.limits,state:task.status,verification:{code:task.engineering.verification.code,groupClosed:task.engineering.verification.groupClosed,outputDigest:task.engineering.verification.outputDigest},patchDigest:m.artifact.contentDigest,attempts:task.engineering.economics.attempts.length,sequence:outputs.map(x=>x.map(i=>i.name)),projection:workflowLines(task)},null,2)+'\n');}
+});
+
+test('Task 004 broad headers + empty search still stop before the third count/inference pair',async t=>{
+ const headers=n=>{const lines=Array.from({length:32},()=>('//\n'));lines[0]='//'+'.'.repeat(n-96)+'\n';return lines.join('');};
+ const source=headers(1363),check=headers(2839),pad=(s,n)=>s+'//'+'.'.repeat(n-Buffer.byteLength(s)-3)+'\n';
+ const outputs=[[read('native-source'),call('read_task_file',{file_id:'f2',start_line:1,line_count:32},'native-test')],[search('new task','native-empty')],[patch()]];
+ const f=await fixture(t,{outputs,setup:async({base})=>{
+  await fs.writeFile(path.join(base,'src/id.mjs'),pad(source,31003));await fs.writeFile(path.join(base,'test/id.test.mjs'),pad(check,3046));
+ }});
+ await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),await fs.readFile(new URL('../AGENTS.md',import.meta.url)));
+ const taskBefore=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...taskBefore,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
+ const task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'managed_input_limit');
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.reads,m.searches,m.patches],[2,2,1,3,2,1,0]);
+ assert.equal(m.inputBytes,f.requests.filter(r=>!r.url.includes('/models/')).reduce((n,r)=>n+Buffer.byteLength(JSON.stringify(r.body)),0));
+ const root=f.runtime.store.taskDir(task.slug),third=structuredClone(f.requests.filter(r=>r.url==='/v1/responses')[1].body);
+ third.instructions=third.instructions.replace('3 turns, 4 tools','2 turns, 3 tools');
+ third.input.push(...managedWireInput(outputs[1]),(await f.runtime.store.readJson(path.join(root,'runs/1/managed/tool-3-receipt.json'))).result);
+ const {store,max_output_tokens,reasoning,service_tier,...count}=third;
+ assert.ok(m.inputBytes+Buffer.byteLength(JSON.stringify(count))+Buffer.byteLength(JSON.stringify(third))>32768);
+ await assert.rejects(fs.stat(path.join(root,'runs/1/managed/request-6-intent.json')),{code:'ENOENT'});
+ assert.equal(task.engineering.verification,null);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
+ const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);
 });

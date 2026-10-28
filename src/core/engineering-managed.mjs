@@ -39,6 +39,29 @@ async function readManagedSource(cwd,file,guard,maxBytes,expected) {
 }
 const prefixBytes=(text,max)=>{let out='',size=0;for(const ch of text){const n=Buffer.byteLength(ch);if(size+n>max)break;out+=ch;size+=n;}return out;};
 const sourceLines=text=>text.split('\n').map(s=>s.endsWith('\r')?s.slice(0,-1):s);
+// Wire-only, lossless projection. Keep structured packet/results in immutable
+// receipts and in the loop; avoid JSON-encoding source text inside a JSON string
+// inside another JSON request. Source/instructions/outcomes are not summarized
+// or clipped; byte accounting still measures the actual request bodies.
+export function managedModelContext(packet) {
+  return 'Task:\n'+packet.brief+'\nConstraints:\n'+JSON.stringify(packet.constraints)+'\nFiles:\n'+JSON.stringify(packet.files.map(({id,path,bytes,writable})=>({id,path,bytes,writable})))+
+    packet.instructions.map(i=>'\n'+JSON.stringify(i.path)+':\n'+i.text).join('');
+}
+export function managedWireInput(conversation) {
+  return conversation.map(item=>{
+    // Provider item IDs/status are audit metadata, not tool-call inputs. Keep
+    // the call ID, name and exact arguments linking every unresolved result.
+    if(item.type==='function_call'){
+      const {type,call_id,name,arguments:args}=item;
+      return {type,call_id,name,arguments:args};
+    }
+    if(item.type!=='function_call_output')return item;
+    const data=JSON.parse(item.output);
+    if(typeof data.content!=='string')return item;
+    const {content,...metadata}=data;
+    return {...item,output:JSON.stringify(metadata)+'\n'+content};
+  });
+}
 export function managedSearchResult(file_id,text,query,call_id) {
   const b=MANAGED_SEARCH_BOUNDS,lines=sourceLines(text),matches=[];
   const result={type:'function_call_output',call_id,output:''};
@@ -172,14 +195,13 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       const source=await freezeEngineering(store,task,run,baseline,'inputs');await sync({baseline:source});await event('run.started',{run,provider:'managed-openai',purpose:'implement'});
       // Fencing/check identities stay in immutable attempt inputs, not repeated model
       // context. Preserve the complete brief, constraints and repository instructions.
-      const modelPacket={brief:packet.brief,constraints:packet.constraints,instructions:packet.instructions.map(({path,text})=>({path,text})),files:packet.files.map(({id,path,bytes,writable})=>({id,path,bytes,writable}))};
-      let conversation=[{role:'user',content:JSON.stringify(modelPacket)}];
+      let conversation=[{role:'user',content:managedModelContext(packet)}];
       while(!patchSubmitted){
         active();if(state.inferences>=limits.inferenceRequests)fail('managed_request_limit');
         // Give the model the actual remaining allowance before it chooses a
         // batch. These are the existing ledgers, not another execution budget.
         const instructions=managedInstructions+` Left: ${limits.inferenceRequests-state.inferences} turns, ${limits.tools-state.tools} tools, ${limits.reads-state.reads} reads, ${limits.patches-state.patches} patch.`;
-        const prompt={model:model.id,instructions,input:conversation,tools:managedTools,tool_choice:'auto'};guard(prompt);
+        const prompt={model:model.id,instructions,input:managedWireInput(conversation),tools:managedTools,tool_choice:'auto'};guard(prompt);
         // Reserve serialized bytes for BOTH count and inference before counting.
         const outputMax=Math.min(limits.outputTokensPerRequest,limits.outputTokens-state.outputReserved);
         if(outputMax<1)fail('managed_output_limit');

@@ -30,12 +30,12 @@ export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS
   return ranked[0];
 }
 export const managedTools=[
-  {type:'function',name:'read_task_file',description:'Read approved ID; 1–32 lines, ≤4096 content bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},start_line:{type:'integer',minimum:1,maximum:Number.MAX_SAFE_INTEGER},line_count:{type:'integer',minimum:1,maximum:MANAGED_SEARCH_BOUNDS.readLines}},required:['file_id','start_line','line_count'],additionalProperties:false}},
+  {type:'function',name:'read_task_file',description:'Read approved ID; ≤4096 content bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},start_line:{type:'integer',minimum:1,maximum:Number.MAX_SAFE_INTEGER},line_count:{type:'integer',minimum:1,maximum:MANAGED_SEARCH_BOUNDS.readLines}},required:['file_id','start_line','line_count'],additionalProperties:false}},
   {type:'function',name:'search_task_file',description:'Literal approved-ID search: 1–128 UTF-8 query bytes, single line; ≤4096 bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},query:{type:'string'}},required:['file_id','query'],additionalProperties:false}},
   {type:'function',name:'submit_patch',description:'One multi-file patch; each old_text matches once.',strict:true,parameters:{type:'object',properties:{edits:{type:'array',items:{type:'object',properties:{file_id:{type:'string'},old_text:{type:'string'},new_text:{type:'string'}},required:['file_id','old_text','new_text'],additionalProperties:false}}},required:['edits'],additionalProperties:false}},
   {type:'function',name:'request_context_expansion',description:'Stop; no expansion or retry.',strict:true,parameters:{type:'object',properties:{reason:{type:'string'}},required:['reason'],additionalProperties:false}}
 ];
-export const managedInstructions='One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery.';
+export const managedInstructions='One attempt. Batch literal code locators, not prose guesses. Read short test windows, not headers. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No hits: read, not synonyms. No shell/tests/network/Git/delivery.';
 
 // Test seam is fetch, not a user-configurable API endpoint/provider gateway.
 export function managedTransport(key,{fetchImpl=fetch}={}) {
