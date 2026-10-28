@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "single live foreground qualification; evidence-only commit, no Task delivery",
+  "candidateCommit": "a9cd9f1bcfbb4728703863d5b409a2d8d0198c09",
+  "implementationCommit": "f9be6c8106c6c3a11df3fbf3e95978c6180e6799",
+  "taskId": 5,
+  "compression": "evidence.json.gz is lossless gzip JSON, mtime=0; no execution context/accounting change",
+  "files": {
+    "report.md": {
+      "bytes": 7382,
+      "sha256": "6366737836cff8b11e30556fb3d5e4a48dbd09217c17e173d9e22a8370c09c6e"
+    },
+    "evidence.json.gz": {
+      "bytes": 5835,
+      "sha256": "626f5d2437792f805ee67dd9b1099d95e6689a9b0508a7d4fe1d4344a04249f7"
+    }
+  }
+}
