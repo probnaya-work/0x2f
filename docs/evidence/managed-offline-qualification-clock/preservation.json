@@ -1,0 +1,47 @@
+{
+  "capturedAtUtc": "2026-10-28T08:03:32.145500+00:00",
+  "candidateWorkFilesPreserved": 1389,
+  "beforeManifestDigest": "55eb72cc4ec5140224058fc7d042c909abf0ed67a51f2089c75a910b00285dc5",
+  "afterManifestDigest": "55eb72cc4ec5140224058fc7d042c909abf0ed67a51f2089c75a910b00285dc5",
+  "tasks": [
+    {
+      "id": 1,
+      "status": "needs_you",
+      "blockedOn": "managed_input_limit",
+      "taskJsonSha256": "d9d0ef1a95aaedf36097258bfc3bf4f509077ede6a1f4e13068160b3e5d6ae62",
+      "preservedFiles": 25
+    },
+    {
+      "id": 2,
+      "status": "needs_you",
+      "blockedOn": "managed_read_range",
+      "taskJsonSha256": "60fa70365ef0475710b1418a15d8bb4f2069dadb35b16040b04c665df506a0e7",
+      "preservedFiles": 30
+    },
+    {
+      "id": 3,
+      "status": "needs_you",
+      "blockedOn": "managed_tool_limit",
+      "taskJsonSha256": "7e886f7e983beb2796b79952e1c1d3532c6022072375d0a5956aa8968d4a8184",
+      "preservedFiles": 32
+    }
+  ],
+  "candidateTask004Created": false,
+  "projectPolicyUnchanged": true,
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "productionAndStableTrackedBytesAndPackageChangesPreserved": true,
+  "launchAgentScheduleBindingAndLaunchersPreserved": true,
+  "productionWorkFiles": 300,
+  "naturalProductionChanges": [
+    "scheduler.log",
+    "scheduler/health.json"
+  ],
+  "schedulerHealthy": true,
+  "schedulerControlInvoked": false,
+  "runtimeAndPricingRegistryUnchanged": true,
+  "priorTrackedEvidenceUnchanged": true,
+  "providerCalls": 0,
+  "realKeychainReads": 0,
+  "realKeychainWrites": 0
+}

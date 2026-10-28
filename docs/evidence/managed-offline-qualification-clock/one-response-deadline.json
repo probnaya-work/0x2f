@@ -1,0 +1,38 @@
+{
+  "status": "needs_you",
+  "blockedOn": {
+    "type": "decision",
+    "code": "managed_deadline",
+    "text": "managed_deadline"
+  },
+  "managedState": "NEEDS YOU",
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 4,
+    "countRequests": 4,
+    "responsesRequests": 8,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "advancedMs": 30000,
+  "projectDeadlineMs": 30000,
+  "inferences": 1,
+  "counts": 1,
+  "requests": 3,
+  "patches": 1,
+  "attempts": 1,
+  "verification": null
+}

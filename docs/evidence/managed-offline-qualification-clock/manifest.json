@@ -1,0 +1,10 @@
+{
+  "implementationCommit": "2d0c1003b782a15c961efa71d5455bf698fd4f72",
+  "files": {
+    "one-response-deadline.json": "c568b9dc3cd1bdde7690d9a990d7482412791022738bdf0f42fa77c566db9a90",
+    "one-response.json": "f97a465ffde608d3181238f354c2bb5016bb68193d4a38808ee4d38f66d45962",
+    "preservation.json": "40768ec232919115ce09628b4c0b407834dbf2a6306f8fa57873f456508761de",
+    "report.md": "46618d5243344e8d7accb9aa1df1291e511e912d5e54d31e13c0ca282d33eef4",
+    "verification.json": "6022a3115e9e4ad92213ff34218e5b47cf45516947dec6a39e2f99ca3ac35892"
+  }
+}

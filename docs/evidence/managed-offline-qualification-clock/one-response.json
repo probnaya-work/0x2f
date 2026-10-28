@@ -1,0 +1,54 @@
+{
+  "status": "ready",
+  "blockedOn": null,
+  "managedState": "READY",
+  "limits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 4,
+    "countRequests": 4,
+    "responsesRequests": 8,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "projectDeadlineMs": 30000,
+  "inferences": 1,
+  "counts": 1,
+  "requests": 3,
+  "patches": 1,
+  "attempts": 1,
+  "verification": {
+    "schemaVersion": 1,
+    "run": 2,
+    "artifact": {
+      "path": "runs/1/artifacts/manifest.json",
+      "digest": "5540d13358a685d2a4679960ef0ebda0a34a21d284d4e72666b4bc2090437796",
+      "contentDigest": "ffb34d213eecbebfbf4f5344d7fd3c3790cdc219a9740269cee37b76ba6bfe2b"
+    },
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "--test",
+      "test/id.test.mjs"
+    ],
+    "executableDigest": "849e5785bd5b3ac68516f105d617c4a7ddcc3de1d7a89ba696d5dab271ab0164",
+    "cwd": "/private/tmp/0x2f-playbook-Yc6qnY/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive",
+    "code": 0,
+    "error": null,
+    "output": "✔ test/id.test.mjs (45.76375ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 48.949875\n",
+    "groupClosed": true,
+    "sourceUnchanged": true,
+    "outputDigest": "11ba54402be1f77f2d7e9efb4705b688ce459fbfb6d9dcd0e948a272299e950e"
+  }
+}

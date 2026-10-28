@@ -1,0 +1,89 @@
+{
+  "implementationCommit": "2d0c1003b782a15c961efa71d5455bf698fd4f72",
+  "recordedAtUtc": "2026-10-28T08:04:51.284543+00:00",
+  "environment": "deterministic fake Responses; OPENAI_API_KEY/CODEX_API_KEY/CODEX_ACCESS_TOKEN unset; OX2F_NATIVE_LAUNCHD=0",
+  "diagnostic": {
+    "command": "node --test --test-name-pattern='one-response patch' test/engineering-managed.test.mjs",
+    "exitCode": 0,
+    "summary": {
+      "tests": 2,
+      "pass": 2,
+      "fail": 0,
+      "skipped": 0
+    },
+    "durationMs": 3349.553584,
+    "logSha256": "0cd8b600061fabad44f5658f03eb5024d130477e08477198cc22b01770c94461",
+    "logPath": "/private/tmp/0x2f-managed-qualification-20261028/diagnostic.log"
+  },
+  "focused": {
+    "command": "node --test test/engineering-managed.test.mjs test/engineering-economics.test.mjs test/engineering-projection.test.mjs test/engineering-foreground.test.mjs test/engineering-foreground-cli.test.mjs",
+    "exitCode": 0,
+    "summary": {
+      "tests": 115,
+      "pass": 115,
+      "fail": 0,
+      "skipped": 0
+    },
+    "durationMs": 132056.094,
+    "logSha256": "efb6192c88dca6c5b44e5b491a441dc40f1e4d2a5d2d9e91e603b731a4a25d3e",
+    "logPath": "/private/tmp/0x2f-managed-qualification-20261028/focused.log"
+  },
+  "check": {
+    "command": "npm run check",
+    "exitCode": 0,
+    "summary": {},
+    "durationMs": null,
+    "logSha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f",
+    "logPath": "/private/tmp/0x2f-managed-qualification-20261028/check-final.log"
+  },
+  "explicitEditedFileSyntax": {
+    "file": "test/engineering-managed.test.mjs",
+    "command": "node --check test/engineering-managed.test.mjs",
+    "exitCode": 0
+  },
+  "full": {
+    "command": "npm test",
+    "exitCode": 0,
+    "summary": {
+      "tests": 1010,
+      "pass": 891,
+      "fail": 0,
+      "skipped": 119
+    },
+    "durationMs": 179456.5625,
+    "logSha256": "7ae9d827b593ecf254fa50c4c3cbd38da15706d21efeddfa0027b13c9b572002",
+    "logPath": "/private/tmp/0x2f-managed-qualification-20261028/full.log"
+  },
+  "fullInvocations": 1,
+  "testFileSha256": "14f79cd6aeb87e7fd9e6b76461d6191edf9f268747d4f73880dcb887f8ee2d8e",
+  "realProviderCalls": 0,
+  "realKeychainReads": 0,
+  "runtimeChanged": false,
+  "limitsChanged": false,
+  "historicalFailure": {
+    "evidence": "../managed-task003-search-economy/verification.json",
+    "recordedStatus": "needs_you",
+    "exactBlockedOn": "unrecoverable; original assertion did not retain it and fixture teardown removed its Task",
+    "elapsedWholeTestMs": 33916.1915,
+    "fixtureDeadlineMs": 30000,
+    "exactHistoricalCauseProven": false
+  },
+  "controlledReproduction": {
+    "blockedOn": "managed_deadline",
+    "stage": "after one patch, late verifier result at elapsed 30000 ms",
+    "attempts": 1,
+    "inferenceRequests": 1,
+    "countRequests": 1,
+    "availabilityRequests": 1,
+    "readyPublished": false,
+    "replayDispatch": false
+  },
+  "fullRegressionLines": [
+    "✔ managed deadline closes loop; late ignored response cannot apply a patch (15620.035584ms)",
+    "✔ managed verifier receives no credential and deadline kills owned descendants (1506.685166ms)",
+    "✔ Task 002-shaped two-file searches → targeted reads → one multi-file patch → verifier → READY (2572.682958ms)",
+    "✔ Task 003-shaped discovery: targeted test read + code locator → targeted source read → patch → READY (2482.724875ms)",
+    "✔ simple one-response patch remains one response under the four-response allowance (1567.125083ms)",
+    "✔ one-response patch at the unchanged deadline records managed_deadline without replay or READY (1525.758292ms)"
+  ]
+}
