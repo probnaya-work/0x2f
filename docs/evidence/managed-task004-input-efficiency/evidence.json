@@ -1,0 +1,337 @@
+{
+  "implementationCommit": "f9be6c8106c6c3a11df3fbf3e95978c6180e6799",
+  "kind": "offline-only; zero provider calls and zero Keychain reads",
+  "nativeReconstruction": {
+    "kind": "read-only native evidence reconstruction; no Task replay or API requests",
+    "accounting": "UTF-8 JSON.stringify bytes, count AND inference; GET has no body and is excluded",
+    "rows": [
+      {
+        "turn": 1,
+        "original": {
+          "count": 4615,
+          "inference": 4709,
+          "cumulative": 9324,
+          "countParts": {
+            "runtimeInstructions": 273,
+            "toolSchemas": 1409,
+            "packet_brief": 318,
+            "packet_constraints": 0,
+            "packet_instructions": 2246,
+            "packet_files": 177,
+            "framing": 192
+          }
+        },
+        "compactSameSequence": {
+          "count": 4516,
+          "inference": 4610,
+          "cumulative": 9126
+        },
+        "projectedNotDispatched": false
+      },
+      {
+        "turn": 2,
+        "original": {
+          "count": 9897,
+          "inference": 9991,
+          "cumulative": 29212,
+          "countParts": {
+            "runtimeInstructions": 273,
+            "toolSchemas": 1409,
+            "packet_brief": 318,
+            "packet_constraints": 0,
+            "packet_instructions": 2246,
+            "packet_files": 177,
+            "toolCallArguments": 110,
+            "assistantCallMetadata": 370,
+            "sourceContent": 4440,
+            "toolResultMetadata": 350,
+            "framing": 204
+          }
+        },
+        "compactSameSequence": {
+          "count": 9466,
+          "inference": 9560,
+          "cumulative": 28152
+        },
+        "projectedNotDispatched": false
+      },
+      {
+        "turn": 3,
+        "original": {
+          "count": 10271,
+          "inference": 10365,
+          "cumulative": 49848,
+          "countParts": {
+            "runtimeInstructions": 273,
+            "toolSchemas": 1409,
+            "packet_brief": 318,
+            "packet_constraints": 0,
+            "packet_instructions": 2246,
+            "packet_files": 177,
+            "toolCallArguments": 153,
+            "assistantCallMetadata": 557,
+            "sourceContent": 4440,
+            "toolResultMetadata": 488,
+            "searchExcerpts": 0,
+            "framing": 210
+          }
+        },
+        "compactSameSequence": {
+          "count": 9758,
+          "inference": 9852,
+          "cumulative": 47762
+        },
+        "projectedNotDispatched": true
+      }
+    ],
+    "decodedReadSourceBytes": [
+      1363,
+      2839
+    ],
+    "liveResultBytes": [
+      1686,
+      3108,
+      140
+    ],
+    "sameBadSequenceStillBlocked": true,
+    "refs": {
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-2-intent.json": "0ff7e7e209e65cd684cc971e23fbaf3ebd856b3765ee3d68ec139f6dd2f8b621",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-4-intent.json": "6b6b38e109d5b005fddc99ad84869bfe9f8cd9ed8307c01720bdd211245962dd",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/attempt.json": "0e72249b36ef7d72f2125122604db547e3455ce51064a8d912fd2600188510b7",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-receipt.json": "7fce864b43b84ce7b89593d39b2e61facb71ea468fe85f546044f805db09b1b0",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-3-receipt.json": "334f0e07a9d4f98df5f623ec178530c77a6bddeb6936157ab49515c2ba093035",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-3-intent.json": "a79f8f7285c4aac6c53f6fbeccd103f5d8a69affc37d47e0961191b66c669c05",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-intent.json": "7475ebaabf2bc935ea4b1118e0bfbc49ba8310b81c37f657665e66aa5784ec30",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-1-receipt.json": "0ae8994bf6a7d18c73c743f15cac5b325b356b1a7d76eb680bc2da9dc575a627",
+      ".work/tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-2-receipt.json": "4f0ec7be89717acc2948ba29ab4a690b84198cd46d91d5fe6302391660821770"
+    }
+  },
+  "fixture": {
+    "kind": "offline mock; changed discovery strategy, not a replay of the live model",
+    "byteRows": [
+      {
+        "kind": "count",
+        "before": 4615,
+        "after": 4516
+      },
+      {
+        "kind": "inference",
+        "before": 4709,
+        "after": 4610
+      },
+      {
+        "kind": "count",
+        "before": 6220,
+        "after": 5941
+      },
+      {
+        "kind": "inference",
+        "before": 6314,
+        "after": 6035
+      },
+      {
+        "kind": "count",
+        "before": 5885,
+        "after": 5567
+      },
+      {
+        "kind": "inference",
+        "before": 5979,
+        "after": 5661
+      }
+    ],
+    "before": 33722,
+    "after": 32330,
+    "margin": 438,
+    "resultBytes": 1877,
+    "packetBytes": 3392,
+    "usage": {
+      "input": 3093,
+      "cachedInput": 30,
+      "output": 60,
+      "total": 3153
+    },
+    "publishedInferenceMaximum": 0.024576,
+    "limits": {
+      "attempts": 1,
+      "packetBytes": 8192,
+      "files": 4,
+      "sourceBytes": 65536,
+      "reads": 4,
+      "patches": 1,
+      "tools": 6,
+      "toolResultBytes": 24576,
+      "readResultBytes": 4096,
+      "serializedInputBytes": 32768,
+      "inferenceRequests": 4,
+      "countRequests": 4,
+      "responsesRequests": 8,
+      "inputTokens": 8192,
+      "inputTokensPerRequest": 4096,
+      "outputTokens": 4096,
+      "outputTokensPerRequest": 2048,
+      "deadlineMs": 120000,
+      "costUsd": 0.25
+    },
+    "state": "ready",
+    "verification": {
+      "code": 0,
+      "groupClosed": true,
+      "outputDigest": "f47c54d6cdced8686903eb2e12af326d3635a068e0f8792ba3e5bc26261c32e2"
+    },
+    "patchDigest": "fdbf26d0a53a7ca596886d1502d236b306d9e006f4d3d415a0361ca11e965596",
+    "attempts": 1,
+    "sequence": [
+      [
+        "search_task_file",
+        "search_task_file"
+      ],
+      [
+        "read_task_file",
+        "read_task_file"
+      ],
+      [
+        "submit_patch"
+      ]
+    ],
+    "projection": [
+      "STATE READY",
+      "PURPOSE VERIFY \u00b7 EXECUTOR local-checks \u00b7 RUN 2",
+      "NEXT ACCEPT \u00b7 REASON INITIAL_EXECUTOR",
+      "COST TOTAL UNKNOWN \u00b7 inference calculation and provider charge are separate",
+      "LANE MANAGED API \u00b7 READY \u00b7 MODEL gpt-5.4-mini-2026-03-17 \u00b7 NO OPAQUE FALLBACK",
+      "OBSERVED MODEL gpt-5.4-mini-2026-03-17",
+      "FOREGROUND ONLY \u00b7 UNATTENDED NO-GO \u00b7 NO AUTOMATIC RETRY OR DELIVERY",
+      "ENVELOPE 1 attempt \u00b7 4 inference + 4 count requests \u00b7 6 tools \u00b7 4 reads \u00b7 1 patch",
+      "MANAGED USAGE 7 HTTP \u00b7 6 Responses HTTP \u00b7 3 inference \u00b7 3 count \u00b7 1 availability GET \u00b7 5 tools \u00b7 2 reads \u00b7 2 searches \u00b7 1 patches \u00b7 1877 result bytes",
+      "BOUND 12288 inference tokens",
+      "LIMITS 4 files \u00b7 65536 source bytes \u00b7 8192 packet bytes \u00b7 120000 ms deadline",
+      "PAYLOAD 4096 bytes/read \u00b7 24576 result bytes \u00b7 32768 serialized API input bytes",
+      "PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576",
+      "CONTROL REQUESTS: 5 maximum, no separate published fee \u00b7 4 dispatched \u00b7 contractual zero fee not claimed",
+      "ACTUAL TOKENS 3153 \u00b7 CALCULATED INFERENCE USD 0.0025695 \u00b7 PROVIDER COST UNKNOWN",
+      "USAGE TOTAL 3153 \u00b7 INPUT 3093 \u00b7 CACHED 30 \u00b7 OUTPUT 60 \u00b7 REASONING ? \u00b7 ATTEMPTS 1",
+      "USAGE COST USD 2570 micros",
+      "RESULT PATCH VERIFIED \u00b7 fdbf26d0a53a7ca596886d1502d236b306d9e006f4d3d415a0361ca11e965596",
+      "ARTIFACT runs/1/artifacts/manifest.json",
+      "REVIEW runs/2/review.json \u00b7 b67abf2619073699f23619336ededd526ad6a8c2ac2bac33fc5f3f5227d56f03",
+      "WORKSPACE /private/tmp/0x2f-playbook-VRjKe8/.work/worktrees/001-fix-parser-without-changing-public-api-or-delive \u00b7 ref c604a2391c6be7d9568ff791831a34e0ec4040d0 \u00b7 task-owned worktree",
+      "ROUTING implement \u2192 managed-openai \u00b7 minimum-qualified-managed-model"
+    ],
+    "savingsBreakdown": {
+      "initialContext": 540,
+      "optionalItemMetadata": 720,
+      "readSourceRepresentation": 78,
+      "shorterToolDescription": 84,
+      "extraDiscoveryGuidance": -30,
+      "total": 1392
+    }
+  },
+  "checks": {
+    "focused": {
+      "tests": 117,
+      "pass": 117,
+      "fail": 0,
+      "exitCode": 0
+    },
+    "additionalInputBoundaryRegression": {
+      "tests": 1,
+      "pass": 1,
+      "exitCode": 0
+    },
+    "npmRunCheck": {
+      "exitCode": 0
+    },
+    "finalChangedTestSyntax": {
+      "exitCode": 0
+    },
+    "full": {
+      "exitCode": 0,
+      "elapsedSeconds": 181.4875705,
+      "command": "npm test",
+      "nativeLaunchd": false,
+      "providerCredentialsRemoved": true,
+      "tests": 1013,
+      "pass": 894,
+      "skip": 119,
+      "fail": 0,
+      "invocations": 1
+    },
+    "note": "One new negative test first expected undefined for existing null verification; assertion corrected, only that test rerun. No runtime fix needed. Only a comment clarification followed the final full suite."
+  },
+  "logs": {
+    "focused.log": {
+      "path": "/private/tmp/0x2f-task004-input-correction/focused.log",
+      "bytes": 11282,
+      "sha256": "988de427464a7e9ae4a77bafafcb4c44a9299953b1c5babc4f8b54e2f99220a5"
+    },
+    "negative.log": {
+      "path": "/private/tmp/0x2f-task004-input-correction/negative.log",
+      "bytes": 951,
+      "sha256": "6f3ddd9f4ce48f216deb09034f3b8dcc35be33e9aa83b1359518cbc8d456e92f"
+    },
+    "negative-final.log": {
+      "path": "/private/tmp/0x2f-task004-input-correction/negative-final.log",
+      "bytes": 223,
+      "sha256": "998095c29f38c420b4cda45a4f94e0a9539b6951b64d62625f83dd0c4507043d"
+    },
+    "check.log": {
+      "path": "/private/tmp/0x2f-task004-input-correction/check.log",
+      "bytes": 274,
+      "sha256": "58154ec86c573c7f48ad2ed4b311354b89f995814c0a03a7ffc49f06c0e1170f"
+    },
+    "full.log": {
+      "path": "/private/tmp/0x2f-task004-input-correction/full.log",
+      "bytes": 94478,
+      "sha256": "9ba392cb5db79381a5f4c3e21737c5212e63097e4d5dbaef0a72639790ce38ee"
+    }
+  },
+  "preservation": {
+    "candidateWorkFiles": 1892,
+    "candidateWorkChanged": [],
+    "candidateManifestBefore": "db542cec3504f5b32623e01e3b07d2285c484724b00c4d4aaca589e8038605ce",
+    "candidateManifestAfter": "db542cec3504f5b32623e01e3b07d2285c484724b00c4d4aaca589e8038605ce",
+    "productionRepositoryIdentical": true,
+    "stableRepositoryIdentical": true,
+    "productionWorkChanged": [
+      "scheduler.log",
+      "scheduler/health.json"
+    ],
+    "launchAgentIdentical": true,
+    "launchersIdentical": true,
+    "taskSequence": "{\n  \"schemaVersion\": 1,\n  \"lastId\": 4\n}\n",
+    "tasks": [
+      {
+        "slug": "001-after-creating-a-task-print-one-concise-next-act",
+        "files": 25,
+        "manifest": "422af4d46bdb65ecb2a80b0597518e22fe1d63f7d87cee8ba7cfe2ce7baf23fd",
+        "unchanged": true
+      },
+      {
+        "slug": "002-after-creating-a-task-print-one-concise-next-act",
+        "files": 30,
+        "manifest": "4828e2080a04284da9386c7e9696adaad45f59d9341dafe558957d04ff0b0b6a",
+        "unchanged": true
+      },
+      {
+        "slug": "003-after-creating-a-task-print-one-concise-next-act",
+        "files": 32,
+        "manifest": "be90ad231ad531164498ed806f965e9cb8c94e2850f3f92127520e58e0308be2",
+        "unchanged": true
+      },
+      {
+        "slug": "004-after-creating-a-task-print-one-concise-next-act",
+        "files": 31,
+        "manifest": "43a8816634d4b278ef1015ab792408f785ef31ab6e2712cb2622ccca7e42fb99",
+        "unchanged": true
+      }
+    ]
+  },
+  "inventoryAfterEvidence": {
+    "files": 487,
+    "bytes": 7974450,
+    "fileMaximum": 512,
+    "byteMaximum": 8000000,
+    "note": "Read-only inventory measurement before final report wording/manifest; final inventory recorded in manifest."
+  }
+}
