@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-10-28T08:22:05Z",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "sources": [
+    "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+    "https://developers.openai.com/api/docs/pricing",
+    "https://developers.openai.com/api/docs/guides/token-counting"
+  ],
+  "perMillionUsd": {
+    "input": 0.75,
+    "cachedInput": 0.075,
+    "output": 4.5
+  },
+  "publishedInferenceMaximumUsd": 0.024576,
+  "calculation": "8192 * 0.75 / 1000000 + 4096 * 4.5 / 1000000",
+  "controlRequests": {
+    "maximum": 5,
+    "counts": 4,
+    "availability": 1,
+    "classification": "unpriced_control_request",
+    "separatePublishedFeeFound": false,
+    "contractualZeroFee": false
+  },
+  "totalProviderBilling": "unknown",
+  "endpoint": "https://api.openai.com/v1",
+  "serviceTier": "default",
+  "snapshotListed": true,
+  "noNewModelOrProvider": true
+}

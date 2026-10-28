@@ -1,0 +1,336 @@
+{
+  "id": 4,
+  "slug": "004-after-creating-a-task-print-one-concise-next-act",
+  "title": "After creating a Task, print one concise next-action line containing the…",
+  "brief": "After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.",
+  "engineering": {
+    "schemaVersion": 1,
+    "revision": 27,
+    "config": {
+      "schemaVersion": 1,
+      "enabled": true,
+      "currency": "USD",
+      "providers": [
+        "managed-openai"
+      ],
+      "files": [
+        "src/cli.mjs",
+        "test/engineering-foreground-cli.test.mjs"
+      ],
+      "writePaths": [
+        "src/cli.mjs",
+        "test/engineering-foreground-cli.test.mjs"
+      ],
+      "check": [
+        "/Users/bogart/.n/bin/node",
+        "--test",
+        "test/engineering-foreground-cli.test.mjs"
+      ],
+      "limits": {
+        "moneyMicros": 24576,
+        "tokens": 12288,
+        "modelCalls": 4,
+        "providerCalls": 9,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "agentRuns": 1,
+        "reviewCycles": 0
+      },
+      "workspace": {
+        "repository": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+        "ref": "HEAD"
+      },
+      "policy": "engineering-continuity-v1",
+      "checkDigest": "20a18709f0154d668f1bd6f6ea8c2a7ae001447b4b2c339732f22e57a8767a55",
+      "reviewCheckPins": {}
+    },
+    "configDigest": "bd6dc616691c03f465e9a45e4d63d554f9aab21b1ce137c4b8190efbf24f378d",
+    "driver": {
+      "token": "a5a7859d-b464-42d7-ae72-90628ceb62a4",
+      "pid": 50669,
+      "state": "stopped"
+    },
+    "decisions": [
+      {
+        "purpose": "implement",
+        "provider": "managed-openai",
+        "model": "gpt-5.4-mini-2026-03-17",
+        "reason": "minimum-qualified-managed-model",
+        "lane": "managed-api",
+        "opaqueFallback": false
+      }
+    ],
+    "budget": {
+      "limits": {
+        "moneyMicros": 24576,
+        "tokens": 12288,
+        "modelCalls": 4,
+        "providerCalls": 9,
+        "wallClockMs": 120000,
+        "implementationAttempts": 1,
+        "agentRuns": 1,
+        "reviewCycles": 0
+      },
+      "confirmed": {
+        "moneyMicros": 0,
+        "tokens": 0,
+        "modelCalls": 0,
+        "providerCalls": 0
+      },
+      "reservations": [],
+      "uncertain": []
+    },
+    "verification": null,
+    "next": "user",
+    "workspace": {
+      "schemaVersion": 1,
+      "taskId": 4,
+      "slug": "004-after-creating-a-task-print-one-concise-next-act",
+      "repository": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+      "commonDir": "/Users/bogart/Dev/PROBNAYA/work-cli-v0/.git",
+      "requestedRef": "HEAD",
+      "commit": "aa30653f7d50644281f697ae746e562a090e8a9b",
+      "path": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground/.work/worktrees/004-after-creating-a-task-print-one-concise-next-act",
+      "identity": "552d42132c46784e6e483a2be857b7dacf3ff5b49ceb469ca9a540031875eb53",
+      "state": "ready"
+    },
+    "economics": {
+      "policy": {
+        "version": "engineering-economics-v1",
+        "classification": "small",
+        "signals": {
+          "writeFiles": 2,
+          "relevantFiles": 2,
+          "directories": 2,
+          "sensitive": false
+        },
+        "hard": {
+          "inputBytes": 8192,
+          "attempts": 1,
+          "driverDeadlineMs": 120000
+        },
+        "soft": {
+          "totalTokens": 8000,
+          "toolOutputBytes": 4096
+        },
+        "unknown": [
+          "providerMoney",
+          "internalCalls",
+          "harnessInjectedContext",
+          "agentToolOutputLimit",
+          "processTreeTermination"
+        ]
+      },
+      "attempts": [
+        {
+          "run": 1,
+          "path": "runs/1/usage.json",
+          "digest": "ea493828b066749fd82ad2edfc240df49798d34a1be136c344740eda611b4fe7"
+        }
+      ],
+      "aggregate": {
+        "attempts": 1,
+        "metrics": {
+          "input": {
+            "value": 3149,
+            "observed": 3149,
+            "unknownAttempts": 0
+          },
+          "cachedInput": {
+            "value": 0,
+            "observed": 0,
+            "unknownAttempts": 0
+          },
+          "output": {
+            "value": 100,
+            "observed": 100,
+            "unknownAttempts": 0
+          },
+          "reasoning": {
+            "value": 0,
+            "observed": 0,
+            "unknownAttempts": 0
+          },
+          "total": {
+            "value": 3249,
+            "observed": 3249,
+            "unknownAttempts": 0
+          }
+        },
+        "money": {
+          "value": 2812,
+          "currency": "USD"
+        },
+        "partial": false
+      },
+      "aggregateRef": {
+        "path": "usage/task-after-1.json",
+        "digest": "82452ef0f8549d3a30d45e4d49935296dec28f4644cdc9f4ddf85e01499c44d3"
+      }
+    },
+    "managed": {
+      "lane": "managed-api",
+      "state": "NEEDS YOU",
+      "limits": {
+        "attempts": 1,
+        "packetBytes": 8192,
+        "files": 4,
+        "sourceBytes": 65536,
+        "reads": 4,
+        "patches": 1,
+        "tools": 6,
+        "toolResultBytes": 24576,
+        "readResultBytes": 4096,
+        "serializedInputBytes": 32768,
+        "inferenceRequests": 4,
+        "countRequests": 4,
+        "responsesRequests": 8,
+        "inputTokens": 8192,
+        "inputTokensPerRequest": 4096,
+        "outputTokens": 4096,
+        "outputTokensPerRequest": 2048,
+        "deadlineMs": 120000,
+        "costUsd": 0.25
+      },
+      "attempt": "edd90ba6-8fc1-4337-956f-350cc855e529",
+      "requests": 4,
+      "inferences": 2,
+      "tools": 3,
+      "reads": 2,
+      "searches": 1,
+      "patches": 0,
+      "resultBytes": 4934,
+      "inputBytes": 29212,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "predicted": {
+        "currency": "USD",
+        "inferenceUpperUsd": 0.024576,
+        "totalUpperUsd": null,
+        "controlRequests": {
+          "classification": "unpriced_control_request",
+          "maximum": 5,
+          "tokenCountMaximum": 4,
+          "availabilityMaximum": 1,
+          "separatePublishedFee": false,
+          "contractualZeroFee": false,
+          "includedInInferenceMaximum": false
+        },
+        "inputTokens": 8192,
+        "outputTokens": 4096,
+        "totalInferenceTokens": 12288,
+        "pricing": {
+          "currency": "USD",
+          "perMillion": {
+            "input": 0.75,
+            "cachedInput": 0.075,
+            "output": 4.5
+          },
+          "observedAt": "2026-10-28T08:22:05Z",
+          "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+          "apiPricingSource": "https://developers.openai.com/api/docs/pricing",
+          "controlRequestPolicy": "unpriced_control_request"
+        }
+      },
+      "inputTokens": 3149,
+      "inputReserved": 3149,
+      "outputTokens": 100,
+      "outputReserved": 100,
+      "counts": 2,
+      "modelQueries": 1,
+      "pricingPolicy": {
+        "version": "managed-foreground-pricing-v3",
+        "mode": "foreground",
+        "foregroundCanary": false,
+        "foregroundAuthorized": true,
+        "publishedBillableInferenceMaximumUsd": 0.024576,
+        "controlRequests": {
+          "classification": "unpriced_control_request",
+          "maximum": 5,
+          "tokenCountMaximum": 4,
+          "availabilityMaximum": 1,
+          "separatePublishedFee": false,
+          "contractualZeroFee": false,
+          "includedInInferenceMaximum": false
+        },
+        "totalBilledAmount": "unknown",
+        "retry": false,
+        "opaqueFallback": false
+      },
+      "pendingRequest": null,
+      "baseline": {
+        "path": "runs/1/inputs/manifest.json",
+        "digest": "0382b78f70361b26beef20096710f8768c516c4aba89c8f4a3463613f80f9d76",
+        "contentDigest": "9d80ea5a62b55dc2fd8a769d6b2b43caaafa8cb3084261c14857dc74694e1a7a"
+      },
+      "pendingInputTokens": 0,
+      "actualUsage": {
+        "input": 3149,
+        "cachedInput": 0,
+        "output": 100,
+        "total": 3249
+      },
+      "calculatedInferenceCostUsd": 0.00281175,
+      "providerReportedCost": "unknown",
+      "controlCost": "no separate published fee; actual billed amount unknown",
+      "reason": "managed_input_limit"
+    }
+  },
+  "status": "needs_you",
+  "execution": {
+    "provider": "managed-openai",
+    "launchToken": "a5a7859d-b464-42d7-ae72-90628ceb62a4",
+    "node": "local",
+    "workspace": "local"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "managed-openai",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-28T08:25:20.758Z",
+      "requestedProvider": "auto",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "purpose": "implement",
+      "executor": {
+        "kind": "managed",
+        "harness": "0x2f-responses-v1",
+        "requestedModel": "gpt-5.4-mini-2026-03-17",
+        "observedModel": "gpt-5.4-mini-2026-03-17"
+      },
+      "usage": {
+        "confirmed": null,
+        "estimated": null,
+        "uncertainty": "not_started"
+      },
+      "permissions": {
+        "tools": [
+          "read_task_file",
+          "search_task_file",
+          "submit_patch",
+          "request_context_expansion"
+        ],
+        "writePaths": [
+          "src/cli.mjs",
+          "test/engineering-foreground-cli.test.mjs"
+        ],
+        "externalActions": false
+      },
+      "usageLedger": {
+        "run": 1,
+        "path": "runs/1/usage.json",
+        "digest": "ea493828b066749fd82ad2edfc240df49798d34a1be136c344740eda611b4fe7"
+      },
+      "completedAt": "2026-10-28T08:25:28.921Z"
+    }
+  ],
+  "createdAt": "2026-10-28T08:25:20.805Z",
+  "updatedAt": "2026-10-28T08:25:28.921Z",
+  "pid": 50669,
+  "blockedOn": {
+    "type": "decision",
+    "code": "managed_input_limit",
+    "text": "managed_input_limit"
+  }
+}

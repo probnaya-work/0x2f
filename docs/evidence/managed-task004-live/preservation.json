@@ -1,0 +1,213 @@
+{
+  "at": "2026-10-28T08:32:19.958331+00:00",
+  "existingCandidateFiles": 1389,
+  "existingFilesPreserved": 1388,
+  "authorizedExistingChange": {
+    "path": "task-sequence.json",
+    "reason": "normal allocation of the single new Task",
+    "lastId": 4
+  },
+  "addedFiles": 503,
+  "allAddedFilesUnderNewTaskOrOwnedWorktree": true,
+  "oldTasks": [
+    {
+      "id": 1,
+      "status": "needs_you",
+      "reason": "managed_input_limit",
+      "files": 25,
+      "taskJsonSha256": "d9d0ef1a95aaedf36097258bfc3bf4f509077ede6a1f4e13068160b3e5d6ae62"
+    },
+    {
+      "id": 2,
+      "status": "needs_you",
+      "reason": "managed_read_range",
+      "files": 30,
+      "taskJsonSha256": "60fa70365ef0475710b1418a15d8bb4f2069dadb35b16040b04c665df506a0e7"
+    },
+    {
+      "id": 3,
+      "status": "needs_you",
+      "reason": "managed_tool_limit",
+      "files": 32,
+      "taskJsonSha256": "7e886f7e983beb2796b79952e1c1d3532c6022072375d0a5956aa8968d4a8184"
+    }
+  ],
+  "newTerminalTaskManifestDigest": "43a8816634d4b278ef1015ab792408f785ef31ab6e2712cb2622ccca7e42fb99",
+  "newTerminalTaskFiles": 31,
+  "newTerminalTaskFileManifest": {
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/engineering-lock/.mutex": {
+      "bytes": 0,
+      "mode": 384,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/events.jsonl": {
+      "bytes": 373,
+      "mode": 384,
+      "sha256": "30cceac826d19387a2b9c9a9156e20b78c9a9a6bfef3c848689f6b3e1e27807c"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/managed-lock/.mutex": {
+      "bytes": 0,
+      "mode": 384,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/prompt.md": {
+      "bytes": 2346,
+      "mode": 384,
+      "sha256": "cb84d312ec37a4e0f2400502a8afe4e6e6c0b18d9edc2db579003c82b9c94568"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/run.log": {
+      "bytes": 0,
+      "mode": 384,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/inputs/files/src/cli.mjs": {
+      "bytes": 31003,
+      "mode": 384,
+      "sha256": "8b5070dc356d1c6c5baaa432423e6938684e382ca06a5d431f330f68ce72cc9e"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/inputs/files/test/engineering-foreground-cli.test.mjs": {
+      "bytes": 3046,
+      "mode": 384,
+      "sha256": "085e06f1f7cae2a2b116227814f91af68e80a9a778d7cfe7cabaabbc8f5f0ae0"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/inputs/manifest.json": {
+      "bytes": 77455,
+      "mode": 384,
+      "sha256": "374ecf6e268cc0c357751910de0727c9edd67a97bf58e76d3415926a3cc285f9"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/attempt.json": {
+      "bytes": 6314,
+      "mode": 384,
+      "sha256": "0e72249b36ef7d72f2125122604db547e3455ce51064a8d912fd2600188510b7"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/foreground-preview.json": {
+      "bytes": 1840,
+      "mode": 384,
+      "sha256": "98455db70de9876369a9fd9bfa0014d5fbf4c470908810da47a1e8775262def9"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-1-intent.json": {
+      "bytes": 829,
+      "mode": 384,
+      "sha256": "6d086db2448fd83b01a1859744221e8f8971f838b4c5215517015b6ba467b527"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-1-receipt.json": {
+      "bytes": 463,
+      "mode": 384,
+      "sha256": "c2f00bfe88beae5eee357e63abc490f625b44b4a46fbe19c7bafdee0eece3f22"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-2-intent.json": {
+      "bytes": 6924,
+      "mode": 384,
+      "sha256": "0ff7e7e209e65cd684cc971e23fbaf3ebd856b3765ee3d68ec139f6dd2f8b621"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-2-receipt.json": {
+      "bytes": 387,
+      "mode": 384,
+      "sha256": "ead80f9ce8f9bd805a730313c6694b8d6ab61818ebf979eb786b9aaeb7a24f74"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-3-intent.json": {
+      "bytes": 7183,
+      "mode": 384,
+      "sha256": "a79f8f7285c4aac6c53f6fbeccd103f5d8a69affc37d47e0961191b66c669c05"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-3-receipt.json": {
+      "bytes": 6039,
+      "mode": 384,
+      "sha256": "a38f04102b20b190b3497b53f43bfb1d6e8679061addce3ddf4da64ebf8065c2"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-4-intent.json": {
+      "bytes": 12442,
+      "mode": 384,
+      "sha256": "6b6b38e109d5b005fddc99ad84869bfe9f8cd9ed8307c01720bdd211245962dd"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-4-receipt.json": {
+      "bytes": 388,
+      "mode": 384,
+      "sha256": "018fe6836c33ccaac4f17a7947a2eebffeb70599f43de692f629ba36eca7c221"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-intent.json": {
+      "bytes": 12704,
+      "mode": 384,
+      "sha256": "7475ebaabf2bc935ea4b1118e0bfbc49ba8310b81c37f657665e66aa5784ec30"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/request-5-receipt.json": {
+      "bytes": 5714,
+      "mode": 384,
+      "sha256": "7fce864b43b84ce7b89593d39b2e61facb71ea468fe85f546044f805db09b1b0"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-1-receipt.json": {
+      "bytes": 1900,
+      "mode": 384,
+      "sha256": "0ae8994bf6a7d18c73c743f15cac5b325b356b1a7d76eb680bc2da9dc575a627"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-2-receipt.json": {
+      "bytes": 3322,
+      "mode": 384,
+      "sha256": "4f0ec7be89717acc2948ba29ab4a690b84198cd46d91d5fe6302391660821770"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/tool-3-receipt.json": {
+      "bytes": 355,
+      "mode": 384,
+      "sha256": "334f0e07a9d4f98df5f623ec178530c77a6bddeb6936157ab49515c2ba093035"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/usage-1.json": {
+      "bytes": 385,
+      "mode": 384,
+      "sha256": "2582c7e493e07744cf39bfd1e9000f508a8443a1b28300dff67551d570c0fa2c"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/managed/usage-2.json": {
+      "bytes": 388,
+      "mode": 384,
+      "sha256": "0ff73572e4652b1a4c3aae44f2cc7e3b512d471bd36f78ed7f39d753ecdf94af"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/prompt.md": {
+      "bytes": 2346,
+      "mode": 384,
+      "sha256": "cb84d312ec37a4e0f2400502a8afe4e6e6c0b18d9edc2db579003c82b9c94568"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/runs/1/usage.json": {
+      "bytes": 2841,
+      "mode": 384,
+      "sha256": "915acb2d14eef6e7030748ea753f162fd262d0ab0ed851ba2a260d693138b5ba"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/task.json": {
+      "bytes": 10001,
+      "mode": 384,
+      "sha256": "124c82d1d5c068aaf4b27012ae378653ff94faf1fc3c5787ba5d4f5473afd975"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/usage/task-after-1.json": {
+      "bytes": 893,
+      "mode": 384,
+      "sha256": "1617e225b35be43b706e6e86a61ecb7c2e7b5dc967fecce0fbff9d7491e37719"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/workspace-lock/.mutex": {
+      "bytes": 0,
+      "mode": 384,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tasks/004-after-creating-a-task-print-one-concise-next-act/workspace.json": {
+      "bytes": 547,
+      "mode": 384,
+      "sha256": "577144476ae50ccef069d20e19e7532967e7220e24a217db657c3d30f808cb6f"
+    }
+  },
+  "productionAndStableTrackedBytesPackagesAndTasksPreserved": true,
+  "productionHead": "b5b17f629ddc0b976243e83a9fcb0f13f9412b00",
+  "stableHead": "4e568b7c5d063720a5296fe4730c7cbf06892125",
+  "launchAgentScheduleRuntimeBindingAndLaunchersPreserved": true,
+  "productionNaturalChanges": [],
+  "schedulerHealthy": true,
+  "schedulerControlInvoked": false,
+  "projectLimitsConfigUnchanged": true,
+  "priorTrackedEvidenceUnchanged": true,
+  "candidateSourcePreparationOnly": "pricing observedAt refreshed from official documentation; no other implementation changes",
+  "ownedGroupClosed": true,
+  "verifierSpawned": false,
+  "credentialAccess": "one metadata-only presence operation; normal foreground retrieval by runtime; no imports or writes",
+  "independentNewTaskAndOutputSecretShapeHits": 0,
+  "secretValueNotReadByAudit": true,
+  "providerAttempts": 1,
+  "fallback": false,
+  "retry": false,
+  "delivery": false
+}

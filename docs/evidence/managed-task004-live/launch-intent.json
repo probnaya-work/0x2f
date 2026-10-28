@@ -1,0 +1,23 @@
+{
+  "operationId": "0c3952f5-674a-4989-aba4-46cf42a9a055",
+  "at": "2026-10-28T08:25:20.543508+00:00",
+  "command": [
+    "/Users/bogart/.n/bin/2f-next",
+    "new",
+    "After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests."
+  ],
+  "cwd": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+  "candidateCommit": "aa30653f7d50644281f697ae746e562a090e8a9b",
+  "existingTaskIds": [
+    1,
+    2,
+    3
+  ],
+  "authorization": "User attachment authorizes exactly one attended foreground qualification attempt using normal existing credential path",
+  "maximumInvocations": 1,
+  "sourceHintsProvided": false,
+  "precomputedPatchProvided": false,
+  "retry": false,
+  "fallback": false,
+  "delivery": false
+}

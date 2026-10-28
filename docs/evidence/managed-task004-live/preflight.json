@@ -1,0 +1,100 @@
+{
+  "at": "2026-10-28T08:24:24.795Z",
+  "checkout": "/Users/bogart/Dev/PROBNAYA/work-cli-foreground",
+  "branch": "fix/managed-source-search",
+  "candidateCommit": "aa30653f7d50644281f697ae746e562a090e8a9b",
+  "acceptedOfflineCommit": "219ec91582026e851d737d81bbc0c3fc4fc7b789",
+  "workingTreeClean": true,
+  "onlyCodeChangeSinceQualification": "verified pricing observedAt timestamp",
+  "configuredLimits": {
+    "moneyMicros": 24576,
+    "tokens": 12288,
+    "modelCalls": 4,
+    "providerCalls": 9,
+    "wallClockMs": 120000,
+    "implementationAttempts": 1,
+    "agentRuns": 1,
+    "reviewCycles": 0
+  },
+  "hardLimits": {
+    "attempts": 1,
+    "packetBytes": 8192,
+    "files": 4,
+    "sourceBytes": 65536,
+    "reads": 4,
+    "patches": 1,
+    "tools": 6,
+    "toolResultBytes": 24576,
+    "readResultBytes": 4096,
+    "serializedInputBytes": 32768,
+    "inferenceRequests": 4,
+    "countRequests": 4,
+    "responsesRequests": 8,
+    "inputTokens": 8192,
+    "inputTokensPerRequest": 4096,
+    "outputTokens": 4096,
+    "outputTokensPerRequest": 2048,
+    "deadlineMs": 120000,
+    "costUsd": 0.25
+  },
+  "model": "gpt-5.4-mini-2026-03-17",
+  "pricingPolicy": {
+    "version": "managed-foreground-pricing-v3",
+    "mode": "foreground",
+    "foregroundCanary": false,
+    "foregroundAuthorized": true,
+    "publishedBillableInferenceMaximumUsd": 0.024576,
+    "controlRequests": {
+      "classification": "unpriced_control_request",
+      "maximum": 5,
+      "tokenCountMaximum": 4,
+      "availabilityMaximum": 1,
+      "separatePublishedFee": false,
+      "contractualZeroFee": false,
+      "includedInInferenceMaximum": false
+    },
+    "totalBilledAmount": "unknown",
+    "retry": false,
+    "opaqueFallback": false
+  },
+  "pricingObservedAt": "2026-10-28T08:22:05Z",
+  "files": [
+    {
+      "path": "src/cli.mjs",
+      "bytes": 31003,
+      "sha256": "8b5070dc356d1c6c5baaa432423e6938684e382ca06a5d431f330f68ce72cc9e"
+    },
+    {
+      "path": "test/engineering-foreground-cli.test.mjs",
+      "bytes": 3046,
+      "sha256": "085e06f1f7cae2a2b116227814f91af68e80a9a778d7cfe7cabaabbc8f5f0ae0"
+    }
+  ],
+  "verifier": {
+    "argv": [
+      "/Users/bogart/.n/bin/node",
+      "--test",
+      "test/engineering-foreground-cli.test.mjs"
+    ],
+    "executable": "/Users/bogart/.n/bin/node",
+    "sha256": "20a18709f0154d668f1bd6f6ea8c2a7ae001447b4b2c339732f22e57a8767a55"
+  },
+  "inventory": {
+    "files": 471,
+    "bytes": 7879759,
+    "digest": "9d80ea5a62b55dc2fd8a769d6b2b43caaafa8cb3084261c14857dc74694e1a7a"
+  },
+  "existingTaskIds": [
+    1,
+    2,
+    3
+  ],
+  "credential": {
+    "path": "normal foreground dedicated Keychain",
+    "status": "configured",
+    "presenceOnly": true
+  },
+  "authorization": "one explicitly user-authorized attended foreground qualification; not ordinary production or unattended approval",
+  "attemptsAuthorized": 1,
+  "sourceHintsProvided": false
+}

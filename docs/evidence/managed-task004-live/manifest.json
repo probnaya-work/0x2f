@@ -1,0 +1,20 @@
+{
+  "preparationCommit": "aa30653f7d50644281f697ae746e562a090e8a9b",
+  "taskId": 4,
+  "run": 1,
+  "attempt": "edd90ba6-8fc1-4337-956f-350cc855e529",
+  "files": {
+    "execution.json": "2030bba633fcd8c80d5db7cf0f08954dc66569401eea20cabe92f3ff801c64b1",
+    "foreground.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "foreground.txt": "8802d09319128be6682e43f28dbe30dee2c0289b8bee5127f7cee3a56c91b5e9",
+    "launch-intent.json": "0d1dbd16f149ce9360c4c4e9196ac23958b6b4bf0bc54cd705f1b13799dfff4d",
+    "launch-receipt.json": "f7d9e2252abb6c2bbf0da64dc11094fb148dd8398ccf08f5dd4cebe091a465f3",
+    "patch.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preflight.json": "c6ca65028c781c6a7be69fa71420fa4e8e0b64ff8af453d16028c9e1dbfc45b0",
+    "preservation.json": "6f5283ac15152bc20e1fbc671c19719982c1dcf059241a6b2af85018fe2fd17c",
+    "pricing.json": "66e9409eacab9409bf48e86385f354347d6130de8cf84a0e4fa7529b62ff630e",
+    "projection.txt": "f512fa788275d7329158630467dfccb523bbe0f7ff6fe3db24b87bd0064f7fbb",
+    "report.md": "f018be443a98d87f30de88ed75ba62b382909a1d7193a616cf4b5d24dfbfb7bc",
+    "task.json": "124c82d1d5c068aaf4b27012ae378653ff94faf1fc3c5787ba5d4f5473afd975"
+  }
+}
