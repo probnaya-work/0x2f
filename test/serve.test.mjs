@@ -298,6 +298,9 @@ test("a task left working with a dead worker is recovered on the next runtime st
         "the rerun to complete",
         { timeoutMs: 10000 }
       );
+      // READY precedes the worker's final event append. Reap this fixture's
+      // writer before deleting its workspace; stopping the server is not enough.
+      await waitFor(() => isPidAlive(rerunTask.pid).then(alive => !alive), "the rerun worker to exit");
     } finally {
       await stopAndReap(runtimeB);
     }

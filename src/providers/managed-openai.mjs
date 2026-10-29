@@ -1,8 +1,9 @@
 // One small-task Responses lane. No SDK retries, hosted tools or OAuth access.
 import {rejectCredentialValues} from '../core/workflow-credentials.mjs';
-export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,sourceBytes:65536,reads:4,patches:1,tools:6,toolResultBytes:24576,readResultBytes:4096,serializedInputBytes:32768,inferenceRequests:4,countRequests:4,responsesRequests:8,inputTokens:8192,inputTokensPerRequest:4096,outputTokens:4096,outputTokensPerRequest:2048,deadlineMs:120000,costUsd:0.25});
-export const MANAGED_FOREGROUND_INFERENCE_MAX_USD=0.024576;
-export const MANAGED_SEARCH_BOUNDS=Object.freeze({queryBytes:128,matches:6,lineBytes:160,contextLines:1,resultBytes:4096,readLines:32});
+export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,sourceBytes:65536,reads:4,patches:1,tools:10,toolResultBytes:24576,readResultBytes:4096,requestInputBytes:16384,serializedInputBytes:196608,inferenceRequests:6,countRequests:6,responsesRequests:12,inputTokens:16384,inputTokensPerRequest:4096,outputTokens:4096,outputTokensPerRequest:2048,deadlineMs:120000,costUsd:0.030720});
+export const MANAGED_FOREGROUND_INFERENCE_MAX_USD=0.030720;
+export const MANAGED_POLICY='managed-foreground-b-v1';
+export const MANAGED_SEARCH_BOUNDS=Object.freeze({queryBytes:128,matches:6,lineBytes:160,contextLines:1,resultBytes:4096,readLines:32,outlineAnchors:24,outlineBytes:2048});
 export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-28T08:22:05Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',controlRequestPolicy:'unpriced_control_request'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
 export class ManagedStop extends Error {constructor(code){super(code);this.code=code;}}
 export const fail=code=>{throw new ManagedStop(code);};
@@ -21,7 +22,7 @@ export function managedForegroundPricing(predicted,{mode='unattended',foreground
   if(foregroundCanary!==true&&foregroundAuthorized!==true)fail('managed_foreground_canary_required');
   if(predicted.controlRequests?.classification!=='unpriced_control_request')fail('managed_pricing_unproven');
   if(!Number.isFinite(predicted.inferenceUpperUsd)||predicted.inferenceUpperUsd>MANAGED_FOREGROUND_INFERENCE_MAX_USD)fail('managed_cost_limit');
-  return {version:'managed-foreground-pricing-v3',mode,foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true,publishedBillableInferenceMaximumUsd:predicted.inferenceUpperUsd,controlRequests:predicted.controlRequests,totalBilledAmount:'unknown',retry:false,opaqueFallback:false};
+  return {version:'managed-foreground-pricing-v4',mode,foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true,publishedBillableInferenceMaximumUsd:predicted.inferenceUpperUsd,controlRequests:predicted.controlRequests,totalBilledAmount:'unknown',retry:false,opaqueFallback:false};
 }
 export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS) {
   const ranked=registry.filter(m=>m.capabilities.includes('function-calling')&&m.capabilities.includes('small-code-patch')).map(model=>({model,predicted:managedCost(model,limits)})).sort((a,b)=>a.predicted.inferenceUpperUsd-b.predicted.inferenceUpperUsd);
@@ -31,11 +32,11 @@ export function selectManagedModel(limits=MANAGED_LIMITS,registry=MANAGED_MODELS
 }
 export const managedTools=[
   {type:'function',name:'read_task_file',description:'Read approved ID; ≤4096 content bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},start_line:{type:'integer',minimum:1,maximum:Number.MAX_SAFE_INTEGER},line_count:{type:'integer',minimum:1,maximum:MANAGED_SEARCH_BOUNDS.readLines}},required:['file_id','start_line','line_count'],additionalProperties:false}},
-  {type:'function',name:'search_task_file',description:'Literal approved-ID search: 1–128 UTF-8 query bytes, single line; ≤4096 bytes.',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},query:{type:'string'}},required:['file_id','query'],additionalProperties:false}},
+  {type:'function',name:'search_task_file',description:'Approved ID: literal query (1–128 UTF-8 bytes, single line), start_line:null; or outline query:null, start_line≥1 (declarations/branches, ≤24 anchors/2048 bytes, next_line cursor).',strict:true,parameters:{type:'object',properties:{file_id:{type:'string'},query:{type:['string','null']},start_line:{type:['integer','null'],minimum:1,maximum:Number.MAX_SAFE_INTEGER}},required:['file_id','query','start_line'],additionalProperties:false}},
   {type:'function',name:'submit_patch',description:'One multi-file patch; each old_text matches once.',strict:true,parameters:{type:'object',properties:{edits:{type:'array',items:{type:'object',properties:{file_id:{type:'string'},old_text:{type:'string'},new_text:{type:'string'}},required:['file_id','old_text','new_text'],additionalProperties:false}}},required:['edits'],additionalProperties:false}},
   {type:'function',name:'request_context_expansion',description:'Stop; no expansion or retry.',strict:true,parameters:{type:'object',properties:{reason:{type:'string'}},required:['reason'],additionalProperties:false}}
 ];
-export const managedInstructions='One attempt. Batch literal code locators, not prose guesses. Read short test windows, not headers. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No hits: read, not synonyms. No shell/tests/network/Git/delivery.';
+export const managedInstructions='One attempt. Use outline (query:null, start_line:1) to discover code without guessed prose; follow next_line only if needed, then read short windows. Literal search: start_line:null. Batch independent locators. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery.';
 
 // Test seam is fetch, not a user-configurable API endpoint/provider gateway.
 export function managedTransport(key,{fetchImpl=fetch}={}) {
@@ -76,7 +77,11 @@ export function managedCalls(response,state,manifest,{rangeErrors=false}={}) {
         if(!rangeErrors)fail('managed_read_range');error='managed_read_range';
       }
     }
-    if(item.name==='search_task_file'&&(keys!=='file_id,query'||typeof args.query!=='string'||!args.query.length||Buffer.byteLength(args.query)>MANAGED_SEARCH_BOUNDS.queryBytes||/[\r\n\0]/.test(args.query)))fail('managed_search_query');
+    if(item.name==='search_task_file'){
+      const outline=args.query===null&&Number.isSafeInteger(args.start_line)&&args.start_line>=1;
+      const literal=args.start_line===null&&typeof args.query==='string'&&args.query.length&&Buffer.byteLength(args.query)<=MANAGED_SEARCH_BOUNDS.queryBytes&&!/[\r\n\0]/.test(args.query);
+      if(keys!=='file_id,query,start_line'||!outline&&!literal)fail('managed_search_query');
+    }
     if(item.name==='submit_patch'){
       if(keys!=='edits'||!Array.isArray(args.edits)||!args.edits.length||args.edits.length>4)fail('managed_malformed_patch');
       const files=new Set();for(const edit of args.edits){if(!edit||Object.keys(edit).sort().join(',')!=='file_id,new_text,old_text'||typeof edit.old_text!=='string'||!edit.old_text||typeof edit.new_text!=='string'||!manifest.some(f=>f.id===edit.file_id&&f.writable)||files.has(edit.file_id))fail('managed_patch_scope');files.add(edit.file_id);}
@@ -85,6 +90,8 @@ export function managedCalls(response,state,manifest,{rangeErrors=false}={}) {
     calls.push({item,args,...(error?{error}:{})});
   }
   if(state.tools+calls.length>state.limits.tools)fail('managed_tool_limit');
+  // Leave one slot for the single patch, including when a batch is denied.
+  if(!state.patches&&state.tools+calls.length===state.limits.tools&&(!calls.some(c=>c.item.name==='submit_patch')||calls.some(c=>c.error)))fail('managed_patch_slot_reserved');
   if(state.reads+calls.filter(c=>c.item.name==='read_task_file').length>state.limits.reads)fail('managed_read_limit');
   if(state.patches+calls.filter(c=>c.item.name==='submit_patch').length>state.limits.patches)fail('managed_patch_limit');
   return calls;

@@ -24,6 +24,8 @@ test('candidate normal new auto-routes without model/harness choice and shares i
   assert.match(stdout,/LANE MANAGED API.*NEEDS YOU/);assert.match(stdout,/MODEL gpt-5.4-mini-2026-03-17/);assert.match(stdout,/HTTP 0/);
   const runtime=createRuntime(base),tasks=await runtime.actions.listWork();assert.equal(tasks.length,1);
   const task=tasks[0];assert.equal(task.blockedOn.code,'managed_api_key_missing');assert.equal(task.engineering.managed.modelQueries,undefined);assert.equal(task.engineering.managed.requests,0);
+  assert.deepEqual([task.engineering.config.limits.moneyMicros,task.engineering.config.limits.tokens,task.engineering.config.limits.modelCalls,task.engineering.config.limits.providerCalls],[30720,20480,6,13]);
+  assert.equal(task.engineering.managed.policy,'managed-foreground-b-v1');
   assert.equal(task.runs.length,1);assert.equal(task.engineering.delivery,undefined);
   for(const line of workflowLines(task))assert.ok(stdout.includes(line));
   assert.deepEqual((await snapshot(runtime)).tasks[0].workflowLines,workflowLines(task));assert.deepEqual(projectRow(task,await runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));

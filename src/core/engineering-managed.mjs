@@ -11,7 +11,7 @@ import {engineeringDirectory,assertEngineeringWorkspace,engineeringTrackedFiles}
 import {mutateEngineering,engineeringInventory,freezeEngineering,engineeringRun,engineeringStop,verifyEngineeringArtifact} from './engineering.mjs';
 import {saveEngineeringUsage,economicsPolicy} from './engineering-economics.mjs';
 import {workEvent} from './events.mjs';
-import {MANAGED_LIMITS,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,selectManagedModel,managedForegroundPricing,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
+import {MANAGED_LIMITS,MANAGED_POLICY,MANAGED_SEARCH_BOUNDS,MANAGED_MODELS,selectManagedModel,managedForegroundPricing,managedGuard,managedTransport,managedInstructions,managedTools,managedCalls,ManagedStop,fail} from '../providers/managed-openai.mjs';
 
 const now=()=>new Date().toISOString();
 const int=n=>Number.isSafeInteger(n)&&n>=0;
@@ -80,6 +80,22 @@ export function managedSearchResult(file_id,text,query,call_id) {
   if(Buffer.byteLength(JSON.stringify(result))>b.resultBytes)fail('managed_payload_limit');
   return result;
 }
+// Fixed in-process navigation, not a model-supplied pattern or source parser.
+export function managedOutlineResult(file_id,text,start_line,call_id) {
+  const b=MANAGED_SEARCH_BOUNDS,lines=sourceLines(text),anchors=[];
+  const anchor=/^\s*(?:(?:export\s+(?:default\s+)?)?(?:async\s+)?(?:function|class|const|let|var|import)\b|(?:if|else|switch|case|catch|test|describe|it)\b)/;
+  const result={type:'function_call_output',call_id,output:''};let next_line=null;
+  for(let i=start_line-1;i<lines.length;i++){
+    if(!anchor.test(lines[i]))continue;
+    const entry={line:i+1,excerpt:prefixBytes(lines[i],b.lineBytes)};
+    const candidate={file_id,anchors:[...anchors,entry],truncated:true,next_line:i+2};
+    if(anchors.length===b.outlineAnchors||Buffer.byteLength(JSON.stringify({...result,output:JSON.stringify(candidate)}))>b.outlineBytes){next_line=i+1;break;}
+    anchors.push(entry);
+  }
+  result.output=JSON.stringify({file_id,anchors,truncated:next_line!==null,next_line});
+  if(Buffer.byteLength(JSON.stringify(result))>b.outlineBytes||next_line!==null&&next_line<=start_line)fail('managed_payload_limit');
+  return result;
+}
 export async function managedPacket(store,task,guard,limits=MANAGED_LIMITS) {
   const cwd=engineeringDirectory(store,task),c=task.engineering.config;
   if(c.files.length>limits.files)fail('managed_file_limit');
@@ -131,7 +147,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
     };
     if(task.engineering.managed?.attempt)return task.status==='working'?stop('managed_uncertain'):task;
     if(task.status!=='working'||task.engineering.driver.state!=='pending')return task;
-    task=await update(t=>{claimed=true;return {...t,pid:process.pid,execution:{...t.execution,provider:'managed-openai'},engineering:{...t.engineering,driver:{token,pid:process.pid,state:'running'},managed:{lane:'managed-api',state:'PREFLIGHT',limits,attempt:randomUUID(),requests:0,inferences:0,tools:0,reads:0,searches:0,patches:0,resultBytes:0,inputBytes:0},next:'implement'}};});
+    task=await update(t=>{claimed=true;return {...t,pid:process.pid,execution:{...t.execution,provider:'managed-openai'},engineering:{...t.engineering,driver:{token,pid:process.pid,state:'running'},managed:{lane:'managed-api',policy:MANAGED_POLICY,state:'PREFLIGHT',limits,attempt:randomUUID(),requests:0,inferences:0,tools:0,reads:0,searches:0,patches:0,resultBytes:0,inputBytes:0},next:'implement'}};});
     if(!claimed)return task;
     const attempt=task.engineering.managed.attempt,run=task.runs.at(-1).run,dir=`runs/${run}/managed`,cwd=engineeringDirectory(store,task),intent=engineeringIntent(task);
     let state={limits,callIds:[],tools:0,reads:0,searches:0,patches:0,resultBytes:0,inputBytes:0,inputTokens:0,inputReserved:0,outputTokens:0,outputReserved:0,requests:0,inferences:0,counts:0,modelQueries:0},usageEvents=[],toolEvidence=[],knownUsage=true,model,predicted,packet,baseline,expected,patchSubmitted=false;
@@ -139,7 +155,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
     let pendingRequest=false;
     async function rpc(kind,body){
       active();guard(body);const byteCount=Buffer.byteLength(JSON.stringify(body));
-      if(kind!=='model'&&(state.requests>=limits.responsesRequests||state.inputBytes+byteCount>limits.serializedInputBytes))fail('managed_request_or_input_limit');
+      if(kind!=='model'&&(state.requests>=limits.responsesRequests||byteCount>limits.requestInputBytes||state.inputBytes+byteCount>limits.serializedInputBytes))fail('managed_request_or_input_limit');
       if(kind==='count'&&state.counts>=limits.countRequests||kind==='inference'&&state.inferences>=limits.inferenceRequests)fail('managed_request_limit');
       if(kind==='model'&&state.modelQueries>=1)fail('managed_request_limit');
       const fresh=await store.findTask(task.id);if(engineeringIntent(fresh)!==intent||fresh.status!=='working')fail('managed_input_drift');
@@ -183,7 +199,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
       // The eligibility pass deliberately did not retrieve the credential.
       const guardedPacket=await managedPacket(store,task,guard,limits);
       if(hash(guardedPacket)!==hash(packet))fail('managed_source_drift');
-      await write(`${dir}/attempt.json`,{schemaVersion:1,taskId:task.id,run,attempt,model,limits,predicted,authorization:{mode:'foreground',foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true},packet,inputDigest:hash(packet),intent,at:now()});
+      await write(`${dir}/attempt.json`,{schemaVersion:1,policy:MANAGED_POLICY,taskId:task.id,run,attempt,model,limits,predicted,authorization:{mode:'foreground',foregroundCanary:foregroundCanary===true,foregroundAuthorized:foregroundAuthorized===true},packet,inputDigest:hash(packet),intent,at:now()});
       task=await update(t=>({...t,runs:t.runs.map(r=>r.run===run?{...r,purpose:'implement',provider:'managed-openai',executor:{kind:'managed',harness:'0x2f-responses-v1',requestedModel:model.id,observedModel:null},permissions:{tools:managedTools.map(t=>t.name),writePaths:t.engineering.config.writePaths,externalActions:false}}:r),engineering:{...t.engineering,decisions:[...t.engineering.decisions,{purpose:'implement',provider:'managed-openai',model:model.id,reason:'minimum-qualified-managed-model',lane:'managed-api',opaqueFallback:false}],managed:{...t.engineering.managed,model:model.id,predicted}}}));
       if(!key)fail('managed_api_key_missing');
       transport??=managedTransport(key);
@@ -206,7 +222,8 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
         const outputMax=Math.min(limits.outputTokensPerRequest,limits.outputTokens-state.outputReserved);
         if(outputMax<1)fail('managed_output_limit');
         const body={...prompt,store:false,max_output_tokens:outputMax,reasoning:{effort:model.reasoningEffort},service_tier:'default'};
-        if(state.inputBytes+Buffer.byteLength(JSON.stringify(prompt))+Buffer.byteLength(JSON.stringify(body))>limits.serializedInputBytes)fail('managed_input_limit');
+        const sizes=[prompt,body].map(b=>Buffer.byteLength(JSON.stringify(b)));
+        if(sizes.some(n=>n>limits.requestInputBytes)||state.inputBytes+sizes[0]+sizes[1]>limits.serializedInputBytes)fail('managed_input_limit');
         const counted=await rpc('count',prompt);
         if(counted.object!=='response.input_tokens'||!int(counted.input_tokens)||counted.input_tokens>limits.inputTokensPerRequest||state.inputTokens+counted.input_tokens>limits.inputTokens)fail('managed_token_limit');
         state.outputReserved+=outputMax;state.inputReserved+=counted.input_tokens;state.pendingInputTokens=counted.input_tokens;
@@ -242,7 +259,7 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
             active();
             // Slice whole Unicode codepoints, including JSON framing in total cap.
             let result;
-            if(item.name==='search_task_file')result=managedSearchResult(file.id,bytes.toString(),args.query,item.call_id);
+            if(item.name==='search_task_file')result=args.query===null?managedOutlineResult(file.id,bytes.toString(),args.start_line,item.call_id):managedSearchResult(file.id,bytes.toString(),args.query,item.call_id);
             else {
               const ranged=Number.isSafeInteger(args.start_line),lines=ranged?sourceLines(bytes.toString()).slice(args.start_line-1,args.start_line-1+args.line_count):null;
               const selected=ranged?lines.join('\n'):bytes.toString(),content=prefixBytes(selected,limits.readResultBytes);

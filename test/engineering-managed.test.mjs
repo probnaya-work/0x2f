@@ -10,7 +10,7 @@ import {ensureEngineeringWorkspace} from '../src/core/engineering-workspace.mjs'
 import {mutateEngineering,assertEngineeringAccepted} from '../src/core/engineering.mjs';
 import {handoffHash as hash} from '../src/core/engineering-handoff.mjs';
 import {economicsPolicy} from '../src/core/engineering-economics.mjs';
-import {runManagedForeground,managedCheck,managedSearchResult,managedModelContext,managedWireInput} from '../src/core/engineering-managed.mjs';
+import {runManagedForeground,managedCheck,managedOutlineResult,managedSearchResult,managedModelContext,managedWireInput} from '../src/core/engineering-managed.mjs';
 import {runForegroundEngineering} from '../src/core/engineering-foreground.mjs';
 import {credentialFreeEnvironment} from '../src/core/workflow-credentials.mjs';
 import {renderTasks} from '../src/render.mjs';
@@ -25,7 +25,7 @@ const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
 const read=(id='read')=>call('read_task_file',{file_id:'f1',start_line:1,line_count:32},id);
-const search=(query='parseTaskId',id='search',file_id='f1')=>call('search_task_file',{file_id,query},id);
+const search=(query='parseTaskId',id='search',file_id='f1')=>call('search_task_file',{file_id,query,start_line:null},id);
 test('wire context preserves every instruction, constraint and source byte without nested source JSON',()=>{
  const packet={brief:'Keep API "014"\nAdd regression',constraints:['No delivery','Keep checks'],files:[{id:'f1',path:'src/x.mjs',bytes:50,writable:true,sha256:'audit-only'}],instructions:[{path:'AGENTS.md',text:'Keep .work atomic\n```\n"quotes"\\slashes\n```'}]};
  const context=managedModelContext(packet);
@@ -41,7 +41,7 @@ test('wire context preserves every instruction, constraint and source byte witho
  assert.ok(Buffer.byteLength(JSON.stringify(wire))<Buffer.byteLength(JSON.stringify(original)));
 });
 async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS,setup}={}){
- const f=await playbookFixture(t,{setup,config:{limits:{moneyMicros:24576,tokens:12288,modelCalls:4,providerCalls:9,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
+ const f=await playbookFixture(t,{setup,config:{limits:{moneyMicros:30720,tokens:20480,modelCalls:6,providerCalls:13,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
  const git=args=>execFileSync('/usr/bin/git',['-C',f.base,...args],{env:{PATH:'/usr/bin:/bin'},stdio:'pipe'});
  git(['init','-q']);git(['add','src','test']);git(['-c','user.name=Fixture','-c','user.email=fixture@localhost','commit','--no-gpg-sign','--no-verify','-qm','fixture base']);
  const spec={repository:f.base,ref:'HEAD'};let task=await f.runtime.store.findTask(f.task.id);const c={...task.engineering.config,workspace:spec};task=await f.runtime.store.updateTask({...task,engineering:{...task.engineering,config:c,configDigest:hash(c)}});
@@ -102,7 +102,7 @@ test('ignored/untracked approved source is rejected at preflight before credenti
 test('search shares tool/result ceilings and stops safely without continuation, retry or fallback',async t=>{
  for(const limits of [{...MANAGED_LIMITS,toolResultBytes:1},{...MANAGED_LIMITS,tools:1}]){
   const f=await fixture(t,{limits,outputs:[[search()],[read(),patch()]]}),task=await f.run();
-  assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,limits.toolResultBytes===1?'managed_payload_limit':'managed_tool_limit');
+  assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,limits.toolResultBytes===1?'managed_payload_limit':'managed_patch_slot_reserved');
   assert.equal(task.engineering.managed.patches,0);assert.ok(task.engineering.managed.resultBytes<=limits.toolResultBytes);
   const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
  }
@@ -196,13 +196,14 @@ test('managed expensive worst-case and missing explicit foreground decision bloc
 
 test('foreground pricing permits unpriced controls only with explicit foreground authorization, never unattended',()=>{
  const predicted=managedCost(MANAGED_MODELS[0]);
- assert.equal(predicted.inferenceUpperUsd,0.024576);assert.equal(predicted.totalUpperUsd,null);
- assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:5,tokenCountMaximum:4,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
+ assert.equal(predicted.inferenceUpperUsd,0.030720);assert.equal(predicted.totalUpperUsd,null);
+ assert.deepEqual([MANAGED_LIMITS.requestInputBytes,MANAGED_LIMITS.serializedInputBytes,MANAGED_LIMITS.inferenceRequests,MANAGED_LIMITS.countRequests,MANAGED_LIMITS.responsesRequests,MANAGED_LIMITS.tools,MANAGED_LIMITS.reads,MANAGED_LIMITS.patches],[16384,196608,6,6,12,10,4,1]);
+ assert.deepEqual(predicted.controlRequests,{classification:'unpriced_control_request',maximum:7,tokenCountMaximum:6,availabilityMaximum:1,separatePublishedFee:false,contractualZeroFee:false,includedInInferenceMaximum:false});
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'foreground'}),/managed_foreground_canary_required/);
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundCanary:true}),/managed_unattended_unqualified/);
  assert.throws(()=>managedForegroundPricing(predicted,{mode:'unattended',foregroundAuthorized:true}),/managed_unattended_unqualified/);
- assert.equal(managedForegroundPricing(predicted,{mode:'foreground',foregroundAuthorized:true}).publishedBillableInferenceMaximumUsd,0.024576);
- assert.throws(()=>managedForegroundPricing({...predicted,inferenceUpperUsd:0.024577},{mode:'foreground',foregroundCanary:true}),/managed_cost_limit/);
+ assert.equal(managedForegroundPricing(predicted,{mode:'foreground',foregroundAuthorized:true}).publishedBillableInferenceMaximumUsd,0.030720);
+ assert.throws(()=>managedForegroundPricing({...predicted,inferenceUpperUsd:0.030721},{mode:'foreground',foregroundCanary:true}),/managed_cost_limit/);
  const policy=managedForegroundPricing(predicted,{mode:'foreground',foregroundCanary:true});
  assert.equal(policy.totalBilledAmount,'unknown');assert.equal(policy.retry,false);assert.equal(policy.opaqueFallback,false);
 });
@@ -216,8 +217,8 @@ test('foreground pricing saves and shows the preview before HTTP; controls remai
  // Freshness is a clock fixture; this does not refresh official price evidence.
  const freshRegistry=MANAGED_MODELS.map(m=>({...m,price:{...m.price,observedAt:new Date().toISOString()}}));
  const task=await f.run({registry:freshRegistry});assert.equal(task.status,'ready');assert.equal(f.previews.length,1);
- const preview=f.previews[0];assert.equal(preview.pricingPolicy.publishedBillableInferenceMaximumUsd,0.024576);
- assert.equal(preview.pricingPolicy.controlRequests.maximum,5);assert.equal(preview.model,MANAGED_MODELS[0].id);
+ const preview=f.previews[0];assert.equal(preview.pricingPolicy.publishedBillableInferenceMaximumUsd,0.030720);
+ assert.equal(preview.pricingPolicy.controlRequests.maximum,7);assert.equal(preview.model,MANAGED_MODELS[0].id);
  assert.equal(preview.pricingSource,MANAGED_MODELS[0].price.source);assert.ok(preview.pricingObservedAt);assert.match(preview.notice,/no separate published fee/);
  const saved=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),'runs/1/managed/foreground-preview.json'));assert.deepEqual(saved,preview);
  assert.equal(f.requests.filter(r=>r.url.startsWith('/v1/models/')).length,1);assert.equal(f.requests.filter(r=>r.url.endsWith('/input_tokens')).length,2);assert.equal(f.requests.length,5);
@@ -225,9 +226,9 @@ test('foreground pricing saves and shows the preview before HTTP; controls remai
   const receipt=await f.runtime.store.readJson(path.join(f.runtime.store.taskDir(task.slug),`runs/1/managed/request-${i}-receipt.json`));
   assert.equal(receipt.requestType,receipt.kind==='inference'?'published_billable_inference':'unpriced_control_request');
  }
- const lines=workflowLines(task);assert.ok(lines.includes('PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.024576'));
- assert.ok(lines.some(l=>l.startsWith('CONTROL REQUESTS: 5 maximum, no separate published fee')));
- assert.ok(lines.some(l=>l.startsWith('COST TOTAL UNKNOWN')));assert.ok(!lines.some(l=>l.includes('TOTAL COST 0.024576')));
+ const lines=workflowLines(task);assert.ok(lines.includes('PUBLISHED BILLABLE INFERENCE MAXIMUM: $0.030720'));
+ assert.ok(lines.some(l=>l.startsWith('CONTROL REQUESTS: 7 maximum, no separate published fee')));
+ assert.ok(lines.some(l=>l.startsWith('COST TOTAL UNKNOWN')));assert.ok(!lines.some(l=>l.includes('TOTAL COST 0.030720')));
  assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,lines);assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,lines);
  await f.run();assert.equal(f.requests.length,5);assert.equal(f.calls.length,0);
 });
@@ -299,7 +300,7 @@ test('managed invalid or missing usage is unknown and prevents patch effects',as
  for(const change of [r=>({...r,model:'unexpected-model'}),r=>({...r,usage:null}),r=>({...r,usage:{...r.usage,output_tokens:2049,total_tokens:2149}}),r=>({...r,usage:{...r.usage,input_tokens_details:{cached_tokens:101}}})]){
   const f=await fixture(t,{outputs:[[patch()]],hook:({req,result})=>req.url==='/v1/responses'?change(result):result});
   const task=await f.run();assert.equal(task.blockedOn.code,'managed_usage_uncertain');
-  assert.equal(task.engineering.managed.actualUsage,null);assert.equal(task.engineering.economics.aggregate.metrics.total.value,null);
+  assert.equal(task.engineering.managed.actualUsage,null);assert.equal(task.engineering.economics.aggregate.metrics.total.value,null);assert.equal(task.engineering.managed.inputReserved,100);assert.equal(task.engineering.managed.outputReserved,2048);
   assert.equal(task.engineering.managed.patches,0);assert.equal(f.requests.filter(r=>r.url==='/v1/responses').length,1);
  }
 });
@@ -429,7 +430,7 @@ test('read range schema and runtime agree at every advertised boundary',()=>{
  }
 });
 
-test('Task 002-shaped two-file searches → targeted reads → one multi-file patch → verifier → READY',async t=>{
+test('two-file discovery with misses → outlines → literal locators → targeted reads → patch → READY',async t=>{
  const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
  const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);';
  const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);';
@@ -438,29 +439,29 @@ test('Task 002-shaped two-file searches → targeted reads → one multi-file pa
  const source=('// filler '+'.'.repeat(60)+'\n').repeat(395)+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n';
  const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
  const pad=(text,size)=>text+'//'+'.'.repeat(size-Buffer.byteLength(text)-3)+'\n';
- const outputs=[[search('Created #','source-search'),search('foreground','test-search','f2')],[call('read_task_file',{file_id:'f1',start_line:396,line_count:3},'source-read'),call('read_task_file',{file_id:'f2',start_line:17,line_count:4},'test-read')],[call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]})]];
+ const outputs=[[search('absent-a','miss-a'),search('absent-b','miss-b','f2'),search('absent-c','miss-c')],[call('search_task_file',{file_id:'f1',query:null,start_line:1},'outline-source'),call('search_task_file',{file_id:'f2',query:null,start_line:1},'outline-test')],[search('Created #','source-search')],[search('foreground','test-search','f2')],[call('read_task_file',{file_id:'f1',start_line:396,line_count:3},'source-read'),call('read_task_file',{file_id:'f2',start_line:17,line_count:4},'test-read')],[call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]})]];
  const f=await fixture(t,{count:1031,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},outputs,setup:async({base})=>{
   await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
  },hook:({req,body,inf})=>{
   if(req.url!=='/v1/responses')return;
-  if(inf===2)assert.equal(body.input.filter(i=>i.type==='function_call_output').length,2);
-  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
+  if(inf===3)assert.equal(body.input.filter(i=>i.type==='function_call_output'&&wireResult(i).anchors).length,2);
+  if(inf===6){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
  }});
  await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
  const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
  const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.searches,m.reads,m.patches,m.tools],[3,3,1,2,2,1,5]);
- assert.ok(m.actualUsage.total<=12288);assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.equal(m.predicted.totalUpperUsd,null);
- assert.ok(m.resultBytes<8192);assert.ok(m.inputBytes<=32768);assert.equal(m.limits.toolResultBytes,24576);assert.equal(m.limits.readResultBytes,4096);
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.searches,m.reads,m.patches,m.tools],[6,6,1,7,2,1,10]);
+ assert.ok(m.actualUsage.total<=20480);assert.equal(m.predicted.inferenceUpperUsd,0.030720);assert.equal(m.predicted.totalUpperUsd,null);
+ assert.ok(m.resultBytes<8192);assert.ok(m.inputBytes<=MANAGED_LIMITS.serializedInputBytes);assert.equal(m.limits.toolResultBytes,24576);assert.equal(m.limits.readResultBytes,4096);
  const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
  assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);assert.deepEqual(attempt.packet.files.map(f=>f.bytes),[31003,3046]);
  assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
  const diff=await f.runtime.actions.getTaskDiff(task.id);assert.deepEqual(diff.map(d=>d.path).sort(),[sourcePath,testPath]);
  assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
- assert.ok(workflowLines(task).some(l=>l.includes('4 inference + 4 count')));assert.ok(workflowLines(task).some(l=>l.includes('5 maximum, no separate published fee')));
- assert.ok(workflowLines(task).some(l=>l.includes('7 HTTP')));
+ assert.ok(workflowLines(task).some(l=>l.includes('6 inference + 6 count')));assert.ok(workflowLines(task).some(l=>l.includes('7 maximum, no separate published fee')));
+ assert.ok(workflowLines(task).some(l=>l.includes('13 HTTP')));
  const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);assert.equal(task.engineering.managed.attempt,(await f.runtime.store.findTask(task.id)).engineering.managed.attempt);
- if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});const receipts=[];for(let i=1;i<=5;i++)receipts.push(await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`)));await fs.writeFile(path.join(dir,'task002-shape.json'),JSON.stringify(managedGuard(key)({kind:'offline fake Responses only; no provider or Keychain calls',task,attempt,receipts,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,bytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification}),null,2)+'\n');}
+ if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});const receipts=[];for(let i=1;i<=10;i++)receipts.push(await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`)));await fs.writeFile(path.join(dir,'envelope-b-flow.json'),JSON.stringify(managedGuard(key)({kind:'offline fake Responses only; no provider or Keychain calls',task,attempt,receipts,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,bytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification}),null,2)+'\n');}
 });
 
 test('Task 003-shaped discovery: targeted test read + code locator → targeted source read → patch → READY',async t=>{
@@ -481,9 +482,8 @@ test('Task 003-shaped discovery: targeted test read + code locator → targeted 
   await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
  },hook:({req,body,inf})=>{
   if(req.url!=='/v1/responses')return;
-  assert.match(body.instructions,/Read short test windows/);
-  assert.match(body.instructions,/Batch literal code locators/);assert.match(body.instructions,/No hits: read, not synonyms/);
-  const remaining=['4 turns, 6 tools, 4 reads, 1 patch.','3 turns, 4 tools, 3 reads, 1 patch.','2 turns, 3 tools, 2 reads, 1 patch.'];
+  assert.match(body.instructions,/Use outline/);assert.match(body.instructions,/then read short windows/);
+  const remaining=['6 turns, 10 tools, 4 reads, 1 patch.','5 turns, 8 tools, 3 reads, 1 patch.','4 turns, 7 tools, 2 reads, 1 patch.'];
   assert.ok(body.instructions.endsWith('Left: '+remaining[inf-1]));
   if(inf===2){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes("'new'")));assert.equal(results.find(r=>r.matches).matches[0].line,395);}
   if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes(original)));}
@@ -493,8 +493,8 @@ test('Task 003-shaped discovery: targeted test read + code locator → targeted 
  const task=await f.run(),m=task.engineering.managed;
  assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
  assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.searches,m.reads,m.patches],[3,3,1,4,1,2,1]);
- assert.ok(m.actualUsage.total<=12288);assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.equal(m.providerReportedCost,'unknown');
- assert.ok(m.inputBytes<=32768);assert.ok(m.resultBytes<8192);assert.deepEqual(m.limits,MANAGED_LIMITS);
+ assert.ok(m.actualUsage.total<=20480);assert.equal(m.predicted.inferenceUpperUsd,0.030720);assert.equal(m.providerReportedCost,'unknown');
+ assert.ok(m.inputBytes<=MANAGED_LIMITS.serializedInputBytes);assert.ok(m.resultBytes<8192);assert.deepEqual(m.limits,MANAGED_LIMITS);
  assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
  assert.deepEqual((await f.runtime.actions.getTaskDiff(task.id)).map(d=>d.path).sort(),[sourcePath,testPath]);
  const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
@@ -509,7 +509,7 @@ test('Task 003-shaped discovery: targeted test read + code locator → targeted 
 
 test('Task 003 exact guessed-search batches still stop before an oversized second batch',async t=>{
  const outputs=[['After creating a Task','open it','Created Task'].map((q,i)=>search(q,'guess-'+i)).concat(search('Task','guess-3','f2')),['task id','task.json','print'].map((q,i)=>search(q,'guess-'+(i+4))).concat(search('open','guess-7','f2'))];
- const f=await fixture(t,{outputs,setup:({base})=>fs.writeFile(path.join(base,'test/id.test.mjs'),'// fixture test\n'),hook:({req,body,inf})=>{if(req.url==='/v1/responses'&&inf===2)assert.ok(body.instructions.endsWith('Left: 3 turns, 2 tools, 4 reads, 1 patch.'));}});
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,tools:6,inferenceRequests:4,countRequests:4,responsesRequests:8},outputs,setup:({base})=>fs.writeFile(path.join(base,'test/id.test.mjs'),'// fixture test\n'),hook:({req,body,inf})=>{if(req.url==='/v1/responses'&&inf===2)assert.ok(body.instructions.endsWith('Left: 3 turns, 2 tools, 4 reads, 1 patch.'));}});
  const task=await f.run(),m=task.engineering.managed;
  assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'managed_tool_limit');
  assert.deepEqual([m.inferences,m.searches,m.reads,m.patches,m.tools],[2,4,0,0,4]);
@@ -519,24 +519,24 @@ test('Task 003 exact guessed-search batches still stop before an oversized secon
  const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);
 });
 
-test('four inference requests share the unchanged 8192 input + 4096 output ceiling and cost maximum',async t=>{
- const f=await fixture(t,{count:2048,outputs:[[search('parseTaskId','s1')],[search('014','s2','f2')],[read('r')],[patch()]],hook:({req,result})=>req.url==='/v1/responses'?{...result,usage:{...result.usage,output_tokens:1024,total_tokens:3072}}:result});
+test('six requests share 16384 input + 4096 output tokens, reservations and $0.030720 maximum',async t=>{
+ const outputs=Array.from({length:5},(_,i)=>[search('x','s'+i)]).concat([[patch()]]);
+ const f=await fixture(t,{count:n=>n===6?2734:2730,outputs,hook:({req,result,inf})=>req.url==='/v1/responses'?{...result,usage:{...result.usage,output_tokens:inf===6?596:700,total_tokens:result.usage.input_tokens+(inf===6?596:700)}}:result});
  const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',task.blockedOn?.text);
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.requests],[4,4,1,8]);assert.equal(f.requests.length,9);
- assert.deepEqual(m.actualUsage,{input:8192,cachedInput:40,output:4096,total:12288});assert.equal(m.outputReserved,4096);assert.equal(m.inputReserved,8192);
- assert.deepEqual(f.requests.filter(r=>r.url==='/v1/responses').map(r=>r.body.max_output_tokens),[2048,2048,2048,1024]);
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.requests,f.requests.length],[6,6,1,12,13]);
+ assert.deepEqual(m.actualUsage,{input:16384,cachedInput:60,output:4096,total:20480});assert.equal(m.outputReserved,4096);assert.equal(m.inputReserved,16384);
+ assert.deepEqual(f.requests.filter(r=>r.url==='/v1/responses').map(r=>r.body.max_output_tokens),[2048,2048,2048,1996,1296,596]);
  const root=f.runtime.store.taskDir(task.slug);
- for(const n of [1,3,5,7,9]){const intent=await f.runtime.store.readJson(path.join(root,`runs/1/managed/request-${n}-intent.json`));assert.ok(intent.remaining.publishedInferenceUsd>=0&&intent.remaining.publishedInferenceUsd<=0.024576);}
- assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/request-9-intent.json'))).remaining.publishedInferenceUsd,0);
- assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.ok(m.calculatedInferenceCostUsd<=0.024576);assert.equal(m.pricingPolicy.controlRequests.maximum,5);assert.equal(m.providerReportedCost,'unknown');
- assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
- const lines=workflowLines(task);assert.ok(lines.some(l=>l.includes('9 HTTP')));assert.ok(lines.some(l=>l.includes('5 dispatched')));
+ for(const n of [1,3,5,7,9,11,13]){const r=await f.runtime.store.readJson(path.join(root,`runs/1/managed/request-${n}-intent.json`));assert.ok(r.remaining.publishedInferenceUsd>=0&&r.remaining.publishedInferenceUsd<=0.030720);}
+ assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/request-13-intent.json'))).remaining.publishedInferenceUsd,0);
+ assert.equal(m.predicted.inferenceUpperUsd,0.030720);assert.ok(m.calculatedInferenceCostUsd<=0.030720);assert.equal(m.pricingPolicy.controlRequests.maximum,7);assert.equal(m.providerReportedCost,'unknown');
+ assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);assert.ok(workflowLines(task).some(l=>l.includes('13 HTTP')));
 });
 
-test('next cumulative input reservation over 8192 stops before its inference dispatch',async t=>{
- const f=await fixture(t,{count:2731,outputs:[[search('x','s1')],[search('y','s2')],[patch()]]}),task=await f.run(),m=task.engineering.managed;
- assert.equal(task.blockedOn.code,'managed_token_limit');assert.deepEqual([m.inferences,m.counts,m.patches],[2,3,0]);assert.equal(m.actualUsage.input,5462);assert.equal(m.actualUsage.total,5502);
- assert.equal(f.requests.length,6);const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
+test('next cumulative input reservation over 16384 stops before inference dispatch',async t=>{
+ const f=await fixture(t,{count:3000,outputs:Array.from({length:5},(_,i)=>[search('x','s'+i)]).concat([[patch()]])}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_token_limit');assert.deepEqual([m.inferences,m.counts,m.patches],[5,6,0]);assert.equal(m.actualUsage.input,15000);
+ assert.equal(f.requests.length,12);const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
 });
 
 test('exhausted cumulative output stops before another count or inference',async t=>{
@@ -563,7 +563,7 @@ test('invalid read in the last turn denies the whole batch without patch effect 
  const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(f.calls.length,0);
 });
 
-test('simple one-response patch remains one response under the four-response allowance',async t=>{
+test('simple one-response patch remains one response under the six-response allowance',async t=>{
  const f=await fixture(t,{outputs:[[patch()]]});
  // Request cardinality must not depend on wall time lost to other test files
  // or host suspension. The deadline boundary is exercised separately below;
@@ -604,9 +604,9 @@ test('existing stricter project request caps remain a pre-credential gate and ar
 });
 
 
-test('four responses cannot dispatch a fifth or start a fresh attempt',async t=>{
- const f=await fixture(t,{outputs:[1,2,3,4].map(n=>[read('r'+n)])}),task=await f.run(),m=task.engineering.managed;
- assert.equal(task.blockedOn.code,'managed_request_limit');assert.deepEqual([m.inferences,m.counts,m.reads,m.patches],[4,4,4,0]);assert.equal(f.requests.length,9);
+test('six responses cannot dispatch a seventh or start a fresh attempt',async t=>{
+ const f=await fixture(t,{outputs:[1,2,3,4,5,6].map(n=>[search('absent','s'+n)])}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_request_limit');assert.deepEqual([m.inferences,m.counts,m.searches,m.patches],[6,6,6,0]);assert.equal(f.requests.length,13);
  const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
 });
 
@@ -636,78 +636,78 @@ test('a rejected search sibling remains a denial when a later targeted read succ
  const root=f.runtime.store.taskDir(task.slug);assert.equal((await f.runtime.store.readJson(path.join(root,'runs/1/managed/tool-2-receipt.json'))).code,'managed_batch_rejected');
 });
 
-test('Task 004-shaped compact discovery retains source and fits both serialized bodies before real verification',async t=>{
- const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
- const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);',testOriginal='assert.match(output, /^Created #001: Fixture/m);';
- const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);',testReplacement=testOriginal+"\nassert.ok(output.includes('Next #001: 2f-next open 1'));";
- const source=('// filler '+'.'.repeat(60)+'\n').repeat(395)+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n';
- const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
- const pad=(s,n)=>s+'//'+'.'.repeat(n-Buffer.byteLength(s)-3)+'\n';
- const item=(name,args,i)=>({...call(name,args,'call_'+String(i).padStart(24,'0')),id:'fc_'+String(i).padStart(58,'0'),status:'completed'});
- const outputs=[
-  [item('search_task_file',{file_id:'f1',query:'console.log('},1),item('search_task_file',{file_id:'f2',query:'assert.match('},2)],
-  [item('read_task_file',{file_id:'f1',start_line:396,line_count:3},3),item('read_task_file',{file_id:'f2',start_line:17,line_count:4},4)],
-  [item('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]},5)]
- ];
- const instructions=await fs.readFile(new URL('../AGENTS.md',import.meta.url),'utf8');
- const f=await fixture(t,{outputs,count:1031,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},setup:async({base})=>{
-  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
- },hook:async({req,body,f,inf})=>{
-  if(req.url!=='/v1/responses')return;
-  assert.equal((await f.runtime.store.findTask(f.task.id)).status,'working','READY cannot precede verifier');
-  assert.ok(body.input[0].content.includes(instructions));
-  assert.match(body.input[0].content,/Preserve existing output compatibility/);
-  if(inf===3){const r=body.input.filter(i=>i.type==='function_call_output').map(wireResult);assert.equal(r.length,2);assert.ok(r.some(x=>x.content.includes(original)));assert.ok(r.some(x=>x.content.includes(testOriginal)));}
- }});
- await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),instructions);
- const brief='After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.';
- await f.runtime.store.updateTask({...await f.runtime.store.findTask(f.task.id),brief});
- const task=await f.run(),m=task.engineering.managed;
- assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
- const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
- const oldInstructions='One attempt. Read small tests before guessed UI searches. Search code; one search/file/batch. No hits: read, not synonyms. Reserve reads + patch. Reads 1–32 lines; correct errors within turns. No shell/tests/network/Git/delivery.';
- const legacy=r=>{
-  const b=structuredClone(r.body);b.tools[0].description='Read approved ID; 1–32 lines, ≤4096 content bytes.';b.instructions=b.instructions.replace(b.instructions.slice(0,b.instructions.indexOf(' Left:')),oldInstructions);
-  b.input=b.input.map(i=>{
-   if(i.role==='user')return {...i,content:JSON.stringify({brief:attempt.packet.brief,constraints:attempt.packet.constraints,instructions:attempt.packet.instructions.map(({path,text})=>({path,text})),files:attempt.packet.files.map(({id,path,bytes,writable})=>({id,path,bytes,writable}))})};
-   if(i.type==='function_call')return outputs.flat().find(o=>o.call_id===i.call_id);
-   if(i.type==='function_call_output'){const d=wireResult(i);return {...i,output:JSON.stringify(d.content===undefined?d:{file_id:d.file_id,start_line:d.start_line,line_count:d.line_count,content:d.content,truncated:d.truncated})};}
-   return i;
-  });return b;
- };
- const counted=f.requests.filter(r=>!r.url.includes('/models/'));
- const byteRows=counted.map(r=>({kind:r.url.endsWith('input_tokens')?'count':'inference',before:Buffer.byteLength(JSON.stringify(legacy(r))),after:Buffer.byteLength(JSON.stringify(r.body))}));
- const before=byteRows.reduce((n,r)=>n+r.before,0),after=byteRows.reduce((n,r)=>n+r.after,0);
- assert.equal(after,m.inputBytes);assert.ok(after<=32768);assert.ok(after<before);assert.ok(before>32768,'same fixture under prior serialization would block pair three');
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.reads,m.searches,m.patches],[3,3,1,5,2,2,1]);
- assert.deepEqual(m.limits,MANAGED_LIMITS);assert.ok(m.actualUsage.total<=12288);assert.equal(m.predicted.inferenceUpperUsd,0.024576);assert.equal(m.predicted.totalUpperUsd,null);
- assert.ok(m.resultBytes<8192);assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);
- assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.verification.groupClosed,true);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
- assert.deepEqual((await f.runtime.actions.getTaskDiff(task.id)).map(d=>d.path).sort(),[sourcePath,testPath]);
- assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
- const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests,'no replay');
- if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'task004-compact.json'),JSON.stringify({kind:'offline mock; changed discovery strategy, not a replay of the live model',byteRows,before,after,margin:32768-after,resultBytes:m.resultBytes,packetBytes:Buffer.byteLength(JSON.stringify(attempt.packet)),usage:m.actualUsage,publishedInferenceMaximum:m.predicted.inferenceUpperUsd,limits:m.limits,state:task.status,verification:{code:task.engineering.verification.code,groupClosed:task.engineering.verification.groupClosed,outputDigest:task.engineering.verification.outputDigest},patchDigest:m.artifact.contentDigest,attempts:task.engineering.economics.attempts.length,sequence:outputs.map(x=>x.map(i=>i.name)),projection:workflowLines(task)},null,2)+'\n');}
+for(const [name,limits,code] of [
+ ['per-body',{requestInputBytes:1},'managed_input_limit'],
+ ['cumulative',{serializedInputBytes:1},'managed_input_limit']
+])test(`${name} byte guard rejects both exact bodies before the count dispatch`,async t=>{
+ const f=await fixture(t,{limits:{...MANAGED_LIMITS,...limits}}),task=await f.run();
+ assert.equal(task.blockedOn.code,code);assert.deepEqual([task.engineering.managed.counts,task.engineering.managed.inferences],[0,0]);assert.equal(f.requests.length,1);
+ assert.equal(task.engineering.managed.inputBytes,0);await f.run();assert.equal(f.requests.length,1);
 });
 
-test('Task 004 broad headers + empty search still stop before the third count/inference pair',async t=>{
- const headers=n=>{const lines=Array.from({length:32},()=>('//\n'));lines[0]='//'+'.'.repeat(n-96)+'\n';return lines.join('');};
- const source=headers(1363),check=headers(2839),pad=(s,n)=>s+'//'+'.'.repeat(n-Buffer.byteLength(s)-3)+'\n';
- const outputs=[[read('native-source'),call('read_task_file',{file_id:'f2',start_line:1,line_count:32},'native-test')],[search('new task','native-empty')],[patch()]];
- const f=await fixture(t,{outputs,setup:async({base})=>{
-  await fs.writeFile(path.join(base,'src/id.mjs'),pad(source,31003));await fs.writeFile(path.join(base,'test/id.test.mjs'),pad(check,3046));
- }});
- await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),await fs.readFile(new URL('../AGENTS.md',import.meta.url)));
- const taskBefore=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...taskBefore,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
- const task=await f.run(),m=task.engineering.managed;
- assert.equal(task.status,'needs_you');assert.equal(task.blockedOn.code,'managed_input_limit');
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.reads,m.searches,m.patches],[2,2,1,3,2,1,0]);
- assert.equal(m.inputBytes,f.requests.filter(r=>!r.url.includes('/models/')).reduce((n,r)=>n+Buffer.byteLength(JSON.stringify(r.body)),0));
- const root=f.runtime.store.taskDir(task.slug),third=structuredClone(f.requests.filter(r=>r.url==='/v1/responses')[1].body);
- third.instructions=third.instructions.replace('3 turns, 4 tools','2 turns, 3 tools');
- third.input.push(...managedWireInput(outputs[1]),(await f.runtime.store.readJson(path.join(root,'runs/1/managed/tool-3-receipt.json'))).result);
- const {store,max_output_tokens,reasoning,service_tier,...count}=third;
- assert.ok(m.inputBytes+Buffer.byteLength(JSON.stringify(count))+Buffer.byteLength(JSON.stringify(third))>32768);
- await assert.rejects(fs.stat(path.join(root,'runs/1/managed/request-6-intent.json')),{code:'ENOENT'});
- assert.equal(task.engineering.verification,null);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
- const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);
+
+test('outline is query-free, byte bounded and paginates declarations/branches monotonically',()=>{
+ const text=Array.from({length:70},(_,i)=>i%2?`if (x === ${i}) { // ${'"\\🚀'.repeat(100)}`:`export const symbol${i} = 0;`).join('\r\n');
+ let start=1,seen=[];
+ do {
+  const result=managedOutlineResult('f1',text,start,'o'),out=JSON.parse(result.output);
+  assert.ok(Buffer.byteLength(JSON.stringify(result))<=2048);assert.ok(out.anchors.length<=24);
+  for(const a of out.anchors){assert.ok(a.line>=start);assert.ok(Buffer.byteLength(a.excerpt)<=160);seen.push(a.line);}
+  assert.equal(out.truncated,out.next_line!==null);
+  if(out.next_line!==null)assert.ok(out.next_line>start);
+  start=out.next_line;
+ }while(start!==null);
+ assert.deepEqual(seen,Array.from({length:70},(_,i)=>i+1));
+ const out=JSON.parse(managedOutlineResult('f1',Array.from({length:40},()=> 'const a=1;').join('\n'),1,'o').output);
+ assert.equal(out.anchors.length,24);assert.equal(out.next_line,25);
+ assert.deepEqual(JSON.parse(managedOutlineResult('f1','// none',1,'o').output).anchors,[]);
+});
+
+test('outline schema/runtime, manifest scope and reserved patch slot agree before effects',()=>{
+ const parameters=managedTools.find(t=>t.name==='search_task_file').parameters;
+ assert.deepEqual(parameters.required.sort(),Object.keys(parameters.properties).sort());
+ assert.deepEqual(parameters.properties.query.type,['string','null']);assert.equal(parameters.properties.start_line.minimum,1);
+ const state={limits:MANAGED_LIMITS,callIds:[],tools:0,reads:0,patches:0},manifest=[{id:'f1',writable:true}];
+ const validate=(args,s=state)=>managedCalls({status:'completed',output:[call('search_task_file',args)]},s,manifest);
+ for(const start_line of [0,1,Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER+1,null,1.5]){
+  const run=()=>validate({file_id:'f1',query:null,start_line});
+  if(Number.isSafeInteger(start_line)&&start_line>=1)assert.equal(run().length,1);else assert.throws(run,/managed_search_query/);
+ }
+ assert.throws(()=>validate({file_id:'f1',query:'x',start_line:1}),/managed_search_query/);
+ for(const file_id of ['f99','../outside','.work/task.json'])assert.throws(()=>validate({file_id,query:null,start_line:1}),/managed_file_id/);
+ assert.throws(()=>validate({file_id:'f1',query:null,start_line:1},{...state,tools:9}),/managed_patch_slot_reserved/);
+ assert.equal(managedCalls({status:'completed',output:[patch()]},{...state,tools:9},manifest).length,1);
+ const bad=call('read_task_file',{file_id:'f1',start_line:1,line_count:220});
+ assert.throws(()=>managedCalls({status:'completed',output:[bad,patch()]},{...state,tools:8},manifest,{rangeErrors:true}),/managed_patch_slot_reserved/);
+});
+
+for(const change of ['symlink','identity','bytes'])test(`outline shares the ${change} source fence`,async t=>{
+ const f=await fixture(t,{outputs:[[call('search_task_file',{file_id:'f1',query:null,start_line:1})]],hook:async({req,workspace})=>{
+  if(req.url!=='/v1/responses')return;
+  const p=path.join(workspace.path,'src/id.mjs');
+  if(change==='bytes')await fs.writeFile(p,'changed');else{const q=p+'.replacement';await fs.writeFile(q,await fs.readFile(p));if(change==='identity')await fs.rename(q,p);else{await fs.unlink(p);await fs.symlink(q,p);}}
+ }}),task=await f.run();assert.equal(task.status,'needs_you');assert.equal(task.engineering.managed.inferences,1);assert.equal(task.engineering.managed.patches,0);assert.equal(task.engineering.managed.resultBytes,0);assert.equal(f.requests.length,3);
+});
+
+test('outline bytes use existing ledger and result ceiling; background never retrieves a key',async t=>{
+ const outputs=[[call('search_task_file',{file_id:'f1',query:null,start_line:1})],[patch()]];
+ for(const background of [false,true]){
+  const f=await fixture(t,{outputs,limits:{...MANAGED_LIMITS,toolResultBytes:1}});let keys=0;
+  const task=await f.run({foregroundCanary:!background,credential:async()=>{keys++;return key;}});
+  assert.equal(task.status,'needs_you');assert.equal(task.engineering.managed.patches,0);
+  assert.equal(keys,background?0:1);assert.equal(f.requests.length,background?0:3);
+  if(!background){assert.equal(task.blockedOn.code,'managed_payload_limit');assert.equal(task.engineering.managed.searches,1);}
+ }
+});
+
+test('both exact request bodies are charged, including at the pre-count boundary',async t=>{
+ const probe=await fixture(t,{outputs:[[patch()]]}),ready=await probe.run();assert.equal(ready.status,'ready');
+ const bodies=probe.requests.filter(r=>r.url!=='/v1/models/'+registry[0].id).map(r=>Buffer.byteLength(JSON.stringify(r.body)));
+ assert.equal(bodies.length,2);assert.equal(ready.engineering.managed.inputBytes,bodies[0]+bodies[1]);assert.ok(bodies[1]>bodies[0]);
+ for(const kind of ['requestInputBytes','serializedInputBytes'])for(const delta of [-1,0]){
+  const maximum=kind==='requestInputBytes'?Math.max(...bodies):bodies[0]+bodies[1];
+  const f=await fixture(t,{outputs:[[patch()]],limits:{...MANAGED_LIMITS,[kind]:maximum+delta}}),task=await f.run();
+  assert.equal(task.status,delta<0?'needs_you':'ready',task.blockedOn?.text);assert.equal(f.requests.length,delta<0?1:3);
+  assert.equal(task.engineering.managed.inputBytes,delta<0?0:bodies[0]+bodies[1]);
+ }
 });
