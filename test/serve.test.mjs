@@ -236,6 +236,8 @@ test("SIGTERM shuts the runtime down cleanly without terminating the detached wo
     const settled = await readTaskOnDisk(base, task.id);
     assert.equal(settled.status, "ready");
     assert.equal(settled.runs[0].outcome, "ready");
+    // READY precedes the detached worker's final writes; wait before rm.
+    await waitFor(() => isPidAlive(task.pid).then(alive => !alive), "the detached worker to exit");
   } finally {
     await stopAndReap(runtime);
     await fs.rm(base, { recursive: true, force: true });
