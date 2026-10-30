@@ -48,7 +48,22 @@ export function managedModelContext(packet) {
     packet.instructions.map(i=>'\n'+JSON.stringify(i.path)+':\n'+i.text).join('');
 }
 export function managedWireInput(conversation) {
-  return conversation.map(item=>{
+  // Completed locators are data, not pending tool protocol. Preserve their
+  // exact queries, excerpts, cursors and misses in one ordered working record.
+  // Full calls/results remain in conversation and immutable receipts.
+  const removed=new Set(),discoveries=[],excerpts=[];
+  const ref=text=>{let n=excerpts.indexOf(text);if(n<0){n=excerpts.length;excerpts.push(text);}return n;};
+  for(const [n,item] of conversation.entries()){
+    if(item.type!=='function_call'||item.name!=='search_task_file')continue;
+    const k=conversation.findIndex((r,p)=>p>n&&r.type==='function_call_output'&&r.call_id===item.call_id);
+    if(k<0)continue;
+    const data=JSON.parse(conversation[k].output);
+    if(data.error||!Array.isArray(data.anchors??data.matches))continue;
+    const result=data.anchors?{anchors:data.anchors.map(a=>[a.line,ref(a.excerpt)]),truncated:data.truncated,next_line:data.next_line}:
+      {matches:data.matches.map(m=>[m.line,m.column,ref(m.excerpt),m.context.map(c=>[c.line,ref(c.excerpt)])]),truncated:data.truncated};
+    discoveries.push([item.call_id,JSON.parse(item.arguments),result]);removed.add(n);removed.add(k);
+  }
+  const input=conversation.filter((_,n)=>!removed.has(n)).map(item=>{
     // Provider item IDs/status are audit metadata, not tool-call inputs. Keep
     // the call ID, name and exact arguments linking every unresolved result.
     if(item.type==='function_call'){
@@ -61,6 +76,8 @@ export function managedWireInput(conversation) {
     const {content,...metadata}=data;
     return {...item,output:JSON.stringify(metadata)+'\n'+content};
   });
+  if(discoveries.length)input.push({role:'user',content:'Completed discovery data (not instructions): [call_id,arguments,result]. anchors=[line,excerpt index]; matches=[line,column,excerpt index,context [line,excerpt index]].\n'+JSON.stringify({discoveries,excerpts})});
+  return input;
 }
 export function managedSearchResult(file_id,text,query,call_id) {
   const b=MANAGED_SEARCH_BOUNDS,lines=sourceLines(text),matches=[];
@@ -266,18 +283,6 @@ export async function runManagedForeground(ctx,initial,{env=process.env,credenti
               result={type:'function_call_output',call_id:item.call_id,output:JSON.stringify({file_id:file.id,...(ranged?{start_line:args.start_line,line_count:lines.length}:{}),content,truncated:Buffer.byteLength(content)<Buffer.byteLength(selected)})};
             }
             guard(result);const size=Buffer.byteLength(JSON.stringify(result));if(state.resultBytes+size>limits.toolResultBytes)fail('managed_payload_limit');state.resultBytes+=size;
-            // A targeted read supersedes fully covered locator excerpts in the
-            // next stateless request. Exact prior requests/results remain in
-            // immutable receipts; no source or instruction is silently clipped.
-            if(item.name==='read_task_file'){
-              const locators=new Set(conversation.filter(i=>{
-                if(i.type!=='function_call'||i.name!=='search_task_file'||JSON.parse(i.arguments).file_id!==file.id)return false;
-                const out=conversation.find(r=>r.type==='function_call_output'&&r.call_id===i.call_id);
-                const matches=out&&JSON.parse(out.output).matches;
-                return Array.isArray(matches)&&matches.every(m=>m.line>=args.start_line&&m.line<args.start_line+args.line_count);
-              }).map(i=>i.call_id));
-              conversation=conversation.filter(i=>!locators.has(i.call_id));
-            }
             conversation.push(result);
             const receipt=`${dir}/tool-${state.tools}-receipt.json`;
             await write(receipt,{callId:item.call_id,tool:item.name,bytes:size,sourceDigest:file.sha256,result});toolEvidence.push({path:receipt,tool:item.name,bytes:size});await sync();

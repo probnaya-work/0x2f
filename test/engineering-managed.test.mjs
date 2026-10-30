@@ -21,6 +21,7 @@ import {snapshot} from '../src/tui/model.mjs';
 import {recoverInterruptedRuns} from '../src/recover.mjs';
 const key='sk-fake-managed-qualification-key';
 const wireResult=item=>{const n=item.output.indexOf('\n');return n<0?JSON.parse(item.output):{...JSON.parse(item.output.slice(0,n)),content:item.output.slice(n+1)};};
+const discoveries=body=>{const {discoveries,excerpts}=JSON.parse(body.input.find(i=>i.content?.startsWith('Completed discovery data')).content.split('\n')[1]);return discoveries.map(([id,args,r])=>[id,args,r.anchors?{...r,anchors:r.anchors.map(([line,n])=>[line,excerpts[n]])}:{...r,matches:r.matches.map(([line,column,n,context])=>[line,column,excerpts[n],context.map(([line,n])=>[line,excerpts[n]])])}]);};
 const registry=MANAGED_MODELS;
 const call=(name,args,id=name)=>({type:'function_call',call_id:id,name,arguments:JSON.stringify(args)});
 const patch=()=>call('submit_patch',{edits:[{file_id:'f1',old_text:'() => null',new_text:'s => /^0*[1-9][0-9]*$/.test(s) ? Number(s) : null'}]});
@@ -39,6 +40,17 @@ test('wire context preserves every instruction, constraint and source byte witho
  assert.deepEqual(original,[sourceCall,result,denial]);assert.deepEqual(wireResult(wire[1]),JSON.parse(result.output));
  assert.equal(wireResult(wire[1]).content,content);assert.deepEqual(wire[0],call('read_task_file',{file_id:'f1',start_line:2,line_count:4},'x'));assert.deepEqual(wire[2],denial);
  assert.ok(Buffer.byteLength(JSON.stringify(wire))<Buffer.byteLength(JSON.stringify(original)));
+});
+test('working discovery projection is reversible; pending, denied, assistant, instructions and exact reads stay intact',()=>{
+ const result=managedSearchResult('f1','before\nquoted "🚀" needle\nafter','needle','s'),outline=managedOutlineResult('f1',Array.from({length:30},(_,n)=>'const x'+n+'="🚀";').join('\n'),1,'o');
+ const pairs=[search('needle','s'),result,call('search_task_file',{file_id:'f1',query:null,start_line:1},'o'),outline,search('absent','miss'),managedSearchResult('f1','text','absent','miss')];
+ const protectedItems=[{role:'user',content:'Intent\nConstraints\nAGENTS: authoritative'}, {role:'assistant',content:'Interpretation of previous result'},search('pending','pending'),call('read_task_file',{file_id:'f1',start_line:1,line_count:2},'r'),{type:'function_call_output',call_id:'r',output:JSON.stringify({file_id:'f1',content:'exact "🚀"\nsource',truncated:false})},search('denied','d'),{type:'function_call_output',call_id:'d',output:'{"error":"managed_batch_rejected"}'}];
+ const history=[...protectedItems,...pairs],copy=structuredClone(history),wire=managedWireInput(history),records=discoveries({input:wire});
+ assert.deepEqual(history,copy);assert.deepEqual(wire.slice(0,-1),managedWireInput(protectedItems));assert.equal(records.length,3);
+ for(const [id,args,data] of records){const raw=JSON.parse(pairs.find(i=>i.type==='function_call_output'&&i.call_id===id).output);assert.deepEqual(args,JSON.parse(pairs.find(i=>i.type==='function_call'&&i.call_id===id).arguments));
+  const restored=data.anchors?{file_id:args.file_id,anchors:data.anchors.map(([line,excerpt])=>({line,excerpt})),truncated:data.truncated,next_line:data.next_line}:{file_id:args.file_id,matches:data.matches.map(([line,column,excerpt,context])=>({line,column,excerpt,context:context.map(([line,excerpt])=>({line,excerpt}))})),truncated:data.truncated};assert.deepEqual(restored,raw);
+ }
+ assert.deepEqual(records.find(r=>r[0]==='miss')[2].matches,[]);assert.ok(Buffer.byteLength(JSON.stringify(wire))<Buffer.byteLength(JSON.stringify(history)));
 });
 async function fixture(t,{outputs=[[read()],[patch()]],count=100,hook,config={},transportFailure,limits=MANAGED_LIMITS,setup}={}){
  const f=await playbookFixture(t,{setup,config:{limits:{moneyMicros:30720,tokens:20480,modelCalls:6,providerCalls:13,wallClockMs:30000,implementationAttempts:1,agentRuns:1},...config}});
@@ -130,7 +142,7 @@ test('scheduled/unattended managed search cannot retrieve a credential or dispat
 test('Task 001-shaped large source: search → targeted read → patch → verifier → READY, one bounded attempt',async t=>{
  const targetLine=301,outputs=[[search()],[call('read_task_file',{file_id:'f1',start_line:targetLine,line_count:1},'targeted'),patch()]];
  const f=await fixture(t,{count:1031,outputs,hook:({req,body,inf})=>{
-  if(req.url==='/v1/responses'&&inf===2){const result=body.input.find(i=>i.type==='function_call_output');assert.equal(wireResult(result).matches[0].line,targetLine);}
+  if(req.url==='/v1/responses'&&inf===2){assert.equal(discoveries(body)[0][2].matches[0][0],targetLine);}
  }});
  const large='// filler '+ 'x'.repeat(90)+'\n',prefix=large.repeat(300),source=prefix+'export const parseTaskId = () => null;\n';
  await fs.writeFile(path.join(f.workspace.path,'src/id.mjs'),source+'//'+'.'.repeat(31003-Buffer.byteLength(source)-3)+'\n');
@@ -430,81 +442,49 @@ test('read range schema and runtime agree at every advertised boundary',()=>{
  }
 });
 
-test('two-file discovery with misses → outlines → literal locators → targeted reads → patch → READY',async t=>{
+test('Task 006-shaped retained discovery → targeted read → two-file patch → verifier → READY',async t=>{
  const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
- const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);';
- const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);';
- const testOriginal="assert.match(output, /^Created #001: Fixture/m); // foreground";
- const testReplacement=testOriginal+"\nassert.ok(output.includes('Next #001: 2f-next open 1'));";
- const source=('// filler '+'.'.repeat(60)+'\n').repeat(395)+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n';
- const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
- const pad=(text,size)=>text+'//'+'.'.repeat(size-Buffer.byteLength(text)-3)+'\n';
- const outputs=[[search('absent-a','miss-a'),search('absent-b','miss-b','f2'),search('absent-c','miss-c')],[call('search_task_file',{file_id:'f1',query:null,start_line:1},'outline-source'),call('search_task_file',{file_id:'f2',query:null,start_line:1},'outline-test')],[search('Created #','source-search')],[search('foreground','test-search','f2')],[call('read_task_file',{file_id:'f1',start_line:396,line_count:3},'source-read'),call('read_task_file',{file_id:'f2',start_line:17,line_count:4},'test-read')],[call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]})]];
- const f=await fixture(t,{count:1031,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},outputs,setup:async({base})=>{
-  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
- },hook:({req,body,inf})=>{
-  if(req.url!=='/v1/responses')return;
-  if(inf===3)assert.equal(body.input.filter(i=>i.type==='function_call_output'&&wireResult(i).anchors).length,2);
-  if(inf===6){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.equal(results.filter(r=>r.content!==undefined).length,2);assert.ok(results.every(r=>!r.matches),'targeted bytes supersede locator context only; exact searches remain durable');}
- }});
- await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
- const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
- const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.searches,m.reads,m.patches,m.tools],[6,6,1,7,2,1,10]);
- assert.ok(m.actualUsage.total<=20480);assert.equal(m.predicted.inferenceUpperUsd,0.030720);assert.equal(m.predicted.totalUpperUsd,null);
- assert.ok(m.resultBytes<8192);assert.ok(m.inputBytes<=MANAGED_LIMITS.serializedInputBytes);assert.equal(m.limits.toolResultBytes,24576);assert.equal(m.limits.readResultBytes,4096);
- const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
- assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);assert.deepEqual(attempt.packet.files.map(f=>f.bytes),[31003,3046]);
- assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
- const diff=await f.runtime.actions.getTaskDiff(task.id);assert.deepEqual(diff.map(d=>d.path).sort(),[sourcePath,testPath]);
- assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
- assert.ok(workflowLines(task).some(l=>l.includes('6 inference + 6 count')));assert.ok(workflowLines(task).some(l=>l.includes('7 maximum, no separate published fee')));
- assert.ok(workflowLines(task).some(l=>l.includes('13 HTTP')));
- const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);assert.equal(task.engineering.managed.attempt,(await f.runtime.store.findTask(task.id)).engineering.managed.attempt);
- if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});const receipts=[];for(let i=1;i<=10;i++)receipts.push(await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`)));await fs.writeFile(path.join(dir,'envelope-b-flow.json'),JSON.stringify(managedGuard(key)({kind:'offline fake Responses only; no provider or Keychain calls',task,attempt,receipts,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,bytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification}),null,2)+'\n');}
-});
-
-test('Task 003-shaped discovery: targeted test read + code locator → targeted source read → patch → READY',async t=>{
- const sourcePath='src/cli.mjs',testPath='test/engineering-foreground-cli.test.mjs';
- const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);';
- const replacement=original+'\nconsole.log(`Next #${String(task.id).padStart(3, "0")}: 2f-next open ${task.id}`);';
- const testOriginal='assert.match(output, /^Created #001: Fixture/m);';
- const testReplacement=testOriginal+"\nassert.ok(output.includes('Next #001: 2f-next open 1'));";
- const source=('// filler '+'.'.repeat(60)+'\n').repeat(394)+'if ((process.argv[2] ?? "new") === "new") {\n'+"const task = {id:1,title:'Fixture'};\n\n"+original+'\n}\n';
- const check='// fixture\n'.repeat(16)+"import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';\nconst output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname,'new'],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});\n"+testOriginal+'\n';
- const pad=(text,size)=>text+('// pad\n'.repeat(Math.floor((size-Buffer.byteLength(text)-3)/7)))+'//'+'.'.repeat((size-Buffer.byteLength(text)-3)%7)+'\n';
+ const original='console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);',replacement=original+'\nconsole.log(`Next: 2f-next open ${task.id}`);';
+ const assertion="assert.match(output, new RegExp('Created #' + String(id).padStart(3,'0')));",regression=assertion+"\nassert.ok(output.includes('Next: 2f-next open '+id));";
+ const source=Array.from({length:430},()=> '// '+'.'.repeat(55));
+ for(let n=0;n<24;n++)source[n]='const a'+n+'="open '+'.'.repeat(95)+'";';
+ source[40]='const runtime={actions:{createWork:async({id})=>({id,title:"Fixture"})}};';
+ source[395]='const task = await runtime.actions.createWork({id:Number(process.argv[2])});';source[396]='';source[397]=original;
+ const check=Array.from({length:38},()=> '// '+'.'.repeat(65));
+ check[0]="import assert from 'node:assert/strict';";check[1]="import {execFileSync} from 'node:child_process';";
+ for(let n=2;n<16;n++)check[n]='const c'+n+'="'+'.'.repeat(65)+'";';
+ check[16]='for(const id of [7,14]) {';
+ check[17]="const output=execFileSync(process.execPath,[new URL('../src/cli.mjs',import.meta.url).pathname,String(id)],{encoding:'utf8',env:{PATH:'/usr/bin:/bin'}});";
+ check[18]=assertion;check[19]='}';
+ const pad=(lines,size)=>{const text=lines.join('\n')+'\n';return text+'//'+'.'.repeat(size-Buffer.byteLength(text)-3)+'\n';};
  const outputs=[
-  [call('read_task_file',{file_id:'f2',start_line:17,line_count:4},'small-test'),search('"new"','code-locator')],
-  [call('read_task_file',{file_id:'f1',start_line:395,line_count:4},'source-read')],
-  [call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:testOriginal,new_text:testReplacement}]})]
+  ['f1','f2'].map((file_id,i)=>call('search_task_file',{file_id,query:null,start_line:1},'outline-'+i)),
+  [call('read_task_file',{file_id:'f1',start_line:100,line_count:32},'wrong-area'),call('read_task_file',{file_id:'f2',start_line:16,line_count:24},'test-read')],
+  [search('createWork({','locator'),search('open','broad'),search('task.id','id')],
+  [call('read_task_file',{file_id:'f1',start_line:396,line_count:4},'source-read')],
+  [call('submit_patch',{edits:[{file_id:'f1',old_text:original,new_text:replacement},{file_id:'f2',old_text:assertion,new_text:regression}]})]
  ];
  const f=await fixture(t,{count:1031,outputs,config:{files:[sourcePath,testPath],writePaths:[sourcePath,testPath],check:[process.execPath,'--test',testPath]},setup:async({base})=>{
-  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,3046));
+  await fs.writeFile(path.join(base,sourcePath),pad(source,31003));await fs.writeFile(path.join(base,testPath),pad(check,4000));
  },hook:({req,body,inf})=>{
   if(req.url!=='/v1/responses')return;
-  assert.match(body.instructions,/Use outline/);assert.match(body.instructions,/then read short windows/);
-  const remaining=['6 turns, 10 tools, 4 reads, 1 patch.','5 turns, 8 tools, 3 reads, 1 patch.','4 turns, 7 tools, 2 reads, 1 patch.'];
-  assert.ok(body.instructions.endsWith('Left: '+remaining[inf-1]));
-  if(inf===2){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes("'new'")));assert.equal(results.find(r=>r.matches).matches[0].line,395);}
-  if(inf===3){const results=body.input.filter(i=>i.type==='function_call_output').map(i=>wireResult(i));assert.ok(results.some(r=>r.content?.includes(original)));}
+  if(inf>=4){const records=discoveries(body);assert.equal(records.length,5);assert.equal(records.find(r=>r[0]==='locator')[2].matches[0][0],396);assert.ok(body.input.some(i=>i.type==='function_call_output'&&wireResult(i).content?.includes(assertion)));}
+  if(inf===5)assert.ok(body.input.some(i=>i.type==='function_call_output'&&wireResult(i).content?.includes(original)));
  }});
  await fs.writeFile(path.join(f.workspace.path,'AGENTS.md'),'# Fixture constraints\n'+'.'.repeat(2100));
- const before=await f.runtime.store.findTask(f.task.id);await f.runtime.store.updateTask({...before,brief:'After creating a Task, print one concise next-action line containing the created Task ID and the exact command to open it. Reuse the existing CLI projection and style. Do not add flags, concepts, routing behavior, or another interface. Preserve existing output compatibility and add deterministic CLI regression tests.'});
- const task=await f.run(),m=task.engineering.managed;
- assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
- assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.tools,m.searches,m.reads,m.patches],[3,3,1,4,1,2,1]);
- assert.ok(m.actualUsage.total<=20480);assert.equal(m.predicted.inferenceUpperUsd,0.030720);assert.equal(m.providerReportedCost,'unknown');
- assert.ok(m.inputBytes<=MANAGED_LIMITS.serializedInputBytes);assert.ok(m.resultBytes<8192);assert.deepEqual(m.limits,MANAGED_LIMITS);
+ await f.runtime.store.updateTask({...await f.runtime.store.findTask(f.task.id),brief:'After creating a Task, print its actual ID and the exact command to open it, with a meaningful regression test.'});
+ const task=await f.run(),m=task.engineering.managed;assert.equal(task.status,'ready',JSON.stringify({blocked:task.blockedOn,inputBytes:m.inputBytes}));
+ assert.deepEqual([m.inferences,m.counts,m.modelQueries,m.searches,m.reads,m.patches,m.tools],[5,5,1,5,3,1,9]);
+ assert.deepEqual(m.limits,MANAGED_LIMITS);assert.ok(m.actualUsage.total<=20480);assert.equal(m.predicted.inferenceUpperUsd,.030720);assert.equal(m.providerReportedCost,'unknown');
+ const requests=f.requests.filter(r=>r.url.includes('/responses')),sizes=requests.map(r=>Buffer.byteLength(JSON.stringify(r.body)));
+ assert.ok(sizes.every(n=>n<=16384));assert.equal(m.inputBytes,sizes.reduce((a,b)=>a+b,0));assert.ok(m.inputBytes<=196608);assert.ok(m.resultBytes<=24576);
+ const root=f.runtime.store.taskDir(task.slug),receipts=[];for(let i=1;i<=9;i++)receipts.push(await f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`)));
+ assert.equal(receipts.slice(0,-1).reduce((n,r)=>n+r.bytes,0),m.resultBytes);assert.equal(JSON.parse(receipts[0].result.output).anchors[0].line,1);
  assert.equal(task.engineering.economics.attempts.length,1);assert.equal(task.engineering.verification.code,0);assert.equal(task.engineering.delivery,undefined);assert.equal(f.calls.length,0);
  assert.deepEqual((await f.runtime.actions.getTaskDiff(task.id)).map(d=>d.path).sort(),[sourcePath,testPath]);
- const root=f.runtime.store.taskDir(task.slug),attempt=await f.runtime.store.readJson(path.join(root,'runs/1/managed/attempt.json'));
- assert.deepEqual(attempt.packet.files.map(f=>f.bytes),[31003,3046]);assert.ok(Buffer.byteLength(JSON.stringify(attempt.packet))<8192);
- const receipts=await Promise.all([1,2,3,4].map(i=>f.runtime.store.readJson(path.join(root,`runs/1/managed/tool-${i}-receipt.json`))));
- assert.deepEqual(receipts.map(r=>r.tool),['read_task_file','search_task_file','read_task_file','submit_patch']);
- assert.equal(receipts.slice(0,3).reduce((n,r)=>n+r.bytes,0),m.resultBytes);
  assert.deepEqual(projectRow(task,await f.runtime.store.readEvents(task.slug)).workflowLines,workflowLines(task));assert.deepEqual((await snapshot(f.runtime)).tasks[0].workflowLines,workflowLines(task));
- const requests=f.requests.length;await f.run();assert.equal(f.requests.length,requests);assert.equal(requests,7);
- if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});await fs.writeFile(path.join(dir,'task003-search-economy.json'),JSON.stringify(managedGuard(key)({kind:'offline scripted Responses; exercises instructions and budgets, not real model compliance',task,attempt,receipts,projection:workflowLines(task),requests:f.requests.map(r=>({url:r.url,instructions:r.body.instructions,bytes:Buffer.byteLength(JSON.stringify(r.body))})),verification:task.engineering.verification}),null,2)+'\n');}
+ const before=f.requests.length;await f.run();assert.equal(f.requests.length,before);
+ if(process.env.OX2F_MANAGED_EVIDENCE_DIR){const dir=process.env.OX2F_MANAGED_EVIDENCE_DIR;assert.match(dir,/^\/private\/tmp\/0x2f-managed-[a-z0-9-]+$/);await fs.mkdir(dir,{recursive:true});const journal={};for(const name of await fs.readdir(path.join(root,'runs/1/managed')))if(name.endsWith('.json'))journal[name]=await f.runtime.store.readJson(path.join(root,'runs/1/managed',name));await fs.writeFile(path.join(dir,'retention-flow.json'),JSON.stringify(managedGuard(key)({kind:'scripted offline; not model reliability',task,receipts,journal,sizes,verification:task.engineering.verification}),null,2)+'\n');}
 });
 
 test('Task 003 exact guessed-search batches still stop before an oversized second batch',async t=>{
@@ -619,7 +599,7 @@ test('range denials use the result ceiling and never mask an unknown tool',async
 
 test('a targeted read retains search locations it has not covered',async t=>{
  const f=await fixture(t,{outputs:[[search('export','locator')],[call('read_task_file',{file_id:'f1',start_line:2,line_count:1},'targeted')],[patch()]],hook:({req,body,inf})=>{
-  if(req.url==='/v1/responses'&&inf===3)assert.ok(body.input.some(i=>i.type==='function_call_output'&&wireResult(i).matches));
+  if(req.url==='/v1/responses'&&inf===3)assert.ok(discoveries(body).some(r=>r[2].matches));
  }}),task=await f.run();assert.equal(task.status,'ready',task.blockedOn?.text);
 });
 
@@ -698,6 +678,12 @@ test('outline bytes use existing ledger and result ceiling; background never ret
   assert.equal(keys,background?0:1);assert.equal(f.requests.length,background?0:3);
   if(!background){assert.equal(task.blockedOn.code,'managed_payload_limit');assert.equal(task.engineering.managed.searches,1);}
  }
+});
+
+test('retained necessary source can still overflow: stop before the next count, no clipping',async t=>{
+ const f=await fixture(t,{outputs:[[read('r1'),read('r2')],[read('r3'),read('r4')],[patch()]],setup:({base})=>fs.writeFile(path.join(base,'src/id.mjs'),'// '+ 'x'.repeat(50000))}),task=await f.run(),m=task.engineering.managed;
+ assert.equal(task.blockedOn.code,'managed_input_limit');assert.deepEqual([m.inferences,m.counts,m.tools,m.reads,m.patches],[2,2,4,4,0]);assert.equal(f.requests.length,5);assert.ok(m.resultBytes>16384&&m.resultBytes<24576);
+ const root=f.runtime.store.taskDir(task.slug);assert.equal(await f.runtime.store.exists(path.join(root,'runs/1/managed/request-6-intent.json')),false);assert.equal(task.engineering.verification,null);assert.equal(task.engineering.economics.attempts.length,1);assert.equal(f.calls.length,0);
 });
 
 test('both exact request bodies are charged, including at the pre-count boundary',async t=>{
