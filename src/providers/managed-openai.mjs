@@ -4,7 +4,7 @@ export const MANAGED_LIMITS=Object.freeze({attempts:1,packetBytes:8192,files:4,s
 export const MANAGED_FOREGROUND_INFERENCE_MAX_USD=0.030720;
 export const MANAGED_POLICY='managed-foreground-b-v1';
 export const MANAGED_SEARCH_BOUNDS=Object.freeze({queryBytes:128,matches:6,lineBytes:160,contextLines:1,resultBytes:4096,readLines:32,outlineAnchors:24,outlineBytes:2048});
-export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-28T08:22:05Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',controlRequestPolicy:'unpriced_control_request'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
+export const MANAGED_MODELS=Object.freeze([Object.freeze({id:'gpt-5.4-mini-2026-03-17',capabilities:['responses','function-calling','small-code-patch'],reasoningEffort:'none',price:{currency:'USD',perMillion:{input:0.75,cachedInput:0.075,output:4.5},observedAt:'2026-10-30T11:09:49Z',source:'https://developers.openai.com/api/docs/models/gpt-5.4-mini',apiPricingSource:'https://developers.openai.com/api/docs/pricing',controlRequestPolicy:'unpriced_control_request'},capabilitySource:'https://developers.openai.com/api/docs/models/gpt-5.4-mini'})]);
 export class ManagedStop extends Error {constructor(code){super(code);this.code=code;}}
 export const fail=code=>{throw new ManagedStop(code);};
 export function managedGuard(key) {
