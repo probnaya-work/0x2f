@@ -407,7 +407,11 @@ export async function main({foregroundCandidate=false}={}) {
     const { rest, flags } = parseFlags(args);
     const id = Number(rest[0]);
     if (!Number.isFinite(id)) throw new Error("Usage: 2f open <id> [--run <n>]");
-    if (flags.run !== undefined) {
+    // A bare `--run` (option present, number absent) still creates the
+    // property in parseFlags — check membership, not the value, so openRun's
+    // Number.isFinite validation rejects it instead of falling back to the
+    // general Task view.
+    if ("run" in flags) {
       const runNumber = Number(flags.run);
       if (!Number.isFinite(runNumber)) throw new Error("Usage: 2f open <id> --run <n>");
       await openRun(id, runNumber, base);

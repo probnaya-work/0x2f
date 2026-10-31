@@ -169,6 +169,14 @@ test("CLI: the dogfooding loop — new, rerun through another provider, open, op
     const missingRun = await runCli(base, ["open", "1", "--run", "9"], env);
     assert.notEqual(missingRun.code, 0);
     assert.match(missingRun.err, /has no run 9/);
+
+    // `--run` with no number must be rejected, not silently reinterpreted as
+    // "open the general Task view" (broke the loop once: the flag was parsed
+    // but its missing value made it indistinguishable from no flag at all).
+    const bareRunFlag = await runCli(base, ["open", "1", "--run"], env);
+    assert.notEqual(bareRunFlag.code, 0);
+    assert.match(bareRunFlag.err, /Usage: 2f open/);
+    assert.doesNotMatch(bareRunFlag.out, /RUNS/, "general Task view must not be rendered");
   } finally {
     await fs.rm(base, { recursive: true, force: true });
   }
