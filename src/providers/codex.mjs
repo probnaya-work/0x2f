@@ -133,6 +133,8 @@ export const codexProvider = {
 
   async start({ cwd, prompt, model, onEvent = () => {} }) {
     const args = ["exec", "--json", "--skip-git-repo-check", ...codexSandboxArgs()];
+    // Explicit opt-in only: keep normal user settings and authentication by default.
+    if (process.env.CODEX_IGNORE_USER_CONFIG === "1") args.push("--ignore-user-config");
     if (model) args.push("-m", model);
     args.push(prompt);
     return runCodex({ cwd, args, onEvent });
@@ -144,6 +146,8 @@ export const codexProvider = {
     }
     const prompt = RESUME_PROMPTS[grant] ?? RESUME_PROMPTS.continue;
     const args = ["exec", "resume", externalSessionId, "--json", "--skip-git-repo-check", ...codexSandboxArgs()];
+    // Explicit opt-in only: keep normal user settings and authentication by default.
+    if (process.env.CODEX_IGNORE_USER_CONFIG === "1") args.push("--ignore-user-config");
     if (model) args.push("-m", model);
     args.push(prompt);
     return runCodex({ cwd, args, onEvent });

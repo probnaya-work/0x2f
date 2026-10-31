@@ -161,6 +161,7 @@ test("registry: native + configured providers coexist behind one contract", asyn
       "codex",
       "deepseek-harness",
       "gemini",
+      "opencode",
       "cursor",
       "my-agent"
     ]);
@@ -258,4 +259,27 @@ test("executableAvailable: PATH resolution and absolute paths, cheap and sync", 
   } finally {
     await fs.rm(binDir, { recursive: true, force: true });
   }
+});
+
+
+test("registry: built-in OpenCode uses ACP without a workspace manifest", async () => {
+  const base = await makeBase({});
+  try {
+    const provider = createProviderRegistry({ base }).getProvider("opencode");
+    assert.equal(provider.integrationType, "acp");
+    assert.deepEqual(provider.command, ["opencode", "acp"]);
+    assert.equal(provider.capabilities.supportsResume, true);
+  } finally { await fs.rm(base, { recursive: true, force: true }); }
+});
+
+test("registry: an existing OpenCode manifest keeps its explicit descriptor", async () => {
+  const base = await makeBase({ "opencode.json": {
+    id: "opencode", displayName: "Project OpenCode", transport: "acp",
+    command: ["project-opencode", "acp"], permissions: "deny"
+  } });
+  try {
+    const provider = createProviderRegistry({ base }).getProvider("opencode");
+    assert.equal(provider.displayName, "Project OpenCode");
+    assert.deepEqual(provider.command, ["project-opencode", "acp"]);
+  } finally { await fs.rm(base, { recursive: true, force: true }); }
 });

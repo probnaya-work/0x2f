@@ -211,6 +211,9 @@ Normalized outcome shapes (`src/core/lifecycle.mjs`):
   v1 over stdio — `initialize`, `session/new`, `session/load`,
   `session/prompt`, `session/request_permission` (interactive → live
   needs_you; `deny`/`approve` → headless auto-resolution), cancel.
+  OpenCode is registered as a built-in ACP descriptor (`opencode acp`), using
+  the existing protocol adapter. Older workspace manifests named `opencode`
+  continue to take precedence over that default.
 - **Command** (`command.mjs`): a headless argv invocation; exit 0 + stdout →
   ready (honoring the decision protocol), non-zero → failed. Nothing else is
   inferred.

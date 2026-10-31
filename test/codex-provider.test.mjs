@@ -380,3 +380,35 @@ test("start() fails cleanly when codex is not installed", async () => {
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+
+test("user config is preserved by default; account-default execution is explicit", async () => {
+  const previous = process.env.CODEX_IGNORE_USER_CONFIG;
+  const argsLog = path.join(os.tmpdir(), `codex-default-args-${process.pid}.json`);
+  const { bin, dir } = await fakeCodex({ stdout: await fixture("codex-events.jsonl"), argsLogPath: argsLog });
+  try {
+    await withCodexBin(bin, async () => {
+      for (const setting of [undefined, "0", "1"]) {
+        if (setting === undefined) delete process.env.CODEX_IGNORE_USER_CONFIG;
+        else process.env.CODEX_IGNORE_USER_CONFIG = setting;
+        for (const operation of ["start", "resume"]) {
+          const result = await codexProvider[operation]({ cwd: dir, prompt: "x", externalSessionId: "thread-abc" });
+          assert.equal(result.status, "ready");
+          const args = JSON.parse(await fs.readFile(argsLog, "utf8"));
+          assert.equal(args.includes("--ignore-user-config"), setting === "1");
+          assert.equal(args.includes("-m"), false, "no model is forced");
+          assert.equal(args.some(arg => arg.includes("forced_login_method")), false, "authentication is not overridden");
+        }
+      }
+      const result = await codexProvider.start({ cwd: dir, prompt: "x", model: "explicit-model" });
+      assert.equal(result.status, "ready");
+      const args = JSON.parse(await fs.readFile(argsLog, "utf8"));
+      assert.equal(args[args.indexOf("-m") + 1], "explicit-model");
+    });
+  } finally {
+    if (previous === undefined) delete process.env.CODEX_IGNORE_USER_CONFIG;
+    else process.env.CODEX_IGNORE_USER_CONFIG = previous;
+    await fs.rm(dir, { recursive: true, force: true });
+    await fs.rm(argsLog, { force: true });
+  }
+});
