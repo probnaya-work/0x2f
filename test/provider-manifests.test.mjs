@@ -272,7 +272,7 @@ test("registry: built-in OpenCode uses ACP without a workspace manifest", async 
   } finally { await fs.rm(base, { recursive: true, force: true }); }
 });
 
-test("registry: an existing OpenCode manifest keeps its command and permissions", async () => {
+test("registry: an existing OpenCode manifest keeps its explicit descriptor", async () => {
   const base = await makeBase({ "opencode.json": {
     id: "opencode", displayName: "Project OpenCode", transport: "acp",
     command: ["project-opencode", "acp"], permissions: "deny"

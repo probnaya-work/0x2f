@@ -45,6 +45,7 @@ src/
     codex.mjs         native adapter (exec --json + thread resume)
     deepseek-harness.mjs  native adapter
     gemini.mjs        native adapter (stream-json + UUID session resume)
+    opencode.mjs      built-in descriptor for the existing ACP adapter
     acp.mjs           generic ACP provider
     command.mjs       generic command provider
     manifests.mjs     provider manifest loading + validation
@@ -257,3 +258,7 @@ node server.mjs --port 8080 --data ./data/state.json
 
 See [`docs/remote-control.md`](remote-control.md) for the full walkthrough
 and [`relay/README.md`](../relay/README.md) for deployment.
+
+The [task continuity example](task-continuity.md) records the completed
+Codex → OpenCode dogfood. The [managed execution decision](decisions/managed-execution.md)
+explains which experimental work is deliberately excluded from the main line.

@@ -84,10 +84,16 @@ Inside the repository you want to work on:
 2f init                          # create .work/ with project.md and rules.md
 2f new "Investigate why retries restart the whole run"
 2f                               # list tasks
-2f open 1                        # run detail, history, result
+2f open 1                        # use the actual ID printed by new
 2f tui                           # open the terminal client (full screen)
 2f ui                            # open the Web UI (starts the local runtime)
 ```
+
+Creation immediately prints the persisted ID and its exact reopen command,
+for example `Created #014: …` followed by `Open: 2f open 14`. Reopen it from
+a separate CLI process; inspect a run with `2f open 14 --run 1`, or continue
+the same task with `2f rerun 14 --provider opencode` once its run has ended.
+See the [verified Codex → OpenCode example](docs/task-continuity.md).
 
 To run a task with the built-in Codex provider, install the
 [Codex CLI](https://github.com/openai/codex), sign in, and select it explicitly:
@@ -101,6 +107,28 @@ codex login
 Codex runs headlessly with workspace-write sandboxing by default and supports
 same-thread resume. Its structured-event and permission boundaries are
 documented in [`docs/codex-capability-map.md`](docs/codex-capability-map.md).
+
+Codex normally keeps your CLI configuration and authentication. If that
+configuration forces a model unavailable to your account, opt in to the
+installed CLI default for one invocation:
+
+```bash
+CODEX_IGNORE_USER_CONFIG=1 2f new "Investigate a CLI bug" --provider codex
+```
+
+This skips the entire Codex user config for that invocation; authentication
+still uses Codex’s existing storage. It does not edit settings, force a model,
+or retry a failed execution. The same opt-in applies to Codex reruns/resumes.
+
+OpenCode is also built in through `opencode acp`:
+
+```bash
+2f providers
+2f new "Inspect a CLI bug" --provider opencode
+```
+
+Configure an available model in OpenCode itself. Existing workspace OpenCode
+manifests retain their explicit command and permission settings.
 
 To run a task with the built-in Gemini CLI provider, install the
 [Gemini CLI](https://github.com/google-gemini/gemini-cli), authenticate once
@@ -351,7 +379,7 @@ to the install.
 | **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Any ACP-compatible agent — Cursor, OpenCode — configured by manifest |
 | **Command** | One generic provider for headless executables | Any CLI that takes a prompt and prints a result — configured by manifest |
 
-`claude-code`, `codex`, `deepseek-harness` and `gemini` are built in.
+`claude-code`, `codex`, `deepseek-harness`, `gemini`, and `opencode` are built in.
 Everything else is added **declaratively**: drop one JSON manifest into
 `.work/providers/` and it becomes a provider — no source changes:
 

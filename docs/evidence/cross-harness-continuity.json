@@ -1,0 +1,71 @@
+{
+  "observedAt": "2026-10-31T18:02:27.286862+00:00",
+  "project": "disposable 0x2F source copy",
+  "taskId": 1,
+  "taskSlug": "001-fix-the-real-cli-problem-where-2f-open-id-run-wi",
+  "originalProductCommit": "4eb5cc220ce914e35792aefb9b1a853bce4e2f56",
+  "models": {
+    "codex": "gpt-5.6-sol (observed account default; existing ChatGPT login)",
+    "opencode": "opencode/glm-5.3-flash-free (documented free zero-retention; no connected account; no API-key environment)"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-31T17:58:15.005Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "completedAt": "2026-10-31T17:58:40.290Z",
+      "durationMs": 25285,
+      "externalSessionId": "01a1931c-b7f0-7120-bb75-50c80e964059"
+    },
+    {
+      "run": 2,
+      "provider": "opencode",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-10-31T17:59:25.690Z",
+      "requestedProvider": "opencode",
+      "outcome": "ready",
+      "attempts": 1,
+      "completedAt": "2026-10-31T18:00:03.541Z",
+      "durationMs": 37851,
+      "externalSessionId": "ses_e6ce232d7ffeFiitYTZpXF3YEl"
+    }
+  ],
+  "run1ProcessExitedBeforeRun2": true,
+  "sourceUnchangedAfterRun1": true,
+  "handoff": {
+    "promptSha256": "844c92e2f8854e6a4a4c3d98861445450c1ff5ef78fd2ab4863a2719601ad475",
+    "priorResultSha256": "d6c3c576643edfff484efa5900c59d43c1d4b81816c3b1f9dff873d1b47a51de",
+    "priorResultInGeneratedPrompt": true,
+    "hasPreviousRuns": true
+  },
+  "manualPatchRepair": false,
+  "patchSha256": "0488ce3f93f9fc51491469329a75093ce8a5e5cd9c52ac2a571d8b604bc294f6",
+  "changedFileSha256": {
+    "src/cli.mjs": "40124077c08be345c08fe10bae479c5c1fa0d862ee39aed6bbf000327c4b2789",
+    "test/cli-rerun.test.mjs": "aaa5105dc4e73bd32e108544ff7ae12c730d028cfb7c33f1afec076d9864c59d"
+  },
+  "run1ArtifactSha256": {
+    "runs/1/result.md": "d6c3c576643edfff484efa5900c59d43c1d4b81816c3b1f9dff873d1b47a51de",
+    "runs/1/prompt.md": "96cb5ffd53bc67227e1bb85ad9fecc1d99531e66923f6f292a74dcce5b045f8f"
+  },
+  "verification": {
+    "focused": "10 passed; 0 failed; 0 skipped",
+    "npmRunCheck": "exit 0",
+    "gitDiffCheck": "exit 0",
+    "realCLI": {
+      "openTask": 0,
+      "openCodexRun": 0,
+      "openOpenCodeRun": 0,
+      "bareRunFlag": 1
+    },
+    "fullSuite": "not run; scoped verification requested"
+  },
+  "historicalCandidateFilesPreserved": 3567,
+  "claim": "One real CLI issue, one Task, independent Codex/OpenCode sessions, verified READY; not unattended qualification."
+}
