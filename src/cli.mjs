@@ -396,6 +396,7 @@ export async function main({foregroundCandidate=false}={}) {
     const task = await runtime.actions.createWork({ brief, provider, foreground });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
+    console.log(`Open: ${foregroundCandidate ? "2f-next" : "2f"} open ${task.id}`);
     if (foreground) for (const line of workflowLines(task)) console.log(line);
     else console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
     return;

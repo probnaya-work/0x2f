@@ -127,6 +127,32 @@ test("CLI: the dogfooding loop — new, rerun through another provider, open, op
     assert.equal(task.runs[1].provider, "deepseek-harness");
     assert.equal(task.runs[1].outcome, "ready");
 
+    const firstTaskBeforeSecondCreate = structuredClone(task);
+    const secondTitle = "Confirm the persisted task can be reopened";
+    const secondCreated = await runCli(base, ["new", secondTitle], env);
+    assert.equal(secondCreated.code, 0);
+
+    const secondTask = (await store.listTasks()).find(candidate => candidate.title === secondTitle);
+    assert.ok(secondTask, "second task must be persisted");
+    const creationOutput = secondCreated.out.match(
+      /^Created #(\d+): Confirm the persisted task can be reopened\nOpen: (2f open (\d+))$/m
+    );
+    assert.ok(creationOutput, "creation output must immediately include an exact reopen command");
+    assert.equal(Number(creationOutput[1]), secondTask.id);
+    assert.equal(Number(creationOutput[3]), secondTask.id);
+    assert.notEqual(secondTask.id, 1, "regression must exercise a non-first task ID");
+
+    await waitForStatus(base, secondTask.id, "ready");
+    const [, ...openArgs] = creationOutput[2].split(" ");
+    const secondOpened = await runCli(base, openArgs, env);
+    assert.equal(secondOpened.code, 0);
+    assert.match(secondOpened.out, new RegExp(`^#${String(secondTask.id).padStart(3, "0")} ${secondTitle}$`, "m"));
+    assert.match(secondOpened.out, /^Status: ready$/m);
+
+    const firstTaskAfterSecondOpen = await store.findTask(1);
+    assert.deepEqual(firstTaskAfterSecondOpen, firstTaskBeforeSecondCreate);
+    assert.equal(firstTaskAfterSecondOpen.runs.length, 2);
+
     const opened = await runCli(base, ["open", "1"], env);
     assert.equal(opened.code, 0);
     assert.match(opened.out, /RUNS/);
