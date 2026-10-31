@@ -318,6 +318,7 @@ async function main() {
     const task = await runtime.actions.createWork({ brief, provider });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
+    console.log(`Open: 2f open ${task.id}`);
     console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
     return;
   }
@@ -327,7 +328,7 @@ async function main() {
     const { rest, flags } = parseFlags(args);
     const id = Number(rest[0]);
     if (!Number.isFinite(id)) throw new Error("Usage: 2f open <id> [--run <n>]");
-    if (flags.run !== undefined) {
+    if ("run" in flags) {
       const runNumber = Number(flags.run);
       if (!Number.isFinite(runNumber)) throw new Error("Usage: 2f open <id> --run <n>");
       await openRun(id, runNumber, base);
