@@ -168,6 +168,33 @@ test("writing the confirmed pairing does not make the poller swap the config obj
   assert.equal(h.agent.status().phoneId, h.phoneId);
 });
 
+test("polling during a delayed pairing write never observes a partial config", async t => {
+  const h = await makeHarness(t, { configPollMs: 1 });
+  const writeFile = fs.writeFile;
+  let delayed = false;
+  // Widen writeFile's real truncate-before-write window. The live destination
+  // must remain complete even while a replacement file is still being written.
+  fs.writeFile = async (file, data, ...args) => {
+    const target = String(file);
+    if (!delayed && path.dirname(target) === path.dirname(h.configPath) &&
+        path.basename(target).includes("relay.json") && String(data).includes('"pairing": "confirmed"')) {
+      delayed = true;
+      await writeFile(file, "", ...args);
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return writeFile(file, data, ...args);
+  };
+  t.after(() => { fs.writeFile = writeFile; });
+
+  const { ack } = await h.sendPairHello();
+  assert.equal(delayed, true, "the pairing config write must exercise the delayed window");
+  assert.equal(ack?.ok, true, "polling must not disable the agent during its own write");
+  assert.equal(h.agent.status().pairing, "confirmed");
+  assert.equal(h.agent.status().phoneId, h.phoneId);
+  assert.equal(JSON.parse(await fs.readFile(h.configPath, "utf8")).pairing, "confirmed");
+  assert.equal((await fs.stat(h.configPath)).mode & 0o777, 0o600);
+});
+
 // --- the race itself --------------------------------------------------------
 
 test("the config vanishing during the pairing ceremony never throws", async t => {

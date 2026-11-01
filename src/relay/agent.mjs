@@ -47,6 +47,7 @@ import {
 } from "./protocol.mjs";
 import { validateRelayUrl } from "./pair.mjs";
 import { WorkError } from "../core/errors.mjs";
+import { writeJson } from "../core/store.mjs";
 import { deriveKeyRaw, importKey, encrypt, decrypt } from "../web/e2e.mjs";
 import { projectSnapshot, projectEvent, projectTask, projectRun, projectResult } from "./project.mjs";
 
@@ -161,12 +162,9 @@ export function createRelayAgent({
 
   async function writeConfig(next) {
     try {
-      await fs.mkdir(path.dirname(configPath), { recursive: true });
-      await fs.writeFile(configPath, JSON.stringify(next, null, 2) + "\n", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(configPath, 0o600);
+      // The poller must see the complete old or new config, never writeFile's
+      // truncate-before-write window, which would disable a valid pairing.
+      await writeJson(configPath, next);
     } catch (err) {
       error(`relay: could not write config: ${err.message}`);
     }
