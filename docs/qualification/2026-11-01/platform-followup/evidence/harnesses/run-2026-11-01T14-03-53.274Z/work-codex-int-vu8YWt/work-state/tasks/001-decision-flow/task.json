@@ -1,0 +1,57 @@
+{
+  "id": 1,
+  "slug": "001-decision-flow",
+  "title": "Decision flow",
+  "brief": "Decision flow",
+  "status": "ready",
+  "execution": {
+    "provider": "codex",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "01a1976c-a357-72b2-a254-1e750fb54dc9"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:01.243Z",
+      "requestedProvider": "codex",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "externalSessionId": "01a1976c-a1f8-78f2-9a24-a5493894d5bb",
+      "completedAt": "2026-11-01T14:04:01.435Z",
+      "durationMs": 192,
+      "blockedOn": {
+        "type": "decision",
+        "text": "Which backend should the retry use?"
+      }
+    },
+    {
+      "run": 2,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:01.618Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "01a1976c-a357-72b2-a254-1e750fb54dc9",
+      "completedAt": "2026-11-01T14:04:01.785Z",
+      "durationMs": 167
+    }
+  ],
+  "createdAt": "2026-11-01T14:04:01.245Z",
+  "updatedAt": "2026-11-01T14:04:01.785Z",
+  "context": {
+    "notes": [
+      {
+        "at": "2026-11-01T14:04:01.555Z",
+        "text": "use backend A"
+      }
+    ]
+  },
+  "pid": 95972,
+  "processGroupId": 95972
+}

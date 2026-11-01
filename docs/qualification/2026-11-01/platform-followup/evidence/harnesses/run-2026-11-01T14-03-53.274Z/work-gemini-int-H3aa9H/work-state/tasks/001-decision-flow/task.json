@@ -1,0 +1,57 @@
+{
+  "id": 1,
+  "slug": "001-decision-flow",
+  "title": "Decision flow",
+  "brief": "Decision flow",
+  "status": "ready",
+  "execution": {
+    "provider": "gemini",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "ccb2c1bf-54f0-4d02-9eb5-fa0a574db8a1"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:06.981Z",
+      "requestedProvider": "gemini",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "externalSessionId": "e8edc05d-a9b9-4e1e-b1c3-479f8a833947",
+      "completedAt": "2026-11-01T14:04:08.035Z",
+      "durationMs": 1054,
+      "blockedOn": {
+        "type": "decision",
+        "text": "Which backend should the retry use?"
+      }
+    },
+    {
+      "run": 2,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:08.251Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "ccb2c1bf-54f0-4d02-9eb5-fa0a574db8a1",
+      "completedAt": "2026-11-01T14:04:09.468Z",
+      "durationMs": 1217
+    }
+  ],
+  "createdAt": "2026-11-01T14:04:06.983Z",
+  "updatedAt": "2026-11-01T14:04:09.468Z",
+  "context": {
+    "notes": [
+      {
+        "at": "2026-11-01T14:04:08.174Z",
+        "text": "use backend A"
+      }
+    ]
+  },
+  "pid": 97284,
+  "processGroupId": 97284
+}

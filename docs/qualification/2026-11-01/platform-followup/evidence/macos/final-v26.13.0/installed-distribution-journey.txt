@@ -1,0 +1,12 @@
+Node v26.13.0; npm 11.20.0; darwin/arm64; Python 3.9.6
+Command: ["/private/tmp/0x2f-node-matrix-downloads/node-v26.13.0-darwin-arm64/bin/node","--test","test/distribution.test.mjs"]
+CWD: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v26.13.0-acDs5n/checkout
+✔ the packed artifact supports the full first-install journey (1403.374875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1436.920459

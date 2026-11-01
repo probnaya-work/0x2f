@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "slug": "001-run-through-gemini",
+  "title": "Run through gemini",
+  "brief": "Run through gemini",
+  "status": "ready",
+  "pid": 96497,
+  "execution": {
+    "provider": "gemini",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "4d961698-b2b4-4dbd-9884-7a84b8840e00"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:03.294Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "4d961698-b2b4-4dbd-9884-7a84b8840e00",
+      "completedAt": "2026-11-01T14:04:04.359Z",
+      "durationMs": 1065
+    }
+  ],
+  "createdAt": "2026-11-01T14:04:03.298Z",
+  "updatedAt": "2026-11-01T14:04:04.359Z",
+  "processGroupId": 96497
+}

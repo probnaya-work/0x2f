@@ -1,0 +1,71 @@
+{
+  "reason": "Preserve8882951 intermediate runs and reserve final-v* for committed2941c02; raw file bytes and source metadata unchanged.",
+  "relocations": [
+    {
+      "from": "final-v20.0.0",
+      "to": "intermediate-8882951-v20.0.0",
+      "content_sha256_unchanged": {
+        "summary.json": "5f6f9331595469f046516c8bdfb344336e77a458b3d7285428570f51d644abd9",
+        "npm-check.txt": "006e47baac3823a2ba760d79cbda06a5c8ff7ba30f65c3904a8b40c29ec076bd",
+        "installed-distribution-journey.txt": "d3ffc5ba9c974932a37283c2473ad06a6087f300921a9b147782cee6c798bbd7",
+        "actual-npm-test.txt": "fcb9550562438aace5948c6a3b3aa603e2b9ad77162e81f3d037e496a61dbea2",
+        "clean-npm-ci.txt": "130eeb380d0094b34e95b86b1570918885d875284791920e0bc2c5dcaa085340"
+      }
+    },
+    {
+      "from": "final-2941c02-v20.0.0",
+      "to": "final-v20.0.0",
+      "content_sha256_unchanged": {
+        "summary.json": "35875143744763c9a7235ae3a4a86d7c61d00eb29ed331d01c1d96ac9ee6323d",
+        "npm-check.txt": "64c5c63f927c29663aea7a406adb0a07ad0a72872f1fb708c18330ed2fd7db63",
+        "installed-distribution-journey.txt": "992fb771213469732c194976d832ed2991697e7543cb27767027d64ca4a7866d",
+        "actual-npm-test.txt": "79862a3ea3a6df36dab27abd97fe3283a71fd21e4009654ce5790a7b7d84c8b8",
+        "clean-npm-ci.txt": "63a1c662a0629029db479cbdb5709f82789bf87dff609331c34704548d1ba577"
+      }
+    },
+    {
+      "from": "final-v20.20.2",
+      "to": "intermediate-8882951-v20.20.2",
+      "content_sha256_unchanged": {
+        "summary.json": "5e0cb88cdd6e876d6d4c0618126857ea586f4350aab4e36343febfe895897a76",
+        "npm-check.txt": "f9f0c9a6b62d2cbf68c8cf02cf6e28c1ccaf5fa2b0f83c976afce5b934448e8d",
+        "installed-distribution-journey.txt": "62c4f6bc65315b96f2bef885ce75849fee7d4dd1cb6c19fb1cca5ebce83358d9",
+        "actual-npm-test.txt": "59786ce46e9bea6dd437d8c35a71ac0568ac823d565d778b73c95ceff6aca38d",
+        "clean-npm-ci.txt": "e8c8507081b535d6ea1af18660b0b1553a6475bae03206fc938dde1c3d452752"
+      }
+    },
+    {
+      "from": "final-2941c02-v20.20.2",
+      "to": "final-v20.20.2",
+      "content_sha256_unchanged": {
+        "summary.json": "b28c9b5a59d56260a1348776c26279175b016fe311ce87e650529426037004d9",
+        "npm-check.txt": "549a9249047bd7d32de330de389294ce20781385adaaa21d0031852c12632e26",
+        "installed-distribution-journey.txt": "aa35e27fbe0a5e5d8f421a638ca7349c2eafaec11245c0d2b79169f62f983490",
+        "actual-npm-test.txt": "ad6dbda6a161ff493f0427b0b05dbfcdb6fc4c0a4d60a575c0099634fa6b306f",
+        "clean-npm-ci.txt": "c2fdced763a2a6ad0f1ce7f636c30694cb5ccbf278305d44abe47d76b730d26b"
+      }
+    },
+    {
+      "from": "final-v26.13.0",
+      "to": "intermediate-8882951-v26.13.0",
+      "content_sha256_unchanged": {
+        "summary.json": "645315bdd1bb8ba4b55a996a61e375c8146d5d6096fae331ee2b8d9d929f9360",
+        "npm-check.txt": "a6d3b552b348a9f15ec2d7c0406dc1a32feb435fb9ab33b616c785858d169301",
+        "installed-distribution-journey.txt": "478f5971415f23186992b9f83797b60620f71b98789c2a58b73f93a2cc3c90eb",
+        "actual-npm-test.txt": "b5e54934281ca73e6dae254b7213eb9c00417a4ac19ed6725a49fea0b8f7b2db",
+        "clean-npm-ci.txt": "c31d1db40d92b879b778f4c1a77f8135cde36ee39224fa57f21c45598c7b6f08"
+      }
+    },
+    {
+      "from": "final-2941c02-v26.13.0",
+      "to": "final-v26.13.0",
+      "content_sha256_unchanged": {
+        "summary.json": "a6d14d439f86db382bedeea2e818ee50525167cf959300f93c9dbc75ac255787",
+        "npm-check.txt": "38f6f96628b8bb26f5335b2008dc7b1e20de6d7421385416b08bf178655a5723",
+        "installed-distribution-journey.txt": "7259dce6f5f51392e54a5991a31a9eef66bd1ea454d1c45cb6ea0e27be354c92",
+        "actual-npm-test.txt": "94272853f8f0c573cfcc62b1ec318095b08ebd00a31276faaecc3cbc3583bb39",
+        "clean-npm-ci.txt": "3bb871abc4567e18b4ac335e248b1cec3bbdc5b53d1b1448e9917e7f539bcf6a"
+      }
+    }
+  ]
+}

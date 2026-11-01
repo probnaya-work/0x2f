@@ -1,0 +1,7 @@
+Node v20.0.0; npm 9.6.4; linux/x64; Python 3.14.4
+Command: ["/home/bogart/0x2f-qualification-20261101/runtimes/node-v20.0.0-linux-x64/bin/node","/home/bogart/0x2f-qualification-20261101/runtimes/node-v20.0.0-linux-x64/lib/node_modules/npm/bin/npm-cli.js","run","check"]
+CWD: /tmp/0x2f-matrix-v20.0.0-NeqRQd/checkout
+
+> 0x2f@0.1.4 check
+> node scripts/check.mjs
+

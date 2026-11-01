@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: only literal loopback fake upstreams can be configured
+ok 1 - only literal loopback fake upstreams can be configured
+  ---
+  duration_ms: 0.546834
+  type: 'test'
+  ...
+# Subtest: auth, active turn, model and input checks prevent any upstream request
+ok 2 - auth, active turn, model and input checks prevent any upstream request
+  ---
+  duration_ms: 16.234166
+  type: 'test'
+  ...
+# Subtest: fixed output cap and per-turn/total request limits apply before forwarding
+ok 3 - fixed output cap and per-turn/total request limits apply before forwarding
+  ---
+  duration_ms: 7.953083
+  type: 'test'
+  ...
+# Subtest: budget exhaustion rejects before the first paid-shaped request
+ok 4 - budget exhaustion rejects before the first paid-shaped request
+  ---
+  duration_ms: 1.413625
+  type: 'test'
+  ...
+# Subtest: concurrent request and turn changes cannot overlap a live forward
+ok 5 - concurrent request and turn changes cannot overlap a live forward
+  ---
+  duration_ms: 1.968125
+  type: 'test'
+  ...
+# Subtest: timeout stops gate without automatic retry or reservation refund
+ok 6 - timeout stops gate without automatic retry or reservation refund
+  ---
+  duration_ms: 55.740167
+  type: 'test'
+  ...
+# Subtest: upstream redirects are refused without following another endpoint
+ok 7 - upstream redirects are refused without following another endpoint
+  ---
+  duration_ms: 1.323833
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 146.089375

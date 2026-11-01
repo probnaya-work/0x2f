@@ -1,0 +1,32 @@
+{
+  "id": 2,
+  "slug": "002-call-write-file-exactly-once-to-write-private-tm",
+  "title": "Call write_file exactly once to write /private/tmp/0x2f-approved-live-0kpi4w/wor…",
+  "brief": "Call write_file exactly once to write /private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt with exact content APPROVED_ONCE followed by one newline. Use no other tool. This is an explicitly requested scratch qualification write. Wait for the real ACP permission approval. After the write, return the standard brief result sections and REQUIRED: no.",
+  "status": "done",
+  "pid": 42665,
+  "execution": {
+    "provider": "gemini-acp",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "17762d2a-20b6-4056-bf16-78932fa1097b"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini-acp",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:22:41.116Z",
+      "requestedProvider": "gemini-acp",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "17762d2a-20b6-4056-bf16-78932fa1097b",
+      "completedAt": "2026-11-01T17:22:42.074Z",
+      "durationMs": 958
+    }
+  ],
+  "createdAt": "2026-11-01T17:22:41.118Z",
+  "updatedAt": "2026-11-01T17:22:42.312Z",
+  "processGroupId": 42665
+}

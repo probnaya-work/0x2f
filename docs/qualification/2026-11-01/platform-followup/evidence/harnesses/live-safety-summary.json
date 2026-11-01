@@ -1,0 +1,75 @@
+{
+  "capturedAt": "2026-11-01T17:44:59.506242+00:00",
+  "tasks": [
+    {
+      "scope": "live",
+      "taskId": 1,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "live",
+      "taskId": 2,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-41-01.899Z",
+      "taskId": 1,
+      "status": "ready",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-41-01.899Z",
+      "taskId": 2,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-44-23.057Z",
+      "taskId": 1,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-44-23.057Z",
+      "taskId": 2,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-41-41.017Z",
+      "taskId": 1,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "scope": "deepseek-switch-mock-2026-11-01T17-41-41.017Z",
+      "taskId": 2,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    }
+  ],
+  "noKnownLiveWorkerOrRecordedGroup": true,
+  "reviewTreeGeneratedBinaryArtifacts": [],
+  "reviewTreeSymlinks": [],
+  "reviewTreeCredentialValueFiles": [],
+  "reviewTreeCredentialPatternMatches": [],
+  "note": "Only owned scratch task state and recorded process identity were inspected. No credential values or process command lines retained. All real/mock scratch homes remain outside repository; review evidence contains task snapshots and nonsecret settings only."
+}

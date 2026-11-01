@@ -1,0 +1,71 @@
+{
+  "id": 1,
+  "slug": "001-qualify-a-human-choice",
+  "title": "Qualify a human choice.",
+  "brief": "Qualify a human choice. Do not use tools. If task context has no recorded colour answer, return marker LIVE_B_01 and ask exactly \"Choose amber or teal?\" using REQUIRED: yes. If context includes the answer teal, report teal and marker LIVE_B_02 with REQUIRED: no. Keep every section very brief.",
+  "status": "done",
+  "execution": {
+    "provider": "gemini",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "44b0763a-b4a3-4fad-b24c-d30ccc88fcec"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:22:24.969Z",
+      "requestedProvider": "gemini",
+      "outcome": "failed",
+      "attempts": 1,
+      "externalSessionId": "df382276-8ee3-487d-a55e-ef8dbe04a7c5",
+      "completedAt": "2026-11-01T17:22:25.930Z",
+      "durationMs": 961,
+      "error": "[API Error: {\"error\":{\"code\":401,\"message\":\"Qualification controlled auth failure before upstream forwarding\",\"status\":\"UNAUTHENTICATED\"}}]"
+    },
+    {
+      "run": 2,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:22:26.055Z",
+      "requestedProvider": "gemini",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "externalSessionId": "b4069c2c-f039-4c1e-8c9b-005af226bcba",
+      "completedAt": "2026-11-01T17:22:39.429Z",
+      "durationMs": 13374,
+      "blockedOn": {
+        "type": "decision",
+        "text": "Choose amber or teal?"
+      }
+    },
+    {
+      "run": 3,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:22:39.621Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "44b0763a-b4a3-4fad-b24c-d30ccc88fcec",
+      "completedAt": "2026-11-01T17:22:40.260Z",
+      "durationMs": 639
+    }
+  ],
+  "createdAt": "2026-11-01T17:22:24.971Z",
+  "updatedAt": "2026-11-01T17:22:42.178Z",
+  "context": {
+    "notes": [
+      {
+        "at": "2026-11-01T17:22:39.554Z",
+        "text": "teal"
+      }
+    ]
+  },
+  "pid": 42635,
+  "processGroupId": 42635
+}

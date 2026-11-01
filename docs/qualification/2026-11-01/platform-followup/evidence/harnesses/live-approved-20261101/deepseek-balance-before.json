@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T17:39:14.141Z",
+  "endpoint": "GET https://api.deepseek.com/user/balance",
+  "status": 200,
+  "isAvailable": true,
+  "balances": [
+    {
+      "currency": "USD",
+      "total": "0.93",
+      "granted": "0.00",
+      "toppedUp": "0.93"
+    }
+  ],
+  "modelRequests": 0
+}

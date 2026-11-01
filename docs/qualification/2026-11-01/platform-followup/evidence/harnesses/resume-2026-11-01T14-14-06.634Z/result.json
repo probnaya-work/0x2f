@@ -1,0 +1,68 @@
+[
+  {
+    "name": "codex",
+    "first": {
+      "status": "ready",
+      "externalSessionId": "01a19775-de8c-7ee1-af18-6faa71d99471",
+      "result": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "second": {
+      "status": "ready",
+      "externalSessionId": "01a19775-de8c-7ee1-af18-6faa71d99471",
+      "result": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "priorAssistantContextCarried": true,
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "01a19775-de8c-7ee1-af18-6faa71d99471"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      },
+      {
+        "type": "run.started",
+        "sessionId": "01a19775-de8c-7ee1-af18-6faa71d99471"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ],
+    "passed": true
+  },
+  {
+    "name": "gemini",
+    "first": {
+      "status": "ready",
+      "externalSessionId": "a7bc1107-8672-4fb0-9ff3-5eeac58d754f",
+      "result": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "second": {
+      "status": "ready",
+      "externalSessionId": "a7bc1107-8672-4fb0-9ff3-5eeac58d754f",
+      "result": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "priorAssistantContextCarried": true,
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "a7bc1107-8672-4fb0-9ff3-5eeac58d754f"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      },
+      {
+        "type": "run.started",
+        "sessionId": "a7bc1107-8672-4fb0-9ff3-5eeac58d754f"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ],
+    "passed": true
+  }
+]

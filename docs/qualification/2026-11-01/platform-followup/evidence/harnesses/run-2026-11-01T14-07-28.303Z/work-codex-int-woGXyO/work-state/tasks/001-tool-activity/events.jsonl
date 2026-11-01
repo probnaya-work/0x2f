@@ -1,0 +1,6 @@
+{"type":"task.created","at":"2026-11-01T14:07:28.560Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:07:28.929Z","taskId":1,"sessionId":"01a1976f-cc98-7752-b667-111bc09cdd24","run":1}
+{"type":"tool.started","at":"2026-11-01T14:07:28.996Z","taskId":1,"name":"command_execution","input":{"command":"/bin/zsh -lc \"printf 'x' > note.txt\""},"run":1}
+{"type":"progress","at":"2026-11-01T14:07:29.000Z","taskId":1,"text":"## Result\nwrote the file\n## Needs human decision\nNone","run":1}
+{"type":"run.completed","at":"2026-11-01T14:07:29.287Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:07:29.288Z","taskId":1,"status":"ready","run":1}

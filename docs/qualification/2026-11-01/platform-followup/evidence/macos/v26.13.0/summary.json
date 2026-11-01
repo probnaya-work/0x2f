@@ -1,0 +1,97 @@
+{
+  "started_utc": "2026-11-01T14:03:58.445Z",
+  "node": "v26.13.0",
+  "npm": "11.20.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "os_release": "25.6.0",
+  "python": "Python 3.9.6",
+  "source_commit": "2e11f53b95c11ecc70eb4acef6127713f71ba168",
+  "source_status": "?? docs/qualification/2026-11-01/platform-followup/\n",
+  "scratch": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v26.13.0-iSkjKB",
+  "copiedCacheEntries": 10,
+  "credentials": "omitted; empty HOME and npm config; vendor CLIs absent from PATH",
+  "steps": [
+    {
+      "label": "clean-npm-ci",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v26.13.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--offline",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 313,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "npm-check",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v26.13.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 3144,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "actual-npm-test",
+      "args": [
+        "docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 26227,
+      "tap": {
+        "tests": 712,
+        "suites": 0,
+        "pass": 703,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 9,
+        "todo": 0
+      },
+      "skips": [
+        "\ufe63 E2E: `2f providers` detects codex and a task runs to READY through the real CLI (0.525542ms) # codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "\ufe63 E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (0.175209ms) # codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "\ufe63 E2E: command_execution is recorded honestly as tool activity, never as file.changed (0.155875ms) # codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "\ufe63 E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (0.14025ms) # codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "\ufe63 E2E: the same task can switch away from codex to another provider without losing task context (0.154125ms) # codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "\ufe63 E2E: `2f providers` detects gemini and a task runs to READY through the real CLI (0.516333ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "\ufe63 E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works (0.178667ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "\ufe63 E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context (0.15275ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "\ufe63 E2E: the same task can switch away from gemini to another provider without losing task context (0.148958ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)"
+      ]
+    },
+    {
+      "label": "installed-distribution-journey",
+      "args": [
+        "docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs",
+        "test/distribution.test.mjs"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 1545,
+      "tap": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "skips": []
+    }
+  ],
+  "completed_utc": "2026-11-01T14:04:29.852Z",
+  "scratch_preserved": false,
+  "summary_parsing_note": "Counts and skips were derived from unchanged raw logs after adding Node26 spec-reporter parsing; no tests rerun for this parsing correction."
+}

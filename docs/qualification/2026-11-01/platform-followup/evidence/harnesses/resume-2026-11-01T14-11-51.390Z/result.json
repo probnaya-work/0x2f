@@ -1,0 +1,60 @@
+[
+  {
+    "name": "codex",
+    "passed": false,
+    "first": {
+      "status": "ready",
+      "externalSessionId": "01a19773-ce5d-7e81-bd55-f088bc0c9698",
+      "result": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "second": {
+      "status": "failed",
+      "externalSessionId": null,
+      "error": "error: unexpected argument '-s' found\n\n  tip: to pass '-s' as a value, use '-- -s'\n\nUsage: codex exec resume [OPTIONS] [SESSION_ID] [PROMPT]\n\nFor more information, try '--help'."
+    },
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'failed' !== 'ready'\n\n    at file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/docs/qualification/2026-11-01/platform-followup/evidence/harnesses/probe-resume.mjs:63:12\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)",
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "01a19773-ce5d-7e81-bd55-f088bc0c9698"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ]
+  },
+  {
+    "name": "gemini",
+    "first": {
+      "status": "ready",
+      "externalSessionId": "520580ed-5372-4f2c-9cb3-617dc539fb20",
+      "result": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "second": {
+      "status": "ready",
+      "externalSessionId": "520580ed-5372-4f2c-9cb3-617dc539fb20",
+      "result": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "priorAssistantContextCarried": true,
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "520580ed-5372-4f2c-9cb3-617dc539fb20"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      },
+      {
+        "type": "run.started",
+        "sessionId": "520580ed-5372-4f2c-9cb3-617dc539fb20"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ],
+    "passed": true
+  }
+]

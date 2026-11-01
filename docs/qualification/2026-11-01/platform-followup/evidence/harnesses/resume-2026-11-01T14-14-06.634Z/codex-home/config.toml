@@ -1,0 +1,6 @@
+model = "gpt-5.1-codex"
+model_provider = "mock"
+[model_providers.mock]
+name = "Local mock"
+base_url = "http://127.0.0.1:56102/v1"
+wire_api = "responses"

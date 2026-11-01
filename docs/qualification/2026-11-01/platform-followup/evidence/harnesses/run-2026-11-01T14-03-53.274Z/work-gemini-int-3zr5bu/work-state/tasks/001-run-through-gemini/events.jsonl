@@ -1,0 +1,5 @@
+{"type":"task.created","at":"2026-11-01T14:04:03.306Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:04.291Z","taskId":1,"sessionId":"4d961698-b2b4-4dbd-9884-7a84b8840e00","run":1}
+{"type":"progress","at":"2026-11-01T14:04:04.321Z","taskId":1,"text":"## Result\nhandled by mock gemini\n## Evidence\nran\n## Verification\nok\n## Needs human decision\nNone","run":1}
+{"type":"run.completed","at":"2026-11-01T14:04:04.362Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:04.362Z","taskId":1,"status":"ready","run":1}

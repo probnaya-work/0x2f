@@ -1,0 +1,16 @@
+{"type":"task.created","at":"2026-11-01T17:22:24.973Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T17:22:25.895Z","taskId":1,"sessionId":"df382276-8ee3-487d-a55e-ef8dbe04a7c5","run":1}
+{"type":"run.failed","at":"2026-11-01T17:22:25.930Z","taskId":1,"error":"[API Error: {\"error\":{\"code\":401,\"message\":\"Qualification controlled auth failure before upstream forwarding\",\"status\":\"UNAUTHENTICATED\"}}]","run":1}
+{"type":"task.updated","at":"2026-11-01T17:22:25.930Z","taskId":1,"status":"failed","run":1}
+{"type":"task.updated","at":"2026-11-01T17:22:26.058Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T17:22:39.373Z","taskId":1,"sessionId":"b4069c2c-f039-4c1e-8c9b-005af226bcba","run":2}
+{"type":"progress","at":"2026-11-01T17:22:39.396Z","taskId":1,"text":"## Result\nLIVE_B_01\n## Evidence\nqualification\n## Changes\nNone\n## Verification\nchoice pending\n## Needs human decision\nREQUIRED: yes\nQUESTION: Choose amber or teal?","run":2}
+{"type":"needs_user","at":"2026-11-01T17:22:39.430Z","taskId":1,"reason":"decision","blockedOn":{"type":"decision","text":"Choose amber or teal?"},"run":2}
+{"type":"task.updated","at":"2026-11-01T17:22:39.430Z","taskId":1,"status":"needs_you","run":2}
+{"type":"task.answered","at":"2026-11-01T17:22:39.556Z","taskId":1,"answer":"teal"}
+{"type":"task.updated","at":"2026-11-01T17:22:39.624Z","taskId":1,"status":"working","run":3}
+{"type":"run.started","at":"2026-11-01T17:22:40.219Z","taskId":1,"sessionId":"44b0763a-b4a3-4fad-b24c-d30ccc88fcec","run":3}
+{"type":"progress","at":"2026-11-01T17:22:40.234Z","taskId":1,"text":"## Result\nteal LIVE_B_02\n## Evidence\nprior answer retained\n## Changes\nNone\n## Verification\nok\n## Needs human decision\nREQUIRED: no","run":3}
+{"type":"run.completed","at":"2026-11-01T17:22:40.261Z","taskId":1,"status":"ready","run":3}
+{"type":"task.updated","at":"2026-11-01T17:22:40.261Z","taskId":1,"status":"ready","run":3}
+{"type":"task.closed","at":"2026-11-01T17:22:42.179Z","taskId":1,"status":"done"}

@@ -1,0 +1,53 @@
+Local-only suite: Node v20.20.2; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+TAP version 13
+# Subtest: a normal pair-hello still confirms: the liveness check does not fire on the happy path
+ok 1 - a normal pair-hello still confirms: the liveness check does not fire on the happy path # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.52625
+  ...
+# Subtest: writing the confirmed pairing does not make the poller swap the config object
+ok 2 - writing the confirmed pairing does not make the poller swap the config object # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.045875
+  ...
+# Subtest: polling during a delayed pairing write never observes a partial config
+not ok 3 - polling during a delayed pairing write never observes a partial config
+  ---
+  duration_ms: 118.463125
+  location: '/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/relay-config-race.test.mjs:171:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    polling must not disable the agent during its own write
+    + actual - expected
+    
+    + undefined
+    - true
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/relay-config-race.test.mjs:191:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    async Test.run (node:internal/test_runner/test:797:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:526:7)
+  ...
+# Subtest: the config vanishing during the pairing ceremony never throws
+ok 4 - the config vanishing during the pairing ceremony never throws # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.315875
+  ...
+# Subtest: a pair-hello arriving with no live config is refused, not crashed on
+ok 5 - a pair-hello arriving with no live config is refused, not crashed on # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.037583
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 4
+# todo 0
+# duration_ms 274.072833

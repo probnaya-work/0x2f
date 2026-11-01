@@ -1,0 +1,9 @@
+{"type":"task.created","at":"2026-11-01T14:04:09.654Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:10.513Z","taskId":1,"sessionId":"522e80d4-e6de-47bf-bf55-385cbab110e9","run":1}
+{"type":"progress","at":"2026-11-01T14:04:10.530Z","taskId":1,"text":"## Result\nhandled by mock gemini\n## Evidence\nran\n## Verification\nok\n## Needs human decision\nNone","run":1}
+{"type":"run.completed","at":"2026-11-01T14:04:10.564Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:10.564Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:10.723Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T14:04:10.815Z","taskId":1,"sessionId":null,"run":2}
+{"type":"run.completed","at":"2026-11-01T14:04:11.074Z","taskId":1,"status":"ready","run":2}
+{"type":"task.updated","at":"2026-11-01T14:04:11.074Z","taskId":1,"status":"ready","run":2}

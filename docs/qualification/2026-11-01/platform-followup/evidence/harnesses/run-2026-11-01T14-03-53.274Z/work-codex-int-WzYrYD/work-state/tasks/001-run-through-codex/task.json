@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "slug": "001-run-through-codex",
+  "title": "Run through codex",
+  "brief": "Run through codex",
+  "status": "ready",
+  "pid": 95605,
+  "execution": {
+    "provider": "codex",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "01a1976c-843b-7fe1-abf3-233a35fb7a18"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:03:53.552Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "01a1976c-843b-7fe1-abf3-233a35fb7a18",
+      "completedAt": "2026-11-01T14:03:53.838Z",
+      "durationMs": 286
+    }
+  ],
+  "createdAt": "2026-11-01T14:03:53.554Z",
+  "updatedAt": "2026-11-01T14:03:53.838Z",
+  "processGroupId": 95605
+}

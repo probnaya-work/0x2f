@@ -1,0 +1,5 @@
+Node v20.0.0; npm 9.6.4; darwin/arm64; Python 3.9.6
+Command: ["/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/bin/node","/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js","ci","--offline","--ignore-scripts","--no-audit","--no-fund"]
+CWD: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-s2mC9t/checkout
+
+added 3 packages in 64ms

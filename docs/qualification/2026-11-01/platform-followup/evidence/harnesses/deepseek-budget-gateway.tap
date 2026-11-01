@@ -1,0 +1,26 @@
+✔ pins original configured model/high thinking, strips all tools, hard combined output cap (1.153584ms)
+✔ rejects model, effort, image/file/URI parts, non-text system and tool history (0.17475ms)
+✔ request is reserved before forward; usage and nonsecret audit preserved (18.967208ms)
+✔ rejects unapproved routes, model, body size and credentials before upstream (12.474375ms)
+✔ tool calls, partial output, combined cap or missing usage stop before CLI sees output (0.175125ms)
+✔ redirect and authentication errors retain reservations and stop without retry (6.960417ms)
+✔ existing six-turn ledger is shared across DSH turn7 and Gemini turn8 (5.784667ms)
+✔ persistent global sixteen-request and per-turn two-request limits apply to DSH (6.052083ms)
+✔ DeepSeek cumulative sub-reservation is bounded by $0.10 before forwarding (1.958625ms)
+✔ response model drift stops before CLI delivery but records charged usage (2.493958ms)
+✔ Gemini transform fixes total output/thinking cap and removes all unapproved tools (0.607291ms)
+✔ exact endpoint/model, body size and controlled auth failure never reach upstream (26.893208ms)
+✔ SSE remains parseable, usage is audited, cap applied, and local auth never forwarded (5.978916ms)
+✔ persistent ledger enforces two calls per turn and sixteen across eight turns including restart (27.875125ms)
+✔ only the exact approved file/content reaches CLI; response tool drift is blocked (4.52775ms)
+✔ redirect and upstream auth failure stop without retry or refund (4.913875ms)
+✔ a repeated write across separate responses is stopped before a second call reaches CLI (2.918958ms)
+✔ missing usage or combined output/thinking overflow cannot produce accepted SSE (2.453959ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 146.991042

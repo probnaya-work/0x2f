@@ -1,0 +1,1 @@
+{"id":"gemini-acp","displayName":"Gemini ACP qualification","transport":"acp","command":["/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/gemini-qualification","--acp","--skip-trust","--approval-mode","default","-m","gemini-3.5-flash-lite"],"permissions":"interactive"}

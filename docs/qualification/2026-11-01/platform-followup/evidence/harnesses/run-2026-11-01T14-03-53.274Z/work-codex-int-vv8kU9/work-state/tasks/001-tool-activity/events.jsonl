@@ -1,0 +1,5 @@
+{"type":"task.created","at":"2026-11-01T14:04:00.854Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:01.023Z","taskId":1,"sessionId":"01a1976c-a077-7392-8bfe-97f089e073a4","run":1}
+{"type":"progress","at":"2026-11-01T14:04:01.083Z","taskId":1,"text":"## Result\nwrote the file\n## Needs human decision\nNone","run":1}
+{"type":"run.completed","at":"2026-11-01T14:04:01.093Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:01.093Z","taskId":1,"status":"ready","run":1}

@@ -1,0 +1,14 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "gateway",
+      "useExternal": true
+    }
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "general": {
+    "enableAutoUpdate": false
+  }
+}

@@ -1,0 +1,15 @@
+{"type":"task.created","at":"2026-11-01T17:21:11.256Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T17:21:12.463Z","taskId":1,"sessionId":"75e4febc-36ad-4d3d-b38b-cb3c4a8525aa","run":1}
+{"type":"run.failed","at":"2026-11-01T17:21:12.504Z","taskId":1,"error":"[API Error: {\"error\":{\"code\":401,\"message\":\"Qualification controlled auth failure before upstream forwarding\",\"status\":\"UNAUTHENTICATED\"}}]","run":1}
+{"type":"task.updated","at":"2026-11-01T17:21:12.504Z","taskId":1,"status":"failed","run":1}
+{"type":"task.updated","at":"2026-11-01T17:21:12.651Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T17:21:13.227Z","taskId":1,"sessionId":"9986f4b6-4ef4-4473-a3fa-b9b8eb9d72d6","run":2}
+{"type":"progress","at":"2026-11-01T17:21:13.247Z","taskId":1,"text":"## Result\nLIVE_B_01\n## Evidence\nqualification\n## Changes\nNone\n## Verification\nchoice pending\n## Needs human decision\nREQUIRED: yes\nQUESTION: Choose amber or teal?","run":2}
+{"type":"needs_user","at":"2026-11-01T17:21:13.274Z","taskId":1,"reason":"decision","blockedOn":{"type":"decision","text":"Choose amber or teal?"},"run":2}
+{"type":"task.updated","at":"2026-11-01T17:21:13.274Z","taskId":1,"status":"needs_you","run":2}
+{"type":"task.answered","at":"2026-11-01T17:21:13.439Z","taskId":1,"answer":"teal"}
+{"type":"task.updated","at":"2026-11-01T17:21:13.509Z","taskId":1,"status":"working","run":3}
+{"type":"run.started","at":"2026-11-01T17:21:14.080Z","taskId":1,"sessionId":"1c1e7892-8252-4928-b953-8f5a8f1fdf3b","run":3}
+{"type":"progress","at":"2026-11-01T17:21:14.094Z","taskId":1,"text":"## Result\nteal LIVE_B_02\n## Evidence\nprior answer retained\n## Changes\nNone\n## Verification\nok\n## Needs human decision\nREQUIRED: no","run":3}
+{"type":"run.completed","at":"2026-11-01T17:21:14.124Z","taskId":1,"status":"ready","run":3}
+{"type":"task.updated","at":"2026-11-01T17:21:14.124Z","taskId":1,"status":"ready","run":3}

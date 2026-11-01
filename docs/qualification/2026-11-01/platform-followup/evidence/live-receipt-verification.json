@@ -1,0 +1,19 @@
+{
+  "verified_from": "persistent budget.json and every request.forwarded/response.completed in audit.jsonl; switch result identity/notes assertions",
+  "turns": 8,
+  "actual_model_requests": 8,
+  "completed_responses": 8,
+  "providers": {
+    "gemini": 7,
+    "deepseek": 1
+  },
+  "approved_max_turns": 8,
+  "approved_max_requests": 16,
+  "approved_max_usd": 5,
+  "output_cap_each": 1024,
+  "function_calls": 1,
+  "usage_conservative_estimate_usd": 0.0202138,
+  "reserved_usd": 0.1866244,
+  "deepseek_subreserve_usd": 0.008369399999999999,
+  "invoice_verified": false
+}

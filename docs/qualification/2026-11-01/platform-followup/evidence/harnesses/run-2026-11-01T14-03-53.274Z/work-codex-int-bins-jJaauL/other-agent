@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+process.stdout.write("## Result\nfrom other provider\n## Needs human decision\nNone");
+process.exit(0);

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "resume-2026-11-01T14-11-51.390Z/codex-home/tmp/arg0-macos/codex-arg0kJkp1G/applypatch",
+    "link_target": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "retained_path": "/private/tmp/0x2f-harness-generated-state-00zpg99j/runtime-links/resume-2026-11-01T14-11-51.390Z/codex-home/tmp/arg0-macos/codex-arg0kJkp1G/applypatch"
+  },
+  {
+    "path": "resume-2026-11-01T14-11-51.390Z/codex-home/tmp/arg0-macos/codex-arg0kJkp1G/apply_patch",
+    "link_target": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "retained_path": "/private/tmp/0x2f-harness-generated-state-00zpg99j/runtime-links/resume-2026-11-01T14-11-51.390Z/codex-home/tmp/arg0-macos/codex-arg0kJkp1G/apply_patch"
+  },
+  {
+    "path": "resume-2026-11-01T14-09-14.933Z/codex-home/tmp/arg0-macos/codex-arg0JOhayB/applypatch",
+    "link_target": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "retained_path": "/private/tmp/0x2f-harness-generated-state-00zpg99j/runtime-links/resume-2026-11-01T14-09-14.933Z/codex-home/tmp/arg0-macos/codex-arg0JOhayB/applypatch"
+  },
+  {
+    "path": "resume-2026-11-01T14-09-14.933Z/codex-home/tmp/arg0-macos/codex-arg0JOhayB/apply_patch",
+    "link_target": "/Users/bogart/.n/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "retained_path": "/private/tmp/0x2f-harness-generated-state-00zpg99j/runtime-links/resume-2026-11-01T14-09-14.933Z/codex-home/tmp/arg0-macos/codex-arg0JOhayB/apply_patch"
+  }
+]

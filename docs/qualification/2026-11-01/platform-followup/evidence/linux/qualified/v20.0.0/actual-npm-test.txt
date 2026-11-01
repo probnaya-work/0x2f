@@ -1,0 +1,3672 @@
+Node v20.0.0; npm 9.6.4; linux/x64; Python 3.14.4
+Command: ["/home/bogart/0x2f-qualification-20261101/runtimes/node-v20.0.0-linux-x64/bin/node","/home/bogart/0x2f-qualification-20261101/runtimes/node-v20.0.0-linux-x64/lib/node_modules/npm/bin/npm-cli.js","test"]
+CWD: /tmp/0x2f-matrix-v20.0.0-tMFNkc/checkout
+
+> 0x2f@0.1.4 test
+> node scripts/test.mjs
+
+TAP version 13
+# Subtest: INTERACTIVE E2E: permission request -> NEEDS YOU -> ALLOW -> the same run continues to READY
+ok 1 - INTERACTIVE E2E: permission request -> NEEDS YOU -> ALLOW -> the same run continues to READY
+  ---
+  duration_ms: 408.415912
+  ...
+# Subtest: INTERACTIVE E2E: REJECT answers with the rejection and the run continues
+ok 2 - INTERACTIVE E2E: REJECT answers with the rejection and the run continues
+  ---
+  duration_ms: 399.608002
+  ...
+# Subtest: ACP: a completed turn maps to ready with the session id, result and progress events
+ok 2 - ACP: a completed turn maps to ready with the session id, result and progress events
+  ---
+  duration_ms: 50.906696
+  ...
+# Subtest: ACP: a decision block maps to needs_you/decision via the Work convention
+ok 3 - ACP: a decision block maps to needs_you/decision via the Work convention
+  ---
+  duration_ms: 43.857374
+  ...
+# Subtest: ACP: an early stop reason maps to failed
+ok 4 - ACP: an early stop reason maps to failed
+  ---
+  duration_ms: 43.275163
+  ...
+# Subtest: ACP: the agent exiting before completing maps to failed
+ok 5 - ACP: the agent exiting before completing maps to failed
+  ---
+  duration_ms: 44.883502
+  ...
+# Subtest: ACP: a malformed initialize response fails clearly
+ok 6 - ACP: a malformed initialize response fails clearly
+  ---
+  duration_ms: 40.537631
+  ...
+# Subtest: ACP: a missing session id fails clearly instead of inventing one
+ok 7 - ACP: a missing session id fails clearly instead of inventing one
+  ---
+  duration_ms: 41.493111
+  ...
+# Subtest: ACP: permission requests are auto-declined with the explicit deny policy (headless)
+ok 8 - ACP: permission requests are auto-declined with the explicit deny policy (headless)
+  ---
+  duration_ms: 42.744907
+  ...
+# Subtest: ACP: permission requests are auto-approved with the approve policy
+ok 9 - ACP: permission requests are auto-approved with the approve policy
+  ---
+  duration_ms: 42.0551
+  ...
+# Subtest: ACP: one bound decision resolves only one queued permission request
+ok 10 - ACP: one bound decision resolves only one queued permission request
+  ---
+  duration_ms: 2151.832784
+  ...
+# Subtest: ACP: unbound, mismatched, and unknown grants leave the active request pending
+ok 11 - ACP: unbound, mismatched, and unknown grants leave the active request pending
+  ---
+  duration_ms: 1801.224483
+  ...
+# Subtest: ACP: an allow-only request without a decision channel is cancelled
+ok 12 - ACP: an allow-only request without a decision channel is cancelled
+  ---
+  duration_ms: 45.294544
+  ...
+# Subtest: ACP: reusing a native RPC id cannot replay a previous occurrence's grant
+ok 13 - ACP: reusing a native RPC id cannot replay a previous occurrence's grant
+  ---
+  duration_ms: 797.205026
+  ...
+# Subtest: ACP: interactive permission requests pause for the human and answer in place
+ok 14 - ACP: interactive permission requests pause for the human and answer in place
+  ---
+  duration_ms: 297.077262
+  ...
+# Subtest: ACP: interactive reject answers with the reject option and the run continues
+ok 15 - ACP: interactive reject answers with the reject option and the run continues
+  ---
+  duration_ms: 298.50596
+  ...
+# Subtest: ACP: interactive ambiguous options are never guessed — only mappable actions are offered
+ok 16 - ACP: interactive ambiguous options are never guessed — only mappable actions are offered
+  ---
+  duration_ms: 306.225805
+  ...
+# Subtest: ACP: the agent dying while an interactive permission waits fails the run
+ok 17 - ACP: the agent dying while an interactive permission waits fails the run
+  ---
+  duration_ms: 45.874985
+  ...
+# Subtest: ACP: resume loads the session and prompts it
+ok 18 - ACP: resume loads the session and prompts it
+  ---
+  duration_ms: 40.938769
+  ...
+# Subtest: ACP: resume fails clearly when the agent lacks the loadSession capability
+ok 19 - ACP: resume fails clearly when the agent lacks the loadSession capability
+  ---
+  duration_ms: 83.021574
+  ...
+# Subtest: ACP: unknown notifications and non-mappable updates never break the run
+ok 20 - ACP: unknown notifications and non-mappable updates never break the run
+  ---
+  duration_ms: 41.331791
+  ...
+# Subtest: ACP: cancel sends session/cancel and the run ends failed
+ok 21 - ACP: cancel sends session/cancel and the run ends failed
+  ---
+  duration_ms: 48.496745
+  ...
+# Subtest: ACP ready teardown retains no timeout after its actual child closes
+ok 3 - ACP ready teardown retains no timeout after its actual child closes
+  ---
+  duration_ms: 97.360649
+  ...
+# Subtest: ACP failed teardown retains no timeout after its actual child closes
+ok 4 - ACP failed teardown retains no timeout after its actual child closes
+  ---
+  duration_ms: 82.528432
+  ...
+# Subtest: simultaneous human notes retain every acknowledged constraint
+ok 4 - simultaneous human notes retain every acknowledged constraint
+  ---
+  duration_ms: 143.616322
+  ...
+# Subtest: distinct concurrent permission resumes admit exactly one execution
+ok 5 - distinct concurrent permission resumes admit exactly one execution
+  ---
+  duration_ms: 28.399869
+  ...
+# Subtest: live permissions and closed in-flight executions cannot be rerun
+ok 6 - live permissions and closed in-flight executions cannot be rerun
+  ---
+  duration_ms: 10.139391
+  ...
+# Subtest: spawn failure is durably failed instead of stranded working
+ok 7 - spawn failure is durably failed instead of stranded working
+  ---
+  duration_ms: 7.31568
+  ...
+# Subtest: non-text action inputs are rejected before persistence or execution
+ok 8 - non-text action inputs are rejected before persistence or execution
+  ---
+  duration_ms: 9.20265
+  ...
+# Subtest: a gesture bound to an earlier permission cannot authorize the current occurrence
+ok 9 - a gesture bound to an earlier permission cannot authorize the current occurrence
+  ---
+  duration_ms: 11.021923
+  ...
+# Subtest: createWork creates a persistent task and starts execution on the node
+ok 5 - createWork creates a persistent task and starts execution on the node
+  ---
+  duration_ms: 17.716196
+  ...
+# Subtest: createWork rejects an empty title with the shared error
+ok 6 - createWork rejects an empty title with the shared error
+  ---
+  duration_ms: 2.359591
+  ...
+# Subtest: resumeWork on a needs_you task hands execution back to the node
+ok 7 - resumeWork on a needs_you task hands execution back to the node
+  ---
+  duration_ms: 9.947563
+  ...
+# Subtest: allowWork/rejectWork are the same action with a different grant
+ok 8 - allowWork/rejectWork are the same action with a different grant
+  ---
+  duration_ms: 9.652504
+  ...
+# Subtest: resumeWork on a non-needs_you task throws the CLI's exact error (shared logic)
+ok 9 - resumeWork on a non-needs_you task throws the CLI's exact error (shared logic)
+  ---
+  duration_ms: 10.084017
+  ...
+# Subtest: resumeWork without a resumable session throws the CLI's exact error
+ok 10 - resumeWork without a resumable session throws the CLI's exact error
+  ---
+  duration_ms: 5.959444
+  ...
+# Subtest: closeWork moves any task to done and records task.closed
+ok 11 - closeWork moves any task to done and records task.closed
+  ---
+  duration_ms: 6.970367
+  ...
+# Subtest: getWork returns the task with its final result
+ok 12 - getWork returns the task with its final result
+  ---
+  duration_ms: 5.309778
+  ...
+# Subtest: listWork returns persisted tasks (what the CLI and the API both render)
+ok 13 - listWork returns persisted tasks (what the CLI and the API both render)
+  ---
+  duration_ms: 9.635728
+  ...
+# Subtest: CLI and HTTP API are the same actions: the runtime factory both use produces identical outcomes
+ok 14 - CLI and HTTP API are the same actions: the runtime factory both use produces identical outcomes
+  ---
+  duration_ms: 5.755355
+  ...
+# Subtest: createWork selects the execution provider explicitly
+ok 15 - createWork selects the execution provider explicitly
+  ---
+  duration_ms: 5.209856
+  ...
+# Subtest: createWork defaults to the runtime default provider (claude-code)
+ok 16 - createWork defaults to the runtime default provider (claude-code)
+  ---
+  duration_ms: 6.081265
+  ...
+# Subtest: createWork rejects an unknown provider with the shared error
+ok 17 - createWork rejects an unknown provider with the shared error
+  ---
+  duration_ms: 0.747937
+  ...
+# Subtest: createWork persists model when reliably known (separate concern from provider)
+ok 18 - createWork persists model when reliably known (separate concern from provider)
+  ---
+  duration_ms: 4.257898
+  ...
+# Subtest: resumeWork refuses a decision block: decisions are answered, not allowed/rejected
+ok 19 - resumeWork refuses a decision block: decisions are answered, not allowed/rejected
+  ---
+  duration_ms: 9.823895
+  ...
+# Subtest: answerWork records the human's answer to a decision; the task stays needs_you
+ok 20 - answerWork records the human's answer to a decision; the task stays needs_you
+  ---
+  duration_ms: 9.23851
+  ...
+# Subtest: answerWork validates: needs_you decision only, non-empty answer
+ok 21 - answerWork validates: needs_you decision only, non-empty answer
+  ---
+  duration_ms: 8.319202
+  ...
+# Subtest: a non-resumable NEEDS YOU task can still be closed without invoking the provider
+ok 22 - a non-resumable NEEDS YOU task can still be closed without invoking the provider
+  ---
+  duration_ms: 6.881285
+  ...
+# Subtest: resumeWork refuses a permission block on a provider that cannot resume (capability, not parity faking)
+ok 23 - resumeWork refuses a permission block on a provider that cannot resume (capability, not parity faking)
+  ---
+  duration_ms: 5.040817
+  ...
+# Subtest: correctWork records a SEND-BACK correction as its own event, apart from a note
+ok 24 - correctWork records a SEND-BACK correction as its own event, apart from a note
+  ---
+  duration_ms: 8.625374
+  ...
+# Subtest: correctWork validates: a correction is required and bounded
+ok 25 - correctWork validates: a correction is required and bounded
+  ---
+  duration_ms: 7.557985
+  ...
+# Subtest: getTaskDiff returns one entry per file.changed event, with real hunks when git has a baseline
+ok 26 - getTaskDiff returns one entry per file.changed event, with real hunks when git has a baseline
+  ---
+  duration_ms: 11.84668
+  ...
+# 0x2F UI: http://127.0.0.1:43087
+# Subtest: POST /api/tasks creates a task through the shared action and starts it on the node
+ok 6 - POST /api/tasks creates a task through the shared action and starts it on the node
+  ---
+  duration_ms: 58.262836
+  ...
+# 0x2F UI: http://127.0.0.1:33577
+# Subtest: POST /api/tasks without a title -> 400 from the shared action
+ok 7 - POST /api/tasks without a title -> 400 from the shared action
+  ---
+  duration_ms: 6.28925
+  ...
+# 0x2F UI: http://127.0.0.1:35957
+# Subtest: GET /api/tasks and GET /api/tasks/:id (with result)
+ok 8 - GET /api/tasks and GET /api/tasks/:id (with result)
+  ---
+  duration_ms: 19.649163
+  ...
+# 0x2F UI: http://127.0.0.1:41737
+# Subtest: POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400
+ok 9 - POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400
+  ---
+  duration_ms: 22.160971
+  ...
+# 0x2F UI: http://127.0.0.1:44657
+# Subtest: permission HTTP actions refuse stale or missing displayed decision IDs
+ok 10 - permission HTTP actions refuse stale or missing displayed decision IDs
+  ---
+  duration_ms: 48.717547
+  ...
+# 0x2F UI: http://127.0.0.1:45739
+# Subtest: POST /api/tasks/:id/close moves the task to done
+ok 11 - POST /api/tasks/:id/close moves the task to done
+  ---
+  duration_ms: 10.587821
+  ...
+# 0x2F UI: http://127.0.0.1:39179
+# Subtest: unknown routes -> 404; missing task -> 404
+ok 12 - unknown routes -> 404; missing task -> 404
+  ---
+  duration_ms: 8.165086
+  ...
+# 0x2F UI: http://127.0.0.1:40107
+# Subtest: server binds to localhost by default (local-first, not LAN-exposed)
+ok 13 - server binds to localhost by default (local-first, not LAN-exposed)
+  ---
+  duration_ms: 3.978156
+  ...
+# 0x2F UI: http://127.0.0.1:42609
+# Subtest: SSE delivers normalized task.created when a task is created through the API
+ok 14 - SSE delivers normalized task.created when a task is created through the API
+  ---
+  duration_ms: 25.736067
+  ...
+# 0x2F UI: http://127.0.0.1:45605
+# Subtest: GET / serves the 0x2F Web shell and its module assets
+ok 15 - GET / serves the 0x2F Web shell and its module assets
+  ---
+  duration_ms: 24.762734
+  ...
+# 0x2F UI: http://127.0.0.1:35623
+# Subtest: GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint
+ok 16 - GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint
+  ---
+  duration_ms: 3.312334
+  ...
+# 0x2F UI: http://127.0.0.1:44601
+# Subtest: the bootstrap meta tag survives this server's own CSP — a real browser would actually read it
+ok 17 - the bootstrap meta tag survives this server's own CSP — a real browser would actually read it
+  ---
+  duration_ms: 4.738214
+  ...
+# 0x2F UI: http://127.0.0.1:36611
+# Subtest: GET /api/status also carries workspace + node (symmetry with the bootstrap payload)
+ok 18 - GET /api/status also carries workspace + node (symmetry with the bootstrap payload)
+  ---
+  duration_ms: 2.584104
+  ...
+# 0x2F UI: http://127.0.0.1:40111
+# Subtest: a workspace directory name that could break out of the meta attribute is escaped safely
+ok 19 - a workspace directory name that could break out of the meta attribute is escaped safely
+  ---
+  duration_ms: 3.600637
+  ...
+# 0x2F UI: http://127.0.0.1:44489
+# Subtest: the browser client's full module graph is served (no blank-page regressions)
+ok 20 - the browser client's full module graph is served (no blank-page regressions)
+  ---
+  duration_ms: 30.059961
+  ...
+# 0x2F UI: http://127.0.0.1:37567
+# Subtest: GET /api/events/history returns the persisted normalized log per task
+ok 21 - GET /api/events/history returns the persisted normalized log per task
+  ---
+  duration_ms: 10.436853
+  ...
+# 0x2F UI: http://127.0.0.1:40113
+# Subtest: a task with no event log yet is still present in the history
+ok 22 - a task with no event log yet is still present in the history
+  ---
+  duration_ms: 10.045295
+  ...
+# 0x2F UI: http://127.0.0.1:40921
+# Subtest: GET /api/providers lists the registry (default first) with normalized descriptors
+ok 23 - GET /api/providers lists the registry (default first) with normalized descriptors
+  ---
+  duration_ms: 4.55918
+  ...
+# 0x2F UI: http://127.0.0.1:40183
+# Subtest: POST /api/tasks creates through the selected provider
+ok 24 - POST /api/tasks creates through the selected provider
+  ---
+  duration_ms: 10.391193
+  ...
+# 0x2F UI: http://127.0.0.1:46777
+# Subtest: POST /api/tasks with an unknown provider -> 400 from the shared action
+ok 25 - POST /api/tasks with an unknown provider -> 400 from the shared action
+  ---
+  duration_ms: 5.336416
+  ...
+# 0x2F UI: http://127.0.0.1:43401
+# Subtest: POST /api/tasks/:id/rerun starts a second run under the same task through the shared action
+ok 26 - POST /api/tasks/:id/rerun starts a second run under the same task through the shared action
+  ---
+  duration_ms: 14.462231
+  ...
+# 0x2F UI: http://127.0.0.1:42657
+# Subtest: DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence)
+ok 27 - DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence)
+  ---
+  duration_ms: 14.511219
+  ...
+# 0x2F UI: http://127.0.0.1:36025
+# Subtest: POST /api/tasks/:id/correct records a SEND-BACK correction as its own event
+ok 28 - POST /api/tasks/:id/correct records a SEND-BACK correction as its own event
+  ---
+  duration_ms: 8.985459
+  ...
+# 0x2F UI: http://127.0.0.1:42879
+# Subtest: DECISION FLOW: a body-less rerun POST is a valid request, not a 500
+ok 29 - DECISION FLOW: a body-less rerun POST is a valid request, not a 500
+  ---
+  duration_ms: 14.592818
+  ...
+# 0x2F UI: http://127.0.0.1:35537
+# Subtest: DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run
+ok 30 - DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run
+  ---
+  duration_ms: 15.567041
+  ...
+# 0x2F UI: http://127.0.0.1:35721
+# Subtest: DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run
+ok 31 - DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run
+  ---
+  duration_ms: 10.820178
+  ...
+# 0x2F UI: http://127.0.0.1:35497
+# Subtest: DECISION FLOW: distinct request ids are distinct gestures
+ok 32 - DECISION FLOW: distinct request ids are distinct gestures
+  ---
+  duration_ms: 11.213203
+  ...
+# 0x2F UI: http://127.0.0.1:34755
+# Subtest: every API failure is explicit, valid JSON (never an empty or partial body)
+ok 33 - every API failure is explicit, valid JSON (never an empty or partial body)
+  ---
+  duration_ms: 12.847776
+  ...
+# 0x2F UI: http://127.0.0.1:44533
+# Subtest: GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404
+ok 34 - GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404
+  ---
+  duration_ms: 11.61595
+  ...
+# 0x2F UI: http://127.0.0.1:40617
+# Subtest: GET /api/tasks/:id includes the projected run history
+ok 35 - GET /api/tasks/:id includes the projected run history
+  ---
+  duration_ms: 8.401324
+  ...
+# 0x2F UI: http://127.0.0.1:43321
+# Subtest: POST /api/tasks/:id/answer records the human's decision answer
+ok 36 - POST /api/tasks/:id/answer records the human's decision answer
+  ---
+  duration_ms: 12.162463
+  ...
+# 0x2F UI: http://127.0.0.1:42237
+# Subtest: ALLOW on a decision is refused over the API; ANSWER on a permission is refused
+ok 37 - ALLOW on a decision is refused over the API; ANSWER on a permission is refused
+  ---
+  duration_ms: 24.231647
+  ...
+# 0x2F UI: http://127.0.0.1:40365
+# Subtest: a non-resumable NEEDS YOU task can be closed over the API without invoking the provider
+ok 38 - a non-resumable NEEDS YOU task can be closed over the API without invoking the provider
+  ---
+  duration_ms: 7.789749
+  ...
+# 0x2F UI: http://127.0.0.1:42159
+# Subtest: REGRESSION: the ~1,000 character brief that dogfooding rejected is accepted
+ok 7 - REGRESSION: the ~1,000 character brief that dogfooding rejected is accepted
+  ---
+  duration_ms: 58.440788
+  ...
+# 0x2F UI: http://127.0.0.1:43473
+# Subtest: run 1's persisted input carries the full brief, not the title
+ok 8 - run 1's persisted input carries the full brief, not the title
+  ---
+  duration_ms: 14.327891
+  ...
+# 0x2F UI: http://127.0.0.1:40445
+# Subtest: a short brief behaves exactly as it did before briefs existed
+ok 9 - a short brief behaves exactly as it did before briefs existed
+  ---
+  duration_ms: 10.742821
+  ...
+# 0x2F UI: http://127.0.0.1:33707
+# Subtest: the slug is built from the derived title, so a long brief cannot produce a monstrous directory name
+ok 10 - the slug is built from the derived title, so a long brief cannot produce a monstrous directory name
+  ---
+  duration_ms: 10.215451
+  ...
+# 0x2F UI: http://127.0.0.1:45231
+# Subtest: the brief is bounded: MAX_BRIEF is enforced at the action boundary
+ok 11 - the brief is bounded: MAX_BRIEF is enforced at the action boundary
+  ---
+  duration_ms: 8.119411
+  ...
+# 0x2F UI: http://127.0.0.1:37049
+# Subtest: the brief is bounded at the API boundary too, with the same message
+ok 12 - the brief is bounded at the API boundary too, with the same message
+  ---
+  duration_ms: 4.47413
+  ...
+# 0x2F UI: http://127.0.0.1:45527
+# Subtest: a blank brief is still refused — one required field, clearly named
+ok 13 - a blank brief is still refused — one required field, clearly named
+  ---
+  duration_ms: 4.582566
+  ...
+# 0x2F UI: http://127.0.0.1:32985
+# Subtest: creating a task derives its title with no provider process at all
+ok 14 - creating a task derives its title with no provider process at all
+  ---
+  duration_ms: 5.863289
+  ...
+# 0x2F UI: http://127.0.0.1:45579
+# Subtest: a task created before briefs existed still reads correctly (no migration)
+ok 15 - a task created before briefs existed still reads correctly (no migration)
+  ---
+  duration_ms: 7.692483
+  ...
+# Subtest: npm run check rejects invalid JavaScript instead of reporting success
+ok 8 - npm run check rejects invalid JavaScript instead of reporting success
+  ---
+  duration_ms: 419.943705
+  ...
+# Subtest: npm run check checks nested source directories and rejects invalid Python helpers
+ok 9 - npm run check checks nested source directories and rejects invalid Python helpers
+  ---
+  duration_ms: 893.422133
+  ...
+# Subtest: npm run check accepts valid sources and skips dependency directories
+ok 10 - npm run check accepts valid sources and skips dependency directories
+  ---
+  duration_ms: 470.63902
+  ...
+# Subtest: permission -> allow -> successful resume: the SAME session continues and the run completes
+ok 9 - permission -> allow -> successful resume: the SAME session continues and the run completes
+  ---
+  duration_ms: 549.26577
+  ...
+# Subtest: permission -> allow -> failed resume: the run FAILS honestly (kind resume), never pretends the grant continued
+ok 10 - permission -> allow -> failed resume: the run FAILS honestly (kind resume), never pretends the grant continued
+  ---
+  duration_ms: 556.341137
+  ...
+# Subtest: incomplete selectors refuse before creating work, rerunning, pairing or launching UI
+ok 10 - incomplete selectors refuse before creating work, rerunning, pairing or launching UI
+  ---
+  duration_ms: 722.699857
+  ...
+# Subtest: CLI: the dogfooding loop — new, rerun through another provider, open, open --run
+ok 11 - CLI: the dogfooding loop — new, rerun through another provider, open, open --run
+  ---
+  duration_ms: 1235.629752
+  ...
+# Subtest: 2f version prints the package version only
+ok 12 - 2f version prints the package version only
+  ---
+  duration_ms: 81.888886
+  ...
+# Subtest: 2f --version prints the package version only
+ok 13 - 2f --version prints the package version only
+  ---
+  duration_ms: 79.213298
+  ...
+# Subtest: 2f -v prints the package version only
+ok 14 - 2f -v prints the package version only
+  ---
+  duration_ms: 79.154152
+  ...
+# Subtest: E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox
+ok 13 - E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 1.98136
+  ...
+# Subtest: E2E: `2f providers` detects codex and a task runs to READY through the real CLI
+ok 14 - E2E: `2f providers` detects codex and a task runs to READY through the real CLI # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 0.668006
+  ...
+# Subtest: E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works
+ok 15 - E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 0.518697
+  ...
+# Subtest: E2E: command_execution is recorded honestly as tool activity, never as file.changed
+ok 16 - E2E: command_execution is recorded honestly as tool activity, never as file.changed # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 0.485137
+  ...
+# Subtest: E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context
+ok 17 - E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 0.500372
+  ...
+# Subtest: E2E: the same task can switch away from codex to another provider without losing task context
+ok 18 - E2E: the same task can switch away from codex to another provider without losing task context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)
+  ---
+  duration_ms: 1.035503
+  ...
+# Subtest: codex is registered with honest capabilities
+ok 14 - codex is registered with honest capabilities
+  ---
+  duration_ms: 1.155809
+  ...
+# Subtest: codexBin honors CODEX_BIN
+ok 15 - codexBin honors CODEX_BIN
+  ---
+  duration_ms: 0.145714
+  ...
+# Subtest: classifyCodexFailure: auth failures classify with the codex login remedy
+ok 16 - classifyCodexFailure: auth failures classify with the codex login remedy
+  ---
+  duration_ms: 0.516405
+  ...
+# Subtest: classifyCodexFailure: non-auth failures stay unclassified
+ok 17 - classifyCodexFailure: non-auth failures stay unclassified
+  ---
+  duration_ms: 0.121329
+  ...
+# Subtest: normalizeCodexRun: result text -> ready with the session id
+ok 18 - normalizeCodexRun: result text -> ready with the session id
+  ---
+  duration_ms: 1.30978
+  ...
+# Subtest: normalizeCodexRun: result with the shared decision protocol -> needs_you/decision
+ok 19 - normalizeCodexRun: result with the shared decision protocol -> needs_you/decision
+  ---
+  duration_ms: 1.146909
+  ...
+# Subtest: normalizeCodexRun: an explicit blocker report is failed, never READY
+ok 20 - normalizeCodexRun: an explicit blocker report is failed, never READY
+  ---
+  duration_ms: 0.37936
+  ...
+# Subtest: normalizeCodexRun: a partial limitation inside a completed result is still ready
+ok 21 - normalizeCodexRun: a partial limitation inside a completed result is still ready
+  ---
+  duration_ms: 0.556621
+  ...
+# Subtest: normalizeCodexRun: error -> failed with auth classification
+ok 22 - normalizeCodexRun: error -> failed with auth classification
+  ---
+  duration_ms: 0.12999
+  ...
+# Subtest: parser: a completed run maps to run.started + tool events + ready
+ok 23 - parser: a completed run maps to run.started + tool events + ready
+  ---
+  duration_ms: 7.025506
+  ...
+# Subtest: parser: an auth failure maps to a failed outcome with classification
+ok 24 - parser: an auth failure maps to a failed outcome with classification
+  ---
+  duration_ms: 0.738058
+  ...
+# Subtest: parser: the shared decision protocol in the result -> needs_you/decision
+ok 25 - parser: the shared decision protocol in the result -> needs_you/decision
+  ---
+  duration_ms: 1.566524
+  ...
+# Subtest: parser: reasoning summaries surface as progress, never as the result
+ok 26 - parser: reasoning summaries surface as progress, never as the result
+  ---
+  duration_ms: 0.711558
+  ...
+# Subtest: parser: transient reconnect notices are ignored (not task progress)
+ok 27 - parser: transient reconnect notices are ignored (not task progress)
+  ---
+  duration_ms: 0.176484
+  ...
+# Subtest: parser: stray non-JSON lines are ignored without breaking the stream
+ok 28 - parser: stray non-JSON lines are ignored without breaking the stream
+  ---
+  duration_ms: 0.142206
+  ...
+# Subtest: start() runs codex exec --json and normalizes a successful run
+ok 29 - start() runs codex exec --json and normalizes a successful run
+  ---
+  duration_ms: 38.811828
+  ...
+# Subtest: start() passes -m model when provided and surfaces a failed turn
+ok 30 - start() passes -m model when provided and surfaces a failed turn
+  ---
+  duration_ms: 39.34224
+  ...
+# Subtest: resume() resumes the SAME thread via codex exec resume <id>
+ok 31 - resume() resumes the SAME thread via codex exec resume <id>
+  ---
+  duration_ms: 38.179231
+  ...
+# Subtest: resume() without a session id fails loudly
+ok 32 - resume() without a session id fails loudly
+  ---
+  duration_ms: 0.8113
+  ...
+# Subtest: start() fails cleanly when codex is not installed
+ok 33 - start() fails cleanly when codex is not installed
+  ---
+  duration_ms: 4.535783
+  ...
+# Subtest: user config is preserved by default; account-default execution is explicit
+ok 34 - user config is preserved by default; account-default execution is explicit
+  ---
+  duration_ms: 251.178727
+  ...
+# Subtest: command provider: declares the conservative capabilities
+ok 15 - command provider: declares the conservative capabilities
+  ---
+  duration_ms: 1.569397
+  ...
+# Subtest: command provider: success maps to ready with the result and a run.started event
+ok 16 - command provider: success maps to ready with the result and a run.started event
+  ---
+  duration_ms: 44.586937
+  ...
+# Subtest: command provider: a non-zero exit maps to failed with the stderr message
+ok 17 - command provider: a non-zero exit maps to failed with the stderr message
+  ---
+  duration_ms: 37.147646
+  ...
+# Subtest: command provider: a missing executable fails cleanly
+ok 18 - command provider: a missing executable fails cleanly
+  ---
+  duration_ms: 3.481561
+  ...
+# Subtest: command provider: the Work decision convention maps stdout to needs_you/decision
+ok 19 - command provider: the Work decision convention maps stdout to needs_you/decision
+  ---
+  duration_ms: 37.317968
+  ...
+# Subtest: normalizeCommandRun: exit 0 / non-zero / empty stderr
+ok 20 - normalizeCommandRun: exit 0 / non-zero / empty stderr
+  ---
+  duration_ms: 1.104181
+  ...
+# Subtest: substituteCommand replaces only the known placeholders
+ok 21 - substituteCommand replaces only the known placeholders
+  ---
+  duration_ms: 0.140215
+  ...
+# Subtest: a normal result without the section is not a decision
+ok 16 - a normal result without the section is not a decision
+  ---
+  duration_ms: 1.199637
+  ...
+# Subtest: merely mentioning the convention is not a decision
+ok 17 - merely mentioning the convention is not a decision
+  ---
+  duration_ms: 0.199164
+  ...
+# Subtest: REGRESSION /02: 'None.' plus explanation under the heading is not a decision
+ok 18 - REGRESSION /02: 'None.' plus explanation under the heading is not a decision
+  ---
+  duration_ms: 0.155943
+  ...
+# Subtest: a bare 'None' section is not a decision
+ok 19 - a bare 'None' section is not a decision
+  ---
+  duration_ms: 0.107541
+  ...
+# Subtest: REQUIRED: no is an explicit no-decision signal
+ok 20 - REQUIRED: no is an explicit no-decision signal
+  ---
+  duration_ms: 0.092999
+  ...
+# Subtest: a non-positive REQUIRED value is not a decision
+ok 21 - a non-positive REQUIRED value is not a decision
+  ---
+  duration_ms: 0.092496
+  ...
+# Subtest: a question without the positive signal is not a decision (malformed block)
+ok 22 - a question without the positive signal is not a decision (malformed block)
+  ---
+  duration_ms: 0.099111
+  ...
+# Subtest: REQUIRED: yes with no readable question is incomplete, not a decision
+ok 23 - REQUIRED: yes with no readable question is incomplete, not a decision
+  ---
+  duration_ms: 1.02413
+  ...
+# Subtest: REQUIRED: yes + QUESTION is a genuine decision; the question is preserved
+ok 24 - REQUIRED: yes + QUESTION is a genuine decision; the question is preserved
+  ---
+  duration_ms: 1.010462
+  ...
+# Subtest: REQUIRED: yes with the question as prose after the marker is preserved
+ok 25 - REQUIRED: yes with the question as prose after the marker is preserved
+  ---
+  duration_ms: 0.183028
+  ...
+# Subtest: the signal is case-insensitive; keys may be lowercase
+ok 26 - the signal is case-insensitive; keys may be lowercase
+  ---
+  duration_ms: 0.113026
+  ...
+# Subtest: a long question is capped at a generous storage guard (4000), never dropped
+ok 27 - a long question is capped at a generous storage guard (4000), never dropped
+  ---
+  duration_ms: 0.264892
+  ...
+# Subtest: a question well under the storage guard is never truncated
+ok 28 - a question well under the storage guard is never truncated
+  ---
+  duration_ms: 0.104405
+  ...
+# Subtest: a multi-paragraph question after QUESTION: is preserved verbatim, newlines and all
+ok 29 - a multi-paragraph question after QUESTION: is preserved verbatim, newlines and all
+  ---
+  duration_ms: 0.100365
+  ...
+# Subtest: a multi-paragraph question with no QUESTION: field keeps its paragraph breaks
+ok 30 - a multi-paragraph question with no QUESTION: field keeps its paragraph breaks
+  ---
+  duration_ms: 0.100321
+  ...
+# Subtest: a decision block is the LAST section: later \#\# headings bound it
+ok 31 - a decision block is the LAST section: later \#\# headings bound it
+  ---
+  duration_ms: 0.094033
+  ...
+# Subtest: normalizeDshRun: the /02 capture -> READY, not needs_you
+ok 32 - normalizeDshRun: the /02 capture -> READY, not needs_you
+  ---
+  duration_ms: 1.287778
+  ...
+# Subtest: normalizeDshRun: explicit protocol -> needs_you/decision with the question
+ok 33 - normalizeDshRun: explicit protocol -> needs_you/decision with the question
+  ---
+  duration_ms: 0.138851
+  ...
+# Subtest: normalizeOutcome (Claude): explicit protocol -> needs_you/decision; prose -> ready
+ok 34 - normalizeOutcome (Claude): explicit protocol -> needs_you/decision; prose -> ready
+  ---
+  duration_ms: 0.829065
+  ...
+# Subtest: normalizeCommandRun: explicit protocol -> needs_you/decision; prose -> ready
+ok 35 - normalizeCommandRun: explicit protocol -> needs_you/decision; prose -> ready
+  ---
+  duration_ms: 0.16947
+  ...
+# Subtest: deepseek-harness is registered with honest capabilities
+ok 17 - deepseek-harness is registered with honest capabilities
+  ---
+  duration_ms: 1.080931
+  ...
+# Subtest: normalizeDshRun: exit 0 -> ready with the final assistant text
+ok 18 - normalizeDshRun: exit 0 -> ready with the final assistant text
+  ---
+  duration_ms: 1.912558
+  ...
+# Subtest: normalizeDshRun: exit 0 + explicit decision protocol -> needs_you/decision (shared Work convention)
+ok 19 - normalizeDshRun: exit 0 + explicit decision protocol -> needs_you/decision (shared Work convention)
+  ---
+  duration_ms: 1.142484
+  ...
+# Subtest: normalizeDshRun: exit 0 + an explicit blocker report -> failed (kind blocked), never READY
+ok 20 - normalizeDshRun: exit 0 + an explicit blocker report -> failed (kind blocked), never READY
+  ---
+  duration_ms: 0.349631
+  ...
+# Subtest: normalizeDshRun: exit 1 -> failed with the stderr message
+ok 21 - normalizeDshRun: exit 1 -> failed with the stderr message
+  ---
+  duration_ms: 0.132608
+  ...
+# Subtest: normalizeDshRun: exit 1 without stderr -> failed with a code message
+ok 22 - normalizeDshRun: exit 1 without stderr -> failed with a code message
+  ---
+  duration_ms: 0.121085
+  ...
+# Subtest: start() runs dsh --profile headless and normalizes a successful run
+ok 23 - start() runs dsh --profile headless and normalizes a successful run
+  ---
+  duration_ms: 43.016532
+  ...
+# Subtest: start() maps a failing dsh run to failed
+ok 24 - start() maps a failing dsh run to failed
+  ---
+  duration_ms: 34.760342
+  ...
+# Subtest: start() fails cleanly when dsh is not installed
+ok 25 - start() fails cleanly when dsh is not installed
+  ---
+  duration_ms: 4.268642
+  ...
+# Subtest: taskDiff returns real hunks for a tracked, modified file
+ok 18 - taskDiff returns real hunks for a tracked, modified file
+  ---
+  duration_ms: 32.673203
+  ...
+# Subtest: taskDiff reads an untracked file as a whole-file addition
+ok 19 - taskDiff reads an untracked file as a whole-file addition
+  ---
+  duration_ms: 30.672855
+  ...
+# Subtest: taskDiff reports a file without hunks when the workspace is not a git repository
+ok 20 - taskDiff reports a file without hunks when the workspace is not a git repository
+  ---
+  duration_ms: 4.441356
+  ...
+# Subtest: taskDiff dedupes repeated reports and keeps report order
+ok 21 - taskDiff dedupes repeated reports and keeps report order
+  ---
+  duration_ms: 33.449405
+  ...
+# Subtest: taskDiff reports a file outside the workspace without hunks — never diffs elsewhere
+ok 22 - taskDiff reports a file outside the workspace without hunks — never diffs elsewhere
+  ---
+  duration_ms: 19.964532
+  ...
+# Subtest: taskDiff shows a tracked deletion when the reported file is gone
+ok 23 - taskDiff shows a tracked deletion when the reported file is gone
+  ---
+  duration_ms: 26.512914
+  ...
+# Subtest: the packed artifact supports the full first-install journey
+ok 19 - the packed artifact supports the full first-install journey
+  ---
+  duration_ms: 2806.938809
+  ...
+# Subtest: WebCrypto and the pure-JS fallback derive the identical key
+ok 20 - WebCrypto and the pure-JS fallback derive the identical key
+  ---
+  duration_ms: 4773.739767
+  ...
+# Subtest: the fallback derivation stays responsive (yields between PBKDF2 batches)
+ok 21 - the fallback derivation stays responsive (yields between PBKDF2 batches)
+  ---
+  duration_ms: 4357.394835
+  ...
+# Subtest: envelopes encrypt on one path and decrypt on the other (both directions)
+ok 22 - envelopes encrypt on one path and decrypt on the other (both directions)
+  ---
+  duration_ms: 306.635531
+  ...
+# Subtest: a tampered AAD (wrong from/requestId) is rejected on both paths
+ok 23 - a tampered AAD (wrong from/requestId) is rejected on both paths
+  ---
+  duration_ms: 303.577268
+  ...
+# Subtest: AAD encoding is the fixed wire contract
+ok 24 - AAD encoding is the fixed wire contract
+  ---
+  duration_ms: 0.173525
+  ...
+# Subtest: randomId is a UUID v4 even where crypto.randomUUID is absent
+ok 25 - randomId is a UUID v4 even where crypto.randomUUID is absent
+  ---
+  duration_ms: 0.342849
+  ...
+# Subtest: a relay cannot forge a command: envelopes without the pairing key never execute
+ok 21 - a relay cannot forge a command: envelopes without the pairing key never execute
+  ---
+  duration_ms: 5247.830917
+  ...
+# Subtest: a tampered envelope (bit flip in the ciphertext) is rejected
+ok 22 - a tampered envelope (bit flip in the ciphertext) is rejected
+  ---
+  duration_ms: 4854.285801
+  ...
+# Subtest: a captured command envelope cannot be replayed to execute twice
+ok 23 - a captured command envelope cannot be replayed to execute twice
+  ---
+  duration_ms: 675.814906
+  ...
+# Subtest: replay protection survives a Mac/runtime restart (persisted ack cache)
+ok 24 - replay protection survives a Mac/runtime restart (persisted ack cache)
+  ---
+  duration_ms: 1086.850982
+  ...
+# Subtest: legitimate retries (same requestId) return the same ack without double execution
+ok 25 - legitimate retries (same requestId) return the same ack without double execution
+  ---
+  duration_ms: 662.229521
+  ...
+# Subtest: a re-paired (rotated) Mac rejects envelopes from the old phone key
+ok 26 - a re-paired (rotated) Mac rejects envelopes from the old phone key
+  ---
+  duration_ms: 5228.737902
+  ...
+# Subtest: relay state and persisted state hold no task/source/result payloads
+ok 27 - relay state and persisted state hold no task/source/result payloads
+  ---
+  duration_ms: 809.801964
+  ...
+# Subtest: the remote projection drops raw inputs, diffs, session ids, absolute paths and base
+ok 28 - the remote projection drops raw inputs, diffs, session ids, absolute paths and base
+  ---
+  duration_ms: 3.163068
+  ...
+# Subtest: the full remote-control loop works end-to-end over the E2E channel
+ok 29 - the full remote-control loop works end-to-end over the E2E channel
+  ---
+  duration_ms: 658.29016
+  ...
+# Subtest: event model exposes exactly the normalized Work event types
+ok 22 - event model exposes exactly the normalized Work event types
+  ---
+  duration_ms: 1.503899
+  ...
+# Subtest: normalizeEvent stamps type and timestamp; rejects unknown types
+ok 23 - normalizeEvent stamps type and timestamp; rejects unknown types
+  ---
+  duration_ms: 0.691109
+  ...
+# Subtest: workEvent attaches a taskId
+ok 24 - workEvent attaches a taskId
+  ---
+  duration_ms: 0.141717
+  ...
+# Subtest: bus fans events out and supports unsubscribe
+ok 25 - bus fans events out and supports unsubscribe
+  ---
+  duration_ms: 0.207745
+  ...
+# Subtest: tailer emits each new log line exactly once, in order
+ok 26 - tailer emits each new log line exactly once, in order
+  ---
+  duration_ms: 51.861888
+  ...
+# Subtest: tailer does not consume a partial line until it is complete
+ok 27 - tailer does not consume a partial line until it is complete
+  ---
+  duration_ms: 97.485469
+  ...
+# Subtest: tailer ignores malformed lines without breaking the stream
+ok 28 - tailer ignores malformed lines without breaking the stream
+  ---
+  duration_ms: 24.615635
+  ...
+# Subtest: E2E: `2f providers` detects gemini and a task runs to READY through the real CLI
+ok 23 - E2E: `2f providers` detects gemini and a task runs to READY through the real CLI # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+  ---
+  duration_ms: 1.921628
+  ...
+# Subtest: E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works
+ok 24 - E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+  ---
+  duration_ms: 0.657229
+  ...
+# Subtest: E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context
+ok 25 - E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+  ---
+  duration_ms: 0.487148
+  ...
+# Subtest: E2E: the same task can switch away from gemini to another provider without losing task context
+ok 26 - E2E: the same task can switch away from gemini to another provider without losing task context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+  ---
+  duration_ms: 0.518414
+  ...
+# Subtest: gemini is registered with honest capabilities
+ok 24 - gemini is registered with honest capabilities
+  ---
+  duration_ms: 1.191416
+  ...
+# Subtest: geminiBin honors GEMINI_BIN
+ok 25 - geminiBin honors GEMINI_BIN
+  ---
+  duration_ms: 0.144482
+  ...
+# Subtest: geminiApprovalArgs: auto_edit is the default; yolo/default are explicit overrides
+ok 26 - geminiApprovalArgs: auto_edit is the default; yolo/default are explicit overrides
+  ---
+  duration_ms: 0.632193
+  ...
+# Subtest: classifyGeminiFailure: no-auth exit 41 classifies with the settings/API-key remedy
+ok 27 - classifyGeminiFailure: no-auth exit 41 classifies with the settings/API-key remedy
+  ---
+  duration_ms: 0.396716
+  ...
+# Subtest: classifyGeminiFailure: in-run API auth text classifies even with a non-auth exit code
+ok 28 - classifyGeminiFailure: in-run API auth text classifies even with a non-auth exit code
+  ---
+  duration_ms: 0.212622
+  ...
+# Subtest: classifyGeminiFailure: non-auth failures stay unclassified
+ok 29 - classifyGeminiFailure: non-auth failures stay unclassified
+  ---
+  duration_ms: 0.123927
+  ...
+# Subtest: normalizeGeminiRun: successful result -> ready with the session id
+ok 30 - normalizeGeminiRun: successful result -> ready with the session id
+  ---
+  duration_ms: 1.379007
+  ...
+# Subtest: normalizeGeminiRun: result text with the shared decision protocol -> needs_you/decision
+ok 31 - normalizeGeminiRun: result text with the shared decision protocol -> needs_you/decision
+  ---
+  duration_ms: 1.091756
+  ...
+# Subtest: normalizeGeminiRun: result error -> failed with auth classification
+ok 32 - normalizeGeminiRun: result error -> failed with auth classification
+  ---
+  duration_ms: 0.151388
+  ...
+# Subtest: normalizeGeminiRun: no result event is failed, never ready — even on exit 0
+ok 33 - normalizeGeminiRun: no result event is failed, never ready — even on exit 0
+  ---
+  duration_ms: 0.155538
+  ...
+# Subtest: normalizeGeminiRun: no output at all reads as the install/auth prompt
+ok 34 - normalizeGeminiRun: no output at all reads as the install/auth prompt
+  ---
+  duration_ms: 0.165159
+  ...
+# Subtest: normalizeGeminiRun: no-auth exit 41 with the settings message classifies as auth
+ok 35 - normalizeGeminiRun: no-auth exit 41 with the settings message classifies as auth
+  ---
+  duration_ms: 0.115679
+  ...
+# Subtest: parser: a completed run maps to run.started + tool events + file.changed + ready
+ok 36 - parser: a completed run maps to run.started + tool events + file.changed + ready
+  ---
+  duration_ms: 7.917238
+  ...
+# Subtest: parser: the shared decision protocol in the result -> needs_you/decision
+ok 37 - parser: the shared decision protocol in the result -> needs_you/decision
+  ---
+  duration_ms: 1.615656
+  ...
+# Subtest: parser: a handled fatal error maps to failed with auth classification
+ok 38 - parser: a handled fatal error maps to failed with auth classification
+  ---
+  duration_ms: 0.687659
+  ...
+# Subtest: parser: an interrupted run (no result event) stays failed despite exit 0
+ok 39 - parser: an interrupted run (no result event) stays failed despite exit 0
+  ---
+  duration_ms: 0.867237
+  ...
+# Subtest: parser: stray non-JSON lines are ignored without breaking the stream
+ok 40 - parser: stray non-JSON lines are ignored without breaking the stream
+  ---
+  duration_ms: 0.29182
+  ...
+# Subtest: parser: transient error events (severity warning/error) never decide the outcome
+ok 41 - parser: transient error events (severity warning/error) never decide the outcome
+  ---
+  duration_ms: 0.248485
+  ...
+# Subtest: start() runs gemini -p stream-json and normalizes a successful run
+ok 42 - start() runs gemini -p stream-json and normalizes a successful run
+  ---
+  duration_ms: 39.646198
+  ...
+# Subtest: start() passes -m model and the approval mode; surfaces a no-auth exit 41
+ok 43 - start() passes -m model and the approval mode; surfaces a no-auth exit 41
+  ---
+  duration_ms: 40.066576
+  ...
+# Subtest: resume() resumes the SAME session via --resume <uuid> and carries the grant prompt
+ok 44 - resume() resumes the SAME session via --resume <uuid> and carries the grant prompt
+  ---
+  duration_ms: 37.742895
+  ...
+# Subtest: resume() with a missing session (exit 42) fails with the resume error, unclassified
+ok 45 - resume() with a missing session (exit 42) fails with the resume error, unclassified
+  ---
+  duration_ms: 33.296912
+  ...
+# Subtest: resume() without a session id fails loudly
+ok 46 - resume() without a session id fails loudly
+  ---
+  duration_ms: 0.766231
+  ...
+# Subtest: start() fails cleanly when gemini is not installed
+ok 47 - start() fails cleanly when gemini is not installed
+  ---
+  duration_ms: 4.205739
+  ...
+# Subtest: isPrivateLanIp accepts RFC1918 ranges and rejects everything else
+ok 25 - isPrivateLanIp accepts RFC1918 ranges and rejects everything else
+  ---
+  duration_ms: 1.244871
+  ...
+# Subtest: detectLanAddress finds a private IPv4 and skips internal/loopback
+ok 26 - detectLanAddress finds a private IPv4 and skips internal/loopback
+  ---
+  duration_ms: 0.217748
+  ...
+# Subtest: LAN re-pair brings the runtime up BEFORE rotating (the runtime hosts the relay)
+ok 27 - LAN re-pair brings the runtime up BEFORE rotating (the runtime hosts the relay)
+  ---
+  duration_ms: 10.90256
+  ...
+# Port 4242 is used by another 0x2F runtime or process — pairing on port 4243 instead.
+# Subtest: LAN pairing falls back to a free port when the requested port is foreign
+ok 28 - LAN pairing falls back to a free port when the requested port is foreign
+  ---
+  duration_ms: 4.184322
+  ...
+# 0x2F UI: http://0.0.0.0:44485
+# Subtest: LAN hosts get the client + relay protocol only; the local API stays loopback-only
+ok 29 - LAN hosts get the client + relay protocol only; the local API stays loopback-only
+  ---
+  duration_ms: 35.778315
+  ...
+# 0x2F UI: http://0.0.0.0:44165
+# Subtest: LAN peers cannot obtain local credentials or call the local API with a forged loopback Host
+ok 30 - LAN peers cannot obtain local credentials or call the local API with a forged loopback Host
+  ---
+  duration_ms: 48.088012
+  ...
+# 0x2F UI: http://0.0.0.0:36433
+# Subtest: LAN relay requests cannot replay the local plaintext response cache
+ok 31 - LAN relay requests cannot replay the local plaintext response cache
+  ---
+  duration_ms: 5.127011
+  ...
+# 0x2F UI: http://0.0.0.0:41065
+# Subtest: a real private TCP peer cannot bootstrap local auth through a loopback destination
+ok 32 - a real private TCP peer cannot bootstrap local auth through a loopback destination
+  ---
+  duration_ms: 6.043748
+  ...
+# 0x2F UI: http://0.0.0.0:46253
+# Subtest: WebSocket upgrades share the LAN peer, Host, browser, and active-pairing gates
+ok 33 - WebSocket upgrades share the LAN peer, Host, browser, and active-pairing gates
+  ---
+  duration_ms: 137.682449
+  ...
+# 0x2F UI: http://0.0.0.0:42353
+# Subtest: the LAN surface closes when `2f pair --off` disables the config
+ok 34 - the LAN surface closes when `2f pair --off` disables the config
+  ---
+  duration_ms: 136.140683
+  ...
+# 0x2F UI: http://0.0.0.0:46049
+# Subtest: health reports lan so `2f pair` knows whether a running runtime serves the phone
+ok 35 - health reports lan so `2f pair` knows whether a running runtime serves the phone
+  ---
+  duration_ms: 13.596034
+  ...
+# 0x2F UI: http://0.0.0.0:43461
+# Subtest: a phone pairs over the LAN and controls a task; the local API stays off-LAN
+ok 36 - a phone pairs over the LAN and controls a task; the local API stays off-LAN
+  ---
+  duration_ms: 871.801802
+  ...
+# 0x2F UI: http://0.0.0.0:35903
+# Subtest: the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle)
+ok 37 - the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle)
+  ---
+  duration_ms: 9548.24341
+  ...
+# Subtest: lifecycle exposes the five Work statuses
+ok 26 - lifecycle exposes the five Work statuses
+  ---
+  duration_ms: 1.587979
+  ...
+# Subtest: working + ready outcome -> ready
+ok 27 - working + ready outcome -> ready
+  ---
+  duration_ms: 0.459468
+  ...
+# Subtest: working + failed outcome -> failed with error
+ok 28 - working + failed outcome -> failed with error
+  ---
+  duration_ms: 0.122792
+  ...
+# Subtest: working + permission outcome -> needs_you with blockedOn.type=permission
+ok 29 - working + permission outcome -> needs_you with blockedOn.type=permission
+  ---
+  duration_ms: 0.122239
+  ...
+# Subtest: working + decision outcome -> needs_you with blockedOn.type=decision
+ok 30 - working + decision outcome -> needs_you with blockedOn.type=decision
+  ---
+  duration_ms: 0.120062
+  ...
+# Subtest: needs_you + beginResume(allow) -> working, blockedOn cleared, attempts bumped
+ok 31 - needs_you + beginResume(allow) -> working, blockedOn cleared, attempts bumped
+  ---
+  duration_ms: 0.183022
+  ...
+# Subtest: full lifecycle: working -> needs_you -> working -> ready -> done
+ok 32 - full lifecycle: working -> needs_you -> working -> ready -> done
+  ---
+  duration_ms: 0.167632
+  ...
+# Subtest: beginResume on a non-needs_you task throws
+ok 33 - beginResume on a non-needs_you task throws
+  ---
+  duration_ms: 0.404797
+  ...
+# Subtest: closeTask works from needs_you too (user abandons)
+ok 34 - closeTask works from needs_you too (user abandons)
+  ---
+  duration_ms: 0.139541
+  ...
+# Subtest: FAILURE_KINDS includes the blocked kind
+ok 35 - FAILURE_KINDS includes the blocked kind
+  ---
+  duration_ms: 0.182113
+  ...
+# Subtest: classifyResult: an explicit blocker report is failed, not ready
+ok 36 - classifyResult: an explicit blocker report is failed, not ready
+  ---
+  duration_ms: 0.879112
+  ...
+# Subtest: classifyResult: a task-level passive blocker is failed
+ok 37 - classifyResult: a task-level passive blocker is failed
+  ---
+  duration_ms: 0.901894
+  ...
+# Subtest: classifyResult: a partial limitation is NOT a blocker (work was done)
+ok 38 - classifyResult: a partial limitation is NOT a blocker (work was done)
+  ---
+  duration_ms: 0.492021
+  ...
+# Subtest: classifyResult: a warning about a subtask never becomes a blocker
+ok 39 - classifyResult: a warning about a subtask never becomes a blocker
+  ---
+  duration_ms: 0.222287
+  ...
+# Subtest: classifyResult: an explicit decision protocol still wins over ready
+ok 40 - classifyResult: an explicit decision protocol still wins over ready
+  ---
+  duration_ms: 1.044229
+  ...
+# Subtest: classifyResult: plain completed text is ready
+ok 41 - classifyResult: plain completed text is ready
+  ---
+  duration_ms: 0.115474
+  ...
+# Subtest: blockedResultText: returns the agent's own explanation sentence, capped
+ok 42 - blockedResultText: returns the agent's own explanation sentence, capped
+  ---
+  duration_ms: 0.112246
+  ...
+# Subtest: contenders serialize, release on throw, and recover a killed owner
+ok 27 - contenders serialize, release on throw, and recover a killed owner
+  ---
+  duration_ms: 273.724439
+  ...
+# Subtest: a live owner times out without being stolen; empty released directories are replaceable
+ok 28 - a live owner times out without being stolen; empty released directories are replaceable
+  ---
+  duration_ms: 30.912242
+  ...
+# Subtest: an asynchronous EAGAIN during worker start rejects and closes the log descriptor
+ok 28 - an asynchronous EAGAIN during worker start rejects and closes the log descriptor
+  ---
+  duration_ms: 7.093224
+  ...
+# Subtest: an asynchronous EAGAIN during worker resume rejects and closes the log descriptor
+ok 29 - an asynchronous EAGAIN during worker resume rejects and closes the log descriptor
+  ---
+  duration_ms: 2.967093
+  ...
+# Subtest: worker startup waits for the child spawn event before returning its PID
+ok 30 - worker startup waits for the child spawn event before returning its PID
+  ---
+  duration_ms: 2.730121
+  ...
+# Subtest: worker launches close the parent's log descriptor after start and resume
+ok 31 - worker launches close the parent's log descriptor after start and resume
+  ---
+  duration_ms: 10.205169
+  ...
+# Subtest: a failed worker spawn also closes the parent's log descriptor
+ok 32 - a failed worker spawn also closes the parent's log descriptor
+  ---
+  duration_ms: 1.85717
+  ...
+# Subtest: a package path containing spaces and URL characters launches an existing worker path
+ok 33 - a package path containing spaces and URL characters launches an existing worker path
+  ---
+  duration_ms: 5.461476
+  ...
+# Subtest: startExecution spawns the detached worker on this machine and returns its pid
+ok 34 - startExecution spawns the detached worker on this machine and returns its pid
+  ---
+  duration_ms: 0.630697
+  ...
+# Subtest: startExecution passes the current run number to the worker
+ok 35 - startExecution passes the current run number to the worker
+  ---
+  duration_ms: 0.259877
+  ...
+# Subtest: resumeExecution spawns the worker in resume mode with the grant
+ok 36 - resumeExecution spawns the worker in resume mode with the grant
+  ---
+  duration_ms: 0.332505
+  ...
+# Subtest: resolveWorkspace maps the logical 'local' workspace to the local path
+ok 37 - resolveWorkspace maps the logical 'local' workspace to the local path
+  ---
+  duration_ms: 0.208877
+  ...
+# Subtest: cancelExecution is a best-effort stop of the recorded pid
+ok 38 - cancelExecution is a best-effort stop of the recorded pid
+  ---
+  duration_ms: 0.190894
+  ...
+# Subtest: the node is a swappable seam: the same contract a remote node would implement
+ok 39 - the node is a swappable seam: the same contract a remote node would implement
+  ---
+  duration_ms: 0.121381
+  ...
+# Subtest: worker records repository-observed file.changed events for a provider without file-change reporting
+ok 29 - worker records repository-observed file.changed events for a provider without file-change reporting
+  ---
+  duration_ms: 324.909179
+  ...
+# Subtest: a provider that DOES declare file-change reporting is observed too (authoritative on-disk state)
+ok 30 - a provider that DOES declare file-change reporting is observed too (authoritative on-disk state)
+  ---
+  duration_ms: 341.51084
+  ...
+# Subtest: recovery refuses a rerun while an orphan command still writes, then allows it after the group exits
+ok 30 - recovery refuses a rerun while an orphan command still writes, then allows it after the group exits
+  ---
+  duration_ms: 833.773792
+  ...
+# Subtest: a terminal worker can drain its POSIX group before normal rerun admission
+ok 31 - a terminal worker can drain its POSIX group before normal rerun admission
+  ---
+  duration_ms: 476.812584
+  ...
+# Subtest: a saved-session permission cannot resume while the previous group still owns a descendant
+ok 32 - a saved-session permission cannot resume while the previous group still owns a descendant
+  ---
+  duration_ms: 737.997344
+  ...
+# Subtest: the packed artifact ships only the local product
+ok 31 - the packed artifact ships only the local product
+  ---
+  duration_ms: 490.3868
+  ...
+# Subtest: an agent-registered pairing token always has an expiry (never claimable forever)
+ok 32 - an agent-registered pairing token always has an expiry (never claimable forever)
+  ---
+  duration_ms: 62.852019
+  ...
+# Subtest: a re-pair token (rotate-registered) cannot be claimed after it expires
+ok 33 - a re-pair token (rotate-registered) cannot be claimed after it expires
+  ---
+  duration_ms: 35.600799
+  ...
+# Subtest: a phone session expires after its TTL and stops authenticating
+ok 34 - a phone session expires after its TTL and stops authenticating
+  ---
+  duration_ms: 27.087449
+  ...
+# Subtest: 2f pair --off revokes remote access at the relay: sessions and tokens die immediately
+ok 35 - 2f pair --off revokes remote access at the relay: sessions and tokens die immediately
+  ---
+  duration_ms: 28.889882
+  ...
+# Subtest: a stale session stays dead after the Mac reconnects post-revocation
+ok 36 - a stale session stays dead after the Mac reconnects post-revocation
+  ---
+  duration_ms: 43.893838
+  ...
+# Subtest: re-pairing (rotate) retires old sessions; only the new token's session works
+ok 37 - re-pairing (rotate) retires old sessions; only the new token's session works
+  ---
+  duration_ms: 34.462644
+  ...
+# Subtest: a plain reconnect (same generation) does NOT revoke the phone session
+ok 38 - a plain reconnect (same generation) does NOT revoke the phone session
+  ---
+  duration_ms: 57.570025
+  ...
+# Subtest: rotation is authorized by the current deviceSecret; a wrong secret changes nothing
+ok 39 - rotation is authorized by the current deviceSecret; a wrong secret changes nothing
+  ---
+  duration_ms: 27.307839
+  ...
+# relay: The relay rejected the current device credential (Unknown device or bad deviceSecret.). — starting a fresh device identity for this Mac.
+# The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+# Subtest: 2f pair falls back to a fresh identity when the relay rejects the old credential
+ok 40 - 2f pair falls back to a fresh identity when the relay rejects the old credential
+  ---
+  duration_ms: 1839.270498
+  ...
+# Subtest: plain-HTTP relay URLs are refused except loopback and private-LAN development
+ok 41 - plain-HTTP relay URLs are refused except loopback and private-LAN development
+  ---
+  duration_ms: 0.300773
+  ...
+# Subtest: 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one
+ok 42 - 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one
+  ---
+  duration_ms: 260.863372
+  ...
+# The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+# Subtest: relay.json and the relay state file are written with mode 0600
+ok 43 - relay.json and the relay state file are written with mode 0600
+  ---
+  duration_ms: 812.966232
+  ...
+# Subtest: hosted defaults are https and pass the relay transport policy
+ok 44 - hosted defaults are https and pass the relay transport policy
+  ---
+  duration_ms: 0.473525
+  ...
+# Subtest: 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults
+ok 45 - 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults
+  ---
+  duration_ms: 0.742994
+  ...
+# Subtest: 2f pair with no flags resolves the LAN transport (same Wi-Fi)
+ok 46 - 2f pair with no flags resolves the LAN transport (same Wi-Fi)
+  ---
+  duration_ms: 7.273321
+  ...
+# Subtest: 2f pair --relay still resolves the hosted transport; --lan forces LAN
+ok 47 - 2f pair --relay still resolves the hosted transport; --lan forces LAN
+  ---
+  duration_ms: 8.755253
+  ...
+# Subtest: 2f pair with no LAN address fails closed with a clear message
+ok 48 - 2f pair with no LAN address fails closed with a clear message
+  ---
+  duration_ms: 2.412112
+  ...
+# Subtest: a plain-HTTP env override of the relay default is still refused
+ok 49 - a plain-HTTP env override of the relay default is still refused
+  ---
+  duration_ms: 2.882159
+  ...
+# Subtest: canonicalPath: leading ./ and interior . segments collapse
+ok 33 - canonicalPath: leading ./ and interior . segments collapse
+  ---
+  duration_ms: 1.110229
+  ...
+# Subtest: canonicalPath: the three spellings of one file are identical
+ok 34 - canonicalPath: the three spellings of one file are identical
+  ---
+  duration_ms: 0.123808
+  ...
+# Subtest: canonicalPath: resolves .. lexically but never escapes the repository root
+ok 35 - canonicalPath: resolves .. lexically but never escapes the repository root
+  ---
+  duration_ms: 0.134655
+  ...
+# Subtest: canonicalPath: empty and root-like inputs are stable
+ok 36 - canonicalPath: empty and root-like inputs are stable
+  ---
+  duration_ms: 0.109394
+  ...
+# Subtest: REGRESSION: exit-0 run blocked on file-edit permission -> needs_you, reason=permission
+ok 34 - REGRESSION: exit-0 run blocked on file-edit permission -> needs_you, reason=permission
+  ---
+  duration_ms: 2.290074
+  ...
+# Subtest: REGRESSION at the task layer: v0 marked this READY; v0.2 marks it needs_you
+ok 35 - REGRESSION at the task layer: v0 marked this READY; v0.2 marks it needs_you
+  ---
+  duration_ms: 1.138658
+  ...
+# Subtest: after approval, resume outcome on the same session -> working -> ready
+ok 36 - after approval, resume outcome on the same session -> working -> ready
+  ---
+  duration_ms: 2.030413
+  ...
+# Subtest: clean successful run -> ready
+ok 37 - clean successful run -> ready
+  ---
+  duration_ms: 0.792728
+  ...
+# Subtest: result with is_error=true -> failed
+ok 38 - result with is_error=true -> failed
+  ---
+  duration_ms: 0.286815
+  ...
+# Subtest: result text with a real decision section -> needs_you/decision
+ok 39 - result text with a real decision section -> needs_you/decision
+  ---
+  duration_ms: 1.078299
+  ...
+# Subtest: result text with 'None' decision section -> ready
+ok 40 - result text with 'None' decision section -> ready
+  ---
+  duration_ms: 0.180807
+  ...
+# Subtest: denials win even when is_error is also true (blocked, not failed)
+ok 41 - denials win even when is_error is also true (blocked, not failed)
+  ---
+  duration_ms: 0.12075
+  ...
+# Subtest: createWork refuses a manually selected unavailable provider BEFORE persisting anything
+ok 35 - createWork refuses a manually selected unavailable provider BEFORE persisting anything
+  ---
+  duration_ms: 7.016614
+  ...
+# Subtest: an unavailable manual provider is never turned into AUTO
+ok 36 - an unavailable manual provider is never turned into AUTO
+  ---
+  duration_ms: 2.369365
+  ...
+# Subtest: rerunWork refuses an explicitly selected unavailable provider; the previous run survives
+ok 37 - rerunWork refuses an explicitly selected unavailable provider; the previous run survives
+  ---
+  duration_ms: 16.138121
+  ...
+# Subtest: AUTO keeps excluding unavailable providers (never routes to a missing executable)
+ok 38 - AUTO keeps excluding unavailable providers (never routes to a missing executable)
+  ---
+  duration_ms: 1.792212
+  ...
+# Subtest: an unspecified request is not a manual selection: the runtime default keeps its historical behavior
+ok 39 - an unspecified request is not a manual selection: the runtime default keeps its historical behavior
+  ---
+  duration_ms: 7.730364
+  ...
+# 0x2F UI: http://127.0.0.1:45143
+# Subtest: POST /api/tasks with an unavailable provider -> 400 from the shared action (the Web UI is not the authority)
+ok 40 - POST /api/tasks with an unavailable provider -> 400 from the shared action (the Web UI is not the authority)
+  ---
+  duration_ms: 46.799287
+  ...
+# Subtest: the same task through both providers -> ready with the same result
+ok 36 - the same task through both providers -> ready with the same result
+  ---
+  duration_ms: 74.895611
+  ...
+# Subtest: a decision block normalizes identically through both providers
+ok 37 - a decision block normalizes identically through both providers
+  ---
+  duration_ms: 69.567549
+  ...
+# Subtest: classifyClaudeFailure: the exact dogfooding 401 message is classified as auth
+ok 37 - classifyClaudeFailure: the exact dogfooding 401 message is classified as auth
+  ---
+  duration_ms: 1.706997
+  ...
+# Subtest: classifyClaudeFailure: an ordinary execution failure is not classified
+ok 38 - classifyClaudeFailure: an ordinary execution failure is not classified
+  ---
+  duration_ms: 0.226656
+  ...
+# Subtest: classifyClaudeFailure: other common auth phrasings are also recognized
+ok 39 - classifyClaudeFailure: other common auth phrasings are also recognized
+  ---
+  duration_ms: 0.109564
+  ...
+# Subtest: normalizeOutcome: an is_error result with an auth message carries failure.kind=auth
+ok 40 - normalizeOutcome: an is_error result with an auth message carries failure.kind=auth
+  ---
+  duration_ms: 0.217404
+  ...
+# Subtest: normalizeOutcome: an ordinary is_error result carries no failure classification
+ok 41 - normalizeOutcome: an ordinary is_error result carries no failure classification
+  ---
+  duration_ms: 0.110145
+  ...
+# Subtest: applyOutcome persists a recognized failure.kind onto the task
+ok 42 - applyOutcome persists a recognized failure.kind onto the task
+  ---
+  duration_ms: 0.40469
+  ...
+# Subtest: applyOutcome drops an unrecognized failure.kind — no unvetted string reaches the UI
+ok 43 - applyOutcome drops an unrecognized failure.kind — no unvetted string reaches the UI
+  ---
+  duration_ms: 0.14116
+  ...
+# Subtest: applyOutcome clears a stale failure once the task recovers (needs_you / ready)
+ok 44 - applyOutcome clears a stale failure once the task recovers (needs_you / ready)
+  ---
+  duration_ms: 0.137956
+  ...
+# Subtest: a real process exit on a 401 stderr message classifies as auth
+ok 45 - a real process exit on a 401 stderr message classifies as auth
+  ---
+  duration_ms: 43.09202
+  ...
+# Subtest: a real process exit on an unrelated crash is not classified
+ok 46 - a real process exit on an unrelated crash is not classified
+  ---
+  duration_ms: 34.183411
+  ...
+# 0x2F UI: http://127.0.0.1:36485
+# Subtest: API: configured providers appear in /api/providers with their integration type
+ok 38 - API: configured providers appear in /api/providers with their integration type
+  ---
+  duration_ms: 51.665493
+  ...
+# Subtest: CLI: `2f providers` lists natives and configured providers with availability
+ok 39 - CLI: `2f providers` lists natives and configured providers with availability
+  ---
+  duration_ms: 196.840194
+  ...
+# Subtest: E2E: a configured command provider runs the task through the real worker
+ok 40 - E2E: a configured command provider runs the task through the real worker
+  ---
+  duration_ms: 416.938734
+  ...
+# Subtest: E2E: a configured ACP provider runs the task through the real worker and persists the session id
+ok 41 - E2E: a configured ACP provider runs the task through the real worker and persists the session id
+  ---
+  duration_ms: 400.079121
+  ...
+# Subtest: E2E: native + ACP + command providers coexist in one workspace
+ok 42 - E2E: native + ACP + command providers coexist in one workspace
+  ---
+  duration_ms: 11.724082
+  ...
+# Subtest: every manifest example generated by init loads alongside built-in providers
+ok 39 - every manifest example generated by init loads alongside built-in providers
+  ---
+  duration_ms: 20.85996
+  ...
+# Subtest: manifests: a valid ACP manifest and a valid command manifest
+ok 40 - manifests: a valid ACP manifest and a valid command manifest
+  ---
+  duration_ms: 0.247803
+  ...
+# Subtest: manifests: shell and repository-relative executables carry a trust warning
+ok 41 - manifests: shell and repository-relative executables carry a trust warning
+  ---
+  duration_ms: 0.21432
+  ...
+# Subtest: manifests: every failure mode fails loudly, naming the file
+ok 42 - manifests: every failure mode fails loudly, naming the file
+  ---
+  duration_ms: 0.697675
+  ...
+# Subtest: manifests: a manifest cannot shadow a built-in provider
+ok 43 - manifests: a manifest cannot shadow a built-in provider
+  ---
+  duration_ms: 0.243815
+  ...
+# Subtest: loadManifestProviders: no providers dir means nothing configured
+ok 44 - loadManifestProviders: no providers dir means nothing configured
+  ---
+  duration_ms: 3.457158
+  ...
+# Subtest: loadManifestProviders: builds acp + command providers from files; duplicate ids fail
+ok 45 - loadManifestProviders: builds acp + command providers from files; duplicate ids fail
+  ---
+  duration_ms: 4.412504
+  ...
+# Subtest: loadManifestProviders: invalid JSON fails clearly
+ok 46 - loadManifestProviders: invalid JSON fails clearly
+  ---
+  duration_ms: 2.156649
+  ...
+# Subtest: registry: native + configured providers coexist behind one contract
+ok 47 - registry: native + configured providers coexist behind one contract
+  ---
+  duration_ms: 2.391179
+  ...
+# Subtest: registry: a manifest error fails runtime creation loudly (never silent)
+ok 48 - registry: a manifest error fails runtime creation loudly (never silent)
+  ---
+  duration_ms: 1.667462
+  ...
+# Subtest: registry: availability resolves the configured executable deterministically
+ok 49 - registry: availability resolves the configured executable deterministically
+  ---
+  duration_ms: 3.242031
+  ...
+# Subtest: registry: the register() seam adds providers and refuses duplicates
+ok 50 - registry: the register() seam adds providers and refuses duplicates
+  ---
+  duration_ms: 0.78213
+  ...
+# Subtest: executableAvailable: PATH resolution and absolute paths, cheap and sync
+ok 51 - executableAvailable: PATH resolution and absolute paths, cheap and sync
+  ---
+  duration_ms: 1.504062
+  ...
+# Subtest: registry: built-in OpenCode uses ACP without a workspace manifest
+ok 52 - registry: built-in OpenCode uses ACP without a workspace manifest
+  ---
+  duration_ms: 0.64919
+  ...
+# Subtest: registry: an existing OpenCode manifest keeps its explicit descriptor
+ok 53 - registry: an existing OpenCode manifest keeps its explicit descriptor
+  ---
+  duration_ms: 1.915761
+  ...
+# Subtest: pidAlive: signal-0 existence probe with EPERM treated as alive
+ok 40 - pidAlive: signal-0 existence probe with EPERM treated as alive
+  ---
+  duration_ms: 1.473174
+  ...
+# Subtest: an orphaned working run is failed with the crashed classification, preserving history and session
+ok 41 - an orphaned working run is failed with the crashed classification, preserving history and session
+  ---
+  duration_ms: 17.950532
+  ...
+# Subtest: an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time
+ok 42 - an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time
+  ---
+  duration_ms: 10.942908
+  ...
+# Subtest: a task with no recorded pid is also recovered (worker died before pid persisted)
+ok 43 - a task with no recorded pid is also recovered (worker died before pid persisted)
+  ---
+  duration_ms: 6.06462
+  ...
+# Subtest: a working task whose worker is alive is never touched
+ok 44 - a working task whose worker is alive is never touched
+  ---
+  duration_ms: 5.01987
+  ...
+# Subtest: completed tasks and non-live human stops are left alone even with a dead pid
+ok 45 - completed tasks and non-live human stops are left alone even with a dead pid
+  ---
+  duration_ms: 11.389336
+  ...
+# Subtest: a dead live-permission worker is recovered while its saved session survives
+ok 46 - a dead live-permission worker is recovered while its saved session survives
+  ---
+  duration_ms: 5.414878
+  ...
+# Subtest: a live-permission worker that is still alive is never recovered
+ok 47 - a live-permission worker that is still alive is never recovered
+  ---
+  duration_ms: 3.647885
+  ...
+# Subtest: recovery finalizes a closed task's interrupted run without reopening the task
+ok 48 - recovery finalizes a closed task's interrupted run without reopening the task
+  ---
+  duration_ms: 5.063036
+  ...
+# Subtest: recovery merges fresh input and skips a replaced worker from an older snapshot
+ok 49 - recovery merges fresh input and skips a replaced worker from an older snapshot
+  ---
+  duration_ms: 7.938762
+  ...
+# Subtest: concurrent recovery sweeps finalize an interrupted run only once
+ok 50 - concurrent recovery sweeps finalize an interrupted run only once
+  ---
+  duration_ms: 19.368771
+  ...
+# Subtest: legacy tasks (no run records) are recovered without crashing
+ok 51 - legacy tasks (no run records) are recovered without crashing
+  ---
+  duration_ms: 6.024667
+  ...
+# Subtest: failInterruptedRun with no startedAt writes no duration
+ok 52 - failInterruptedRun with no startedAt writes no duration
+  ---
+  duration_ms: 4.234633
+  ...
+# Subtest: a recovered task can be rerun normally (the working guard no longer blocks it)
+ok 53 - a recovered task can be rerun normally (the working guard no longer blocks it)
+  ---
+  duration_ms: 13.906001
+  ...
+# Subtest: recovery is idempotent: a second sweep leaves the failed task alone
+ok 54 - recovery is idempotent: a second sweep leaves the failed task alone
+  ---
+  duration_ms: 4.246992
+  ...
+# Subtest: buildRefineInstruction embeds the note and the refinement rules
+ok 41 - buildRefineInstruction embeds the note and the refinement rules
+  ---
+  duration_ms: 1.281308
+  ...
+# Subtest: cleanRefinedText trims and unwraps a single code fence
+ok 42 - cleanRefinedText trims and unwraps a single code fence
+  ---
+  duration_ms: 0.237184
+  ...
+# Subtest: raw text is sent to the refinement service: claude print mode with tools denied
+ok 43 - raw text is sent to the refinement service: claude print mode with tools denied
+  ---
+  duration_ms: 46.895449
+  ...
+# Subtest: does NOT fall back to dsh headless — refinement only runs a tool-denied model
+ok 44 - does NOT fall back to dsh headless — refinement only runs a tool-denied model
+  ---
+  duration_ms: 2.79419
+  ...
+# Subtest: prefers claude-code's text mode when both providers are available
+ok 45 - prefers claude-code's text mode when both providers are available
+  ---
+  duration_ms: 42.459256
+  ...
+# Subtest: fails gracefully with a clear error when no refinement model is available
+ok 46 - fails gracefully with a clear error when no refinement model is available
+  ---
+  duration_ms: 1.227752
+  ...
+# Subtest: empty, whitespace-only, and over-long notes are refused before any model call
+ok 47 - empty, whitespace-only, and over-long notes are refused before any model call
+  ---
+  duration_ms: 1.991499
+  ...
+# Subtest: a failing model run rejects and leaves the caller's text untouched
+ok 48 - a failing model run rejects and leaves the caller's text untouched
+  ---
+  duration_ms: 36.112824
+  ...
+# Subtest: an empty model response is a failure, never a blank brief
+ok 49 - an empty model response is a failure, never a blank brief
+  ---
+  duration_ms: 38.56984
+  ...
+# Subtest: a hanging refinement times out instead of leaving the composer stuck
+ok 50 - a hanging refinement times out instead of leaving the composer stuck
+  ---
+  duration_ms: 207.927262
+  ...
+# Subtest: a failing claude path surfaces its error and never falls back to dsh
+ok 51 - a failing claude path surfaces its error and never falls back to dsh
+  ---
+  duration_ms: 42.944936
+  ...
+# Subtest: when every available path fails, the preferred path's error is reported
+ok 52 - when every available path fails, the preferred path's error is reported
+  ---
+  duration_ms: 37.152808
+  ...
+# Subtest: a failure reported on stdout is surfaced with the provider label
+ok 53 - a failure reported on stdout is surfaced with the provider label
+  ---
+  duration_ms: 36.925454
+  ...
+# 0x2F UI: http://127.0.0.1:38657
+# Subtest: POST /api/refine returns the refined text; repeated REFINE creates no tasks and starts no execution
+ok 54 - POST /api/refine returns the refined text; repeated REFINE creates no tasks and starts no execution
+  ---
+  duration_ms: 172.978201
+  ...
+# 0x2F UI: http://127.0.0.1:33593
+# Subtest: START after refinement creates the Task using the refined text
+ok 55 - START after refinement creates the Task using the refined text
+  ---
+  duration_ms: 54.204029
+  ...
+# 0x2F UI: http://127.0.0.1:39697
+# Subtest: START without refinement behaves exactly as today
+ok 56 - START without refinement behaves exactly as today
+  ---
+  duration_ms: 11.641847
+  ...
+# 0x2F UI: http://127.0.0.1:46329
+# Subtest: a failed refinement does not destroy the original text: START still uses it
+ok 57 - a failed refinement does not destroy the original text: START still uses it
+  ---
+  duration_ms: 53.593385
+  ...
+# 0x2F UI: http://127.0.0.1:41631
+# Subtest: POST /api/refine refuses empty or missing input with 400 and never spawns the model
+ok 58 - POST /api/refine refuses empty or missing input with 400 and never spawns the model
+  ---
+  duration_ms: 7.09321
+  ...
+# Subtest: a normal pair-hello still confirms: the liveness check does not fire on the happy path
+ok 42 - a normal pair-hello still confirms: the liveness check does not fire on the happy path
+  ---
+  duration_ms: 686.934306
+  ...
+# Subtest: startup polling waits for key derivation before opening the relay connection
+ok 43 - startup polling waits for key derivation before opening the relay connection
+  ---
+  duration_ms: 688.639497
+  ...
+# Subtest: writing the confirmed pairing does not make the poller swap the config object
+ok 44 - writing the confirmed pairing does not make the poller swap the config object
+  ---
+  duration_ms: 758.452289
+  ...
+# Subtest: polling during a delayed pairing write never observes a partial config
+ok 45 - polling during a delayed pairing write never observes a partial config
+  ---
+  duration_ms: 751.121533
+  ...
+# Subtest: the config vanishing during the pairing ceremony never throws
+ok 46 - the config vanishing during the pairing ceremony never throws
+  ---
+  duration_ms: 4182.703829
+  ...
+# Subtest: a pair-hello arriving with no live config is refused, not crashed on
+ok 47 - a pair-hello arriving with no live config is refused, not crashed on
+  ---
+  duration_ms: 650.811163
+  ...
+# Subtest: permission occurrence IDs reach phone snapshots and events as freshness preconditions
+ok 43 - permission occurrence IDs reach phone snapshots and events as freshness preconditions
+  ---
+  duration_ms: 1.614825
+  ...
+# Subtest: projectTask: a recognized failure.kind (and adapter remedy) crosses the relay
+ok 44 - projectTask: a recognized failure.kind (and adapter remedy) crosses the relay
+  ---
+  duration_ms: 0.613539
+  ...
+# Subtest: projectTask: an unrecognized kind never reaches the phone — re-vetted, not trusted
+ok 45 - projectTask: an unrecognized kind never reaches the phone — re-vetted, not trusted
+  ---
+  duration_ms: 0.110905
+  ...
+# Subtest: projectTask: no failure field at all projects to undefined, exactly as before
+ok 46 - projectTask: no failure field at all projects to undefined, exactly as before
+  ---
+  duration_ms: 0.102469
+  ...
+# Subtest: projectTask: failure.remedy is bounded like any other adapter-authored field
+ok 47 - projectTask: failure.remedy is bounded like any other adapter-authored field
+  ---
+  duration_ms: 0.16743
+  ...
+# Subtest: the closed vocabulary the relay checks against is the same one core/lifecycle.mjs owns
+ok 48 - the closed vocabulary the relay checks against is the same one core/lifecycle.mjs owns
+  ---
+  duration_ms: 0.183872
+  ...
+# Subtest: projectWorkspaceLabel: the basename only, never the absolute path
+ok 49 - projectWorkspaceLabel: the basename only, never the absolute path
+  ---
+  duration_ms: 0.202458
+  ...
+# Subtest: projectWorkspaceLabel: a long name is truncated from the LEFT so the distinguishing tail survives
+ok 50 - projectWorkspaceLabel: a long name is truncated from the LEFT so the distinguishing tail survives
+  ---
+  duration_ms: 0.119397
+  ...
+# Subtest: projectSnapshot: carries a bounded workspace label and node — never the absolute base
+ok 51 - projectSnapshot: carries a bounded workspace label and node — never the absolute base
+  ---
+  duration_ms: 0.26307
+  ...
+# Subtest: projectSnapshot: absent base/node project to null, not a crash or an empty string standing in for absence
+ok 52 - projectSnapshot: absent base/node project to null, not a crash or an empty string standing in for absence
+  ---
+  duration_ms: 0.177941
+  ...
+# Subtest: projectBlockedOn: the decision cap is raised to 4000, matching core/lifecycle.mjs's storage guard
+ok 53 - projectBlockedOn: the decision cap is raised to 4000, matching core/lifecycle.mjs's storage guard
+  ---
+  duration_ms: 0.09802
+  ...
+# Subtest: projectBlockedOn: a question under the cap is passed through completely, newlines intact
+ok 54 - projectBlockedOn: a question under the cap is passed through completely, newlines intact
+  ---
+  duration_ms: 0.109943
+  ...
+# Subtest: projectBlockedOn: a genuine over-cap cut is marked explicitly, never a bare ellipsis
+ok 55 - projectBlockedOn: a genuine over-cap cut is marked explicitly, never a bare ellipsis
+  ---
+  duration_ms: 0.236827
+  ...
+# Subtest: projectBlockedOn: an absolute workspace path inside a decision question is still stripped
+ok 56 - projectBlockedOn: an absolute workspace path inside a decision question is still stripped
+  ---
+  duration_ms: 0.125744
+  ...
+# Subtest: projectTask carries the full brief — a long brief is not cut for the phone
+ok 57 - projectTask carries the full brief — a long brief is not cut for the phone
+  ---
+  duration_ms: 0.141344
+  ...
+# Subtest: the relay's brief bound IS the action's bound — the remote surface loses nothing
+ok 58 - the relay's brief bound IS the action's bound — the remote surface loses nothing
+  ---
+  duration_ms: 0.140117
+  ...
+# Subtest: a brief beyond the bound is cut EXPLICITLY and flagged for the UI to say so
+ok 59 - a brief beyond the bound is cut EXPLICITLY and flagged for the UI to say so
+  ---
+  duration_ms: 0.733994
+  ...
+# Subtest: a task with no brief falls back to its title, as legacy tasks require
+ok 60 - a task with no brief falls back to its title, as legacy tasks require
+  ---
+  duration_ms: 0.125011
+  ...
+# Subtest: an absolute workspace path quoted inside a brief is still stripped
+ok 61 - an absolute workspace path quoted inside a brief is still stripped
+  ---
+  duration_ms: 0.175031
+  ...
+# Subtest: projectTask: a READY task carries its projected result, base paths stripped
+ok 62 - projectTask: a READY task carries its projected result, base paths stripped
+  ---
+  duration_ms: 0.150902
+  ...
+# Subtest: projectTask: result is gated to states that show one — a stale result.md never leaks onto a failed task
+ok 63 - projectTask: result is gated to states that show one — a stale result.md never leaks onto a failed task
+  ---
+  duration_ms: 0.126909
+  ...
+# Subtest: projectSnapshot: READY tasks carry their result when the agent supplies resultsByTask
+ok 64 - projectSnapshot: READY tasks carry their result when the agent supplies resultsByTask
+  ---
+  duration_ms: 0.189298
+  ...
+# Subtest: projectRun: outcome, duration and provider cross the relay for run history
+ok 65 - projectRun: outcome, duration and provider cross the relay for run history
+  ---
+  duration_ms: 0.14687
+  ...
+# Subtest: relPath: ./src/foo.mjs, src/foo.mjs and /w/src/foo.mjs project identically
+ok 66 - relPath: ./src/foo.mjs, src/foo.mjs and /w/src/foo.mjs project identically
+  ---
+  duration_ms: 0.14714
+  ...
+# Subtest: relPath: out-of-workspace paths flatten to the basename — never an absolute path
+ok 67 - relPath: out-of-workspace paths flatten to the basename — never an absolute path
+  ---
+  duration_ms: 0.095989
+  ...
+# Subtest: the phone sees the safe user-facing result in the snapshot, task detail and run detail
+ok 44 - the phone sees the safe user-facing result in the snapshot, task detail and run detail
+  ---
+  duration_ms: 736.762514
+  ...
+# Subtest: a failed task never leaks a stale result.md to the phone
+ok 45 - a failed task never leaks a stale result.md to the phone
+  ---
+  duration_ms: 662.543354
+  ...
+# Subtest: the Mac authenticates outbound; unpaired and mismatched hellos are rejected
+ok 45 - the Mac authenticates outbound; unpaired and mismatched hellos are rejected
+  ---
+  duration_ms: 19.886619
+  ...
+# Subtest: a pairing token is one-time: a second claim fails
+ok 46 - a pairing token is one-time: a second claim fails
+  ---
+  duration_ms: 681.905598
+  ...
+# Subtest: an expired pairing token cannot be claimed
+ok 47 - an expired pairing token cannot be claimed
+  ---
+  duration_ms: 4.811618
+  ...
+# Subtest: the phone pairs end-to-end and pulls a redacted snapshot
+ok 48 - the phone pairs end-to-end and pulls a redacted snapshot
+  ---
+  duration_ms: 645.381041
+  ...
+# Subtest: creating a Task through the encrypted channel starts it on the Mac's node
+ok 49 - creating a Task through the encrypted channel starts it on the Mac's node
+  ---
+  duration_ms: 654.537391
+  ...
+# Subtest: redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac
+ok 50 - redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac
+  ---
+  duration_ms: 4976.24428
+  ...
+# Subtest: ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions
+ok 51 - ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions
+  ---
+  duration_ms: 663.311921
+  ...
+# Subtest: remote permission commands refuse stale or missing displayed occurrence IDs
+ok 52 - remote permission commands refuse stale or missing displayed occurrence IDs
+  ---
+  duration_ms: 704.770073
+  ...
+# Subtest: a duplicate requestId returns the cached acknowledgement and never executes twice
+ok 53 - a duplicate requestId returns the cached acknowledgement and never executes twice
+  ---
+  duration_ms: 645.851711
+  ...
+# Subtest: the Mac is offline: status reports offline and commands answer 503 — never queued
+ok 54 - the Mac is offline: status reports offline and commands answer 503 — never queued
+  ---
+  duration_ms: 635.927114
+  ...
+# Subtest: a relay restart loses no session and keeps the phone paired
+ok 55 - a relay restart loses no session and keeps the phone paired
+  ---
+  duration_ms: 1497.299479
+  ...
+# Subtest: the relay holds no task content — state and state.json are content-free
+ok 56 - the relay holds no task content — state and state.json are content-free
+  ---
+  duration_ms: 750.448131
+  ...
+# Subtest: the relay is a broker: it serves no client or pairing page
+ok 57 - the relay is a broker: it serves no client or pairing page
+  ---
+  duration_ms: 646.497486
+  ...
+# Subtest: pairing claims and command forwarding are rate limited
+ok 58 - pairing claims and command forwarding are rate limited
+  ---
+  duration_ms: 6.12269
+  ...
+# 0x2F UI: http://127.0.0.1:37971
+# Subtest: the local server reports mode 'local' — the client keeps its local behavior
+ok 59 - the local server reports mode 'local' — the client keeps its local behavior
+  ---
+  duration_ms: 3.912668
+  ...
+# Subtest: a remote command whose response is lost settles with an honest error (never hangs forever)
+ok 46 - a remote command whose response is lost settles with an honest error (never hangs forever)
+  ---
+  duration_ms: 520.145486
+  ...
+# Subtest: the timeout error is surfaced, not silently retried into a double action
+ok 47 - the timeout error is surfaced, not silently retried into a double action
+  ---
+  duration_ms: 4822.758879
+  ...
+# Subtest: render groups needs_you tasks under NEEDS YOU with the reason
+ok 47 - render groups needs_you tasks under NEEDS YOU with the reason
+  ---
+  duration_ms: 1.568431
+  ...
+# Subtest: decision reason renders its own label
+ok 48 - decision reason renders its own label
+  ---
+  duration_ms: 0.140497
+  ...
+# Subtest: empty render
+ok 49 - empty render
+  ---
+  duration_ms: 0.090182
+  ...
+# Subtest: a realistic provider result parses into headings, prose, lists and code
+ok 48 - a realistic provider result parses into headings, prose, lists and code
+  ---
+  duration_ms: 2.075422
+  ...
+# Subtest: headings cap at three display levels and ordered lists parse
+ok 49 - headings cap at three display levels and ordered lists parse
+  ---
+  duration_ms: 0.237979
+  ...
+# Subtest: unbalanced markers stay literal text instead of becoming markup
+ok 50 - unbalanced markers stay literal text instead of becoming markup
+  ---
+  duration_ms: 0.206775
+  ...
+# Subtest: provider prose carrying HTML stays inert text tokens
+ok 51 - provider prose carrying HTML stays inert text tokens
+  ---
+  duration_ms: 0.321039
+  ...
+# Subtest: code blocks keep newlines and long unbroken lines verbatim
+ok 52 - code blocks keep newlines and long unbroken lines verbatim
+  ---
+  duration_ms: 0.183948
+  ...
+# Subtest: empty, blank and plain input degrade gracefully
+ok 53 - empty, blank and plain input degrade gracefully
+  ---
+  duration_ms: 0.170067
+  ...
+# Subtest: a decision question parses inline for the NEEDS YOU card
+ok 54 - a decision question parses inline for the NEEDS YOU card
+  ---
+  duration_ms: 0.14477
+  ...
+# Subtest: router: AUTO with a single available provider picks it deterministically
+ok 49 - router: AUTO with a single available provider picks it deterministically
+  ---
+  duration_ms: 2.13633
+  ...
+# Subtest: router: preference ordering wins over registry order
+ok 50 - router: preference ordering wins over registry order
+  ---
+  duration_ms: 0.323488
+  ...
+# Subtest: router: an unavailable preferred provider is skipped (deterministic fallback)
+ok 51 - router: an unavailable preferred provider is skipped (deterministic fallback)
+  ---
+  duration_ms: 0.215312
+  ...
+# Subtest: router: no compatible provider fails clearly, never silently
+ok 52 - router: no compatible provider fails clearly, never silently
+  ---
+  duration_ms: 0.264752
+  ...
+# Subtest: router: the configured default resolves an unspecified request
+ok 53 - router: the configured default resolves an unspecified request
+  ---
+  duration_ms: 0.313098
+  ...
+# Subtest: router: orderCandidates is deterministic and preference-first
+ok 54 - router: orderCandidates is deterministic and preference-first
+  ---
+  duration_ms: 0.194029
+  ...
+# Subtest: router: routing config is validated strictly, naming the file
+ok 55 - router: routing config is validated strictly, naming the file
+  ---
+  duration_ms: 7.457284
+  ...
+# Subtest: router: absent routing config means the runtime default applies
+ok 56 - router: absent routing config means the runtime default applies
+  ---
+  duration_ms: 1.416734
+  ...
+# Subtest: actions: createWork with provider auto routes and persists the decision
+ok 57 - actions: createWork with provider auto routes and persists the decision
+  ---
+  duration_ms: 15.384405
+  ...
+# Subtest: actions: the configured routing default routes an unspecified request
+ok 58 - actions: the configured routing default routes an unspecified request
+  ---
+  duration_ms: 7.216757
+  ...
+# Subtest: actions: without routing config an unspecified request keeps the runtime default
+ok 59 - actions: without routing config an unspecified request keeps the runtime default
+  ---
+  duration_ms: 6.500816
+  ...
+# Subtest: actions: a manual override bypasses the router entirely
+ok 60 - actions: a manual override bypasses the router entirely
+  ---
+  duration_ms: 7.638483
+  ...
+# Subtest: actions: AUTO with nothing available fails clearly instead of guessing
+ok 61 - actions: AUTO with nothing available fails clearly instead of guessing
+  ---
+  duration_ms: 1.597972
+  ...
+# Subtest: actions: rerun --provider auto re-routes and keeps the previous run
+ok 62 - actions: rerun --provider auto re-routes and keeps the previous run
+  ---
+  duration_ms: 10.962071
+  ...
+# 0x2F UI: http://127.0.0.1:35399
+# Subtest: API: GET /api/routing exposes the configured default and preference
+ok 63 - API: GET /api/routing exposes the configured default and preference
+  ---
+  duration_ms: 39.984562
+  ...
+# 0x2F UI: http://127.0.0.1:35787
+# Subtest: API: POST /api/tasks with provider auto routes through the shared action
+ok 64 - API: POST /api/tasks with provider auto routes through the shared action
+  ---
+  duration_ms: 18.993988
+  ...
+# Subtest: CLI: 2f new --provider auto routes through the real worker; 2f open shows the decision
+ok 65 - CLI: 2f new --provider auto routes through the real worker; 2f open shows the decision
+  ---
+  duration_ms: 439.236551
+  ...
+# Subtest: an existing task (no runs) is interpreted as one historical run without rewriting it
+ok 50 - an existing task (no runs) is interpreted as one historical run without rewriting it
+  ---
+  duration_ms: 1.343792
+  ...
+# Subtest: legacy run timing comes from the real event log when it exists
+ok 51 - legacy run timing comes from the real event log when it exists
+  ---
+  duration_ms: 0.194266
+  ...
+# Subtest: legacy outcomes: needs_you / failed / working / done are read from state when no event is terminal
+ok 52 - legacy outcomes: needs_you / failed / working / done are read from state when no event is terminal
+  ---
+  duration_ms: 0.142326
+  ...
+# Subtest: makeRunRecord creates an in-flight run; updateRun persists outcome and timing
+ok 53 - makeRunRecord creates an in-flight run; updateRun persists outcome and timing
+  ---
+  duration_ms: 0.268289
+  ...
+# Subtest: updateRun is a no-op for legacy tasks (their history stays interpreted)
+ok 54 - updateRun is a no-op for legacy tasks (their history stays interpreted)
+  ---
+  duration_ms: 0.110443
+  ...
+# Subtest: currentRunNumber is the last record for sequential runs; 1 for legacy
+ok 55 - currentRunNumber is the last record for sequential runs; 1 for legacy
+  ---
+  duration_ms: 0.133886
+  ...
+# Subtest: createWork persists the first run with the task
+ok 56 - createWork persists the first run with the task
+  ---
+  duration_ms: 20.700704
+  ...
+# Subtest: rerunWork appends a second run under the SAME task without overwriting the first
+ok 57 - rerunWork appends a second run under the SAME task without overwriting the first
+  ---
+  duration_ms: 15.725786
+  ...
+# Subtest: rerunWork without a provider retries through the task's current provider
+ok 58 - rerunWork without a provider retries through the task's current provider
+  ---
+  duration_ms: 10.899146
+  ...
+# Subtest: rerunWork refuses while the task is working (sequential runs only)
+ok 59 - rerunWork refuses while the task is working (sequential runs only)
+  ---
+  duration_ms: 6.464301
+  ...
+# Subtest: rerunWork rejects an unknown provider with the shared error
+ok 60 - rerunWork rejects an unknown provider with the shared error
+  ---
+  duration_ms: 7.937837
+  ...
+# Subtest: rerunWork materializes a legacy task's history before appending the new run
+ok 61 - rerunWork materializes a legacy task's history before appending the new run
+  ---
+  duration_ms: 7.541074
+  ...
+# Subtest: getRun returns one run's own result; an unknown run is a 404
+ok 62 - getRun returns one run's own result; an unknown run is a 404
+  ---
+  duration_ms: 5.304432
+  ...
+# Subtest: getWork includes the projected run history
+ok 63 - getWork includes the projected run history
+  ---
+  duration_ms: 4.467966
+  ...
+# Subtest: eventsForRun attributes run-tagged events to their run and legacy events to run 1
+ok 64 - eventsForRun attributes run-tagged events to their run and legacy events to run 1
+  ---
+  duration_ms: 0.242828
+  ...
+# Subtest: DOGFOODING: the same task through claude-code then deepseek-harness persists as two runs
+ok 65 - DOGFOODING: the same task through claude-code then deepseek-harness persists as two runs
+  ---
+  duration_ms: 223.799068
+  ...
+# Subtest: DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2
+ok 66 - DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2
+  ---
+  duration_ms: 221.864761
+  ...
+# Subtest: DOGFOODING: a needs_you run is preserved in history with its block
+ok 67 - DOGFOODING: a needs_you run is preserved in history with its block
+  ---
+  duration_ms: 112.795648
+  ...
+# Subtest: DOGFOODING: a failed rerun is preserved in history; the previous ready run is untouched
+ok 68 - DOGFOODING: a failed rerun is preserved in history; the previous ready run is untouched
+  ---
+  duration_ms: 225.636727
+  ...
+# 0x2F UI: http://127.0.0.1:42641
+# Subtest: idempotency replay still requires authentication and the local browser boundary
+ok 51 - idempotency replay still requires authentication and the local browser boundary
+  ---
+  duration_ms: 49.179115
+  ...
+# 0x2F UI: http://127.0.0.1:37089
+# Subtest: unauthenticated /api requests are refused with 401 — no task can be started
+ok 52 - unauthenticated /api requests are refused with 401 — no task can be started
+  ---
+  duration_ms: 41.63573
+  ...
+# 0x2F UI: http://127.0.0.1:37269
+# Subtest: a wrong or absent token is refused; the correct token is accepted
+ok 53 - a wrong or absent token is refused; the correct token is accepted
+  ---
+  duration_ms: 5.366502
+  ...
+# 0x2F UI: http://127.0.0.1:38583
+# Subtest: the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow)
+ok 54 - the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow)
+  ---
+  duration_ms: 19.56516
+  ...
+# 0x2F UI: http://127.0.0.1:43959
+# Subtest: a foreign Host header (DNS rebinding) is refused on every route
+ok 55 - a foreign Host header (DNS rebinding) is refused on every route
+  ---
+  duration_ms: 7.563481
+  ...
+# 0x2F UI: http://127.0.0.1:40805
+# Subtest: cross-origin requests are refused even with a valid token
+ok 56 - cross-origin requests are refused even with a valid token
+  ---
+  duration_ms: 18.459678
+  ...
+# 0x2F UI: http://127.0.0.1:34693
+# Subtest: Sec-Fetch-Site: cross-site and same-site browser requests are refused
+ok 57 - Sec-Fetch-Site: cross-site and same-site browser requests are refused
+  ---
+  duration_ms: 14.580987
+  ...
+# 0x2F UI: http://127.0.0.1:38103
+# Subtest: the full C1 chain: no unauthenticated or cross-site path starts agent work
+ok 58 - the full C1 chain: no unauthenticated or cross-site path starts agent work
+  ---
+  duration_ms: 6.124671
+  ...
+# 0x2F UI: http://127.0.0.1:41583
+# Subtest: request bodies over the cap are refused with 413 (declared and streamed)
+ok 59 - request bodies over the cap are refused with 413 (declared and streamed)
+  ---
+  duration_ms: 7.419332
+  ...
+# 0x2F UI: http://127.0.0.1:45585
+# Subtest: oversized inputs are refused by the shared actions — the CLI and the API share the caps
+ok 60 - oversized inputs are refused by the shared actions — the CLI and the API share the caps
+  ---
+  duration_ms: 12.673476
+  ...
+# 0x2F UI: http://127.0.0.1:39659
+# Subtest: the health probe is unauthenticated but Host-guarded; static assets carry the CSP
+ok 61 - the health probe is unauthenticated but Host-guarded; static assets carry the CSP
+  ---
+  duration_ms: 9.699718
+  ...
+# Subtest: SIGTERM shuts the runtime down cleanly without terminating the detached worker
+ok 52 - SIGTERM shuts the runtime down cleanly without terminating the detached worker
+  ---
+  duration_ms: 2776.814898
+  ...
+# Subtest: a task left working with a dead worker is recovered on the next runtime start
+ok 53 - a task left working with a dead worker is recovered on the next runtime start
+  ---
+  duration_ms: 3259.104705
+  ...
+# Subtest: a genuinely running task survives a runtime restart untouched
+ok 54 - a genuinely running task survives a runtime restart untouched
+  ---
+  duration_ms: 4316.263188
+  ...
+# Subtest: SIGINT is a clean shutdown too
+ok 55 - SIGINT is a clean shutdown too
+  ---
+  duration_ms: 271.894192
+  ...
+# Subtest: seeded tasks never sound — a task already READY at seed stays silent
+ok 53 - seeded tasks never sound — a task already READY at seed stays silent
+  ---
+  duration_ms: 2.088975
+  ...
+# Subtest: working -> ready via run.completed earns one READY intent
+ok 54 - working -> ready via run.completed earns one READY intent
+  ---
+  duration_ms: 0.302439
+  ...
+# Subtest: one transition arriving as several events sounds once (dedupe)
+ok 55 - one transition arriving as several events sounds once (dedupe)
+  ---
+  duration_ms: 0.165124
+  ...
+# Subtest: needs_user plus its task.updated sounds once (dedupe)
+ok 56 - needs_user plus its task.updated sounds once (dedupe)
+  ---
+  duration_ms: 0.159342
+  ...
+# Subtest: several tasks READY within the window produce ONE gesture
+ok 57 - several tasks READY within the window produce ONE gesture
+  ---
+  duration_ms: 0.188995
+  ...
+# Subtest: NEEDS YOU beats a pending READY in the same window
+ok 58 - NEEDS YOU beats a pending READY in the same window
+  ---
+  duration_ms: 0.192232
+  ...
+# Subtest: READY arriving while NEEDS YOU is pending stays NEEDS YOU
+ok 59 - READY arriving while NEEDS YOU is pending stays NEEDS YOU
+  ---
+  duration_ms: 0.803194
+  ...
+# Subtest: a re-entry after working is a NEW transition, not a replay
+ok 60 - a re-entry after working is a NEW transition, not a replay
+  ---
+  duration_ms: 0.200853
+  ...
+# Subtest: separate windows stay separate gestures
+ok 61 - separate windows stay separate gestures
+  ---
+  duration_ms: 0.172285
+  ...
+# Subtest: stale replayed events (written before the seed) are ignored
+ok 62 - stale replayed events (written before the seed) are ignored
+  ---
+  duration_ms: 0.192864
+  ...
+# Subtest: a genuine transition after the seed is not filtered by the replay guard
+ok 63 - a genuine transition after the seed is not filtered by the replay guard
+  ---
+  duration_ms: 0.160186
+  ...
+# Subtest: reseed (reconnect) suppresses a transition the fresh state already shows
+ok 64 - reseed (reconnect) suppresses a transition the fresh state already shows
+  ---
+  duration_ms: 0.149335
+  ...
+# Subtest: normal execution makes no sound — and failed is tracked, not signalled
+ok 65 - normal execution makes no sound — and failed is tracked, not signalled
+  ---
+  duration_ms: 0.198964
+  ...
+# Subtest: task.closed and task.created are silent
+ok 66 - task.closed and task.created are silent
+  ---
+  duration_ms: 0.123671
+  ...
+# Subtest: flush fires a pending intent immediately (test seam)
+ok 67 - flush fires a pending intent immediately (test seam)
+  ---
+  duration_ms: 0.186713
+  ...
+# Subtest: independent processes cannot collide task IDs or overwrite identical briefs
+ok 54 - independent processes cannot collide task IDs or overwrite identical briefs
+  ---
+  duration_ms: 284.299917
+  ...
+# Subtest: incomplete task directories reserve their ID and existing prompt bytes
+ok 55 - incomplete task directories reserve their ID and existing prompt bytes
+  ---
+  duration_ms: 9.526988
+  ...
+# Subtest: independent processes retain every task context mutation
+ok 56 - independent processes retain every task context mutation
+  ---
+  duration_ms: 216.451013
+  ...
+# Subtest: valid JSON with invalid task shape cannot poison the ledger or redirect task writes
+ok 57 - valid JSON with invalid task shape cannot poison the ledger or redirect task writes
+  ---
+  duration_ms: 11.930333
+  ...
+# Subtest: createTask writes task.json/prompt.md/run.log and assigns sequential ids
+ok 55 - createTask writes task.json/prompt.md/run.log and assigns sequential ids
+  ---
+  duration_ms: 15.71617
+  ...
+# Subtest: listTasks returns newest id first; findTask looks up by id
+ok 56 - listTasks returns newest id first; findTask looks up by id
+  ---
+  duration_ms: 11.800839
+  ...
+# Subtest: updateTask bumps updatedAt; readTaskResult/readTaskLog read back files
+ok 57 - updateTask bumps updatedAt; readTaskResult/readTaskLog read back files
+  ---
+  duration_ms: 10.549183
+  ...
+# Subtest: appendEvent appends normalized JSON lines to events.jsonl
+ok 58 - appendEvent appends normalized JSON lines to events.jsonl
+  ---
+  duration_ms: 4.517435
+  ...
+# Subtest: task state files are written owner-only (0600)
+ok 59 - task state files are written owner-only (0600)
+  ---
+  duration_ms: 6.057863
+  ...
+# Subtest: writeJson/writeText are atomic: temp file + rename, no leftovers, 0600 preserved
+ok 60 - writeJson/writeText are atomic: temp file + rename, no leftovers, 0600 preserved
+  ---
+  duration_ms: 2.427796
+  ...
+# Subtest: sectionOf extracts a result section up to the next heading
+ok 56 - sectionOf extracts a result section up to the next heading
+  ---
+  duration_ms: 1.227071
+  ...
+# Subtest: createWork persists run 1's input per run; the original prompt.md is untouched
+ok 57 - createWork persists run 1's input per run; the original prompt.md is untouched
+  ---
+  duration_ms: 17.903892
+  ...
+# Subtest: run 1's result, verification and changed files appear in run 2's prompt — but never a transcript
+ok 58 - run 1's result, verification and changed files appear in run 2's prompt — but never a transcript
+  ---
+  duration_ms: 17.04654
+  ...
+# Subtest: a user constraint added after run 1 appears in run 2's prompt, not run 1's
+ok 59 - a user constraint added after run 1 appears in run 2's prompt, not run 1's
+  ---
+  duration_ms: 14.657899
+  ...
+# Subtest: noteWork records Task context without starting or resuming an execution
+ok 60 - noteWork records Task context without starting or resuming an execution
+  ---
+  duration_ms: 12.215156
+  ...
+# Subtest: answerWork keeps existing decision behavior AND lands the answer in Task context
+ok 61 - answerWork keeps existing decision behavior AND lands the answer in Task context
+  ---
+  duration_ms: 10.499902
+  ...
+# Subtest: same-provider resume keeps the existing session: no new run, no new per-run prompt
+ok 62 - same-provider resume keeps the existing session: no new run, no new per-run prompt
+  ---
+  duration_ms: 9.413793
+  ...
+# Subtest: previous run records, results and the original prompt stay immutable across reruns
+ok 63 - previous run records, results and the original prompt stay immutable across reruns
+  ---
+  duration_ms: 20.560713
+  ...
+# Subtest: DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session
+ok 64 - DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session
+  ---
+  duration_ms: 223.476179
+  ...
+# Subtest: worker ready preserves notes and corrections recorded during execution
+ok 57 - worker ready preserves notes and corrections recorded during execution
+  ---
+  duration_ms: 183.64284
+  ...
+# Subtest: worker failed preserves notes and corrections recorded during execution
+ok 58 - worker failed preserves notes and corrections recorded during execution
+  ---
+  duration_ms: 152.253301
+  ...
+# Subtest: an exception while publishing a result preserves input and finalizes the run as failed
+ok 59 - an exception while publishing a result preserves input and finalizes the run as failed
+  ---
+  duration_ms: 161.612878
+  ...
+# Subtest: closing a running task remains done when its run becomes ready
+ok 60 - closing a running task remains done when its run becomes ready
+  ---
+  duration_ms: 219.73181
+  ...
+# Subtest: closing a running task remains done when its run becomes failed
+ok 61 - closing a running task remains done when its run becomes failed
+  ---
+  duration_ms: 192.905581
+  ...
+# Subtest: a worker superseded by newer run cannot publish result or terminal events
+ok 62 - a worker superseded by newer run cannot publish result or terminal events
+  ---
+  duration_ms: 166.347605
+  ...
+# Subtest: a worker superseded by different worker PID cannot publish result or terminal events
+ok 63 - a worker superseded by different worker PID cannot publish result or terminal events
+  ---
+  duration_ms: 185.691151
+  ...
+# Subtest: a live permission cannot start another run and its resolved worker preserves new input
+ok 64 - a live permission cannot start another run and its resolved worker preserves new input
+  ---
+  duration_ms: 482.069855
+  ...
+# Subtest: concurrent session grants reserve exactly one resumed execution
+ok 65 - concurrent session grants reserve exactly one resumed execution
+  ---
+  duration_ms: 208.272673
+  ...
+# Subtest: startup recovery fails a dead worker paused on a live permission
+ok 66 - startup recovery fails a dead worker paused on a live permission
+  ---
+  duration_ms: 200.886662
+  ...
+# Subtest: a short one-line brief IS its own title — nothing changes for simple input
+ok 58 - a short one-line brief IS its own title — nothing changes for simple input
+  ---
+  duration_ms: 1.53238
+  ...
+# Subtest: a blank brief derives nothing and is not treated as incomplete
+ok 59 - a blank brief derives nothing and is not treated as incomplete
+  ---
+  duration_ms: 0.626124
+  ...
+# Subtest: a multi-paragraph engineering brief yields a scannable title and stays incomplete
+ok 60 - a multi-paragraph engineering brief yields a scannable title and stays incomplete
+  ---
+  duration_ms: 0.266349
+  ...
+# Subtest: the title is the first sentence, not the first paragraph
+ok 61 - the title is the first sentence, not the first paragraph
+  ---
+  duration_ms: 0.133851
+  ...
+# Subtest: an abbreviation does not end the sentence early
+ok 62 - an abbreviation does not end the sentence early
+  ---
+  duration_ms: 0.159174
+  ...
+# Subtest: a version number does not split the title mid-number
+ok 63 - a version number does not split the title mid-number
+  ---
+  duration_ms: 0.130859
+  ...
+# Subtest: a brief with no terminal punctuation is wholly the title
+ok 64 - a brief with no terminal punctuation is wholly the title
+  ---
+  duration_ms: 0.135283
+  ...
+# Subtest: CJK sentence terminators end a sentence without a following space
+ok 65 - CJK sentence terminators end a sentence without a following space
+  ---
+  duration_ms: 0.226903
+  ...
+# Subtest: leading markdown decoration is stripped from the title
+ok 66 - leading markdown decoration is stripped from the title
+  ---
+  duration_ms: 0.168107
+  ...
+# Subtest: a decorated one-line brief is complete — the title represents all of it
+ok 67 - a decorated one-line brief is complete — the title represents all of it
+  ---
+  duration_ms: 0.211764
+  ...
+# Subtest: a brief that merely wraps across lines is complete once normalized
+ok 68 - a brief that merely wraps across lines is complete once normalized
+  ---
+  duration_ms: 0.155073
+  ...
+# Subtest: an over-long first sentence is cut at a word boundary, never mid-word
+ok 69 - an over-long first sentence is cut at a word boundary, never mid-word
+  ---
+  duration_ms: 0.235512
+  ...
+# Subtest: text with no spaces at all still truncates safely (no word boundary to find)
+ok 70 - text with no spaces at all still truncates safely (no word boundary to find)
+  ---
+  duration_ms: 0.13629
+  ...
+# Subtest: a CJK run with no spaces truncates without hanging or over-cutting
+ok 71 - a CJK run with no spaces truncates without hanging or over-cutting
+  ---
+  duration_ms: 0.142249
+  ...
+# Subtest: a title at exactly the target is not truncated
+ok 72 - a title at exactly the target is not truncated
+  ---
+  duration_ms: 0.113645
+  ...
+# Subtest: the derived title always fits the storage guard with room to spare
+ok 73 - the derived title always fits the storage guard with room to spare
+  ---
+  duration_ms: 0.434499
+  ...
+# Subtest: briefBody is empty when the title already says everything
+ok 74 - briefBody is empty when the title already says everything
+  ---
+  duration_ms: 0.175784
+  ...
+# Subtest: briefBody is the REST of the brief — the heading sentence is never repeated
+ok 75 - briefBody is the REST of the brief — the heading sentence is never repeated
+  ---
+  duration_ms: 0.151647
+  ...
+# Subtest: briefBody preserves the structure of everything after the opening sentence
+ok 76 - briefBody preserves the structure of everything after the opening sentence
+  ---
+  duration_ms: 0.153064
+  ...
+# Subtest: a TRUNCATED title renders the whole brief — a remainder would start mid-thought
+ok 77 - a TRUNCATED title renders the whole brief — a remainder would start mid-thought
+  ---
+  duration_ms: 0.11442
+  ...
+# Subtest: GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit
+ok 59 - GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit
+  ---
+  duration_ms: 4672.405116
+  ...
+# Subtest: RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes
+ok 60 - RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes
+  ---
+  duration_ms: 1605.460915
+  ...
+# Subtest: NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size
+ok 61 - NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size
+  ---
+  duration_ms: 2250.341733
+  ...
+# Subtest: RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset
+ok 62 - RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset
+  ---
+  duration_ms: 397.938844
+  ...
+# Subtest: decodeKeys: a lone ESC chunk is Escape; ESC with more bytes is a modifier
+ok 60 - decodeKeys: a lone ESC chunk is Escape; ESC with more bytes is a modifier
+  ---
+  duration_ms: 1.839723
+  ...
+# Subtest: decodeKeys: Shift+Enter decodes when the terminal can deliver it
+ok 61 - decodeKeys: Shift+Enter decodes when the terminal can deliver it
+  ---
+  duration_ms: 0.192893
+  ...
+# Subtest: decodeKeys: plain keys, control keys and a paste
+ok 62 - decodeKeys: plain keys, control keys and a paste
+  ---
+  duration_ms: 0.329708
+  ...
+# Subtest: isPrintable rejects modified keys, so Ctrl+z never lands in a draft
+ok 63 - isPrintable rejects modified keys, so Ctrl+z never lands in a draft
+  ---
+  duration_ms: 0.115523
+  ...
+# Subtest: j/k move the selection and clamp at both ends
+ok 64 - j/k move the selection and clamp at both ends
+  ---
+  duration_ms: 0.590542
+  ...
+# Subtest: tab cycles the filter and shift-tab cycles it back
+ok 65 - tab cycles the filter and shift-tab cycles it back
+  ---
+  duration_ms: 0.184769
+  ...
+# Subtest: / searches title, brief and number, and esc clears filter and search together
+ok 66 - / searches title, brief and number, and esc clears filter and search together
+  ---
+  duration_ms: 0.270565
+  ...
+# Subtest: Enter and x resolve to the action each Work state is actually waiting for
+ok 67 - Enter and x resolve to the action each Work state is actually waiting for
+  ---
+  duration_ms: 0.397634
+  ...
+# Subtest: Enter on a permission fires immediately; Enter on a decision asks for text first
+ok 68 - Enter on a permission fires immediately; Enter on a decision asks for text first
+  ---
+  duration_ms: 0.184095
+  ...
+# Subtest: an input commits to an intent, and esc throws the draft away
+ok 69 - an input commits to an intent, and esc throws the draft away
+  ---
+  duration_ms: 0.327266
+  ...
+# Subtest: x on a decision is SAVE ONLY — the same answer, without spending a run
+ok 70 - x on a decision is SAVE ONLY — the same answer, without spending a run
+  ---
+  duration_ms: 0.193666
+  ...
+# Subtest: p retargets only the NEXT run, and moving the selection forgets it
+ok 71 - p retargets only the NEXT run, and moving the selection forgets it
+  ---
+  duration_ms: 0.217759
+  ...
+# Subtest: d refuses on a task with nothing to show, and says so instead of opening an empty view
+ok 72 - d refuses on a task with nothing to show, and says so instead of opening an empty view
+  ---
+  duration_ms: 0.230829
+  ...
+# Subtest: the composer: Alt+Enter briefs, Shift+Enter or Ctrl+n adds a newline, Enter creates, Ctrl+z reverts
+ok 73 - the composer: Alt+Enter briefs, Shift+Enter or Ctrl+n adds a newline, Enter creates, Ctrl+z reverts
+  ---
+  duration_ms: 0.365082
+  ...
+# Subtest: q and Ctrl+c both detach
+ok 74 - q and Ctrl+c both detach
+  ---
+  duration_ms: 0.145028
+  ...
+# Subtest: oneline protects the grid from provider text without eating the design's spacing
+ok 75 - oneline protects the grid from provider text without eating the design's spacing
+  ---
+  duration_ms: 0.281081
+  ...
+# Subtest: cut, pad and shortPath keep a cell to its measure
+ok 76 - cut, pad and shortPath keep a cell to its measure
+  ---
+  duration_ms: 0.236937
+  ...
+# Subtest: cellWord ellipsis-truncates long provider words and keeps the column gap
+ok 77 - cellWord ellipsis-truncates long provider words and keeps the column gap
+  ---
+  duration_ms: 0.24037
+  ...
+# Subtest: wrap keeps paragraph breaks — a decision question is prose, not a label
+ok 78 - wrap keeps paragraph breaks — a decision question is prose, not a label
+  ---
+  duration_ms: 0.233641
+  ...
+# Subtest: renderLine pads and truncates to exactly the column count
+ok 79 - renderLine pads and truncates to exactly the column count
+  ---
+  duration_ms: 0.274513
+  ...
+# Subtest: renderLine emits truecolor when the terminal has it and 256 when it does not
+ok 80 - renderLine emits truecolor when the terminal has it and 256 when it does not
+  ---
+  duration_ms: 0.239344
+  ...
+# Subtest: colorSupport follows the documented capability contract
+ok 81 - colorSupport follows the documented capability contract
+  ---
+  duration_ms: 0.204096
+  ...
+# Subtest: 256-color fallback quantizes the palette onto the canonical xterm cube
+ok 82 - 256-color fallback quantizes the palette onto the canonical xterm cube
+  ---
+  duration_ms: 0.175879
+  ...
+# Subtest: a cell's own background wins; every other cell sits on the frame's ground
+ok 83 - a cell's own background wins; every other cell sits on the frame's ground
+  ---
+  duration_ms: 0.875612
+  ...
+# Subtest: the painter rewrites only the rows that changed, and repaints fully on resize
+ok 84 - the painter rewrites only the rows that changed, and repaints fully on resize
+  ---
+  duration_ms: 0.346101
+  ...
+# Subtest: projectTask maps Work status onto the design's state keys, never the reverse
+ok 85 - projectTask maps Work status onto the design's state keys, never the reverse
+  ---
+  duration_ms: 0.08837
+  ...
+# Subtest: a decision's question reaches the model in full — nothing truncates it on the way
+ok 86 - a decision's question reaches the model in full — nothing truncates it on the way
+  ---
+  duration_ms: 24.640067
+  ...
+# Subtest: a permission halt carries the operation, the path and whether it resumes in place
+ok 87 - a permission halt carries the operation, the path and whether it resumes in place
+  ---
+  duration_ms: 6.864418
+  ...
+# Subtest: the human record is read from the event log, so NOTE, ANSWER and CORRECTION stay distinguishable
+ok 88 - the human record is read from the event log, so NOTE, ANSWER and CORRECTION stay distinguishable
+  ---
+  duration_ms: 13.647434
+  ...
+# Subtest: provider identity is derived, so a configured provider is not a blank column
+ok 89 - provider identity is derived, so a configured provider is not a blank column
+  ---
+  duration_ms: 0.162702
+  ...
+# Subtest: every rendered row is exactly the terminal width, at every size
+ok 90 - every rendered row is exactly the terminal width, at every size
+  ---
+  duration_ms: 12.405337
+  ...
+# Subtest: both themes paint their own ground, in every mode and at every size
+ok 91 - both themes paint their own ground, in every mode and at every size
+  ---
+  duration_ms: 13.971005
+  ...
+# Subtest: the two palettes are the design's, and they never share an ink
+ok 92 - the two palettes are the design's, and they never share an ink
+  ---
+  duration_ms: 0.307273
+  ...
+# Subtest: the frame shows the workspace, the counts, the halt and the action it is waiting for
+ok 93 - the frame shows the workspace, the counts, the halt and the action it is waiting for
+  ---
+  duration_ms: 6.212976
+  ...
+# Subtest: the last three rows above the bottom gutter are a fixed footer that the panes never scroll into
+ok 94 - the last three rows above the bottom gutter are a fixed footer that the panes never scroll into
+  ---
+  duration_ms: 5.747359
+  ...
+# Subtest: help, the composer and the changes view each render their own full frame
+ok 95 - help, the composer and the changes view each render their own full frame
+  ---
+  duration_ms: 7.512971
+  ...
+# Subtest: the changes view draws the REAL diff from the working tree, loaded on d
+ok 96 - the changes view draws the REAL diff from the working tree, loaded on d
+  ---
+  duration_ms: 38.213884
+  ...
+# Subtest: a working rerun's rule draws a measured percentage against its prior runs
+ok 97 - a working rerun's rule draws a measured percentage against its prior runs
+  ---
+  duration_ms: 6.677696
+  ...
+# Subtest: an empty workspace says so instead of rendering a broken grid
+ok 98 - an empty workspace says so instead of rendering a broken grid
+  ---
+  duration_ms: 0.826873
+  ...
+# Subtest: overview -> detail -> a NEEDS YOU permission -> back, against the real runtime
+ok 99 - overview -> detail -> a NEEDS YOU permission -> back, against the real runtime
+  ---
+  duration_ms: 17.39158
+  ...
+# Subtest: TUI allow carries the displayed occurrence and refuses a stale snapshot
+ok 100 - TUI allow carries the displayed occurrence and refuses a stale snapshot
+  ---
+  duration_ms: 12.395909
+  ...
+# Subtest: TUI reject carries the displayed occurrence and refuses a stale snapshot
+ok 101 - TUI reject carries the displayed occurrence and refuses a stale snapshot
+  ---
+  duration_ms: 15.967881
+  ...
+# Subtest: ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not
+ok 102 - ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not
+  ---
+  duration_ms: 15.616855
+  ...
+# Subtest: SEND BACK records the correction on the task, then rebuilds the next run from it
+ok 103 - SEND BACK records the correction on the task, then rebuilds the next run from it
+  ---
+  duration_ms: 7.260736
+  ...
+# Subtest: RETRY reruns a failed task on the same provider; the intent has not changed
+ok 104 - RETRY reruns a failed task on the same provider; the intent has not changed
+  ---
+  duration_ms: 5.949721
+  ...
+# Subtest: ACCEPT closes the task through the shared action, and the ledger re-groups it
+ok 105 - ACCEPT closes the task through the shared action, and the ledger re-groups it
+  ---
+  duration_ms: 5.199409
+  ...
+# Subtest: a refusal from the shared action is surfaced verbatim, never swallowed or worked around
+ok 106 - a refusal from the shared action is surfaced verbatim, never swallowed or worked around
+  ---
+  duration_ms: 3.997355
+  ...
+# Subtest: the TUI never writes Work state itself — the store is only reached through actions
+ok 107 - the TUI never writes Work state itself — the store is only reached through actions
+  ---
+  duration_ms: 6.075329
+  ...
+# Subtest: an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor
+ok 61 - an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor
+  ---
+  duration_ms: 6.353017
+  ...
+# 0x2F UI: http://127.0.0.1:44889
+# Subtest: probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down'
+ok 62 - probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down'
+  ---
+  duration_ms: 47.393495
+  ...
+# 0x2F UI: http://127.0.0.1:41009
+# Subtest: launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL
+ok 63 - launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL
+  ---
+  duration_ms: 5.009966
+  ...
+# 0x2F UI: http://127.0.0.1:39777
+# Subtest: launchUi refuses a healthy runtime for another workspace without opening it
+ok 64 - launchUi refuses a healthy runtime for another workspace without opening it
+  ---
+  duration_ms: 5.660218
+  ...
+# 0x2F UI: http://127.0.0.1:35421
+# Subtest: launchUi recognizes the same workspace through a symlink
+ok 65 - launchUi recognizes the same workspace through a symlink
+  ---
+  duration_ms: 4.968227
+  ...
+# Subtest: launchUi cannot reuse an unidentified runtime or accept another workspace during startup
+ok 66 - launchUi cannot reuse an unidentified runtime or accept another workspace during startup
+  ---
+  duration_ms: 1.764124
+  ...
+# Subtest: runtime startup closes the parent's log descriptor on success and spawn failure
+ok 67 - runtime startup closes the parent's log descriptor on success and spawn failure
+  ---
+  duration_ms: 1.469402
+  ...
+# Subtest: a package path with spaces and URL characters supplies an existing runtime entry path
+ok 68 - a package path with spaces and URL characters supplies an existing runtime entry path
+  ---
+  duration_ms: 3.777354
+  ...
+# Subtest: launchUi starts a missing runtime, waits for health, and opens the browser
+ok 69 - launchUi starts a missing runtime, waits for health, and opens the browser
+  ---
+  duration_ms: 1.653626
+  ...
+# Subtest: launchUi --no-browser starts the runtime but opens nothing
+ok 70 - launchUi --no-browser starts the runtime but opens nothing
+  ---
+  duration_ms: 0.788762
+  ...
+# Subtest: launchUi reports 'another process owns the port' instead of an opaque EADDRINUSE
+ok 71 - launchUi reports 'another process owns the port' instead of an opaque EADDRINUSE
+  ---
+  duration_ms: 3.62156
+  ...
+# Subtest: launchUi times out with a pointer at the runtime log when health never arrives
+ok 72 - launchUi times out with a pointer at the runtime log when health never arrives
+  ---
+  duration_ms: 124.464913
+  ...
+# Subtest: launchUi surfaces 'another process' discovered during the wait
+ok 73 - launchUi surfaces 'another process' discovered during the wait
+  ---
+  duration_ms: 1.372424
+  ...
+# Subtest: openBrowser spawns the platform opener and resolves; a missing opener resolves false
+ok 74 - openBrowser spawns the platform opener and resolves; a missing opener resolves false
+  ---
+  duration_ms: 0.503325
+  ...
+# Subtest: startServer rejects with a clear error when another process owns the port
+ok 75 - startServer rejects with a clear error when another process owns the port
+  ---
+  duration_ms: 1.940322
+  ...
+# Subtest: stepArgument reads whatever the tool input names as its target
+ok 62 - stepArgument reads whatever the tool input names as its target
+  ---
+  duration_ms: 1.372974
+  ...
+# Subtest: toSteps turns tool.started, file.changed and commands into distinct units
+ok 63 - toSteps turns tool.started, file.changed and commands into distinct units
+  ---
+  duration_ms: 1.483762
+  ...
+# Subtest: markClass reads the event shape the step was built from, not a tool name
+ok 64 - markClass reads the event shape the step was built from, not a tool name
+  ---
+  duration_ms: 0.272008
+  ...
+# Subtest: the last progress line survives as the live activity when no step follows
+ok 65 - the last progress line survives as the live activity when no step follows
+  ---
+  duration_ms: 0.179116
+  ...
+# Subtest: the worker's duplicated needs_user events collapse into one halt
+ok 66 - the worker's duplicated needs_user events collapse into one halt
+  ---
+  duration_ms: 0.199894
+  ...
+# Subtest: a resume the human authorised becomes a YOU step
+ok 67 - a resume the human authorised becomes a YOU step
+  ---
+  duration_ms: 0.285368
+  ...
+# Subtest: an answered decision becomes a YOU step in the ledger
+ok 68 - an answered decision becomes a YOU step in the ledger
+  ---
+  duration_ms: 0.35028
+  ...
+# Subtest: an interactive ACP permission becomes a YOU step when resolved in place
+ok 69 - an interactive ACP permission becomes a YOU step when resolved in place
+  ---
+  duration_ms: 0.199924
+  ...
+# Subtest: step arguments and changed files are shown as project paths, not machine paths
+ok 70 - step arguments and changed files are shown as project paths, not machine paths
+  ---
+  duration_ms: 0.264264
+  ...
+# Subtest: a file changed twice produces two marks — one per real event, never deduped in the trace
+ok 71 - a file changed twice produces two marks — one per real event, never deduped in the trace
+  ---
+  duration_ms: 0.2139
+  ...
+# Subtest: tail keeps the most recent N units and drops halt/fail (positions, not units)
+ok 72 - tail keeps the most recent N units and drops halt/fail (positions, not units)
+  ---
+  duration_ms: 0.273773
+  ...
+# Subtest: tail drops the oldest units silently once the budget is exceeded
+ok 73 - tail drops the oldest units silently once the budget is exceeded
+  ---
+  duration_ms: 0.395315
+  ...
+# Subtest: the trace draws one fixed-width cell per unit, never scaled by how long it took
+ok 74 - the trace draws one fixed-width cell per unit, never scaled by how long it took
+  ---
+  duration_ms: 0.375271
+  ...
+# Subtest: the point of execution is the luminous head, and it is drawn last
+ok 75 - the point of execution is the luminous head, and it is drawn last
+  ---
+  duration_ms: 0.186521
+  ...
+# Subtest: an interruption tears the track open instead of capping it
+ok 76 - an interruption tears the track open instead of capping it
+  ---
+  duration_ms: 0.878884
+  ...
+# Subtest: a finished run's track is struck in graphite, with no head
+ok 77 - a finished run's track is struck in graphite, with no head
+  ---
+  duration_ms: 0.175657
+  ...
+# Subtest: a long run is bounded by the tail budget, not strided
+ok 78 - a long run is bounded by the tail budget, not strided
+  ---
+  duration_ms: 1.896133
+  ...
+# Subtest: a change mark is drawn in the accent, distinct from an ordinary tool mark
+ok 79 - a change mark is drawn in the accent, distinct from an ordinary tool mark
+  ---
+  duration_ms: 0.240254
+  ...
+# Subtest: a coarse provider draws a single ambient bar — never a per-interval dot
+ok 80 - a coarse provider draws a single ambient bar — never a per-interval dot
+  ---
+  duration_ms: 0.228387
+  ...
+# Subtest: the coarse ambient bar's width is capped, so elapsed time never reads as a step count
+ok 81 - the coarse ambient bar's width is capped, so elapsed time never reads as a step count
+  ---
+  duration_ms: 0.141497
+  ...
+# Subtest: a coarse frame carries the halt tear exactly once and draws no phase frame
+ok 82 - a coarse frame carries the halt tear exactly once and draws no phase frame
+  ---
+  duration_ms: 0.131236
+  ...
+# Subtest: brackets: CHANGES spans the first to the last change mark, only when declared
+ok 83 - brackets: CHANGES spans the first to the last change mark, only when declared
+  ---
+  duration_ms: 0.351576
+  ...
+# Subtest: brackets: two separated runs of edits give two brackets
+ok 84 - brackets: two separated runs of edits give two brackets
+  ---
+  duration_ms: 0.167273
+  ...
+# Subtest: brackets: labels that would print on top of each other are dropped, not stacked
+ok 85 - brackets: labels that would print on top of each other are dropped, not stacked
+  ---
+  duration_ms: 0.417448
+  ...
+# Subtest: brackets: zero evidence in the tail is a valid, complete reading
+ok 86 - brackets: zero evidence in the tail is a valid, complete reading
+  ---
+  duration_ms: 0.135499
+  ...
+# Subtest: sections: a dimension shows only when actually present, and CHECKS never exists
+ok 87 - sections: a dimension shows only when actually present, and CHECKS never exists
+  ---
+  duration_ms: 0.401947
+  ...
+# Subtest: sections: declared true with nothing observed yet is not a section — and not a lie
+ok 88 - sections: declared true with nothing observed yet is not a section — and not a lie
+  ---
+  duration_ms: 0.110771
+  ...
+# Subtest: sections: observed facts render even against a false declaration, and flag the drift
+ok 89 - sections: observed facts render even against a false declaration, and flag the drift
+  ---
+  duration_ms: 0.142017
+  ...
+# Subtest: sections: RESULT is gated on status and real result text, FAILURE takes precedence
+ok 90 - sections: RESULT is gated on status and real result text, FAILURE takes precedence
+  ---
+  duration_ms: 0.167279
+  ...
+# Subtest: capabilityNote: result-on-completion fires only while a coarse provider is working
+ok 91 - capabilityNote: result-on-completion fires only while a coarse provider is working
+  ---
+  duration_ms: 0.240535
+  ...
+# Subtest: capabilityNote: never fires a capability-gap note merely from a declaration
+ok 92 - capabilityNote: never fires a capability-gap note merely from a declaration
+  ---
+  duration_ms: 0.086971
+  ...
+# Subtest: fidelity is a declaration, never an inference from the event log
+ok 93 - fidelity is a declaration, never an inference from the event log
+  ---
+  duration_ms: 0.106491
+  ...
+# Subtest: a rich provider with no steps yet reads as rich, not coarse, with nothing to show
+ok 94 - a rich provider with no steps yet reads as rich, not coarse, with nothing to show
+  ---
+  duration_ms: 1.148696
+  ...
+# Subtest: a coarse provider draws the single ambient trace, never the old three-phase frame
+ok 95 - a coarse provider draws the single ambient trace, never the old three-phase frame
+  ---
+  duration_ms: 0.340163
+  ...
+# Subtest: a coarse working row carries the result-on-completion note and no data sections
+ok 96 - a coarse working row carries the result-on-completion note and no data sections
+  ---
+  duration_ms: 0.21721
+  ...
+# Subtest: working shows ACTIVITY/FILES/COMMANDS when present; needs_you drops COMMANDS
+ok 97 - working shows ACTIVITY/FILES/COMMANDS when present; needs_you drops COMMANDS
+  ---
+  duration_ms: 0.51489
+  ...
+# Subtest: ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never ACTIVITY
+ok 98 - ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never ACTIVITY
+  ---
+  duration_ms: 0.313266
+  ...
+# Subtest: failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop
+ok 99 - failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop
+  ---
+  duration_ms: 0.449207
+  ...
+# Subtest: done carries no EXPANDED trace — the whole fix for the old three-empty-band screen
+ok 100 - done carries no EXPANDED trace — the whole fix for the old three-empty-band screen
+  ---
+  duration_ms: 0.516481
+  ...
+# Subtest: a coarse ready row reports files as absent (no section), not as zero
+ok 101 - a coarse ready row reports files as absent (no section), not as zero
+  ---
+  duration_ms: 0.344045
+  ...
+# Subtest: projectRow renders the Needs You state from the normalized blockedOn
+ok 102 - projectRow renders the Needs You state from the normalized blockedOn
+  ---
+  duration_ms: 0.264091
+  ...
+# Subtest: projectRow renders a decision block, not just permissions
+ok 103 - projectRow renders a decision block, not just permissions
+  ---
+  duration_ms: 0.314071
+  ...
+# Subtest: projectRow distinguishes permission from decision for the interaction surface
+ok 104 - projectRow distinguishes permission from decision for the interaction surface
+  ---
+  duration_ms: 0.413354
+  ...
+# Subtest: projectRow renders the ready result from the files the run actually changed
+ok 105 - projectRow renders the ready result from the files the run actually changed
+  ---
+  duration_ms: 0.236096
+  ...
+# Subtest: projectRow compresses a done task and archives its trace, as the design does
+ok 106 - projectRow compresses a done task and archives its trace, as the design does
+  ---
+  duration_ms: 0.243773
+  ...
+# Subtest: a closed row's sub keeps a fixed width so EXECUTION reads as a grid
+ok 107 - a closed row's sub keeps a fixed width so EXECUTION reads as a grid
+  ---
+  duration_ms: 0.698125
+  ...
+# Subtest: projectRow surfaces failure, a state the design does not draw
+ok 108 - projectRow surfaces failure, a state the design does not draw
+  ---
+  duration_ms: 0.265238
+  ...
+# Subtest: execution metadata is secondary: node and provider, never the headline
+ok 109 - execution metadata is secondary: node and provider, never the headline
+  ---
+  duration_ms: 0.172873
+  ...
+# Subtest: the ledger orders by what wants you first and opens a halted task
+ok 110 - the ledger orders by what wants you first and opens a halted task
+  ---
+  duration_ms: 0.489295
+  ...
+# Subtest: ledger helpers
+ok 111 - ledger helpers
+  ---
+  duration_ms: 0.135078
+  ...
+# Subtest: progressPercent: a finished run is 100%, whatever it did
+ok 112 - progressPercent: a finished run is 100%, whatever it did
+  ---
+  duration_ms: 0.180739
+  ...
+# Subtest: progressPercent: a halted run reports null — the halt marker is the readout
+ok 113 - progressPercent: a halted run reports null — the halt marker is the readout
+  ---
+  duration_ms: 0.068127
+  ...
+# Subtest: progressPercent: run 1 has no baseline, so there is no percentage
+ok 114 - progressPercent: run 1 has no baseline, so there is no percentage
+  ---
+  duration_ms: 0.129323
+  ...
+# Subtest: progressPercent: a working rerun measures elapsed against its prior runs
+ok 115 - progressPercent: a working rerun measures elapsed against its prior runs
+  ---
+  duration_ms: 0.631422
+  ...
+# Subtest: progressPercent: a working run is never claimed complete — capped at 99
+ok 116 - progressPercent: a working run is never claimed complete — capped at 99
+  ---
+  duration_ms: 0.095832
+  ...
+# Subtest: progressPercent: the current run's own record is never its own baseline
+ok 117 - progressPercent: the current run's own record is never its own baseline
+  ---
+  duration_ms: 0.106207
+  ...
+# Subtest: a run measured in hours reads as hours, not as 479 minutes
+ok 118 - a run measured in hours reads as hours, not as 479 minutes
+  ---
+  duration_ms: 0.065917
+  ...
+# Subtest: projectRuns formats run records into ledger rows without inventing fields
+ok 119 - projectRuns formats run records into ledger rows without inventing fields
+  ---
+  duration_ms: 0.28995
+  ...
+# Subtest: projectRuns maps needs_you/working states into the ledger vocabulary
+ok 120 - projectRuns maps needs_you/working states into the ledger vocabulary
+  ---
+  duration_ms: 0.118251
+  ...
+# Subtest: projectRow exposes interactive permission options without inventing them
+ok 121 - projectRow exposes interactive permission options without inventing them
+  ---
+  duration_ms: 0.169593
+  ...
+# Subtest: a long intent keeps the expanded heading proportionate (smallest typography adjustment)
+ok 122 - a long intent keeps the expanded heading proportionate (smallest typography adjustment)
+  ---
+  duration_ms: 0.514249
+  ...
+# Subtest: projectRow exposes the AUTO routing decision of the current run
+ok 123 - projectRow exposes the AUTO routing decision of the current run
+  ---
+  duration_ms: 0.236109
+  ...
+# Subtest: time parked on a human is not counted in the trace's tail selection
+ok 124 - time parked on a human is not counted in the trace's tail selection
+  ---
+  duration_ms: 0.223672
+  ...
+# Subtest: firstSentence: a one-line question is the whole heading, nothing left over
+ok 125 - firstSentence: a one-line question is the whole heading, nothing left over
+  ---
+  duration_ms: 0.082737
+  ...
+# Subtest: firstSentence: splits a multi-paragraph question at its first sentence
+ok 126 - firstSentence: splits a multi-paragraph question at its first sentence
+  ---
+  duration_ms: 0.085213
+  ...
+# Subtest: firstSentence: a question with no terminal punctuation is still a valid heading
+ok 127 - firstSentence: a question with no terminal punctuation is still a valid heading
+  ---
+  duration_ms: 0.060373
+  ...
+# Subtest: projectRow splits a decision's question into heading + body for the card to render
+ok 128 - projectRow splits a decision's question into heading + body for the card to render
+  ---
+  duration_ms: 0.111543
+  ...
+# Subtest: a permission halt (not a decision) has no question split — permWhy is used as-is
+ok 129 - a permission halt (not a decision) has no question split — permWhy is used as-is
+  ---
+  duration_ms: 0.109288
+  ...
+# Subtest: inferFailureKind: an explicit task.failure.kind is trusted as-is
+ok 130 - inferFailureKind: an explicit task.failure.kind is trusted as-is
+  ---
+  duration_ms: 0.065389
+  ...
+# Subtest: inferFailureKind: legacy tasks with no failure field are inferred from the stored error
+ok 131 - inferFailureKind: legacy tasks with no failure field are inferred from the stored error
+  ---
+  duration_ms: 0.059221
+  ...
+# Subtest: authFailureCopy: with a remedy, the hint is shown verbatim in its own slot
+ok 132 - authFailureCopy: with a remedy, the hint is shown verbatim in its own slot
+  ---
+  duration_ms: 0.100107
+  ...
+# Subtest: authFailureCopy: without a remedy, a generic sign-in sentence names the provider and machine
+ok 133 - authFailureCopy: without a remedy, a generic sign-in sentence names the provider and machine
+  ---
+  duration_ms: 0.064682
+  ...
+# Subtest: authFailureLine: the one-line summary shared by the compact row, arg and mobile
+ok 134 - authFailureLine: the one-line summary shared by the compact row, arg and mobile
+  ---
+  duration_ms: 0.068576
+  ...
+# Subtest: projectRow: a classified auth failure reads STOPPED AT, not FAILED AT
+ok 135 - projectRow: a classified auth failure reads STOPPED AT, not FAILED AT
+  ---
+  duration_ms: 0.162633
+  ...
+# Subtest: projectRow: an unclassified failure is completely unaffected by the new fields
+ok 136 - projectRow: an unclassified failure is completely unaffected by the new fields
+  ---
+  duration_ms: 0.19133
+  ...
+# Subtest: a decision question with a fenced code block in its body renders intact
+ok 137 - a decision question with a fenced code block in its body renders intact
+  ---
+  duration_ms: 0.5743
+  ...
+# Subtest: briefBody is empty when the derived title already represents the whole brief
+ok 138 - briefBody is empty when the derived title already represents the whole brief
+  ---
+  duration_ms: 0.116568
+  ...
+# Subtest: a decorated or wrapped brief does not render a body that only repeats the heading
+ok 139 - a decorated or wrapped brief does not render a body that only repeats the heading
+  ---
+  duration_ms: 0.172233
+  ...
+# Subtest: a real multi-paragraph brief renders in full under the heading
+ok 140 - a real multi-paragraph brief renders in full under the heading
+  ---
+  duration_ms: 0.232049
+  ...
+# Subtest: a task written before briefs existed renders no duplicate body
+ok 141 - a task written before briefs existed renders no duplicate body
+  ---
+  duration_ms: 0.099498
+  ...
+# Subtest: briefTruncated is carried through so a cut remote brief can say it was cut
+ok 142 - briefTruncated is carried through so a cut remote brief can say it was cut
+  ---
+  duration_ms: 0.129896
+  ...
+# Subtest: a coarse run's collapsed bar leaves room for the live head inside --col-exec
+ok 143 - a coarse run's collapsed bar leaves room for the live head inside --col-exec
+  ---
+  duration_ms: 1.117486
+  ...
+# Subtest: a closed coarse run archives its ambient bar in the rule colour too
+ok 144 - a closed coarse run archives its ambient bar in the rule colour too
+  ---
+  duration_ms: 0.087179
+  ...
+# Subtest: toSteps: file.changed events carry their source (provider vs worktree)
+ok 145 - toSteps: file.changed events carry their source (provider vs worktree)
+  ---
+  duration_ms: 0.137267
+  ...
+# Subtest: sections: repository-observed changes render for a provider without file-change reporting, with no drift
+ok 146 - sections: repository-observed changes render for a provider without file-change reporting, with no drift
+  ---
+  duration_ms: 0.154293
+  ...
+# Subtest: sections: provider-REPORTED files against a false declaration still flag the drift
+ok 147 - sections: provider-REPORTED files against a false declaration still flag the drift
+  ---
+  duration_ms: 0.14555
+  ...
+# Subtest: brackets: observed changes draw the CHANGES bracket even without the declared capability
+ok 148 - brackets: observed changes draw the CHANGES bracket even without the declared capability
+  ---
+  duration_ms: 0.142303
+  ...
+# Subtest: projectRuns: every run row carries number, provider, duration and outcome state
+ok 149 - projectRuns: every run row carries number, provider, duration and outcome state
+  ---
+  duration_ms: 0.151051
+  ...
+# Subtest: projectRuns: duration falls back to completedAt - startedAt; absent timing shows —
+ok 150 - projectRuns: duration falls back to completedAt - startedAt; absent timing shows —
+  ---
+  duration_ms: 0.102328
+  ...
+# Subtest: sections: provider + observed spellings of ONE file aggregate to ONE logical file
+ok 151 - sections: provider + observed spellings of ONE file aggregate to ONE logical file
+  ---
+  duration_ms: 0.162736
+  ...
+# Subtest: sections: transient provider events that never persisted are NOT counted when observation exists
+ok 152 - sections: transient provider events that never persisted are NOT counted when observation exists
+  ---
+  duration_ms: 0.133944
+  ...
+# Subtest: sections: without observation, provider-reported paths are canonicalized and deduped
+ok 153 - sections: without observation, provider-reported paths are canonicalized and deduped
+  ---
+  duration_ms: 0.11447
+  ...
+# Subtest: parsePorcelain: status lines become { code, path }, renames take the destination
+ok 63 - parsePorcelain: status lines become { code, path }, renames take the destination
+  ---
+  duration_ms: 1.569915
+  ...
+# Subtest: snapshotWorktree returns null when the directory is not a git repository
+ok 64 - snapshotWorktree returns null when the directory is not a git repository
+  ---
+  duration_ms: 10.2971
+  ...
+# Subtest: changedSince reports files introduced or altered during the run
+ok 65 - changedSince reports files introduced or altered during the run
+  ---
+  duration_ms: 24.769277
+  ...
+# Subtest: a file already dirty before the run is not re-reported when it stays dirty
+ok 66 - a file already dirty before the run is not re-reported when it stays dirty
+  ---
+  duration_ms: 22.686297
+  ...
+# Subtest: gitignored paths are invisible to the observation (0x2F's own .work never counts)
+ok 67 - gitignored paths are invisible to the observation (0x2F's own .work never counts)
+  ---
+  duration_ms: 23.034882
+  ...
+# Subtest: changedSince returns null without a baseline (non-git workspace)
+ok 68 - changedSince returns null without a baseline (non-git workspace)
+  ---
+  duration_ms: 0.855699
+  ...
+1..715
+# tests 715
+# suites 0
+# pass 705
+# fail 0
+# cancelled 0
+# skipped 10
+# todo 0
+# duration_ms 135034.906125

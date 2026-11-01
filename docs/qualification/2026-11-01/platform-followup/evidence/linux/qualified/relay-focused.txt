@@ -1,0 +1,51 @@
+✔ an agent-registered pairing token always has an expiry (never claimable forever) (56.842939ms)
+✔ a re-pair token (rotate-registered) cannot be claimed after it expires (27.184179ms)
+✔ a phone session expires after its TTL and stops authenticating (25.501319ms)
+✔ 2f pair --off revokes remote access at the relay: sessions and tokens die immediately (28.417725ms)
+✔ a stale session stays dead after the Mac reconnects post-revocation (39.366302ms)
+✔ re-pairing (rotate) retires old sessions; only the new token's session works (26.713899ms)
+✔ a plain reconnect (same generation) does NOT revoke the phone session (51.684063ms)
+✔ rotation is authorized by the current deviceSecret; a wrong secret changes nothing (20.807464ms)
+relay: The relay rejected the current device credential (Unknown device or bad deviceSecret.). — starting a fresh device identity for this Mac.
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ 2f pair falls back to a fresh identity when the relay rejects the old credential (1808.017151ms)
+✔ plain-HTTP relay URLs are refused except loopback and private-LAN development (0.363849ms)
+✔ 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one (253.60438ms)
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ relay.json and the relay state file are written with mode 0600 (816.58391ms)
+✔ hosted defaults are https and pass the relay transport policy (0.209545ms)
+✔ 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults (0.256158ms)
+✔ 2f pair with no flags resolves the LAN transport (same Wi-Fi) (2.029546ms)
+✔ 2f pair --relay still resolves the hosted transport; --lan forces LAN (1.824317ms)
+✔ 2f pair with no LAN address fails closed with a clear message (0.786259ms)
+✔ a plain-HTTP env override of the relay default is still refused (0.855151ms)
+✔ a normal pair-hello still confirms: the liveness check does not fire on the happy path (591.263103ms)
+✔ startup polling waits for key derivation before opening the relay connection (582.874928ms)
+✔ writing the confirmed pairing does not make the poller swap the config object (649.822189ms)
+✔ polling during a delayed pairing write never observes a partial config (635.431048ms)
+✔ the config vanishing during the pairing ceremony never throws (3465.799004ms)
+✔ a pair-hello arriving with no live config is refused, not crashed on (547.995933ms)
+✔ the Mac authenticates outbound; unpaired and mismatched hellos are rejected (23.184734ms)
+✔ a pairing token is one-time: a second claim fails (569.9205ms)
+✔ an expired pairing token cannot be claimed (7.947135ms)
+✔ the phone pairs end-to-end and pulls a redacted snapshot (546.335161ms)
+✔ creating a Task through the encrypted channel starts it on the Mac's node (550.480805ms)
+✔ redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac (561.617545ms)
+✔ ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions (555.428656ms)
+✔ remote permission commands refuse stale or missing displayed occurrence IDs (587.333962ms)
+✔ a duplicate requestId returns the cached acknowledgement and never executes twice (547.821252ms)
+✔ the Mac is offline: status reports offline and commands answer 503 — never queued (544.543374ms)
+✔ a relay restart loses no session and keeps the phone paired (1708.380852ms)
+✔ the relay holds no task content — state and state.json are content-free (644.042264ms)
+✔ the relay is a broker: it serves no client or pairing page (537.405592ms)
+✔ pairing claims and command forwarding are rate limited (5.324016ms)
+0x2F UI: http://127.0.0.1:45877
+✔ the local server reports mode 'local' — the client keeps its local behavior (3.911227ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8031.00621

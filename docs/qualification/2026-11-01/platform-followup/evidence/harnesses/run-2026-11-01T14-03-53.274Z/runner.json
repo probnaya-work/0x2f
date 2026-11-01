@@ -1,0 +1,28 @@
+{
+  "capturedAt": "2026-11-01T14:03:53.277Z",
+  "repo": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101",
+  "root": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K",
+  "node": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+  "environment": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin",
+    "HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K/home",
+    "TMPDIR": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K",
+    "XDG_CONFIG_HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K/home/config",
+    "XDG_DATA_HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K/home/data",
+    "XDG_CACHE_HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K/home/cache",
+    "CODEX_BIN": "/Users/bogart/.n/bin/codex",
+    "GEMINI_BIN": "/Users/bogart/.n/bin/gemini",
+    "GEMINI_TELEMETRY_ENABLED": "false",
+    "NO_COLOR": "1",
+    "CI": "1",
+    "QUALIFICATION_ARTIFACTS": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/docs/qualification/2026-11-01/platform-followup/evidence/harnesses/run-2026-11-01T14-03-53.274Z",
+    "QUALIFICATION_REQUESTS": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/docs/qualification/2026-11-01/platform-followup/evidence/harnesses/run-2026-11-01T14-03-53.274Z/mock-requests.jsonl"
+  },
+  "note": "Environment object constructed from scratch; only dummy test key; run under loopback-only.sb.",
+  "changes": [
+    "CODEX_SANDBOX bypass -> workspace-write",
+    "Preserve temporary state before original cleanup",
+    "Log mock request bodies on close"
+  ],
+  "assertionsChanged": false
+}

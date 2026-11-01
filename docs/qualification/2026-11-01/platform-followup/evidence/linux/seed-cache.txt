@@ -1,0 +1,19 @@
+
+added 3 packages in 523ms
+npm notice
+npm notice New major version of npm available! 11.20.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice
+ package.json   |  2 +-
+ src/cli.mjs    |  3 ++-
+ src/web/app.js | 17 ++++++++++++++---
+ 3 files changed, 17 insertions(+), 5 deletions(-)
+ M package.json
+ M src/cli.mjs
+ M src/web/app.js
+?? scripts/test.mjs
+3ddc34a35720808328e680cd9421a320150f1678bde082590425702faccdc074  src/cli.mjs
+7d8a22a4a3292b0c9b5bd9d764945a583b7c32098cdc41c97a3177f218fe506a  src/web/app.js
+9c333209b4c027efc48713d38704f2259c0236c41697e1f7f668a07f5300340b  package.json
+b1dc1bb7e0d0056ba0853bf3e97a747ddd1a7ef83fe2e5bb463248f07cdd400a  scripts/test.mjs
