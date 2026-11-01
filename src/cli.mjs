@@ -49,7 +49,7 @@ Commands:
   2f allow <id>     grant the permission a task is blocked on
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
-  2f close <id>      stop working on a task; moves it to DONE
+  2f close <id>      move to DONE; does not cancel the provider
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
@@ -456,6 +456,7 @@ async function main() {
 
     await runtime.actions.closeWork(id);
     console.log(`Closed #${id}.`);
+    console.log("Closing does not cancel the provider. An active run may keep running or wait for permission.");
     return;
   }
 

@@ -697,7 +697,11 @@ const sendBack = id => {
 // execution attempt, no permission interpretation. It is the escape hatch
 // for work that cannot continue (a non-resumable provider, a wrong NEEDS
 // YOU, a finished run the user no longer wants).
-const close = id => accept(id);
+const close = async id => {
+  const closed = await accept(id);
+  if (closed) flash("Task closed. Closing does not cancel the provider; an active run may keep running or wait for permission.");
+  return closed;
+};
 
 // ANSWER responds to a needs_you/decision block. A decision is answered,
 // never allowed/rejected; the answer is persisted with the task.
@@ -1048,10 +1052,13 @@ function actionButton(label, key, cls, onClick, focusKey) {
 // CLOSE: tell 0x2F this Work is no longer active (the existing closeWork
 // action — never a provider call, never a new execution attempt).
 function closeButton(id) {
-  return actionButton("CLOSE", "X", "act-quiet", e => {
+  const button = actionButton("CLOSE", "X", "act-quiet", e => {
     e.stopPropagation();
     close(id);
   }, "close-" + id);
+  button.title = "Move to DONE without cancelling the provider. An active run may keep running or wait for permission.";
+  button.setAttribute("aria-label", "Close task without cancelling the provider");
+  return button;
 }
 
 // §03: the decision question is prose, not a label — a blocking question is
@@ -3149,7 +3156,11 @@ function renderMobileActionBar(row, frozen) {
       retryBtn.disabled = true;
       sendBack(row.id).finally(() => render());
     });
-    const closeBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "CLOSE" });
+    const closeBtn = el("button", {
+      class: "m-abar-btn m-abar-secondary", text: "CLOSE",
+      title: "Move to DONE without cancelling the provider",
+      "aria-label": "Close task without cancelling the provider"
+    });
     closeBtn.addEventListener("click", () => {
       closeBtn.disabled = true;
       close(row.id).finally(() => render());
