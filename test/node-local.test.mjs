@@ -8,6 +8,12 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { EventEmitter } from "node:events";
 import { createLocalNode } from "../src/nodes/local.mjs";
 
 function recordingSpawn() {
@@ -16,12 +22,114 @@ function recordingSpawn() {
     calls,
     spawn(cmd, args, opts) {
       calls.push({ cmd, args, opts });
-      return { pid: 4242, unref() {} };
+      const child = Object.assign(new EventEmitter(), { pid: 4242, unref() {} });
+      queueMicrotask(() => child.emit("spawn"));
+      return child;
     }
   };
 }
 
 const task = slug => ({ slug, execution: { workspace: "local" } });
+
+for (const mode of ["start", "resume"]) {
+  test(`an asynchronous EAGAIN during worker ${mode} rejects and closes the log descriptor`, async () => {
+    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "work-node-async-fail-"));
+    let fd;
+    let unref = false;
+    const node = createLocalNode({ workspace, spawn(_command, _args, opts) {
+      fd = opts.stdio[1];
+      const child = Object.assign(new EventEmitter(), { unref() { unref = true; } });
+      setImmediate(() => child.emit("error", Object.assign(new Error("spawn EAGAIN"), { code: "EAGAIN" })));
+      return child;
+    } });
+    try {
+      const operation = mode === "start"
+        ? node.startExecution({ task: task("001-async-failed") })
+        : node.resumeExecution({ task: task("001-async-failed"), grant: "allow" });
+      await assert.rejects(operation, { code: "EAGAIN" });
+      assert.equal(unref, false, "a failed launch must not be detached as a successful worker");
+      assert.throws(() => fsSync.fstatSync(fd), { code: "EBADF" });
+    } finally {
+      try { fsSync.closeSync(fd); } catch {}
+      await fs.rm(workspace, { recursive: true, force: true });
+    }
+  });
+}
+
+test("worker startup waits for the child spawn event before returning its PID", async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "work-node-spawn-handshake-"));
+  const child = Object.assign(new EventEmitter(), { pid: 4242, unref() {} });
+  let fd;
+  const node = createLocalNode({ workspace, spawn(_command, _args, opts) { fd = opts.stdio[1]; return child; } });
+  try {
+    let settled = false;
+    const pending = node.startExecution({ task: task("001-handshake") }).then(pid => { settled = true; return pid; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(settled, false);
+    child.emit("spawn");
+    assert.equal(await pending, 4242);
+    assert.throws(() => fsSync.fstatSync(fd), { code: "EBADF" });
+  } finally {
+    try { fsSync.closeSync(fd); } catch {}
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+});
+
+test("worker launches close the parent's log descriptor after start and resume", async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "work-node-fds-"));
+  const spawner = recordingSpawn();
+  const node = createLocalNode({ workspace, spawn: spawner.spawn });
+  try {
+    for (let i = 0; i < 32; i++) {
+      await node.startExecution({ task: task("001-fd") });
+      assert.throws(() => fsSync.fstatSync(spawner.calls.at(-1).opts.stdio[1]), { code: "EBADF" });
+      await node.resumeExecution({ task: task("001-fd"), grant: "allow" });
+      assert.throws(() => fsSync.fstatSync(spawner.calls.at(-1).opts.stdio[1]), { code: "EBADF" });
+    }
+  } finally {
+    // Also release descriptors when exercising the regression against an old build.
+    for (const call of spawner.calls) {
+      try { fsSync.closeSync(call.opts.stdio[1]); } catch {}
+    }
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+});
+
+test("a failed worker spawn also closes the parent's log descriptor", async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "work-node-spawn-fail-"));
+  let fd;
+  const node = createLocalNode({ workspace, spawn(_command, _args, opts) {
+    fd = opts.stdio[1];
+    throw new Error("fixture spawn failure");
+  } });
+  try {
+    await assert.rejects(() => node.startExecution({ task: task("001-failed") }), /fixture spawn failure/);
+    assert.throws(() => fsSync.fstatSync(fd), { code: "EBADF" });
+  } finally {
+    try { fsSync.closeSync(fd); } catch {}
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+});
+
+test("a package path containing spaces and URL characters launches an existing worker path", async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "work-node-path-"));
+  const copiedSrc = path.join(workspace, "package with spaces # percent%", "src");
+  try {
+    await fs.mkdir(path.join(copiedSrc, "nodes"), { recursive: true });
+    await fs.mkdir(path.join(copiedSrc, "core"));
+    await fs.copyFile(new URL("../src/nodes/local.mjs", import.meta.url), path.join(copiedSrc, "nodes", "local.mjs"));
+    await fs.copyFile(new URL("../src/core/runs.mjs", import.meta.url), path.join(copiedSrc, "core", "runs.mjs"));
+    const worker = path.join(copiedSrc, "worker.mjs");
+    await fs.writeFile(worker, "// fixture worker\n");
+    const { createLocalNode: copiedNode } = await import(pathToFileURL(path.join(copiedSrc, "nodes", "local.mjs")));
+    const spawner = recordingSpawn();
+    await copiedNode({ workspace, spawn: spawner.spawn }).startExecution({ task: task("001-path") });
+    assert.equal(spawner.calls[0].args[0], await fs.realpath(worker));
+    await fs.access(spawner.calls[0].args[0]);
+  } finally {
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+});
 
 test("startExecution spawns the detached worker on this machine and returns its pid", async () => {
   const spawner = recordingSpawn();

@@ -216,7 +216,7 @@ test("a working task whose worker is alive is never touched", async () => {
   }
 });
 
-test("non-working tasks are left alone even with a dead pid", async () => {
+test("completed tasks and non-live human stops are left alone even with a dead pid", async () => {
   const base = await tempBase();
   try {
     const store = createStore(base);
@@ -249,13 +249,101 @@ test("non-working tasks are left alone even with a dead pid", async () => {
       tasks.push(task);
     }
     for (let i = 0; i < cases.length; i++) {
-      await store.updateTask({ ...applyOutcome(tasks[i], cases[i].outcome), pid: 424242 });
+      const updated = applyOutcome(tasks[i], cases[i].outcome);
+      updated.runs[0].outcome = cases[i].status === "done" ? "ready" : cases[i].status;
+      await store.updateTask({ ...updated, pid: 424242 });
     }
     const recovered = await recoverInterruptedRuns(base, { kill: DEAD, log: quiet });
     assert.deepEqual(recovered, []);
 
     const list = await store.listTasks();
     assert.deepEqual(list.map(t => t.status).sort(), ["done", "failed", "needs_you", "ready"]);
+  } finally {
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("a dead live-permission worker is recovered while its saved session survives", async () => {
+  const base = await tempBase();
+  try {
+    const { store, task } = await makeWorkingTask(base);
+    const blockedOn = { type: "permission", live: true, requestId: 12, tool: "Local edit" };
+    const paused = { ...task, status: "needs_you", blockedOn,
+      runs: [{ ...task.runs[0], outcome: "needs_you", blockedOn }]
+    };
+    await store.updateTask(paused);
+    const recovered = await recoverInterruptedRuns(base, { kill: DEAD, log: quiet });
+    assert.equal(recovered.length, 1);
+    const failed = await store.findTask(task.id);
+    assert.equal(failed.status, "failed");
+    assert.equal(failed.failure.kind, "crashed");
+    assert.equal(failed.blockedOn, undefined);
+    assert.equal(failed.runs[0].outcome, "failed");
+    assert.equal(failed.runs[0].blockedOn, undefined);
+    assert.equal(failed.runs[0].externalSessionId, "sess-orphan");
+  } finally {
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("a live-permission worker that is still alive is never recovered", async () => {
+  const base = await tempBase();
+  try {
+    const { store, task } = await makeWorkingTask(base, { pid: process.pid });
+    const paused = { ...task, status: "needs_you", blockedOn: { type: "permission", live: true } };
+    await store.updateTask(paused);
+    assert.deepEqual(await recoverInterruptedRuns(base, { log: quiet }), []);
+    assert.deepEqual(await store.findTask(task.id), paused);
+    assert.deepEqual(await store.readEvents(task.slug), []);
+  } finally {
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("recovery finalizes a closed task's interrupted run without reopening the task", async () => {
+  const base = await tempBase();
+  try {
+    const { store, task } = await makeWorkingTask(base);
+    await store.updateTask({ ...task, status: "done" });
+    const recovered = await recoverInterruptedRuns(base, { kill: DEAD, log: quiet });
+    assert.equal(recovered.length, 1);
+    const closed = await store.findTask(task.id);
+    assert.equal(closed.status, "done");
+    assert.equal(closed.runs[0].outcome, "failed");
+    assert.equal((await store.readEvents(task.slug)).at(-1).status, "done");
+    assert.deepEqual(await recoverInterruptedRuns(base, { kill: DEAD, log: quiet }), []);
+  } finally {
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("recovery merges fresh input and skips a replaced worker from an older snapshot", async () => {
+  const base = await tempBase();
+  try {
+    const { store, task } = await makeWorkingTask(base);
+    await store.updateTask({ ...task, context: { notes: [{ text: "Keep this constraint" }] } });
+    const recovered = await failInterruptedRun(store, task, { kill: DEAD, log: quiet });
+    assert.equal(recovered.context.notes[0].text, "Keep this constraint");
+
+    const next = { ...task, pid: process.pid, status: "working" };
+    await store.updateTask(next);
+    assert.equal(await failInterruptedRun(store, task, { kill: DEAD, log: quiet }), null);
+    assert.deepEqual(await store.findTask(task.id), next);
+  } finally {
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("concurrent recovery sweeps finalize an interrupted run only once", async () => {
+  const base = await tempBase();
+  try {
+    const { store, task } = await makeWorkingTask(base);
+    const sweeps = await Promise.all([
+      recoverInterruptedRuns(base, { kill: DEAD, log: quiet }),
+      recoverInterruptedRuns(base, { kill: DEAD, log: quiet })
+    ]);
+    assert.equal(sweeps.flat().length, 1);
+    assert.equal((await store.readEvents(task.slug)).filter(event => event.type === "run.failed").length, 1);
   } finally {
     await fs.rm(base, { recursive: true, force: true });
   }

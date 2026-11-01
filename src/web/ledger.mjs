@@ -1223,6 +1223,7 @@ export function projectRow(task, events, opts = {}) {
     // Interactive ACP permission: which actions can be offered without
     // guessing, and the actual options the agent supplied.
     permLive: task.blockedOn?.live === true,
+    permDecisionId: task.blockedOn?.decisionId ?? null,
     permAllowable: task.blockedOn?.canAllow !== false,
     permRejectable: task.blockedOn?.canReject !== false,
     permOptions: task.blockedOn?.options ?? [],

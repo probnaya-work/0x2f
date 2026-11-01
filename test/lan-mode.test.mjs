@@ -16,6 +16,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import http from "node:http";
+import { WebSocket } from "ws";
 import { startServer } from "../src/server.mjs";
 import { createRelayAgent } from "../src/relay/agent.mjs";
 import { createRuntime } from "../src/runtime.mjs";
@@ -85,11 +86,13 @@ async function waitFor(condition, message, timeout = 8000) {
 // A request to the server with a chosen Host header, so the routing can be
 // exercised with a LAN hostname regardless of this machine's real addresses
 // (the server binds 0.0.0.0 in LAN mode; we connect via loopback).
-function lanReq(port, pathname, { host = "192.168.1.163", method = "GET", headers = {}, body } = {}) {
+function lanReq(port, pathname, { host = "192.168.1.163", method = "GET", headers = {}, body, localAddress } = {}) {
   return new Promise((resolve, reject) => {
     const req = http.request(
       {
         host: "127.0.0.1",
+        localAddress,
+        agent: false,
         port,
         path: pathname,
         method,
@@ -343,6 +346,140 @@ test("LAN hosts get the client + relay protocol only; the local API stays loopba
   // A foreign (DNS-rebinding) host stays 403 whether or not LAN is on.
   const evil = await lanReq(port, "/api/tasks", { host: "evil.example.com" });
   assert.equal(evil.status, 403);
+});
+
+test("LAN peers cannot obtain local credentials or call the local API with a forged loopback Host", async t => {
+  const { handle, port } = await makeLanServer(t, {
+    enabled: true,
+    transport: "lan"
+  });
+
+  // All traffic stays on loopback. Model the address attached by the TCP
+  // stack before the real HTTP handler runs, rather than exposing a test
+  // hook or trusting a client-supplied forwarding header in production.
+  let peerAddress = "192.168.1.23";
+  handle.server.prependListener("request", req => {
+    Object.defineProperty(req.socket, "remoteAddress", {
+      configurable: true,
+      value: peerAddress
+    });
+  });
+
+  for (const peer of ["192.168.1.23", "::ffff:192.168.1.23", "203.0.113.23", undefined]) {
+    peerAddress = peer;
+    for (const host of ["127.0.0.1", "localhost", "[::1]"]) {
+      const shell = await lanReq(port, "/", { host });
+      assert.equal(shell.status, 403, `${peer}: shell with forged ${host}`);
+      assert.equal(shell.headers["set-cookie"], undefined);
+      const health = await lanReq(port, "/api/health", { host });
+      assert.equal(health.status, 403, `${peer}: health with forged ${host}`);
+      const tasks = await lanReq(port, "/api/tasks", { host, headers: authHeaders() });
+      assert.equal(tasks.status, 403, `${peer}: authenticated API with forged ${host}`);
+      const mutation = await lanReq(port, "/api/tasks", {
+        host,
+        method: "POST",
+        headers: { ...authHeaders(), "content-type": "application/json" },
+        body: JSON.stringify({ brief: "must not run" })
+      });
+      assert.equal(mutation.status, 403, `${peer}: mutation with forged ${host}`);
+    }
+  }
+
+  // Neither a private Host nor spoofed proxy headers make a public peer a
+  // LAN device. Private peers still receive the bounded pairing surface.
+  peerAddress = "203.0.113.23";
+  const publicPeer = await lanReq(port, "/pair", {
+    headers: { "x-forwarded-for": "127.0.0.1", "x-real-ip": "192.168.1.23" }
+  });
+  assert.equal(publicPeer.status, 403);
+  peerAddress = "192.168.1.23";
+  assert.equal((await lanReq(port, "/pair")).status, 200);
+
+  // Direct local clients remain usable, including a dual-stack listener's
+  // IPv4-mapped loopback address.
+  for (const peer of ["127.0.0.1", "127.0.0.2", "::1", "::ffff:127.0.0.1"]) {
+    peerAddress = peer;
+    const local = await lanReq(port, "/api/tasks", { host: "127.0.0.1", headers: authHeaders() });
+    assert.equal(local.status, 200, peer);
+    const shell = await lanReq(port, "/", { host: "localhost" });
+    assert.ok(shell.headers["set-cookie"]?.some(cookie => cookie.includes("0x2f_auth=")), peer);
+  }
+});
+
+test("LAN relay requests cannot replay the local plaintext response cache", async t => {
+  const { port } = await makeLanServer(t, { enabled: true, transport: "lan" });
+  const key = "local-cache-only";
+  const cached = await lanReq(port, "/api/local-cache-marker", {
+    host: "127.0.0.1",
+    method: "POST",
+    headers: { ...authHeaders(), "x-0x2f-request-id": key }
+  });
+  assert.equal(cached.status, 404);
+  assert.ok(cached.body.includes("local-cache-marker"));
+  const remote = await lanReq(port, "/api/command", {
+    method: "POST",
+    headers: { "x-0x2f-request-id": key }
+  });
+  assert.equal(remote.status, 401);
+  assert.ok(remote.body.includes("Not paired"));
+  assert.ok(!remote.body.includes("local-cache-marker"));
+});
+
+test("a real private TCP peer cannot bootstrap local auth through a loopback destination", async t => {
+  const localAddress = detectLanAddress();
+  if (!localAddress) {
+    t.skip("no assigned private address for the local TCP source");
+    return;
+  }
+  const { port } = await makeLanServer(t, { enabled: true, transport: "lan" });
+  // The destination is always 127.0.0.1. Binding the source to another local
+  // interface exercises a real nonloopback peer without any external traffic.
+  for (const pathname of ["/", "/api/health", "/api/tasks"]) {
+    const response = await lanReq(port, pathname, {
+      host: "127.0.0.1", localAddress, headers: authHeaders()
+    });
+    assert.equal(response.status, 403, pathname);
+    assert.equal(response.headers["set-cookie"], undefined);
+  }
+  assert.equal((await lanReq(port, "/pair", { localAddress })).status, 200);
+});
+
+test("WebSocket upgrades share the LAN peer, Host, browser, and active-pairing gates", async t => {
+  const { base, handle, port } = await makeLanServer(t, { enabled: true, transport: "lan" });
+  let peerAddress = "192.168.1.23";
+  handle.server.prependListener("upgrade", req => {
+    Object.defineProperty(req.socket, "remoteAddress", { configurable: true, value: peerAddress });
+  });
+  const upgrade = headers => new Promise(resolve => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, {
+      handshakeTimeout: 1000,
+      headers: { host: `192.168.1.163:${port}`, ...headers }
+    });
+    ws.once("open", () => { ws.close(); resolve(true); });
+    ws.once("error", () => resolve(false));
+  });
+
+  for (const headers of [
+    { host: "evil.example" },
+    { host: `127.0.0.1:${port}` },
+    { origin: "https://evil.example" },
+    { origin: "invalid" },
+    { "sec-fetch-site": "cross-site" },
+    { "sec-fetch-site": "same-site" }
+  ]) assert.equal(await upgrade(headers), false, JSON.stringify(headers));
+
+  peerAddress = "203.0.113.23";
+  assert.equal(await upgrade({ "x-forwarded-for": "192.168.1.23" }), false);
+  peerAddress = "192.168.1.23";
+  assert.equal(await upgrade({ origin: `http://192.168.1.163:${port}`, "sec-fetch-site": "same-origin" }), true);
+  peerAddress = "127.0.0.1";
+  assert.equal(await upgrade({ host: `127.0.0.1:${port}` }), true);
+
+  await writeConfig(base, { enabled: false, transport: "lan" });
+  await new Promise(r => setTimeout(r, 120));
+  assert.equal(await upgrade({ host: `127.0.0.1:${port}` }), false);
+  peerAddress = "192.168.1.23";
+  assert.equal(await upgrade({}), false);
 });
 
 test("the LAN surface closes when `2f pair --off` disables the config", async t => {

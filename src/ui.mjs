@@ -31,6 +31,7 @@
 import { spawn } from "node:child_process";
 import fsSync from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export class UiError extends Error {
   constructor(message) {
@@ -67,7 +68,7 @@ export async function probeUi(url, opts = {}) {
     if (!res.ok) return { ok: false, kind: "other" };
     const body = await res.json();
     const healthy = body && body.ok === true && body.mode === "local";
-    return healthy ? { ok: true, kind: "0x2f" } : { ok: false, kind: "other" };
+    return healthy ? { ok: true, kind: "0x2f", base: body.base } : { ok: false, kind: "other" };
   } catch (error) {
     if (error?.name === "AbortError") return { ok: false, kind: "timeout" };
     const code = error?.cause?.code ?? error?.code;
@@ -116,6 +117,31 @@ function otherProcessMessage(port, url) {
   );
 }
 
+function workspacePath(value) {
+  if (typeof value !== "string" || !value) return null;
+  try {
+    return fsSync.realpathSync(value);
+  } catch {
+    return path.resolve(value);
+  }
+}
+
+function requireWorkspace(probe, base, port) {
+  const actual = workspacePath(probe.base);
+  if (!actual) {
+    throw new UiError(
+      `Port ${port} is serving a 0x2F runtime without workspace identity. ` +
+      `Stop that runtime or choose another port: 2f ui <port>.`
+    );
+  }
+  if (actual !== workspacePath(base)) {
+    throw new UiError(
+      `Port ${port} is serving 0x2F for another workspace (${probe.base}). ` +
+      `Open this workspace on another port: 2f ui <port>.`
+    );
+  }
+}
+
 // Start the detached 0x2F runtime unless a healthy one already answers on
 // the port. Returns { status: "reused" | "started", url }. This is the
 // shared "make sure 0x2F is running" step behind `2f ui` and `2f pair` —
@@ -135,6 +161,7 @@ export async function ensureRuntime({
   // Already running? Reuse it — never start a second runtime.
   const first = await probe(url);
   if (first.ok) {
+    requireWorkspace(first, base, port);
     return { status: "reused", url };
   }
   if (first.kind === "other") {
@@ -146,18 +173,23 @@ export async function ensureRuntime({
   const entry = new URL("./server-entry.mjs", import.meta.url);
   const log = logPath ?? path.join(base, ".work", "ui.log");
   fsSync.mkdirSync(path.dirname(log), { recursive: true });
-  const fd = fsSync.openSync(log, "a");
-  // The runtime log may carry task titles and provider output — owner-only.
-  fsSync.chmodSync(log, 0o600);
+  const fd = fsSync.openSync(log, "a", 0o600);
   let child;
   try {
-    child = spawnImpl(process.execPath, [entry.pathname, base, String(port)], {
+    // The runtime log may carry task titles and provider output — owner-only.
+    fsSync.fchmodSync(fd, 0o600);
+    child = spawnImpl(process.execPath, [fileURLToPath(entry), base, String(port)], {
       detached: true,
       stdio: ["ignore", fd, fd]
     });
+    await new Promise((resolve, reject) => {
+      child.once("error", reject);
+      child.once("spawn", resolve);
+    });
   } catch (error) {
-    fsSync.closeSync(fd);
     throw new UiError(`Could not start the 0x2F runtime: ${error.message}`);
+  } finally {
+    fsSync.closeSync(fd);
   }
   child.unref();
 
@@ -165,6 +197,7 @@ export async function ensureRuntime({
   for (;;) {
     const p = await probe(url);
     if (p.ok) {
+      requireWorkspace(p, base, port);
       return { status: "started", url };
     }
     if (p.kind === "other") {

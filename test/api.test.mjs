@@ -35,7 +35,11 @@ function fakeNode() {
 async function startTestServer() {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-api-"));
   const node = fakeNode();
-  const runtime = createRuntime(base, { node });
+  // This is an inert execution node, so pin native availability as a fixture
+  // rather than depending on a developer's installed Claude binary. Inherit
+  // later withFakeBin changes for the tests that select other providers.
+  const env = Object.assign(Object.create(process.env), { CLAUDE_BIN: process.execPath });
+  const runtime = createRuntime(base, { node, env });
   const handle = await startServer(base, 0, {
     runtime,
     interval: 20,
@@ -159,6 +163,36 @@ test("POST /api/tasks/:id/allow and /reject resume via the shared action; guards
     const res = await postJson(handle.url + "/api/tasks/" + notBlocked.id + "/allow");
     assert.equal(res.status, 400);
     assert.match((await res.json()).error, /not needs_you — nothing to allow\./);
+  } finally {
+    await handle.close();
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
+test("permission HTTP actions refuse stale or missing displayed decision IDs", async () => {
+  const { base, runtime, handle } = await startTestServer();
+  try {
+    for (const action of ["allow", "reject"]) {
+      const task = await runtime.actions.createWork({ brief: "Synthetic live permission" });
+      const old = { type: "permission", live: true, tool: "Edit", requestId: 100, decisionId: "shown-" + action };
+      await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: old });
+      const shown = await apiFetch(`${handle.url}/api/tasks/${task.id}`).then(r => r.json());
+      const current = { ...old, decisionId: "newer-" + action };
+      await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: current });
+      const decisionFile = path.join(runtime.store.taskDir(task.slug), "permission.json");
+      for (const body of [undefined, {}, { decisionId: shown.blockedOn.decisionId }]) {
+        const response = await postJson(`${handle.url}/api/tasks/${task.id}/${action}`, body);
+        assert.equal(response.status, 409);
+        assert.match((await response.json()).error, /permission request changed/);
+        await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+        assert.equal((await runtime.store.findTask(task.id)).blockedOn.decisionId, current.decisionId);
+      }
+      const response = await postJson(`${handle.url}/api/tasks/${task.id}/${action}`, { decisionId: current.decisionId });
+      assert.equal(response.status, 202);
+      const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+      assert.equal(decision.decisionId, current.decisionId);
+      assert.equal(decision.grant, action);
+    }
   } finally {
     await handle.close();
     await fs.rm(base, { recursive: true, force: true });

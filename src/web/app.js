@@ -381,8 +381,11 @@ function remoteBlocked() {
   return false;
 }
 
-function post(path) {
-  return api(path, { method: "POST" });
+function post(path, body) {
+  return api(path, {
+    method: "POST",
+    ...(body !== undefined ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {})
+  });
 }
 
 // --- the slash: sound, visual, notification ---------------------------------
@@ -663,13 +666,13 @@ async function act(fn) {
   return true;
 }
 
-const allow = id => {
+const allow = (id, decisionId) => {
   if (remoteBlocked()) return;
-  act(() => post("/api/tasks/" + id + "/allow"));
+  act(() => post("/api/tasks/" + id + "/allow", { decisionId: decisionId ?? null }));
 };
-const reject = id => {
+const reject = (id, decisionId) => {
   if (remoteBlocked()) return;
-  act(() => post("/api/tasks/" + id + "/reject"));
+  act(() => post("/api/tasks/" + id + "/reject", { decisionId: decisionId ?? null }));
 };
 const accept = id => {
   if (remoteBlocked()) return Promise.resolve(false);
@@ -1199,7 +1202,7 @@ function renderHalt(row, accent) {
     acts.push(
       actionButton("ALLOW", "A", "act-primary", e => {
         e.stopPropagation();
-        allow(row.id);
+        allow(row.id, row.permDecisionId);
       }, "allow-" + row.id)
     );
   }
@@ -1215,7 +1218,7 @@ function renderHalt(row, accent) {
     acts.push(
       actionButton("REJECT", "R", "act-quiet", e => {
         e.stopPropagation();
-        reject(row.id);
+        reject(row.id, row.permDecisionId);
       }, "reject-" + row.id)
     );
   }
@@ -2296,10 +2299,10 @@ function onKeyDown(event) {
   } else if (event.key === "a" || event.key === "A") {
     // ALLOW/ACCEPT are permission and ready semantics — a decision is
     // answered (in its card), never allowed.
-    if (row?.halted && row.permType !== "decision") allow(row.id);
+    if (row?.halted && row.permType !== "decision") allow(row.id, row.permDecisionId);
     else if (row?.ready) accept(row.id);
   } else if (event.key === "r" || event.key === "R") {
-    if (row?.halted && row.permType !== "decision") reject(row.id);
+    if (row?.halted && row.permType !== "decision") reject(row.id, row.permDecisionId);
   } else if (event.key === "s" || event.key === "S") {
     if (row?.ready || row?.failed) sendBack(row.id);
   } else if (event.key === "x" || event.key === "X") {
@@ -2618,7 +2621,7 @@ function renderMobileAskCard(row, frozen) {
     const btn = el("button", { class: "m-btn m-btn-primary", text: "ALLOW" });
     btn.addEventListener("click", () => {
       btn.disabled = true;
-      allow(row.id);
+      allow(row.id, row.permDecisionId);
     });
     acts.push(btn);
   }
@@ -2626,7 +2629,7 @@ function renderMobileAskCard(row, frozen) {
     const btn = el("button", { class: "m-btn m-btn-secondary", text: "REJECT" });
     btn.addEventListener("click", () => {
       btn.disabled = true;
-      reject(row.id);
+      reject(row.id, row.permDecisionId);
     });
     acts.push(btn);
   }
@@ -3085,12 +3088,12 @@ function renderMobileActionBar(row, frozen) {
     const allowBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ALLOW", disabled: !row.permAllowable ? true : undefined });
     allowBtn.addEventListener("click", () => {
       allowBtn.disabled = true;
-      allow(row.id);
+      allow(row.id, row.permDecisionId);
     });
     const rejectBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "REJECT", disabled: !row.permRejectable ? true : undefined });
     rejectBtn.addEventListener("click", () => {
       rejectBtn.disabled = true;
-      reject(row.id);
+      reject(row.id, row.permDecisionId);
     });
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [allowBtn, rejectBtn])]);
   }

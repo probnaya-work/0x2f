@@ -13,7 +13,8 @@ agent sessions.**
 
 `0x2F` is hex for the ASCII `/` (47). The CLI is `2f`.
 
-Node.js ≥ 20, one dependency (`ws`), no build step, local-first.
+Node.js ≥ 20, three dependencies (`ws`, `@noble/ciphers`, `@noble/hashes`),
+no build step, local-first.
 
 ```text
                           0x2F
@@ -66,8 +67,8 @@ default, [Codex](https://github.com/openai/codex) (`codex`),
 and [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`)
 are also built in, and any ACP-compatible agent or headless executable
 can be added per project (see [Providers](#providers)). 0x2F itself is one
-small package — `ws` is its only dependency, no build step, no accounts, no
-daemon.
+small package with WebSocket and cryptography dependencies, no build step,
+no accounts, no daemon.
 
 ```bash
 npm install -g 0x2f        # the `2f` command lands on your PATH
@@ -201,6 +202,11 @@ attention — a wrong NEEDS YOU, a non-resumable one, a FAILED or READY run you
 no longer want. It never resumes the provider and never starts a new
 execution.
 
+Closing does not cancel an active provider. Let an active run finish before
+closing it; a later permission request on a closed task can otherwise leave
+the provider waiting. If a local POSIX worker crashes but its execution
+processes survive, rerun refuses until that previous process group exits.
+
 ## One task, many runs
 
 
@@ -280,11 +286,14 @@ The CLI, the TUI and the Web are three surfaces over the same core:
 ```
 
 `2f ui` behaves like opening a local application: if a 0x2F runtime is already
-healthy on `http://127.0.0.1:4242` (localhost only) it reuses it; otherwise it
-starts the runtime in the background, waits until it is healthy, and opens the
+healthy for this workspace on `http://127.0.0.1:4242` (localhost only) it
+reuses it; otherwise it starts the runtime in the background, waits until it is healthy, and opens the
 UI. Runtime output lands in `.work/ui.log`. The browser calls the same shared
 actions over a local HTTP/SSE API and subscribes to the same normalized
 events.
+
+If that port serves another workspace, use `2f ui <port>` to open this one on
+a different port.
 
 Control 0x2F from your phone on the **same Wi-Fi** — the Mac keeps running
 the work; the phone is a compact control surface:
@@ -490,9 +499,10 @@ control layer, not remote execution.
 
 ## Development
 
-No dependencies, no build step — the repo runs as-is:
+Install the dependencies once; there is no build step:
 
 ```bash
+npm install       # ws, @noble/ciphers, @noble/hashes
 npm test          # the test suite (node --test, 300+ tests)
 npm run check     # syntax-check every source and test file
 npm start         # run the CLI: node src/cli.mjs

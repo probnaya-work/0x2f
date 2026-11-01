@@ -77,33 +77,21 @@ Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 function parseFlags(args) {
   const rest = [];
   const flags = {};
+  const valueFlags = new Set(["provider", "relay", "client", "run", "port"]);
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === "--provider") {
-      flags.provider = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--provider=")) {
-      flags.provider = arg.slice("--provider=".length);
-    } else if (arg === "--relay") {
-      flags.relay = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--relay=")) {
-      flags.relay = arg.slice("--relay=".length);
-    } else if (arg === "--client") {
-      flags.client = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--client=")) {
-      flags.client = arg.slice("--client=".length);
-    } else if (arg === "--run") {
-      flags.run = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--run=")) {
-      flags.run = arg.slice("--run=".length);
-    } else if (arg === "--port") {
-      flags.port = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--port=")) {
-      flags.port = arg.slice("--port=".length);
+    if (arg === "--") {
+      rest.push(...args.slice(i + 1));
+      break;
+    }
+    const equal = arg.indexOf("=");
+    const name = arg.startsWith("--") ? arg.slice(2, equal < 0 ? undefined : equal) : "";
+    if (valueFlags.has(name)) {
+      const value = equal < 0 ? args[++i] : arg.slice(equal + 1);
+      if (typeof value !== "string" || !value.trim() || value.startsWith("--")) {
+        throw new Error(name === "run" ? "Usage: 2f open <id> --run <n>" : `Option --${name} requires a value.`);
+      }
+      flags[name] = value;
     } else if (arg === "--off") {
       flags.off = true;
     } else if (arg === "--lan") {

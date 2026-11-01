@@ -938,6 +938,7 @@ test("projectRow exposes interactive permission options without inventing them",
     blockedOn: {
       type: "permission",
       live: true,
+      decisionId: "rendered-permission-occurrence",
       tool: "Edit submit-capture.ts",
       file: "/w/src/submit-capture.ts",
       description: "Edit submit-capture.ts",
@@ -948,6 +949,7 @@ test("projectRow exposes interactive permission options without inventing them",
   });
   const row = projectRow(blocked, [], { base: "/w", open: true });
   assert.equal(row.permLive, true);
+  assert.equal(row.permDecisionId, "rendered-permission-occurrence");
   assert.equal(row.permAllowable, true);
   assert.equal(row.permRejectable, false);
   assert.equal(row.permOptions.length, 1);

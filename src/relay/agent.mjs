@@ -612,9 +612,9 @@ export function createRelayAgent({
             })
           );
         case "allow":
-          return ok(202, await runtime.actions.allowWork(taskId));
+          return ok(202, await runtime.actions.allowWork(taskId, { decisionId: body?.decisionId ?? null }));
         case "reject":
-          return ok(202, await runtime.actions.rejectWork(taskId));
+          return ok(202, await runtime.actions.rejectWork(taskId, { decisionId: body?.decisionId ?? null }));
         case "answer":
           return ok(202, await runtime.actions.answerWork(taskId, { answer: body?.answer }));
         case "note":
