@@ -98,6 +98,7 @@ export function createRelayAgent({
   let stopped = false;
   let unsubscribe = null;
   let configTimer = null;
+  let configTickRunning = false;
   let reconnectTimer = null;
   let keepaliveTimer = null;
   let lastPongAt = 0;
@@ -650,16 +651,37 @@ export function createRelayAgent({
   // --- lifecycle ------------------------------------------------------------
 
   async function tickConfig() {
-    const next = await loadConfig();
-    const connKey = connectionKey(next);
-    const cryptoChanged = cryptoKey(next) !== cryptoKey(cfg);
+    // Loading and deriving are asynchronous. An interval tick must not open
+    // a socket while an earlier tick is still preparing its key/config.
+    if (stopped || configTickRunning) return;
+    configTickRunning = true;
+    try {
+      const next = await loadConfig();
+      if (stopped) return;
+      const connKey = connectionKey(next);
+      const cryptoChanged = cryptoKey(next) !== cryptoKey(cfg);
 
-    if (connKey !== seenConfig) {
-      seenConfig = connKey;
-      const disable = cfg && next === null;
-      cfg = next;
-      if (cryptoChanged) await applyKey(next);
-      if (!cfg) {
+      if (connKey !== seenConfig) {
+        seenConfig = connKey;
+        const disable = cfg && next === null;
+        cfg = next;
+        if (cryptoChanged) await applyKey(next);
+        if (stopped) return;
+        if (!cfg) {
+          if (ws) {
+            try {
+              ws.close();
+            } catch {
+              /* already closing */
+            }
+            ws = null;
+          }
+          state = "idle";
+          attempt = 0;
+          sessionKey = null;
+          if (disable) info("relay: remote control disabled");
+          return;
+        }
         if (ws) {
           try {
             ws.close();
@@ -670,28 +692,17 @@ export function createRelayAgent({
         }
         state = "idle";
         attempt = 0;
-        sessionKey = null;
-        if (disable) info("relay: remote control disabled");
-        return;
+        connect();
+      } else if (cryptoChanged) {
+        // New pairing code/token without a transport change: re-derive the key
+        // in place; the pending ceremony waits for the phone's pair-hello.
+        cfg = next;
+        await applyKey(next);
+      } else if (cfg && state === "idle") {
+        connect();
       }
-      if (ws) {
-        try {
-          ws.close();
-        } catch {
-          /* already closing */
-        }
-        ws = null;
-      }
-      state = "idle";
-      attempt = 0;
-      connect();
-    } else if (cryptoChanged) {
-      // New pairing code/token without a transport change: re-derive the key
-      // in place; the pending ceremony waits for the phone's pair-hello.
-      cfg = next;
-      await applyKey(next);
-    } else if (cfg && state === "idle") {
-      connect();
+    } finally {
+      configTickRunning = false;
     }
   }
 
