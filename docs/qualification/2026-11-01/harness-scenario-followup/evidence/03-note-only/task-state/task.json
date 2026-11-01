@@ -1,0 +1,40 @@
+{
+  "id": 1,
+  "slug": "001-implement-a-small-dependency-free-node-js-durati",
+  "title": "Implement a small dependency-free Node.js duration formatter in this temporary…",
+  "brief": "Implement a small dependency-free Node.js duration formatter in this temporary repository. Create executable duration.mjs (with a shebang and executable permission) exporting formatDuration(seconds), and duration.test.mjs using node:test. formatDuration accepts non-negative safe integer seconds and returns H:MM:SS with unbounded hours and two-digit minutes/seconds. The CLI accepts exactly one canonical non-negative decimal integer argument (0 or a nonzero digit followed by digits), prints the formatted duration plus newline, and exits nonzero with stderr and no stdout for invalid input/argument count. Cover actual behavior and boundaries in meaningful tests including CLI execution, not only file existence. Run node --test duration.test.mjs and record concrete results. Keep scope to this tiny tool, no dependencies, network, commits or changes outside this workspace. Do not modify .work task state. Before implementation inspect current files. If prior runs already implemented it, preserve and inspect them; the latest recorded user notes control continuation. Complete only this bounded stage and report what was implemented and tested.",
+  "status": "ready",
+  "pid": 56404,
+  "execution": {
+    "provider": "codex",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "01a1985a-9b5b-7b73-a1ae-d34486b33372"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T18:23:56.996Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "01a1985a-9b5b-7b73-a1ae-d34486b33372",
+      "completedAt": "2026-11-01T18:25:06.237Z",
+      "durationMs": 69241
+    }
+  ],
+  "createdAt": "2026-11-01T18:23:56.998Z",
+  "updatedAt": "2026-11-01T18:26:45.356Z",
+  "processGroupId": 56404,
+  "context": {
+    "notes": [
+      {
+        "at": "2026-11-01T18:26:45.356Z",
+        "text": "USER CONSTRAINT SUM_CONTRACT_01: Continue the existing duration formatter rather than replacing its files/tests. Add CLI --sum followed by one or more canonical non-negative decimal integer seconds; add them exactly, reject any invalid token or a total exceeding Number.MAX_SAFE_INTEGER before producing stdout. Example: ./duration.mjs --sum 0 59 1 must print 0:01:00\\n. Preserve existing one-argument CLI and exported formatDuration behavior. Add tests exercising sums across minute/hour boundaries, zero, missing operands, a malformed operand (e.g. 1e2), and safe-integer overflow. Independent qualification also found a real entry-point bug: executing the absolute duration.mjs path via macOS /var/folders/... (an alias of /private/var/folders/...) exits 0 with empty stdout even for 0, because import.meta.url is canonical but argv[1] is not. Reproduce, minimally fix this path-alias invocation, and add a regression without weakening silent-import behavior. Run the complete existing and new test suite. No dependency installation, network or commits. In your result explicitly identify prior implementation/tests you read and this constraint marker."
+      }
+    ]
+  }
+}

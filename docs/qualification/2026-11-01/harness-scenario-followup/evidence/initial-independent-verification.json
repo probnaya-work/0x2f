@@ -1,0 +1,106 @@
+{
+  "at": "2026-11-01T18:26:35.200Z",
+  "phase": "initial",
+  "workspace": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+  "suiteStatus": 0,
+  "suiteSummary": [
+    "ℹ tests 56",
+    "ℹ pass 56",
+    "ℹ fail 0",
+    "ℹ skipped 0",
+    "ℹ duration_ms 1821.659416"
+  ],
+  "oracleCases": 2010,
+  "cliCases": [
+    {
+      "args": [
+        "0"
+      ],
+      "expected": "0:00:00\n",
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected values to be strictly equal:\n\n'' !== '0:00:00\\n'\n"
+    },
+    {
+      "args": [
+        "360001"
+      ],
+      "expected": "100:00:01\n",
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected values to be strictly equal:\n\n'' !== '100:00:01\\n'\n"
+    },
+    {
+      "args": [
+        "9007199254740991"
+      ],
+      "expected": "2501999792983:36:31\n",
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected values to be strictly equal:\n+ actual - expected\n\n+ ''\n- '2501999792983:36:31\\n'\n"
+    },
+    {
+      "args": [],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    },
+    {
+      "args": [
+        "01"
+      ],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    },
+    {
+      "args": [
+        "1e2"
+      ],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    },
+    {
+      "args": [
+        "1\n"
+      ],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    },
+    {
+      "args": [
+        "9007199254740992"
+      ],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    },
+    {
+      "args": [
+        "1",
+        "2"
+      ],
+      "invalid": true,
+      "status": 0,
+      "stdout": "",
+      "stderr": "",
+      "failure": "Expected \"actual\" to be strictly unequal to: 0"
+    }
+  ],
+  "diffCheck": ""
+}

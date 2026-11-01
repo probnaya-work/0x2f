@@ -1,0 +1,407 @@
+{
+  "at": "2026-11-01T18:24:44.285518+00:00",
+  "versions": {
+    "codex": {
+      "path": "/Users/bogart/.n/bin/codex",
+      "version": "codex-cli 0.166.0",
+      "exit": 0
+    },
+    "opencode": {
+      "path": "/opt/homebrew/bin/opencode",
+      "version": "opencode v2.2.5",
+      "exit": 0
+    },
+    "node": {
+      "path": "/opt/homebrew/bin/node",
+      "version": "v26.11.1",
+      "exit": 0
+    },
+    "npm": {
+      "path": "/opt/homebrew/bin/npm",
+      "version": "11.20.0",
+      "exit": 0
+    }
+  },
+  "codex": {
+    "loginStatus": "Logged in using ChatGPT",
+    "authMode": "chatgpt",
+    "apiKeyPresent": false,
+    "selection": {
+      "model": "gpt-6.1-sol",
+      "model_reasoning_effort": "high"
+    },
+    "HOME": "/Users/bogart",
+    "userConfigPreserved": true,
+    "scenarioSandbox": "workspace-write"
+  },
+  "opencode": {
+    "authList": "No authenticated integrations",
+    "configSources": [
+      {
+        "type": "directory",
+        "path": "/Users/bogart/.config/opencode"
+      }
+    ],
+    "configFiles": [
+      "service.json"
+    ],
+    "sessionDefault": "opencode/big-pickle",
+    "billing": "free catalog entry; no paid authenticated integration"
+  },
+  "claudeCode": {
+    "status": "not tested",
+    "reason": "User confirms no account on this computer"
+  },
+  "packageSourceChecks": [
+    {
+      "file": "src/cli.mjs",
+      "sha256": "3ddc34a35720808328e680cd9421a320150f1678bde082590425702faccdc074",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/actions.mjs",
+      "sha256": "188f786fea510efff651587f1c216d2bc1316e8054568cf2b75d1236962c8976",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/diff.mjs",
+      "sha256": "a15fd628c0446640fc8176a7d67b2492d9434567bf02b46b6e698deed4d6c3b0",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/errors.mjs",
+      "sha256": "6bd20a23df103cea4097c5c86268d17a0ecd486e0681985d163426a5722ef326",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/events.mjs",
+      "sha256": "63f37e2b87cac7b3e21c1bf5fad4eefd26ca29bdc75d5a4e0e380637b22445dd",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/lifecycle.mjs",
+      "sha256": "657d749d4bc63768f86ba66c6594e9b8c4429278e32199a9c7f34171565cb704",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/limits.mjs",
+      "sha256": "09c993b3edfe18a2f9dcc670563318f231bde8bb4a7d872ed02970f6ed40be14",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/lock.mjs",
+      "sha256": "63ce33a6a0d12b8b2d522a41eb8cfb5aea3d3f9eac7ba5774b007f2bd59caed4",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/paths.mjs",
+      "sha256": "50c0b1e513d4c603e950204e869f5f89ea2bc79696c3a0f244af076ca443c2ad",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/router.mjs",
+      "sha256": "5c6152a855cb3eda41f310c793bbdb9263ce8591d6493632ade265231d8743a4",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/runs.mjs",
+      "sha256": "f6578b3ad4823b463ae66a5290bbb5081a22107ef8ed295bc7f2af7b375c8a60",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/store.mjs",
+      "sha256": "6ce1e83e8d78795720dbb38398ef256d8e78a3a9edb8ae0aaf124b3a8e094093",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/title.mjs",
+      "sha256": "9cc5a311379ea9ef2b545c55610c39df0dc388aadf44d8ac5217c5e1e1c4e62e",
+      "installedMatches": true
+    },
+    {
+      "file": "src/core/worktree.mjs",
+      "sha256": "10a4178d004011ad0ebecff252e661980dcbd306602889fcacf0db8a350a3e24",
+      "installedMatches": true
+    },
+    {
+      "file": "src/nodes/local.mjs",
+      "sha256": "81504a0ba4f93754362c9d60dd9fc4055533e716e8d22c12508b37e6f60865be",
+      "installedMatches": true
+    },
+    {
+      "file": "src/project.mjs",
+      "sha256": "cf41ccb3ea11556527f9d3891bf1ae494a352be7e449a7857fd3707b85adf40e",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/acp.mjs",
+      "sha256": "d3e1fb32aedcf916e5a6cca2a3952a88f97e2ce6b6af60541262060a98920246",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/claude-code.mjs",
+      "sha256": "410b341bfd6bf867b73313b8cf13353bb75019438cb13300f4791a068663b85b",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/codex.mjs",
+      "sha256": "d3f7d2b83d0b5c136843175c4250b3a1f9d9a851156f9f4f5b0179fe2cdb7823",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/command.mjs",
+      "sha256": "6b96a99f10f14eba5315f23d66851422935d96013e665a3c69a5dcefdf7df948",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/deepseek-harness.mjs",
+      "sha256": "7dcd2a9adf56fe0b796cb2530561484c48d7ada56cd60d2eea4a240702dec6bd",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/gemini.mjs",
+      "sha256": "4ed8f1a5d9843ee6b6545b9cf128d806128bd28553687e7a6adfbb532e5be969",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/index.mjs",
+      "sha256": "29e70ec4b333dbb0ecff4f3761670d0016ce6e90af12df77be35ac6cb2964b28",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/manifests.mjs",
+      "sha256": "803c68b43a292ce6347844cc1e01219bbc957c2f976ab22fd8e414307413acb7",
+      "installedMatches": true
+    },
+    {
+      "file": "src/providers/opencode.mjs",
+      "sha256": "d1e7e5de2b67334d0d6c7a528f423e8b04b12f47af82050489ee56d4ceb11e25",
+      "installedMatches": true
+    },
+    {
+      "file": "src/recover.mjs",
+      "sha256": "410df247420f01a54d54043903ea7d2969d5bbfaf8c02fc0dc3c53ccdb0c1bba",
+      "installedMatches": true
+    },
+    {
+      "file": "src/refine.mjs",
+      "sha256": "313800f3895202fe4bf7a7a905f9730118665e4fa9bfb0250de9b7c81ea3ceb7",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/agent.mjs",
+      "sha256": "c8e9badedd7680cc0298a08100dd1c4baf5cfbb3a5eb229d5c81540cf20c09e7",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/defaults.mjs",
+      "sha256": "107c8fd9c44b043b4648bba659cf7662499cda8eed3045024e819eb42cee8662",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/lan.mjs",
+      "sha256": "de4513d55d146c87ca45088d8d2230438a4b1dc9ba9669dc97565a3323c47d3e",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/pair.mjs",
+      "sha256": "1097672779b09ed032895f1049e6d922b6afbd204a9e294dbb18de23a8a59472",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/project.mjs",
+      "sha256": "c42f0acb4f7fb82aac4b236835c676a5e266c4079479ea772aeba2cf03259843",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/protocol.mjs",
+      "sha256": "3b107bc1362cf0c21c39befbe20253aa9db6046a2deeec523b83f80da14a4524",
+      "installedMatches": true
+    },
+    {
+      "file": "src/relay/server.mjs",
+      "sha256": "e1c06fac9e0bc0666e9c8bae7f7df36c4edac06403c38f656f8b277a1a96e135",
+      "installedMatches": true
+    },
+    {
+      "file": "src/render.mjs",
+      "sha256": "541d5bbd338377a16fc61a690675ee3fdff85d7824c27e01297306c3c9cce89c",
+      "installedMatches": true
+    },
+    {
+      "file": "src/runtime.mjs",
+      "sha256": "2668cd7942d02d219cb416712c77fd5b0b1fa53cc122cdcd96a7edad4b8aa228",
+      "installedMatches": true
+    },
+    {
+      "file": "src/serve.mjs",
+      "sha256": "116b79474aa574392fa24d8ddfd352bcb3167ef129c43201e11057bf97f0c567",
+      "installedMatches": true
+    },
+    {
+      "file": "src/server-entry.mjs",
+      "sha256": "ef17ac7f32328fb6fac9dd9459e8c3b27afd83d3681eecee56970fd69a84db71",
+      "installedMatches": true
+    },
+    {
+      "file": "src/server.mjs",
+      "sha256": "a634ff0789df4f609cf9e4dbdf768b4156ac2f5f1d4005e6a392cfbb234f7ada",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/app.mjs",
+      "sha256": "028c4285f1289f1dcdf669a2e3a9a9fc255022054a1bf165dfd6989be6f91858",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/index.mjs",
+      "sha256": "9038ee6f9fe329bf6a77dccf38152a48625c22746be25ce15b605bd3e18fcd55",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/keys.mjs",
+      "sha256": "302c9ebae8726c8117c75686e9bfb917b9a6338034f2921bd91c951def763666",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/model.mjs",
+      "sha256": "6ac19de88498a022cad2634958044213f6681506d9c591348160080252b4ec93",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/screen.mjs",
+      "sha256": "deb94b8601b22ed970d316263bbda54c1183005d020c519efa799803ff5662ae",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/state.mjs",
+      "sha256": "cd14f536255cbbff9c5de886f3769d7b07ee7e4e9214ebffa34c0a19a82c3da1",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/theme.mjs",
+      "sha256": "4e817a9d8085f85c28667883b632115c0830f57b51b981bf86e412c55a561b07",
+      "installedMatches": true
+    },
+    {
+      "file": "src/tui/view.mjs",
+      "sha256": "5e96864b24a259e49cce97e7ba3dea0f0fdfd3d7467208f672689a4b29f37172",
+      "installedMatches": true
+    },
+    {
+      "file": "src/ui.mjs",
+      "sha256": "13f6d71ab3b36ad0f155a358fc61771c62709e19d791d99f540c06ae469a3cd4",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/app.css",
+      "sha256": "8f7f8fa0273d0b37c57fc976c385842b4b20c1a86c5e3124624095516afacafe",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/app.js",
+      "sha256": "7d8a22a4a3292b0c9b5bd9d764945a583b7c32098cdc41c97a3177f218fe506a",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/e2e.mjs",
+      "sha256": "1424c27f963ed77aa64561f34cb7175e7be374f5ab76e33c79ca2567756b185e",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/index.html",
+      "sha256": "482fedea761e948acd807e1771e1701e2ae0b47110188ab004a2545e286a68e7",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/ledger.mjs",
+      "sha256": "512ad01a0445ece9216f9d8c4674faf80f9935784413ffefe9065f67b1be0551",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/pair.css",
+      "sha256": "49fd33035119b26dd57d4de8662317025bd3f31f7126e5e05f6b4ba354ee6ff6",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/pair.html",
+      "sha256": "ad66705024e5ce3adec57b2dc726d09a8f80db2fc624633d976bfdd23239b4b5",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/pair.mjs",
+      "sha256": "5ffa22b2ea3030f901684af691144ab3cbd7fa269f5a28053191eaf727051543",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/remote.mjs",
+      "sha256": "49f13e3402cc3917f02b1b72cc88d1dbc760656a48288ddb1e7d8a2255b5f91d",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/sound-policy.mjs",
+      "sha256": "3b1368a63339764bb7e4556a39de21c423dfef4d05191433fd4e844e001e4c10",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/sound.mjs",
+      "sha256": "1f6e5fc45f8685dbe0862b582e190ad1b950f0574c7067f4c0e745b0020a44b5",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/ciphers/_polyval.js",
+      "sha256": "93b718b57b8a6739b62145e6ba82ac0be5f225ba6754d825427fef8010b142e6",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/ciphers/aes.js",
+      "sha256": "c112ad02f2b5315f5f6d51b211c208ed29d91b4a81f9a99ccfc35b043de5c4fc",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/ciphers/utils.js",
+      "sha256": "306e36d8c59519a289756f5775e2fc2faed9b02b6b60029a7c8e3e943522e441",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/_md.js",
+      "sha256": "cefb1557e7715cb2117c83f82ef3e3175c7e0391c80bd5795b2d4effc45fc582",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/_u64.js",
+      "sha256": "e48c0cfc10810439a4807b46db136ce603a3fa09b62584f513ef2f3ca496af54",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/crypto.js",
+      "sha256": "9211d026c5d21e60e0126dd6f01150d87da5ba7261b8f468215c1264372ff5a5",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/hmac.js",
+      "sha256": "124192bf8e54b3650ae13bcaf2534c0da7164a35f44c6d8402b599cf6602e9d3",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/pbkdf2.js",
+      "sha256": "dab190f2112ba5fdef75fe027aecc1183a79bad3cdffdf42014c40ecc75bbf78",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/sha2.js",
+      "sha256": "e729088b82e5450bff54c3a0013582aa42e1fe8f58dd31f5967f6ebe34c52299",
+      "installedMatches": true
+    },
+    {
+      "file": "src/web/vendor/@noble/hashes/utils.js",
+      "sha256": "fead5ad90e4dd87dd5c96b325d25ee6440bfa402aa93b283e6e9b178a0bf57c8",
+      "installedMatches": true
+    },
+    {
+      "file": "src/worker.mjs",
+      "sha256": "630fa05c344948c4f5cd6afe109b27548f9cc340a337d764fb48bd3f883323c3",
+      "installedMatches": true
+    }
+  ]
+}

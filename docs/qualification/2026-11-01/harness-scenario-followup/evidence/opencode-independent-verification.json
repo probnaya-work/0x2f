@@ -1,0 +1,194 @@
+{
+  "at": "2026-11-01T18:28:23.591Z",
+  "phase": "opencode",
+  "workspace": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+  "suiteStatus": 0,
+  "suiteSummary": [
+    "ℹ tests 82",
+    "ℹ pass 82",
+    "ℹ fail 0",
+    "ℹ skipped 0",
+    "ℹ duration_ms 2958.017958"
+  ],
+  "oracleCases": 2010,
+  "cliCases": [
+    {
+      "args": [
+        "0"
+      ],
+      "expected": "0:00:00\n",
+      "status": 0,
+      "stdout": "0:00:00\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "360001"
+      ],
+      "expected": "100:00:01\n",
+      "status": 0,
+      "stdout": "100:00:01\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "9007199254740991"
+      ],
+      "expected": "2501999792983:36:31\n",
+      "status": 0,
+      "stdout": "2501999792983:36:31\n",
+      "stderr": ""
+    },
+    {
+      "args": [],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "01"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "1e2"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "1\n"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "9007199254740992"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "1",
+        "2"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "--sum",
+        "0",
+        "59",
+        "1"
+      ],
+      "expected": "0:01:00\n",
+      "status": 0,
+      "stdout": "0:01:00\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--sum",
+        "3599",
+        "1",
+        "3600"
+      ],
+      "expected": "2:00:00\n",
+      "status": 0,
+      "stdout": "2:00:00\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--sum",
+        "0"
+      ],
+      "expected": "0:00:00\n",
+      "status": 0,
+      "stdout": "0:00:00\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--sum",
+        "9007199254740990",
+        "1"
+      ],
+      "expected": "2501999792983:36:31\n",
+      "status": 0,
+      "stdout": "2501999792983:36:31\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "--sum"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "--sum",
+        "1",
+        "1e2"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "--sum",
+        "9007199254740991",
+        "1"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "--sum",
+        "1",
+        "2\n"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    },
+    {
+      "args": [
+        "--sum",
+        "01"
+      ],
+      "invalid": true,
+      "status": 1,
+      "stdout": "",
+      "stderr": "Usage: duration.mjs <seconds> | --sum <seconds>... (non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)\n"
+    }
+  ],
+  "diffCheck": ""
+}

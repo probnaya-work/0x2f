@@ -1,0 +1,521 @@
+{
+  "created": "2026-11-01T18:21:59.912Z",
+  "sourceSha": "02ff8035e7733c24cbd90f939ca1c586a0890e8a",
+  "root": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW",
+  "workspace": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+  "prefix": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/installed",
+  "cli": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/installed/node_modules/.bin/2f",
+  "archive": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/0x2f-0.1.4.tgz",
+  "archiveSha256": "2b19cbff7f1e9c65ca3d57fc084c24fb16d9dbded86fd71b6874f6ca9333831f",
+  "package": {
+    "id": "0x2f@0.1.4",
+    "name": "0x2f",
+    "version": "0.1.4",
+    "size": 271408,
+    "unpackedSize": 901224,
+    "shasum": "53559a6c064ad14bfc4df2c7d7339cd1e1e9cebc",
+    "integrity": "sha512-tldo8o+l/ZHw6asDNcCB0ksxaNDM6jI9QWVGFrf3fq+JUxmEj6mLlwPg4QcQVWbaX5/gO5tATGaLF+XIeDFHEA==",
+    "filename": "0x2f-0.1.4.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1074,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 22613,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 1241,
+        "mode": 420
+      },
+      {
+        "path": "src/cli.mjs",
+        "size": 23810,
+        "mode": 493
+      },
+      {
+        "path": "src/core/actions.mjs",
+        "size": 26120,
+        "mode": 420
+      },
+      {
+        "path": "src/core/diff.mjs",
+        "size": 4473,
+        "mode": 420
+      },
+      {
+        "path": "src/core/errors.mjs",
+        "size": 471,
+        "mode": 420
+      },
+      {
+        "path": "src/core/events.mjs",
+        "size": 4193,
+        "mode": 420
+      },
+      {
+        "path": "src/core/lifecycle.mjs",
+        "size": 11359,
+        "mode": 420
+      },
+      {
+        "path": "src/core/limits.mjs",
+        "size": 1252,
+        "mode": 420
+      },
+      {
+        "path": "src/core/lock.mjs",
+        "size": 2411,
+        "mode": 420
+      },
+      {
+        "path": "src/core/paths.mjs",
+        "size": 1673,
+        "mode": 420
+      },
+      {
+        "path": "src/core/router.mjs",
+        "size": 5257,
+        "mode": 420
+      },
+      {
+        "path": "src/core/runs.mjs",
+        "size": 6472,
+        "mode": 420
+      },
+      {
+        "path": "src/core/store.mjs",
+        "size": 13203,
+        "mode": 420
+      },
+      {
+        "path": "src/core/title.mjs",
+        "size": 7449,
+        "mode": 420
+      },
+      {
+        "path": "src/core/worktree.mjs",
+        "size": 3152,
+        "mode": 420
+      },
+      {
+        "path": "src/nodes/local.mjs",
+        "size": 4403,
+        "mode": 420
+      },
+      {
+        "path": "src/project.mjs",
+        "size": 10850,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/acp.mjs",
+        "size": 27628,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/claude-code.mjs",
+        "size": 15672,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/codex.mjs",
+        "size": 14471,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/command.mjs",
+        "size": 4443,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/deepseek-harness.mjs",
+        "size": 6367,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/gemini.mjs",
+        "size": 14912,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/index.mjs",
+        "size": 7673,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/manifests.mjs",
+        "size": 7916,
+        "mode": 420
+      },
+      {
+        "path": "src/providers/opencode.mjs",
+        "size": 551,
+        "mode": 420
+      },
+      {
+        "path": "src/recover.mjs",
+        "size": 7927,
+        "mode": 420
+      },
+      {
+        "path": "src/refine.mjs",
+        "size": 10320,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/agent.mjs",
+        "size": 25801,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/defaults.mjs",
+        "size": 1545,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/lan.mjs",
+        "size": 2138,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/pair.mjs",
+        "size": 18987,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/project.mjs",
+        "size": 14212,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/protocol.mjs",
+        "size": 4468,
+        "mode": 420
+      },
+      {
+        "path": "src/relay/server.mjs",
+        "size": 28457,
+        "mode": 420
+      },
+      {
+        "path": "src/render.mjs",
+        "size": 4160,
+        "mode": 420
+      },
+      {
+        "path": "src/runtime.mjs",
+        "size": 2940,
+        "mode": 420
+      },
+      {
+        "path": "src/serve.mjs",
+        "size": 5618,
+        "mode": 420
+      },
+      {
+        "path": "src/server-entry.mjs",
+        "size": 1719,
+        "mode": 420
+      },
+      {
+        "path": "src/server.mjs",
+        "size": 41309,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/app.mjs",
+        "size": 9392,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/index.mjs",
+        "size": 5150,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/keys.mjs",
+        "size": 3751,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/model.mjs",
+        "size": 11772,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/screen.mjs",
+        "size": 6447,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/state.mjs",
+        "size": 12429,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/theme.mjs",
+        "size": 2285,
+        "mode": 420
+      },
+      {
+        "path": "src/tui/view.mjs",
+        "size": 40648,
+        "mode": 420
+      },
+      {
+        "path": "src/ui.mjs",
+        "size": 8272,
+        "mode": 420
+      },
+      {
+        "path": "src/web/app.css",
+        "size": 50119,
+        "mode": 420
+      },
+      {
+        "path": "src/web/app.js",
+        "size": 130892,
+        "mode": 420
+      },
+      {
+        "path": "src/web/e2e.mjs",
+        "size": 10021,
+        "mode": 420
+      },
+      {
+        "path": "src/web/index.html",
+        "size": 306,
+        "mode": 420
+      },
+      {
+        "path": "src/web/ledger.mjs",
+        "size": 50505,
+        "mode": 420
+      },
+      {
+        "path": "src/web/pair.css",
+        "size": 1467,
+        "mode": 420
+      },
+      {
+        "path": "src/web/pair.html",
+        "size": 683,
+        "mode": 420
+      },
+      {
+        "path": "src/web/pair.mjs",
+        "size": 4756,
+        "mode": 420
+      },
+      {
+        "path": "src/web/remote.mjs",
+        "size": 9110,
+        "mode": 420
+      },
+      {
+        "path": "src/web/sound-policy.mjs",
+        "size": 4867,
+        "mode": 420
+      },
+      {
+        "path": "src/web/sound.mjs",
+        "size": 3944,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/ciphers/_polyval.js",
+        "size": 7976,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/ciphers/aes.js",
+        "size": 37163,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/ciphers/utils.js",
+        "size": 12563,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/_md.js",
+        "size": 6192,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/_u64.js",
+        "size": 3081,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/crypto.js",
+        "size": 146,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/hmac.js",
+        "size": 2944,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/pbkdf2.js",
+        "size": 3867,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/sha2.js",
+        "size": 16832,
+        "mode": 420
+      },
+      {
+        "path": "src/web/vendor/@noble/hashes/utils.js",
+        "size": 10529,
+        "mode": 420
+      },
+      {
+        "path": "src/worker.mjs",
+        "size": 12405,
+        "mode": 420
+      }
+    ],
+    "entryCount": 73,
+    "bundled": []
+  },
+  "node": "v26.11.1",
+  "environment": {
+    "HOME": "/Users/bogart",
+    "scenarioCodexSandbox": "workspace-write",
+    "ignoreUserConfig": false,
+    "apiKeyPresent": false
+  },
+  "commands": [
+    {
+      "started": "2026-11-01T18:21:58.671Z",
+      "command": "git",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101",
+      "status": 0,
+      "output": "02ff8035e7733c24cbd90f939ca1c586a0890e8a\n"
+    },
+    {
+      "started": "2026-11-01T18:21:58.682Z",
+      "command": "npm",
+      "args": [
+        "pack",
+        "--ignore-scripts",
+        "--json",
+        "--pack-destination",
+        "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW"
+      ],
+      "cwd": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101",
+      "status": 0,
+      "output": "[\n  {\n    \"id\": \"0x2f@0.1.4\",\n    \"name\": \"0x2f\",\n    \"version\": \"0.1.4\",\n    \"size\": 271408,\n    \"unpackedSize\": 901224,\n    \"shasum\": \"53559a6c064ad14bfc4df2c7d7339cd1e1e9cebc\",\n    \"integrity\": \"sha512-tldo8o+l/ZHw6asDNcCB0ksxaNDM6jI9QWVGFrf3fq+JUxmEj6mLlwPg4QcQVWbaX5/gO5tATGaLF+XIeDFHEA==\",\n    \"filename\": \"0x2f-0.1.4.tgz\",\n    \"files\": [\n      {\n        \"path\": \"LICENSE\",\n        \"size\": 1074,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"README.md\",\n        \"size\": 22613,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"package.json\",\n        \"size\": 1241,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/cli.mjs\",\n        \"size\": 23810,\n        \"mode\": 493\n      },\n      {\n        \"path\": \"src/core/actions.mjs\",\n        \"size\": 26120,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/diff.mjs\",\n        \"size\": 4473,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/errors.mjs\",\n        \"size\": 471,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/events.mjs\",\n        \"size\": 4193,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/lifecycle.mjs\",\n        \"size\": 11359,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/limits.mjs\",\n        \"size\": 1252,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/lock.mjs\",\n        \"size\": 2411,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/paths.mjs\",\n        \"size\": 1673,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/router.mjs\",\n        \"size\": 5257,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/runs.mjs\",\n        \"size\": 6472,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/store.mjs\",\n        \"size\": 13203,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/title.mjs\",\n        \"size\": 7449,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/core/worktree.mjs\",\n        \"size\": 3152,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/nodes/local.mjs\",\n        \"size\": 4403,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/project.mjs\",\n        \"size\": 10850,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/acp.mjs\",\n        \"size\": 27628,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/claude-code.mjs\",\n        \"size\": 15672,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/codex.mjs\",\n        \"size\": 14471,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/command.mjs\",\n        \"size\": 4443,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/deepseek-harness.mjs\",\n        \"size\": 6367,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/gemini.mjs\",\n        \"size\": 14912,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/index.mjs\",\n        \"size\": 7673,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/manifests.mjs\",\n        \"size\": 7916,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/providers/opencode.mjs\",\n        \"size\": 551,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/recover.mjs\",\n        \"size\": 7927,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/refine.mjs\",\n        \"size\": 10320,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/agent.mjs\",\n        \"size\": 25801,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/defaults.mjs\",\n        \"size\": 1545,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/lan.mjs\",\n        \"size\": 2138,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/pair.mjs\",\n        \"size\": 18987,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/project.mjs\",\n        \"size\": 14212,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/protocol.mjs\",\n        \"size\": 4468,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/relay/server.mjs\",\n        \"size\": 28457,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/render.mjs\",\n        \"size\": 4160,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/runtime.mjs\",\n        \"size\": 2940,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/serve.mjs\",\n        \"size\": 5618,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/server-entry.mjs\",\n        \"size\": 1719,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/server.mjs\",\n        \"size\": 41309,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/app.mjs\",\n        \"size\": 9392,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/index.mjs\",\n        \"size\": 5150,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/keys.mjs\",\n        \"size\": 3751,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/model.mjs\",\n        \"size\": 11772,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/screen.mjs\",\n        \"size\": 6447,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/state.mjs\",\n        \"size\": 12429,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/theme.mjs\",\n        \"size\": 2285,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/tui/view.mjs\",\n        \"size\": 40648,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/ui.mjs\",\n        \"size\": 8272,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/app.css\",\n        \"size\": 50119,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/app.js\",\n        \"size\": 130892,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/e2e.mjs\",\n        \"size\": 10021,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/index.html\",\n        \"size\": 306,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/ledger.mjs\",\n        \"size\": 50505,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/pair.css\",\n        \"size\": 1467,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/pair.html\",\n        \"size\": 683,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/pair.mjs\",\n        \"size\": 4756,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/remote.mjs\",\n        \"size\": 9110,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/sound-policy.mjs\",\n        \"size\": 4867,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/sound.mjs\",\n        \"size\": 3944,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/ciphers/_polyval.js\",\n        \"size\": 7976,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/ciphers/aes.js\",\n        \"size\": 37163,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/ciphers/utils.js\",\n        \"size\": 12563,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/_md.js\",\n        \"size\": 6192,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/_u64.js\",\n        \"size\": 3081,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/crypto.js\",\n        \"size\": 146,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/hmac.js\",\n        \"size\": 2944,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/pbkdf2.js\",\n        \"size\": 3867,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/sha2.js\",\n        \"size\": 16832,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/web/vendor/@noble/hashes/utils.js\",\n        \"size\": 10529,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/worker.mjs\",\n        \"size\": 12405,\n        \"mode\": 420\n      }\n    ],\n    \"entryCount\": 73,\n    \"bundled\": []\n  }\n]\n"
+    },
+    {
+      "started": "2026-11-01T18:21:59.048Z",
+      "command": "npm",
+      "args": [
+        "install",
+        "--prefix",
+        "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/installed",
+        "--cache",
+        "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/npm-cache",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--registry",
+        "https://registry.npmjs.org",
+        "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/0x2f-0.1.4.tgz"
+      ],
+      "cwd": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101",
+      "status": 0,
+      "output": "\nadded 4 packages in 314ms\n"
+    },
+    {
+      "started": "2026-11-01T18:21:59.422Z",
+      "command": "git",
+      "args": [
+        "init",
+        "-q"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": ""
+    },
+    {
+      "started": "2026-11-01T18:21:59.437Z",
+      "command": "git",
+      "args": [
+        "config",
+        "user.name",
+        "0x2F Qualification"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": ""
+    },
+    {
+      "started": "2026-11-01T18:21:59.447Z",
+      "command": "git",
+      "args": [
+        "config",
+        "user.email",
+        "qualification@example.invalid"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": ""
+    },
+    {
+      "started": "2026-11-01T18:21:59.457Z",
+      "command": "git",
+      "args": [
+        "add",
+        "."
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": ""
+    },
+    {
+      "started": "2026-11-01T18:21:59.467Z",
+      "command": "git",
+      "args": [
+        "commit",
+        "-qm",
+        "Disposable qualification baseline"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": ""
+    },
+    {
+      "started": "2026-11-01T18:21:59.484Z",
+      "command": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/installed/node_modules/.bin/2f",
+      "args": [
+        "--version"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": "0.1.4\n"
+    },
+    {
+      "started": "2026-11-01T18:21:59.854Z",
+      "command": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/installed/node_modules/.bin/2f",
+      "args": [
+        "init"
+      ],
+      "cwd": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+      "status": 0,
+      "output": "Initialized /private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace/.work\n  project.md     describe the project once — every task prompt starts from it\n  rules.md       working rules for every run\n  knowledge.md   results you promote from finished tasks\n  decisions.md   past decisions, carried into future runs\n  providers/     manifests for extra ACP/command providers\n\nNext: 2f new \"<your first task>\"  ·  2f ui to open the Web UI\nProvider: claude-code, codex, deepseek-harness, gemini, opencode detected and ready.\n"
+    }
+  ]
+}

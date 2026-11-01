@@ -1,0 +1,5 @@
+{"at":"2026-11-01T18:28:23.775Z","label":"before-restart","event":"started","pid":60492,"output":"0x2F UI: http://127.0.0.1:63129\n0x2F UI: http://127.0.0.1:63129\n","stderr":""}
+{"at":"2026-11-01T18:28:23.989Z","label":"before-restart","event":"stopped","pid":60492,"code":0,"signal":null}
+{"at":"2026-11-01T18:28:24.091Z","label":"after-restart","event":"started","pid":60495,"output":"0x2F UI: http://127.0.0.1:63131\n0x2F UI: http://127.0.0.1:63131\n","stderr":""}
+{"at":"2026-11-01T18:28:24.542Z","label":"after-restart","event":"stopped","pid":60495,"code":0,"signal":null}
+{"at":"2026-11-01T18:31:34.301Z","label":"reopened-done","pid":67469,"output":"0x2F UI: http://127.0.0.1:64450\n0x2F UI: http://127.0.0.1:64450\nSIGTERM received — shutting down the runtime (detached workers keep running)\n","stderr":"","code":0,"signal":null}

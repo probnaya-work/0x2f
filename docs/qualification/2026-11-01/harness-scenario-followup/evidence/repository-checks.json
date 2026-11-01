@@ -1,0 +1,32 @@
+{
+  "node": "v26.11.1",
+  "source": "/Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101",
+  "isolatedHome": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-targeted-regressions-enwR4t/home",
+  "path": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-targeted-regressions-enwR4t/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "inheritedCredentials": false,
+  "results": [
+    {
+      "label": "check",
+      "command": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check"
+      ],
+      "start": "2026-11-01T18:30:11.783Z",
+      "end": "2026-11-01T18:30:18.100Z",
+      "code": 0
+    },
+    {
+      "label": "test",
+      "command": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js",
+        "test"
+      ],
+      "start": "2026-11-01T18:30:18.101Z",
+      "end": "2026-11-01T18:30:46.398Z",
+      "code": 0
+    }
+  ]
+}
