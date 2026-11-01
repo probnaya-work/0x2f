@@ -350,7 +350,11 @@ test("resume() resumes the SAME thread via codex exec resume <id>", async () => 
       assert.equal(outcome.externalSessionId, "01a03e5d-2ef3-7422-8f50-c49ef0edbd18");
 
       const args = JSON.parse(await fs.readFile(argsLog, "utf8"));
-      assert.deepEqual(args.slice(0, 3), ["exec", "resume", "thread-abc"]);
+      assert.equal(args[0], "exec");
+      const resumeIndex = args.indexOf("resume");
+      assert.equal(args[resumeIndex + 1], "thread-abc");
+      assert.ok(args.indexOf("-s") > 0 && args.indexOf("-s") < resumeIndex);
+      assert.equal(args[args.indexOf("-s") + 1], "workspace-write");
       assert.ok(args.includes("--json"));
       assert.ok(args.some(a => a.includes("Continue the task")));
     });
