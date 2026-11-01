@@ -1,0 +1,5 @@
+{"runtime":"v26.11.1","platform":"darwin","arch":"arm64","cpu":"Apple M4","scratch":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-bench-FHyeK7"}
+{"count":0,"eventBytesPerTask":8104,"list":{"medianMs":0.05,"minMs":0.04,"maxMs":0.14},"readEventLogs":{"medianMs":0.03,"minMs":0.03,"maxMs":0.07},"bytesReadPerTailPoll":0}
+{"count":100,"eventBytesPerTask":8104,"list":{"medianMs":3.14,"minMs":2.67,"maxMs":4.13},"readEventLogs":{"medianMs":2.58,"minMs":2.3,"maxMs":2.79},"findLast":{"medianMs":3.16,"minMs":3.04,"maxMs":3.28},"bytesReadPerTailPoll":810400}
+{"count":1000,"eventBytesPerTask":8104,"list":{"medianMs":33.55,"minMs":29.95,"maxMs":35.23},"readEventLogs":{"medianMs":29.03,"minMs":25.58,"maxMs":29.46},"findLast":{"medianMs":32.16,"minMs":31.22,"maxMs":35.63},"bytesReadPerTailPoll":8104000}
+{"startupHelp":{"medianMs":62.79,"minMs":58.87,"maxMs":122.68},"startupVersion":{"medianMs":61.81,"minMs":58.74,"maxMs":63.72}}

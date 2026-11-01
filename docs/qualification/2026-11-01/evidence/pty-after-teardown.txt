@@ -1,0 +1,13 @@
+Local-only suite: Node v26.11.1; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+✔ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (4752.106041ms)
+✔ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (1400.794292ms)
+✔ NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size (2234.512959ms)
+✔ RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset (445.717959ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18900.962125

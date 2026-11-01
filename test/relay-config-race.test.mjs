@@ -56,7 +56,7 @@ async function waitFor(condition, message, timeout = 6000) {
 // material needed to send a genuine signed pair-hello. Deliberately smaller
 // than relay.test.mjs's harness: nothing here needs a paired phone, because
 // the pairing ceremony is the thing under test.
-async function makeHarness(t, { configPollMs = 40 } = {}) {
+async function makeHarness(t, { configPollMs = 40, afterAgentStart } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-race-"));
   t.after(() => fs.rm(base, { recursive: true, force: true }));
 
@@ -84,6 +84,7 @@ async function makeHarness(t, { configPollMs = 40 } = {}) {
   const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
   t.after(() => agent.stop());
   agent.start();
+  await afterAgentStart?.({ agent, handle, deviceId });
   await waitFor(() => handle.state.devices.get(deviceId)?.online === true, "agent to connect");
 
   // The phone side of the ceremony.
@@ -152,6 +153,38 @@ test("a normal pair-hello still confirms: the liveness check does not fire on th
   assert.deepEqual(rejections, [], "a normal ceremony must not reject anything");
 });
 
+test("startup polling waits for key derivation before opening the relay connection", async t => {
+  const subtle = globalThis.crypto.subtle;
+  const deriveBits = subtle.deriveBits;
+  let release;
+  let held = false;
+  const pending = new Promise(resolve => { release = resolve; });
+  subtle.deriveBits = async function (...args) {
+    if (!held) {
+      held = true;
+      await pending;
+    }
+    return deriveBits.apply(this, args);
+  };
+  t.after(() => { release(); subtle.deriveBits = deriveBits; });
+
+  const h = await makeHarness(t, {
+    configPollMs: 1,
+    async afterAgentStart({ handle, deviceId }) {
+      await waitFor(() => held, "agent key derivation to start");
+      try {
+        await new Promise(resolve => setTimeout(resolve, 40));
+        assert.notEqual(handle.state.devices.get(deviceId)?.online, true,
+          "another poll must not connect while the first poll is deriving its key");
+      } finally {
+        release();
+      }
+    }
+  });
+  const { ack } = await h.sendPairHello();
+  assert.equal(ack?.ok, true, "a socket opened with a ready key must confirm pairing");
+});
+
 // `pairing` and `phoneId` are in neither connectionKey nor cryptoKey, so a
 // pairing write must NOT cause the poller to swap the config object. This is
 // the invariant that makes `cfg !== config` a precise "no longer live" test
@@ -166,6 +199,33 @@ test("writing the confirmed pairing does not make the poller swap the config obj
   await new Promise(r => setTimeout(r, 120));
   assert.equal(h.agent.status().pairing, "confirmed", "the pairing must survive repeated polls");
   assert.equal(h.agent.status().phoneId, h.phoneId);
+});
+
+test("polling during a delayed pairing write never observes a partial config", async t => {
+  const h = await makeHarness(t, { configPollMs: 1 });
+  const writeFile = fs.writeFile;
+  let delayed = false;
+  // Widen writeFile's real truncate-before-write window. The live destination
+  // must remain complete even while a replacement file is still being written.
+  fs.writeFile = async (file, data, ...args) => {
+    const target = String(file);
+    if (!delayed && path.dirname(target) === path.dirname(h.configPath) &&
+        path.basename(target).includes("relay.json") && String(data).includes('"pairing": "confirmed"')) {
+      delayed = true;
+      await writeFile(file, "", ...args);
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return writeFile(file, data, ...args);
+  };
+  t.after(() => { fs.writeFile = writeFile; });
+
+  const { ack } = await h.sendPairHello();
+  assert.equal(delayed, true, "the pairing config write must exercise the delayed window");
+  assert.equal(ack?.ok, true, "polling must not disable the agent during its own write");
+  assert.equal(h.agent.status().pairing, "confirmed");
+  assert.equal(h.agent.status().phoneId, h.phoneId);
+  assert.equal(JSON.parse(await fs.readFile(h.configPath, "utf8")).pairing, "confirmed");
+  assert.equal((await fs.stat(h.configPath)).mode & 0o777, 0o600);
 });
 
 // --- the race itself --------------------------------------------------------

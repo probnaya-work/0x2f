@@ -80,6 +80,58 @@ function rawRequest({ port, path: p, method = "GET", headers = {}, body }) {
 
 // --- layer 1: per-runtime authentication -------------------------------------
 
+test("idempotency replay still requires authentication and the local browser boundary", async () => {
+  const { base, node, handle } = await startTestServer();
+  try {
+    const key = "security-replay-key";
+    const headers = { ...authHeaders(), "content-type": "application/json", "x-0x2f-request-id": key };
+    const body = JSON.stringify({ brief: "authorized request" });
+    const first = await rawRequest({ port: handle.port, path: "/api/tasks", method: "POST", headers, body });
+    assert.equal(first.status, 201);
+
+    for (const attempt of [
+      { headers: { "x-0x2f-request-id": key }, status: 401 },
+      { headers: { ...headers, host: "evil.example" }, status: 403 },
+      { headers: { ...headers, origin: "https://evil.example" }, status: 403 },
+      { headers: { ...headers, "sec-fetch-site": "cross-site" }, status: 403 }
+    ]) {
+      const replay = await rawRequest({
+        port: handle.port, path: "/api/tasks", method: "POST", headers: attempt.headers, body
+      });
+      assert.equal(replay.status, attempt.status);
+      assert.ok(!replay.body.includes("authorized request"));
+    }
+    for (const pathname of ["/", "/api/health", "/app/app.js"]) {
+      const crossRoute = await rawRequest({
+        port: handle.port, path: pathname, method: "POST", headers: { "x-0x2f-request-id": key }
+      });
+      assert.equal(crossRoute.status, 404, pathname);
+      assert.ok(!crossRoute.body.includes("authorized request"), pathname);
+    }
+    // Sharing a key across distinct authenticated operations cannot return
+    // the first operation's response or silently omit the later operation.
+    const task = JSON.parse(first.body);
+    const note = await rawRequest({
+      port: handle.port, path: `/api/tasks/${task.id}/note`, method: "POST", headers,
+      body: JSON.stringify({ note: "a distinct operation" })
+    });
+    assert.equal(note.status, 202);
+    assert.equal(JSON.parse(note.body).context.notes[0].text, "a distinct operation");
+    const closed = await rawRequest({
+      port: handle.port, path: `/api/tasks/${task.id}/close`, method: "POST", headers
+    });
+    assert.equal(closed.status, 200);
+    assert.equal(JSON.parse(closed.body).status, "done");
+    const retry = await rawRequest({ port: handle.port, path: "/api/tasks", method: "POST", headers, body });
+    assert.equal(retry.status, 201);
+    assert.equal(retry.body, first.body);
+    assert.equal(node.calls.length, 1);
+  } finally {
+    await handle.close();
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
 test("unauthenticated /api requests are refused with 401 — no task can be started", async () => {
   const { base, node, runtime, handle } = await startTestServer();
   try {

@@ -1,0 +1,14 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { initProject } from "../../../../../src/project.mjs";
+import { createStore } from "../../../../../src/core/store.mjs";
+import { startServer } from "../../../../../src/server.mjs";
+const base = await fs.mkdtemp(path.join(os.tmpdir(), "0x2f-close-copy-"));
+await initProject(base);
+const store = createStore(base);
+const task = await store.createTask({ title: "Local close-copy browser fixture", brief: "Inspect close wording only", prompt: "No provider calls" });
+await store.updateTask({ ...task, status: "ready" });
+const server = await startServer(base, 0);
+console.log(JSON.stringify({ base, url: server.url, taskId: task.id }));
+process.on("SIGTERM", async () => { await server.close(); await fs.rm(base, { recursive: true, force: true }); process.exit(0); });

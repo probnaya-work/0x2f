@@ -1,0 +1,16 @@
+# Subtest: DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session
+ok 64 - DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session
+  ---
+  duration_ms: 235.566671
+  ...
+# Subtest: worker ready preserves notes and corrections recorded during execution
+ok 57 - worker ready preserves notes and corrections recorded during execution
+  ---
+  duration_ms: 184.120346
+  ...
+# Subtest: worker failed preserves notes and corrections recorded during execution
+ok 58 - worker failed preserves notes and corrections recorded during execution
+  ---
+  duration_ms: 175.917993
+  ...
+bash: line 1: rg: command not found

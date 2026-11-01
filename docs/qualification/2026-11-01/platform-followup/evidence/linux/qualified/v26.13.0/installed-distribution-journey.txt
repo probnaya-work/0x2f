@@ -1,0 +1,12 @@
+Node v26.13.0; npm 11.20.0; linux/x64; Python 3.14.4
+Command: ["/home/bogart/0x2f-qualification-20261101/runtimes/node-v26.13.0-linux-x64/bin/node","--test","test/distribution.test.mjs"]
+CWD: /tmp/0x2f-matrix-v26.13.0-MpYnzn/checkout
+✔ the packed artifact supports the full first-install journey (2357.213447ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2415.526456

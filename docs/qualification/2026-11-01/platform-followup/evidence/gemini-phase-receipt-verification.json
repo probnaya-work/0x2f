@@ -1,0 +1,15 @@
+{
+  "verified_from": "persistent budget.json and every request.forwarded/response.completed in audit.jsonl",
+  "model": "gemini-3.5-flash-lite",
+  "turns": 6,
+  "actual_model_requests": 6,
+  "completed_responses": 6,
+  "approved_max_turns": 8,
+  "approved_max_requests": 16,
+  "approved_max_usd": 5,
+  "output_cap_each": 1024,
+  "function_calls": 1,
+  "usage_estimate_usd": 0.0163001,
+  "reserved_usd": 0.1510692,
+  "invoice_verified": false
+}

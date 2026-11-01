@@ -1,0 +1,2 @@
+# Preserve raw captured test diagnostics byte-for-byte.
+**/*.txt -whitespace

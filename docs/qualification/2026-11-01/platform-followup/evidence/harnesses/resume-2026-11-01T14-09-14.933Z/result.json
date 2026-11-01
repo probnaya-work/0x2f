@@ -1,0 +1,50 @@
+[
+  {
+    "name": "codex",
+    "passed": false,
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'failed' !== 'ready'\n\n    at file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/docs/qualification/2026-11-01/platform-followup/evidence/harnesses/probe-resume.mjs:61:12\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)",
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "01a19771-6b17-7133-b494-1f238413c5c8"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ]
+  },
+  {
+    "name": "gemini",
+    "first": {
+      "status": "ready",
+      "externalSessionId": "9f83b098-db73-4611-b889-3bf3d5393c4f",
+      "result": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "second": {
+      "status": "ready",
+      "externalSessionId": "9f83b098-db73-4611-b889-3bf3d5393c4f",
+      "result": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+    },
+    "priorAssistantContextCarried": true,
+    "events": [
+      {
+        "type": "run.started",
+        "sessionId": "9f83b098-db73-4611-b889-3bf3d5393c4f"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-first-marker\n## Needs human decision\nREQUIRED: no"
+      },
+      {
+        "type": "run.started",
+        "sessionId": "9f83b098-db73-4611-b889-3bf3d5393c4f"
+      },
+      {
+        "type": "progress",
+        "text": "## Result\nqualification-resumed-marker\n## Needs human decision\nREQUIRED: no"
+      }
+    ],
+    "passed": true
+  }
+]

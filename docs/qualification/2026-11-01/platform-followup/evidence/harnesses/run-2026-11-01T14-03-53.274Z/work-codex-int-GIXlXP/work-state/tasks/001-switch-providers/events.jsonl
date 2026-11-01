@@ -1,0 +1,9 @@
+{"type":"task.created","at":"2026-11-01T14:04:01.955Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:02.113Z","taskId":1,"sessionId":"01a1976c-a4b8-7ec3-860c-005e9543a6bd","run":1}
+{"type":"progress","at":"2026-11-01T14:04:02.132Z","taskId":1,"text":"## Result\nfrom codex\n## Needs human decision\nNone","run":1}
+{"type":"run.completed","at":"2026-11-01T14:04:02.142Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:02.142Z","taskId":1,"status":"ready","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:02.266Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T14:04:02.370Z","taskId":1,"sessionId":null,"run":2}
+{"type":"run.completed","at":"2026-11-01T14:04:02.854Z","taskId":1,"status":"ready","run":2}
+{"type":"task.updated","at":"2026-11-01T14:04:02.854Z","taskId":1,"status":"ready","run":2}

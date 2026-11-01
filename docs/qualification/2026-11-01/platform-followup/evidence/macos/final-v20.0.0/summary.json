@@ -1,0 +1,110 @@
+{
+  "started_utc": "2026-11-01T14:24:44.910Z",
+  "node": "v20.0.0",
+  "npm": "9.6.4",
+  "platform": "darwin",
+  "arch": "arm64",
+  "os_release": "25.6.0",
+  "python": "Python 3.9.6",
+  "source_commit": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+  "source_status": "?? docs/qualification/2026-11-01/platform-followup/\n",
+  "scratch": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-SW9oK0",
+  "copiedCacheEntries": 17,
+  "credentials": "omitted; empty HOME and npm config; vendor CLIs absent from PATH",
+  "npm_manifest_mode": "offline exact locked versions; full JSON+install-v1 Accept variants; equivalent URL cache aliases",
+  "source_sha256": {
+    "package.json": "9c333209b4c027efc48713d38704f2259c0236c41697e1f7f668a07f5300340b",
+    "package-lock.json": "a559466265b0b7ff5f7860a1d70d9d02d5863747301f2f541c45631576fad5ef",
+    "scripts/test.mjs": "b1dc1bb7e0d0056ba0853bf3e97a747ddd1a7ef83fe2e5bb463248f07cdd400a",
+    "src/cli.mjs": "3ddc34a35720808328e680cd9421a320150f1678bde082590425702faccdc074",
+    "src/web/app.js": "7d8a22a4a3292b0c9b5bd9d764945a583b7c32098cdc41c97a3177f218fe506a",
+    "src/relay/agent.mjs": "c8e9badedd7680cc0298a08100dd1c4baf5cfbb3a5eb229d5c81540cf20c09e7",
+    "src/providers/codex.mjs": "d3f7d2b83d0b5c136843175c4250b3a1f9d9a851156f9f4f5b0179fe2cdb7823",
+    "test/relay-config-race.test.mjs": "d87549cfb4555940ec48ae511a99f6abf35416519cb7bad9e02551de3dbf98aa",
+    "test/worktree.test.mjs": "121b27d4e35b9ed4b03c0896efa948725fb9df38a283cb2d0874108c371096a2"
+  },
+  "steps": [
+    {
+      "label": "clean-npm-ci",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--offline",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 222,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "npm-check",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 3030,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "actual-npm-test",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "test"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 112260,
+      "tap": {
+        "tests": 715,
+        "suites": 0,
+        "pass": 705,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 10,
+        "todo": 0
+      },
+      "skips": [
+        "ok 13 - E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 14 - E2E: `2f providers` detects codex and a task runs to READY through the real CLI # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 15 - E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 16 - E2E: command_execution is recorded honestly as tool activity, never as file.changed # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 17 - E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 18 - E2E: the same task can switch away from codex to another provider without losing task context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 23 - E2E: `2f providers` detects gemini and a task runs to READY through the real CLI # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 24 - E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 25 - E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 26 - E2E: the same task can switch away from gemini to another provider without losing task context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)"
+      ]
+    },
+    {
+      "label": "installed-distribution-journey",
+      "args": [
+        "--test",
+        "test/distribution.test.mjs"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 2277,
+      "tap": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "skips": []
+    }
+  ],
+  "completed_utc": "2026-11-01T14:26:43.141Z",
+  "scratch_preserved": false
+}

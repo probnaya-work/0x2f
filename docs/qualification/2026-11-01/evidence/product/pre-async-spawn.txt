@@ -1,0 +1,55 @@
+✖ an asynchronous EAGAIN during worker start rejects and closes the log descriptor (3.155209ms)
+✖ an asynchronous EAGAIN during worker resume rejects and closes the log descriptor (2.363375ms)
+✖ worker startup waits for the child spawn event before returning its PID (1.831917ms)
+✖ an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor (2.042334ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 102.308041
+
+✖ failing tests:
+
+test at test/node-local.test.mjs:35:3
+✖ an asynchronous EAGAIN during worker start rejects and closes the log descriptor (3.155209ms)
+  Error: spawn EAGAIN
+      at Immediate.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-before-async-spawn-wkvvaptf/test/node-local.test.mjs:42:60)
+      at process.processImmediate (node:internal/timers:574:21) {
+    code: 'EAGAIN'
+  }
+
+test at test/node-local.test.mjs:35:3
+✖ an asynchronous EAGAIN during worker resume rejects and closes the log descriptor (2.363375ms)
+  Error: spawn EAGAIN
+      at Immediate.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-before-async-spawn-wkvvaptf/test/node-local.test.mjs:42:60)
+      at process.processImmediate (node:internal/timers:574:21) {
+    code: 'EAGAIN'
+  }
+
+test at test/node-local.test.mjs:59:1
+✖ worker startup waits for the child spawn event before returning its PID (1.831917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-before-async-spawn-wkvvaptf/test/node-local.test.mjs:68:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/ui-launch.test.mjs:47:1
+✖ an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor (2.042334ms)
+  Error: spawn EAGAIN
+      at Immediate.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-before-async-spawn-wkvvaptf/test/ui-launch.test.mjs:59:62)
+      at process.processImmediate (node:internal/timers:574:21) {
+    code: 'EAGAIN'
+  }

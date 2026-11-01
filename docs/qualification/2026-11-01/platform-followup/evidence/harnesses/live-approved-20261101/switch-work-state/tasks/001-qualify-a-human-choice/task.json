@@ -1,0 +1,121 @@
+{
+  "id": 1,
+  "slug": "001-qualify-a-human-choice",
+  "title": "Qualify a human choice.",
+  "brief": "Qualify a human choice. Do not use tools. If task context has no recorded colour answer, return marker LIVE_B_01 and ask exactly \"Choose amber or teal?\" using REQUIRED: yes. If context includes the answer teal, report teal and marker LIVE_B_02 with REQUIRED: no. Keep every section very brief.",
+  "status": "done",
+  "execution": {
+    "provider": "gemini",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "350e01b9-bc3b-4b04-894d-84dfccf6a7dc"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:23:38.922Z",
+      "requestedProvider": "gemini",
+      "outcome": "failed",
+      "attempts": 1,
+      "externalSessionId": "ba84334d-9ffc-4b36-a4d3-68ee5dbc93db",
+      "completedAt": "2026-11-01T17:23:39.961Z",
+      "durationMs": 1039,
+      "error": "[API Error: {\"error\":{\"code\":401,\"message\":\"Qualification controlled auth failure before upstream forwarding\",\"status\":\"UNAUTHENTICATED\"}}]"
+    },
+    {
+      "run": 2,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:23:40.119Z",
+      "requestedProvider": "gemini",
+      "outcome": "needs_you",
+      "attempts": 1,
+      "externalSessionId": "1a7efe08-b555-4aff-9eb8-7129f8e83239",
+      "completedAt": "2026-11-01T17:24:23.614Z",
+      "durationMs": 43495,
+      "blockedOn": {
+        "type": "decision",
+        "text": "Choose amber or teal?"
+      }
+    },
+    {
+      "run": 3,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:24:23.792Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "2fb195a2-8ebf-4911-9225-2753b7ae311e",
+      "completedAt": "2026-11-01T17:24:50.023Z",
+      "durationMs": 26231
+    },
+    {
+      "run": 4,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:28:14.177Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "0e4a270b-7038-4be2-a999-3adf084d7d29",
+      "completedAt": "2026-11-01T17:28:26.635Z",
+      "durationMs": 12458
+    },
+    {
+      "run": 5,
+      "provider": "deepseek-harness",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:42:09.847Z",
+      "requestedProvider": "deepseek-harness",
+      "outcome": "ready",
+      "attempts": 1,
+      "completedAt": "2026-11-01T17:42:13.124Z",
+      "durationMs": 3277
+    },
+    {
+      "run": 6,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T17:42:13.480Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "350e01b9-bc3b-4b04-894d-84dfccf6a7dc",
+      "completedAt": "2026-11-01T17:42:23.322Z",
+      "durationMs": 9842
+    }
+  ],
+  "createdAt": "2026-11-01T17:23:38.924Z",
+  "updatedAt": "2026-11-01T17:42:23.439Z",
+  "context": {
+    "notes": [
+      {
+        "at": "2026-11-01T17:24:23.722Z",
+        "text": "teal"
+      },
+      {
+        "at": "2026-11-01T17:28:14.106Z",
+        "text": "Keep the chosen colour teal; include exact marker NOTE_ROUNDTRIP_01 in Result."
+      },
+      {
+        "at": "2026-11-01T17:42:09.781Z",
+        "text": "Preserve the chosen colour teal and exact NOTE_ROUNDTRIP_01 from prior task context. In Result also include exact marker DSH_SWITCH_01. Do not use any tool. Keep the final answer under 120 words and reasoning brief."
+      },
+      {
+        "at": "2026-11-01T17:42:13.419Z",
+        "text": "Preserve teal, NOTE_ROUNDTRIP_01 and DSH_SWITCH_01 from the immediately preceding DeepSeek result. Include exact marker GEMINI_BACK_01 in Result. Do not use tools. Keep every section very brief."
+      }
+    ]
+  },
+  "pid": 48882,
+  "processGroupId": 48882
+}

@@ -1,0 +1,84 @@
+--- codex/duration.mjs
++++ opencode/duration.mjs
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env node
+ 
+-import { pathToFileURL } from 'node:url';
++import { realpathSync } from 'node:fs';
++import { fileURLToPath } from 'node:url';
+ 
+ export function formatDuration(seconds) {
+   if (!Number.isSafeInteger(seconds) || seconds < 0) {
+@@ -13,14 +14,65 @@
+   return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
+ }
+ 
+-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+-  const args = process.argv.slice(2);
+-  // The final assertion requires the actual end of input, including no newline.
+-  const canonicalInteger = /^(?:0|[1-9][0-9]*)(?![\s\S])/;
+-  if (args.length !== 1 || !canonicalInteger.test(args[0]) || !Number.isSafeInteger(Number(args[0]))) {
+-    console.error('Usage: duration.mjs <seconds> (a non-negative safe integer in canonical decimal form)');
++// The final assertion requires the actual end of input, including no newline.
++const canonicalInteger = /^(?:0|[1-9][0-9]*)(?![\s\S])/;
++
++function parseSeconds(token) {
++  if (!canonicalInteger.test(token)) {
++    return null;
++  }
++  const value = Number(token);
++  return Number.isSafeInteger(value) ? value : null;
++}
++
++function formatArgs(args) {
++  if (args[0] === '--sum') {
++    if (args.length < 2) {
++      return null;
++    }
++    let total = 0n;
++    for (const token of args.slice(1)) {
++      const value = parseSeconds(token);
++      if (value === null) {
++        return null;
++      }
++      total += BigInt(value);
++    }
++    if (total > BigInt(Number.MAX_SAFE_INTEGER)) {
++      return null;
++    }
++    return formatDuration(Number(total));
++  }
++
++  if (args.length !== 1) {
++    return null;
++  }
++  const value = parseSeconds(args[0]);
++  return value === null ? null : formatDuration(value);
++}
++
++// argv[1] may be a non-canonical alias (for example /var/... on macOS), so
++// compare real paths instead of URL strings.
++function isEntryPoint() {
++  if (!process.argv[1]) {
++    return false;
++  }
++  try {
++    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
++  } catch {
++    return false;
++  }
++}
++
++if (isEntryPoint()) {
++  const formatted = formatArgs(process.argv.slice(2));
++  if (formatted === null) {
++    console.error(
++      'Usage: duration.mjs <seconds> | --sum <seconds>... ' +
++        '(non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)',
++    );
+     process.exitCode = 1;
+   } else {
+-    console.log(formatDuration(Number(args[0])));
++    console.log(formatted);
+   }
+ }

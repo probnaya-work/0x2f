@@ -1,0 +1,96 @@
+{
+  "started_utc": "2026-11-01T14:06:52.989Z",
+  "node": "v20.20.2",
+  "npm": "10.8.2",
+  "platform": "darwin",
+  "arch": "arm64",
+  "os_release": "25.6.0",
+  "python": "Python 3.9.6",
+  "source_commit": "2e11f53b95c11ecc70eb4acef6127713f71ba168",
+  "source_status": " M package.json\n?? docs/qualification/2026-11-01/platform-followup/\n?? scripts/test.mjs\n",
+  "scratch": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.20.2-EUp6hX",
+  "copiedCacheEntries": 10,
+  "credentials": "omitted; empty HOME and npm config; vendor CLIs absent from PATH",
+  "steps": [
+    {
+      "label": "clean-npm-ci",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v20.20.2-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--offline",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 272,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "npm-check",
+      "args": [
+        "/private/tmp/0x2f-node-matrix-downloads/node-v20.20.2-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "check"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 2686,
+      "tap": {},
+      "skips": []
+    },
+    {
+      "label": "actual-npm-test",
+      "args": [
+        "docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 27476,
+      "tap": {
+        "tests": 712,
+        "suites": 0,
+        "pass": 703,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 9,
+        "todo": 0
+      },
+      "skips": [
+        "ok 105 - E2E: `2f providers` detects codex and a task runs to READY through the real CLI # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 106 - E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 107 - E2E: command_execution is recorded honestly as tool activity, never as file.changed # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 108 - E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 109 - E2E: the same task can switch away from codex to another provider without losing task context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+        "ok 196 - E2E: `2f providers` detects gemini and a task runs to READY through the real CLI # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 197 - E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 198 - E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+        "ok 199 - E2E: the same task can switch away from gemini to another provider without losing task context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)"
+      ]
+    },
+    {
+      "label": "installed-distribution-journey",
+      "args": [
+        "docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs",
+        "test/distribution.test.mjs"
+      ],
+      "code": 0,
+      "signal": null,
+      "duration_ms": 1680,
+      "tap": {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "skips": []
+    }
+  ],
+  "completed_utc": "2026-11-01T14:07:25.276Z",
+  "scratch_preserved": false
+}

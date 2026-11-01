@@ -1,0 +1,18 @@
+Node v20.20.2; npm 10.8.2; darwin/arm64; Python 3.9.6
+Command: ["/private/tmp/0x2f-node-matrix-downloads/node-v20.20.2-darwin-arm64/bin/node","--test","test/distribution.test.mjs"]
+CWD: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.20.2-m9R3jU/checkout
+TAP version 13
+# Subtest: the packed artifact supports the full first-install journey
+ok 1 - the packed artifact supports the full first-install journey
+  ---
+  duration_ms: 1504.95025
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1536.327291

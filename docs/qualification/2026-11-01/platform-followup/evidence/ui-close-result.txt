@@ -1,0 +1,42 @@
+Browser tab: 1, Title: "0x2f-close-copy-eTLJCt · 0x2F", URL: "http://127.0.0.1:58446/".
+0 AXWebArea 0x2f-close-copy-eTLJCt · 0x2F, URL: 127.0.0.1:58446/
+	1 container shell
+		38 text 0x2F /
+		39 text 0x2f-close-copy-eTLJCt
+		40 text LOCAL RUNTIME Aleksandrs-MacBook-Air.local
+		41 button SOUND ON, Help: the slash sounds when you are away — silent while this page has focus
+		42 button NOTIFY, Help: notify me when 0x2F needs you (requests browser permission)
+		43 text 00
+		44 text NEEDS YOU
+		45 text 00
+		46 text WORKING
+		47 text 00
+		48 text READY
+		49 text 14:26:37
+		50 text TODAY
+		51 container
+			52 text / TASK EXECUTION STATE
+		53 text /01
+		54 container
+			55 text Local close-copy browser fixture DONE
+		20 text SUBMIT
+		21 pop up button (collapsed, settable) Description: execution provider, Value: CLAUDE-CODE, Secondary Actions: Expand
+			22 menu
+				23 AUTO
+				24 (selected) CLAUDE-CODE
+				25 CODEX
+				26 DEEPSEEK-HARNESS
+				27 GEMINI
+				28 OPENCODE
+		29 text entry area (settable)
+		56 text BACKGROUND JOB
+		31 button BRIEF ⌥↵, Help: turn this rough note into a clear execution brief (uses a model)
+			57 text BRIEF
+			33 text ⌥↵
+		34 button START ↵, Help: start this task
+			35 text START
+			58 text ↵
+		37 text J K SELECT ↵ OPEN A ALLOW / ACCEPT R REJECT S SEND BACK I INSPECT X CLOSE / SUBMIT ESC COLLAPSE 0x2F / NODES 01 · CLAUDE-CODE
+		59 text Task closed. Closing does not cancel the provider; an active run may keep running or wait for permission.
+
+The focused UI element is 0 AXWebArea 0x2f-close-copy-eTLJCt · 0x2F, URL: 127.0.0.1:58446/

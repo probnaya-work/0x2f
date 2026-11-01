@@ -1,0 +1,12 @@
+✔ an asynchronous EAGAIN during worker start rejects and closes the log descriptor (3.135333ms)
+✔ an asynchronous EAGAIN during worker resume rejects and closes the log descriptor (1.320667ms)
+✔ worker startup waits for the child spawn event before returning its PID (1.412833ms)
+✔ an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor (2.261584ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.584791

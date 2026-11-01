@@ -1,0 +1,14 @@
+✔ simultaneous human notes retain every acknowledged constraint (74.576334ms)
+✔ distinct concurrent permission resumes admit exactly one execution (15.154833ms)
+✔ live permissions and closed in-flight executions cannot be rerun (6.7595ms)
+✔ spawn failure is durably failed instead of stranded working (3.298625ms)
+✔ non-text action inputs are rejected before persistence or execution (4.323917ms)
+✔ a gesture bound to an earlier permission cannot authorize the current occurrence (5.634625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.961417

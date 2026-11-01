@@ -95,10 +95,12 @@ function isNetworkFailure(output) {
 
 test("the packed artifact supports the full first-install journey", async t => {
   const work = await fsp.mkdtemp(path.join(os.tmpdir(), "0x2f-dist-test-"));
-  const cache = path.join(work, "npm-cache");
+  // Qualification can supply an isolated, preseeded offline cache. Never
+  // delete a caller-owned cache; teardown removes only this test's work dir.
+  const cache = process.env.WORK_TEST_NPM_CACHE ?? path.join(work, "npm-cache");
   const prefix = path.join(work, "prefix");
   const proj = path.join(work, "proj");
-  await fsp.mkdir(cache);
+  await fsp.mkdir(cache, { recursive: true });
   await fsp.mkdir(proj);
 
   // --- 1. pack the real artifact (never --dry-run) --------------------------

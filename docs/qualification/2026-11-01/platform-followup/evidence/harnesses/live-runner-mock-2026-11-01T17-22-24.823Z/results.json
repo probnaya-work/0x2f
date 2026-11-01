@@ -1,0 +1,163 @@
+{
+  "live": false,
+  "model": "gemini-3.5-flash-lite",
+  "scratch": "/private/tmp/0x2f-approved-live-0kpi4w",
+  "results": [
+    {
+      "step": "controlled-local-failure",
+      "passed": true,
+      "modelRequests": 0,
+      "kind": "auth"
+    },
+    {
+      "step": "live-retry-and-decision",
+      "passed": true,
+      "sessionId": "b4069c2c-f039-4c1e-8c9b-005af226bcba"
+    },
+    {
+      "step": "answer-and-rerun",
+      "passed": true,
+      "taskId": 1,
+      "runs": 3
+    },
+    {
+      "step": "saved-session-resume",
+      "passed": true,
+      "sessionId": "44b0763a-b4a3-4fad-b24c-d30ccc88fcec",
+      "result": "## Result\nteal LIVE_B_03\n## Evidence\nprior session retained\n## Changes\nNone\n## Verification\nok\n## Needs human decision\nREQUIRED: no"
+    },
+    {
+      "step": "actual-acp-permission-visible",
+      "passed": true,
+      "blockedOn": {
+        "type": "permission",
+        "live": true,
+        "tool": "Writing to permission-roundtrip.txt",
+        "file": "/private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt",
+        "description": "Writing to permission-roundtrip.txt",
+        "options": [
+          {
+            "optionId": "proceed_always",
+            "name": "Allow for this session",
+            "kind": "allow_always"
+          },
+          {
+            "optionId": "proceed_once",
+            "name": "Allow",
+            "kind": "allow_once"
+          },
+          {
+            "optionId": "cancel",
+            "name": "Reject",
+            "kind": "reject_once"
+          }
+        ],
+        "canAllow": true,
+        "canReject": true,
+        "requestId": 0,
+        "decisionId": "b7db6f97-4896-495f-afc3-082e89f3d63d",
+        "raw": {
+          "toolCallId": "write_file__write_file_1793553761765_0",
+          "status": "pending",
+          "title": "Writing to permission-roundtrip.txt",
+          "content": [
+            {
+              "type": "diff",
+              "path": "/private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt",
+              "oldText": "",
+              "newText": "APPROVED_ONCE\n",
+              "_meta": {
+                "kind": "add"
+              }
+            }
+          ],
+          "locations": [
+            {
+              "path": "/private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt"
+            }
+          ],
+          "kind": "edit"
+        }
+      },
+      "sessionId": "17762d2a-20b6-4056-bf16-78932fa1097b"
+    },
+    {
+      "step": "actual-acp-permission-completed-once",
+      "passed": true,
+      "sessionId": "17762d2a-20b6-4056-bf16-78932fa1097b",
+      "runs": 1,
+      "resolvedOccurrences": 1,
+      "exactFileBytes": "APPROVED_ONCE\n"
+    }
+  ],
+  "budget": {
+    "version": 1,
+    "approvedUsd": 5,
+    "limits": {
+      "turns": 8,
+      "requests": 16,
+      "perTurn": 2,
+      "bodyBytes": 65536,
+      "outputTokens": 1024,
+      "turnMs": 90000,
+      "budgetUsd": 5,
+      "responseBytes": 262144
+    },
+    "model": "gemini-3.5-flash-lite",
+    "turns": [
+      {
+        "id": "retry-controlled-local-failure",
+        "requests": 0,
+        "functionCalls": 0,
+        "started": 1793553744909,
+        "writePath": null,
+        "failLocally": true,
+        "deadline": 1793553834909
+      },
+      {
+        "id": "gemini-live-retry-decision",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553745989,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553835989
+      },
+      {
+        "id": "gemini-answer-rerun",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553759559,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553849559
+      },
+      {
+        "id": "gemini-saved-session-resume",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553760335,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553850335
+      },
+      {
+        "id": "gemini-acp-permission",
+        "requests": 2,
+        "functionCalls": 1,
+        "started": 1793553761052,
+        "writePath": "/private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt",
+        "failLocally": false,
+        "deadline": 1793553851052
+      }
+    ],
+    "requests": 5,
+    "reservedUsd": 0.1232606,
+    "usageEstimateUsd": 0.0000775,
+    "stopped": false
+  },
+  "blockedBranches": {
+    "codex": "Only ChatGPT OAuth found; no approved API-key billing path.",
+    "claude": "OAuth scopes metadata found, but no usable API key/access token in the inspected configured credential entry; no unrestricted subscription fallback."
+  }
+}

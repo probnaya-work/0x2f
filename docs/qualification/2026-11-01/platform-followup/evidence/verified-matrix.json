@@ -1,0 +1,79 @@
+{
+  "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+  "checks": "raw counts + summaries + local source SHA256 + all step exits + no-skipping installed journeys",
+  "matrix": [
+    {
+      "os": "macOS",
+      "node": "v20.0.0",
+      "npm": "9.6.4",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/macos/final-v20.0.0"
+    },
+    {
+      "os": "macOS",
+      "node": "v20.20.2",
+      "npm": "10.8.2",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/macos/final-v20.20.2"
+    },
+    {
+      "os": "macOS",
+      "node": "v26.13.0",
+      "npm": "11.20.0",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/macos/final-v26.13.0"
+    },
+    {
+      "os": "Ubuntu",
+      "node": "v20.0.0",
+      "npm": "9.6.4",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/linux/qualified/v20.0.0"
+    },
+    {
+      "os": "Ubuntu",
+      "node": "v20.20.2",
+      "npm": "10.8.2",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/linux/qualified/v20.20.2"
+    },
+    {
+      "os": "Ubuntu",
+      "node": "v26.13.0",
+      "npm": "11.20.0",
+      "source": "2941c028b00310f941ced0ed7d7ba5aa48f6d016",
+      "tests": 715,
+      "passed": 705,
+      "failed": 0,
+      "skipped": 10,
+      "installed_journey": "1/1,0skip",
+      "evidence": "docs/qualification/2026-11-01/platform-followup/evidence/linux/qualified/v26.13.0"
+    }
+  ],
+  "online_registry_linux_lts": "1/1,0fail,0skip"
+}

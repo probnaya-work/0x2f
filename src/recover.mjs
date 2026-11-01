@@ -3,14 +3,13 @@
 //
 // A run's execution is owned by a detached worker process (src/worker.mjs)
 // whose pid is persisted on the task (task.pid). When the host restarts, or
-// the worker dies without writing a terminal outcome, the task is left in
-// status "working" with no live worker: rerun refuses (the "still executing"
-// guard in core/actions.mjs), resume requires needs_you, and no surface can
-// tell "running" from "orphaned".
+// the worker dies without writing a terminal outcome, its working execution
+// or live permission pause has no process left to advance it. Closed tasks
+// may still have such an in-flight run; their done status is preserved while
+// the interrupted run itself is finalized.
 //
 // This sweep runs once, on runtime startup (src/serve.mjs), BEFORE the API
-// accepts requests, so a client never observes a "working" task whose worker
-// is gone. It marks such tasks failed through the EXISTING lifecycle
+// accepts requests. It finalizes interrupted runs through the existing lifecycle
 // (applyOutcome + the already-defined failure kind "crashed"), finalizing the
 // interrupted run's record the way the worker would have — but with the run's
 // completedAt/durationMs anchored to the last event the worker persisted (an
@@ -49,6 +48,19 @@ export function pidAlive(pid, kill = process.kill) {
   }
 }
 
+// Local workers are detached POSIX process-group leaders. The group may
+// survive its worker (SIGKILL cannot run cleanup). Probe only: never kill a
+// saved process group, whose numeric identity could have been reused.
+export function processGroupAlive(pgid, kill = process.kill) {
+  if (process.platform === "win32" || !Number.isSafeInteger(pgid) || pgid <= 0) return false;
+  try {
+    kill(-pgid, 0);
+    return true;
+  } catch (error) {
+    return error?.code === "EPERM";
+  }
+}
+
 function info(log, ...args) {
   if (typeof log?.log === "function") log.log(...args);
   else if (typeof log === "function") log(...args);
@@ -66,7 +78,7 @@ function info(log, ...args) {
 // run persisted no events at all, there is no event to anchor to, so we fall
 // back to the sweep's time (the only remaining anchor). externalSessionId and
 // every other historical field are preserved. Returns the failed task.
-export async function failInterruptedRun(store, task, { log = console } = {}) {
+async function failLockedRun(store, task, { log = console } = {}) {
   const runNumber = currentRunNumber(task);
   // The last event this run's worker persisted — the honest lower-bound anchor.
   const events = await store.readEvents(task.slug);
@@ -94,6 +106,9 @@ export async function failInterruptedRun(store, task, { log = console } = {}) {
       blockedOn: undefined
     });
   }
+  // A user may close a task while its worker is still executing. Keep that
+  // decision, but make the interrupted run's own history truthful.
+  if (task.status === "done") failed.status = "done";
   await store.writeJson(path.join(store.taskDir(task.slug), "task.json"), failed);
   // Normalized events, stamped with the run — the same shape the worker's own
   // terminal events carry, so every surface renders the recovery identically.
@@ -103,7 +118,7 @@ export async function failInterruptedRun(store, task, { log = console } = {}) {
   );
   await store.appendEvent(
     task.slug,
-    workEvent("task.updated", task.id, { status: "failed", run: runNumber })
+    workEvent("task.updated", task.id, { status: failed.status, run: runNumber })
   );
   info(
     log,
@@ -113,9 +128,34 @@ export async function failInterruptedRun(store, task, { log = console } = {}) {
   return failed;
 }
 
-// The startup sweep: for every task still marked "working" whose worker pid
-// is gone (or was never recorded), mark the interrupted run failed. Returns
-// the recovered tasks. `kill` is injectable for tests.
+function hasInterruptedExecution(task) {
+  if (task.status === "working") return true;
+  if (task.status === "needs_you") return task.blockedOn?.live === true;
+  if (task.status !== "done") return false;
+  const run = task.runs?.at(-1);
+  return run?.outcome === "working" ||
+    (run?.outcome === "needs_you" && run.blockedOn?.live === true);
+}
+
+// The initial listing is only a candidate list. Another process can close,
+// resume, or finish between that read and recovery, so re-read ownership and
+// liveness under the same lock actions and workers use before writing.
+export async function failInterruptedRun(
+  store,
+  task,
+  { kill = process.kill, log = console } = {}
+) {
+  return store.withTaskLock(task.slug, async () => {
+    const fresh = await store.readJson(path.join(store.taskDir(task.slug), "task.json"));
+    if (currentRunNumber(fresh) !== currentRunNumber(task) || fresh.pid !== task.pid) return null;
+    if (!hasInterruptedExecution(fresh) || pidAlive(fresh.pid, kill)) return null;
+    return failLockedRun(store, fresh, { log });
+  });
+}
+
+// Recover working runs and live permission pauses whose worker pid is gone
+// (or was never recorded). A completed human decision is not an execution
+// and remains untouched. `kill` is injectable for tests.
 export async function recoverInterruptedRuns(
   base,
   { kill = process.kill, log = console } = {}
@@ -124,9 +164,9 @@ export async function recoverInterruptedRuns(
   const tasks = await store.listTasks();
   const recovered = [];
   for (const task of tasks) {
-    if (task.status !== "working") continue;
-    if (pidAlive(task.pid, kill)) continue;
-    recovered.push(await failInterruptedRun(store, task, { log }));
+    if (!hasInterruptedExecution(task)) continue;
+    const failed = await failInterruptedRun(store, task, { kill, log });
+    if (failed) recovered.push(failed);
   }
   return recovered;
 }

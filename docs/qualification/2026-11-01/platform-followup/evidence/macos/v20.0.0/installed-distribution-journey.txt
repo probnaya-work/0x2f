@@ -1,0 +1,33 @@
+Node v20.0.0; npm 9.6.4; darwin/arm64; Python 3.9.6
+Command: ["/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/bin/node","docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs","test/distribution.test.mjs"]
+CWD: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-s2mC9t/checkout
+Local-only suite: Node v20.0.0; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+TAP version 13
+# Subtest: the packed artifact supports the full first-install journey
+not ok 1 - the packed artifact supports the full first-install journey
+  ---
+  duration_ms: 755.722125
+  failureType: 'testCodeFailure'
+  error: |-
+    npm install -g <tgz> failed: npm ERR! code ENOTCACHED
+    npm ERR! request to https://registry.npmjs.org/@noble%2fciphers failed: cache mode is 'only-if-cached' but no cached response is available.
+    
+    npm ERR! A complete log of this run can be found in: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-offline-suite-vUpWmz/cache/_logs/2026-11-01T14_04_33_285Z-debug-0.log
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-s2mC9t/checkout/test/distribution.test.mjs:139:12)
+    async Test.run (node:internal/test_runner/test:551:9)
+    async startSubtest (node:internal/test_runner/harness:203:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 787.980541

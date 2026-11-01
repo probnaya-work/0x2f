@@ -1,0 +1,12 @@
+uid=1000(bogart) gid=1000(bogart) groups=1000(bogart),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users),101(lxd)
+/home/bogart
+Python 3.14.4
+git version 2.53.0
+/usr/bin/curl
+/usr/bin/tar
+/usr/bin/xz
+/usr/bin/sha256sum
+/usr/bin/lsof
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  468G  7.5G  437G   2% /
+7.0.0-42-generic

@@ -1,0 +1,31 @@
+Node20.0.0/npm9.6.4: same preserved scratch+cache with full_metadata=true; sanitized environment, public exact locked cache only
+TAP version 13
+# Subtest: the packed artifact supports the full first-install journey
+not ok 1 - the packed artifact supports the full first-install journey
+  ---
+  duration_ms: 706.563958
+  failureType: 'testCodeFailure'
+  error: |-
+    npm install -g <tgz> failed: npm ERR! code ENOTCACHED
+    npm ERR! request to https://registry.npmjs.org/@noble%2fciphers failed: cache mode is 'only-if-cached' but no cached response is available.
+    
+    npm ERR! A complete log of this run can be found in: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-AwLwhz/cache/_logs/2026-11-01T14_08_41_509Z-debug-0.log
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-AwLwhz/checkout/test/distribution.test.mjs:139:12)
+    async Test.run (node:internal/test_runner/test:551:9)
+    async startSubtest (node:internal/test_runner/harness:203:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 737.879208
+Exit: 1

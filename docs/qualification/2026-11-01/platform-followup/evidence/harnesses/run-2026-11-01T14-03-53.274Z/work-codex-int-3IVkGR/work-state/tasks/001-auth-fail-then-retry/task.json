@@ -1,0 +1,46 @@
+{
+  "id": 1,
+  "slug": "001-auth-fail-then-retry",
+  "title": "Auth fail then retry",
+  "brief": "Auth fail then retry",
+  "status": "ready",
+  "execution": {
+    "provider": "codex",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "01a1976c-9f07-7952-9ae9-496fbc9a26ab"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:03:54.055Z",
+      "requestedProvider": "codex",
+      "outcome": "failed",
+      "attempts": 1,
+      "externalSessionId": "01a1976c-85e3-7a01-9670-cc66073fe50f",
+      "completedAt": "2026-11-01T14:04:00.453Z",
+      "durationMs": 6398,
+      "error": "unexpected status 401 Unauthorized: Invalid API key provided, url: http://127.0.0.1:49702/v1/responses"
+    },
+    {
+      "run": 2,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:00.518Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "01a1976c-9f07-7952-9ae9-496fbc9a26ab",
+      "completedAt": "2026-11-01T14:04:00.681Z",
+      "durationMs": 163
+    }
+  ],
+  "createdAt": "2026-11-01T14:03:54.057Z",
+  "updatedAt": "2026-11-01T14:04:00.681Z",
+  "pid": 95840,
+  "processGroupId": 95840
+}

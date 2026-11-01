@@ -1,0 +1,70 @@
+✔ createWork creates a persistent task and starts execution on the node (45.814666ms)
+✔ createWork rejects an empty title with the shared error (1.062334ms)
+✔ resumeWork on a needs_you task hands execution back to the node (15.025292ms)
+✔ allowWork/rejectWork are the same action with a different grant (17.7425ms)
+✔ resumeWork on a non-needs_you task throws the CLI's exact error (shared logic) (11.731333ms)
+✔ resumeWork without a resumable session throws the CLI's exact error (19.297458ms)
+✔ closeWork moves any task to done and records task.closed (30.461417ms)
+✔ getWork returns the task with its final result (11.122291ms)
+✔ listWork returns persisted tasks (what the CLI and the API both render) (26.242875ms)
+✔ CLI and HTTP API are the same actions: the runtime factory both use produces identical outcomes (18.366ms)
+✔ createWork selects the execution provider explicitly (8.107083ms)
+✔ createWork defaults to the runtime default provider (claude-code) (11.349875ms)
+✔ createWork rejects an unknown provider with the shared error (0.73525ms)
+✔ createWork persists model when reliably known (separate concern from provider) (13.425292ms)
+✔ resumeWork refuses a decision block: decisions are answered, not allowed/rejected (9.568709ms)
+✔ answerWork records the human's answer to a decision; the task stays needs_you (7.595041ms)
+✔ answerWork validates: needs_you decision only, non-empty answer (5.976166ms)
+✔ a non-resumable NEEDS YOU task can still be closed without invoking the provider (5.584416ms)
+✔ resumeWork refuses a permission block on a provider that cannot resume (capability, not parity faking) (4.572625ms)
+✔ correctWork records a SEND-BACK correction as its own event, apart from a note (6.940583ms)
+✔ correctWork validates: a correction is required and bounded (4.893459ms)
+✔ getTaskDiff returns one entry per file.changed event, with real hunks when git has a baseline (17.0005ms)
+✔ an existing task (no runs) is interpreted as one historical run without rewriting it (1.872875ms)
+✔ legacy run timing comes from the real event log when it exists (0.2045ms)
+✔ legacy outcomes: needs_you / failed / working / done are read from state when no event is terminal (0.14175ms)
+✔ makeRunRecord creates an in-flight run; updateRun persists outcome and timing (0.205917ms)
+✔ updateRun is a no-op for legacy tasks (their history stays interpreted) (0.126125ms)
+✔ currentRunNumber is the last record for sequential runs; 1 for legacy (0.12375ms)
+✔ createWork persists the first run with the task (41.720542ms)
+✔ rerunWork appends a second run under the SAME task without overwriting the first (20.271375ms)
+✔ rerunWork without a provider retries through the task's current provider (15.518958ms)
+✔ rerunWork refuses while the task is working (sequential runs only) (10.88825ms)
+✔ rerunWork rejects an unknown provider with the shared error (15.754416ms)
+✔ rerunWork materializes a legacy task's history before appending the new run (10.939292ms)
+✔ getRun returns one run's own result; an unknown run is a 404 (13.024791ms)
+✔ getWork includes the projected run history (13.177708ms)
+✔ eventsForRun attributes run-tagged events to their run and legacy events to run 1 (0.597875ms)
+✔ DOGFOODING: the same task through claude-code then deepseek-harness persists as two runs (2003.8585ms)
+✖ DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2 (10579.169458ms)
+✔ DOGFOODING: a needs_you run is preserved in history with its block (424.475375ms)
+✔ DOGFOODING: a failed rerun is preserved in history; the previous ready run is untouched (672.449875ms)
+✔ independent processes cannot collide task IDs or overwrite identical briefs (288.660291ms)
+✔ sectionOf extracts a result section up to the next heading (0.831583ms)
+✔ createWork persists run 1's input per run; the original prompt.md is untouched (43.980792ms)
+✔ run 1's result, verification and changed files appear in run 2's prompt — but never a transcript (27.72775ms)
+✔ a user constraint added after run 1 appears in run 2's prompt, not run 1's (23.286167ms)
+✔ noteWork records Task context without starting or resuming an execution (25.295375ms)
+✔ answerWork keeps existing decision behavior AND lands the answer in Task context (27.49225ms)
+✔ same-provider resume keeps the existing session: no new run, no new per-run prompt (21.032666ms)
+✔ previous run records, results and the original prompt stay immutable across reruns (32.583834ms)
+✔ DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session (2180.149833ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 50
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13898.452584
+
+✖ failing tests:
+
+test at test/runs.test.mjs:621:1
+✖ DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2 (10579.169458ms)
+  Error: timed out waiting for task 1
+      at waitForStatus (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/runs.test.mjs:535:45)
+      at async file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/runs.test.mjs:641:7
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/runs.test.mjs:625:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

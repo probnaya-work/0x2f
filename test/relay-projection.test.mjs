@@ -17,6 +17,7 @@ import {
   projectTask,
   projectRun,
   projectBlockedOn,
+  projectEvent,
   relPath,
   projectSnapshot,
   projectWorkspaceLabel,
@@ -35,6 +36,16 @@ const baseTask = (over = {}) => ({
   updatedAt: "2026-01-01T00:00:00.000Z",
   error: "boom",
   ...over
+});
+
+test("permission occurrence IDs reach phone snapshots and events as freshness preconditions", () => {
+  const blockedOn = { type: "permission", live: true, decisionId: "displayed-occurrence", raw: { privateInput: "secret" } };
+  const task = projectTask(baseTask({ status: "needs_you", blockedOn }), "/w");
+  const event = projectEvent({ type: "needs_user", taskId: 1, blockedOn }, "/w");
+  assert.equal(task.blockedOn.decisionId, blockedOn.decisionId);
+  assert.equal(event.blockedOn.decisionId, blockedOn.decisionId);
+  assert.equal(task.blockedOn.raw, undefined);
+  assert.equal(event.blockedOn.raw, undefined);
 });
 
 // --- §01: failure crosses the boundary, re-vetted ---------------------------

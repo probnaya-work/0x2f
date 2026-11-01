@@ -1,0 +1,33 @@
+✔ E2E: `2f providers` detects codex and a task runs to READY through the real CLI (565.618625ms)
+✔ E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (6785.005333ms)
+✖ E2E: command_execution is recorded honestly as tool activity, never as file.changed (391.517791ms)
+✔ E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (706.555667ms)
+✔ E2E: the same task can switch away from codex to another provider without losing task context (1104.341125ms)
+✔ E2E: `2f providers` detects gemini and a task runs to READY through the real CLI (1467.698791ms)
+✔ E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works (2345.546541ms)
+✔ E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context (2667.917709ms)
+✔ E2E: the same task can switch away from gemini to another provider without losing task context (1593.192375ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17791.225042
+
+✖ failing tests:
+
+test at test/codex-integration.test.mjs:199:1
+✖ E2E: command_execution is recorded honestly as tool activity, never as file.changed (391.517791ms)
+  AssertionError [ERR_ASSERTION]: tool.started recorded
+      at TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-real-mock-kBkC0K/test/codex-integration.test.mjs:229:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

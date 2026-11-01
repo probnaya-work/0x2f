@@ -144,6 +144,7 @@ function haltOf(task, base) {
     options: (blocked.options ?? []).map(o => String(o.name ?? "")).filter(Boolean),
     partial: blocked.canAllow === false || blocked.canReject === false,
     live: blocked.live === true,
+    decisionId: blocked.decisionId ?? null,
     note:
       blocked.live === true
         ? "resumable — the same run continues the moment you allow"

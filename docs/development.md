@@ -71,7 +71,7 @@ test/                  node --test suite
 ## Running
 
 ```bash
-npm install          # installs ws (root, for the relay agent) — nothing else
+npm install          # installs ws, @noble/ciphers, and @noble/hashes
 npm test             # the full suite (node --test, 300+ tests)
 npm run check        # syntax-check every source and test file (node --check)
 npm start            # run the CLI: node src/cli.mjs

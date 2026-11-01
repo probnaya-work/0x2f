@@ -1,0 +1,20 @@
+{
+  "capturedAt": "2026-11-01T14:06:03.311Z",
+  "command": [
+    "/Users/bogart/.n/bin/codex",
+    "sandbox",
+    "--",
+    "/usr/bin/printf",
+    "fixed-local-command-ok\n"
+  ],
+  "environment": {
+    "PATH": "/opt/homebrew/bin:/usr/bin:/bin",
+    "HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-sandbox-probe-q1YgCP",
+    "CODEX_HOME": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-sandbox-probe-q1YgCP/codex",
+    "TMPDIR": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-sandbox-probe-q1YgCP"
+  },
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "fixed-local-command-ok\n",
+  "stderr": ""
+}

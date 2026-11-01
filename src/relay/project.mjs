@@ -121,6 +121,9 @@ export function projectBlockedOn(blockedOn, base) {
     out.canAllow = blockedOn.canAllow !== false;
     out.canReject = blockedOn.canReject !== false;
     out.live = blockedOn.live === true;
+    // Public request freshness precondition, not a credential. A phone must
+    // send the occurrence it displayed instead of authorizing a newer one.
+    if (typeof blockedOn.decisionId === "string") out.decisionId = blockedOn.decisionId;
     if (Array.isArray(blockedOn.options)) {
       out.options = blockedOn.options.map(o => ({
         optionId: o.optionId,

@@ -32,6 +32,8 @@ const send = obj => process.stdout.write(JSON.stringify(obj) + "\\n");
 
 let pendingPromptId = null;
 let requestedPermission = false;
+const permissionReplies = new Set();
+let repeatedRequestSent = false;
 
 const rl = readline.createInterface({ input: process.stdin });
 rl.on("line", line => {
@@ -39,8 +41,22 @@ rl.on("line", line => {
   try { msg = JSON.parse(line); } catch { return; }
 
   // Response to our server-initiated permission request.
-  if (msg.id === 100) {
-    logLine({ permissionResponse: msg.result });
+  if (msg.id === 100 || msg.id === 101) {
+    logLine({ requestId: msg.id, permissionResponse: msg.result });
+    permissionReplies.add(msg.id);
+    if (behavior === "two-permissions" && permissionReplies.size < 2) return;
+    if (behavior === "reused-id" && !repeatedRequestSent) {
+      repeatedRequestSent = true;
+      send({ jsonrpc: "2.0", id: 100, method: "session/request_permission", params: {
+        sessionId: "sess-fake",
+        toolCall: { toolCallId: "different-call", title: "A different operation with reused RPC id", kind: "execute" },
+        options: [
+          { optionId: "allow-reused", name: "Allow once", kind: "allow_once" },
+          { optionId: "reject-reused", name: "Reject", kind: "reject_once" }
+        ]
+      }});
+      return;
+    }
     requestedPermission = false;
     send({ jsonrpc: "2.0", method: "session/update", params: {
       sessionId: "sess-fake",
@@ -90,15 +106,25 @@ rl.on("line", line => {
     logLine({ prompt: { sessionId: msg.params.sessionId, text: msg.params.prompt?.[0]?.text } });
     if (behavior === "exit-early") { process.exit(1); }
     if (behavior === "hang") { return; } // never answer
-    if (behavior === "permission" || behavior === "approve" || behavior === "die-on-permission") {
+    if (["permission", "approve", "die-on-permission", "two-permissions", "allow-only", "reused-id"].includes(behavior)) {
       requestedPermission = true;
       send({ jsonrpc: "2.0", id: 100, method: "session/request_permission", params: {
         sessionId: "sess-fake",
         toolCall: { toolCallId: "call-1", title: "Edit file", kind: "edit" },
-        options: [
+        options: behavior === "allow-only" ? [
+          { optionId: "allow-once", name: "Allow once", kind: "allow_once" }
+        ] : [
           { optionId: "allow-once", name: "Allow once", kind: "allow_once" },
           { optionId: "allow-always", name: "Allow always", kind: "allow_always" },
           { optionId: "reject-once", name: "Reject", kind: "reject_once" }
+        ]
+      }});
+      if (behavior === "two-permissions") send({ jsonrpc: "2.0", id: 101, method: "session/request_permission", params: {
+        sessionId: "sess-fake",
+        toolCall: { toolCallId: "call-2", title: "Run another command", kind: "execute" },
+        options: [
+          { optionId: "allow-second", name: "Allow once", kind: "allow_once" },
+          { optionId: "reject-second", name: "Reject", kind: "reject_once" }
         ]
       }});
       if (behavior === "die-on-permission") process.exit(1); // die while the human decides
@@ -203,6 +229,32 @@ async function waitForEvent(events, predicate, timeout = 5000) {
   }
 }
 
+async function withInteractiveAgent(behavior, fn, onEvent = () => {}) {
+  const { bin, dir } = await writeFakeAgent();
+  const logPath = path.join(dir, "agent.log");
+  const decisionFile = path.join(dir, "decision.json");
+  const previous = { behavior: process.env.FAKE_ACP_BEHAVIOR, log: process.env.FAKE_ACP_LOG };
+  process.env.FAKE_ACP_BEHAVIOR = behavior;
+  process.env.FAKE_ACP_LOG = logPath;
+  const provider = providerFor(bin);
+  const events = [];
+  const result = provider.start({
+    cwd: dir, prompt: "synthetic permission test", permission: { decisionFile },
+    onEvent: async event => { events.push(event); await onEvent(event); }
+  });
+  try {
+    await fn({ events, result, logPath, decisionFile });
+  } finally {
+    provider.cancel();
+    await result;
+    if (previous.behavior === undefined) delete process.env.FAKE_ACP_BEHAVIOR;
+    else process.env.FAKE_ACP_BEHAVIOR = previous.behavior;
+    if (previous.log === undefined) delete process.env.FAKE_ACP_LOG;
+    else process.env.FAKE_ACP_LOG = previous.log;
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+}
+
 test("ACP: a completed turn maps to ready with the session id, result and progress events", async () => {
   const { outcome, events } = await runBehavior("complete");
 
@@ -275,6 +327,93 @@ test("ACP: permission requests are auto-approved with the approve policy", async
   assert.equal(outcome.status, "ready");
 });
 
+test("ACP: one bound decision resolves only one queued permission request", async () => {
+  await withInteractiveAgent("two-permissions", async ({ events, result, logPath, decisionFile }) => {
+    const first = await waitForEvent(events, e => e.type === "needs_user");
+    assert.equal(first.blockedOn.requestId, 100);
+    assert.equal(events.filter(e => e.type === "needs_user").length, 1);
+    const firstGrant = { grant: "allow", requestId: 100, decisionId: first.blockedOn.decisionId };
+    await fs.writeFile(decisionFile, JSON.stringify(firstGrant));
+    const second = await waitForEvent(events, e => e.type === "needs_user" && e.blockedOn.requestId === 101);
+    assert.equal(second.blockedOn.tool, "Run another command");
+    await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+
+    const responses = async () => (await fs.readFile(logPath, "utf8")).trim().split("\n")
+      .map(JSON.parse).filter(line => line.permissionResponse);
+    await new Promise(r => setTimeout(r, 350));
+    assert.deepEqual((await responses()).map(line => line.requestId), [100]);
+    assert.equal(events.filter(e => e.type === "permission.resolved").length, 1);
+    // A delayed decision for the previous request cannot answer the next.
+    await fs.writeFile(decisionFile, JSON.stringify(firstGrant));
+    await new Promise(r => setTimeout(r, 350));
+    assert.deepEqual((await responses()).map(line => line.requestId), [100]);
+    await fs.writeFile(decisionFile, JSON.stringify({ grant: "reject", requestId: 101, decisionId: second.blockedOn.decisionId }));
+    assert.equal((await result).status, "ready");
+    assert.deepEqual((await responses()).map(line => [line.requestId, line.permissionResponse.outcome.optionId]), [
+      [100, "allow-once"], [101, "reject-second"]
+    ]);
+  }, async event => {
+    // Keep request publication pending across several polling ticks. A
+    // single poll may read/consume it; overlapping async ticks must not.
+    if (event.type === "needs_user" && event.blockedOn.requestId === 100) {
+      await new Promise(r => setTimeout(r, 650));
+    }
+    if (event.type === "permission.resolved") await new Promise(r => setTimeout(r, 350));
+  });
+});
+
+test("ACP: unbound, mismatched, and unknown grants leave the active request pending", async () => {
+  await withInteractiveAgent("permission", async ({ events, result, logPath, decisionFile }) => {
+    const pause = await waitForEvent(events, e => e.type === "needs_user");
+    const decisionId = pause.blockedOn.decisionId;
+    for (const decision of [
+      { grant: "allow" },
+      { grant: "allow", requestId: 100 },
+      { grant: "allow", requestId: 999, decisionId },
+      { grant: "allow", requestId: "100", decisionId },
+      { grant: "unknown", requestId: 100, decisionId }
+    ]) {
+      await fs.writeFile(decisionFile, JSON.stringify(decision));
+      await new Promise(r => setTimeout(r, 300));
+      assert.ok(!(await fs.readFile(logPath, "utf8")).includes("permissionResponse"));
+      assert.equal(events.filter(e => e.type === "permission.resolved").length, 0);
+    }
+    await fs.writeFile(decisionFile, JSON.stringify({ grant: "reject", requestId: 100, decisionId }));
+    assert.equal((await result).status, "ready");
+    assert.match(await fs.readFile(logPath, "utf8"), /"reject-once"/);
+  });
+});
+
+test("ACP: an allow-only request without a decision channel is cancelled", async () => {
+  const { log } = await runBehavior("allow-only");
+  const response = log.trim().split("\n").map(JSON.parse).find(line => line.permissionResponse);
+  assert.deepEqual(response.permissionResponse, { outcome: { outcome: "cancelled" } });
+});
+
+test("ACP: reusing a native RPC id cannot replay a previous occurrence's grant", async () => {
+  await withInteractiveAgent("reused-id", async ({ events, result, logPath, decisionFile }) => {
+    const first = await waitForEvent(events, e => e.type === "needs_user");
+    const firstGrant = JSON.stringify({
+      grant: "allow", requestId: first.blockedOn.requestId, decisionId: first.blockedOn.decisionId
+    });
+    await fs.writeFile(decisionFile, firstGrant);
+    const second = await waitForEvent(events, e =>
+      e.type === "needs_user" && e.blockedOn.decisionId !== first.blockedOn.decisionId);
+    assert.equal(second.blockedOn.requestId, first.blockedOn.requestId);
+    assert.notEqual(second.blockedOn.decisionId, first.blockedOn.decisionId);
+    await fs.writeFile(decisionFile, firstGrant);
+    await new Promise(r => setTimeout(r, 350));
+    const responses = async () => (await fs.readFile(logPath, "utf8")).trim().split("\n")
+      .map(JSON.parse).filter(line => line.permissionResponse);
+    assert.equal((await responses()).length, 1);
+    await fs.writeFile(decisionFile, JSON.stringify({
+      grant: "reject", requestId: second.blockedOn.requestId, decisionId: second.blockedOn.decisionId
+    }));
+    assert.equal((await result).status, "ready");
+    assert.deepEqual((await responses()).map(line => line.permissionResponse.outcome.optionId), ["allow-once", "reject-reused"]);
+  });
+});
+
 test("ACP: interactive permission requests pause for the human and answer in place", async () => {
   const { bin, dir } = await writeFakeAgent();
   const logPath = path.join(dir, "agent.log");
@@ -314,7 +453,7 @@ test("ACP: interactive permission requests pause for the human and answer in pla
       assert.ok(!logText.includes("permissionResponse"), "no response before the human decides");
 
       // The human ALLOWS; the SAME run continues and completes.
-      await fs.writeFile(decisionFile, JSON.stringify({ grant: "allow", at: new Date().toISOString() }));
+      await fs.writeFile(decisionFile, JSON.stringify({ grant: "allow", requestId: pause.blockedOn.requestId, decisionId: pause.blockedOn.decisionId, at: new Date().toISOString() }));
       const outcome = await outcomePromise;
       logText = await fs.readFile(logPath, "utf8");
       assert.match(logText, /"allow-once"/); // answered with the allow option
@@ -351,8 +490,8 @@ test("ACP: interactive reject answers with the reject option and the run continu
         onEvent: e => events.push(e),
         permission: { decisionFile }
       });
-      await waitForEvent(events, e => e.type === "needs_user");
-      await fs.writeFile(decisionFile, JSON.stringify({ grant: "reject" }));
+      const pause = await waitForEvent(events, e => e.type === "needs_user");
+      await fs.writeFile(decisionFile, JSON.stringify({ grant: "reject", requestId: pause.blockedOn.requestId, decisionId: pause.blockedOn.decisionId }));
       const outcome = await outcomePromise;
       const logText = await fs.readFile(logPath, "utf8");
       assert.match(logText, /"reject-once"/);
@@ -397,7 +536,7 @@ test("ACP: interactive ambiguous options are never guessed — only mappable act
       // REJECT with no reject option present is impossible — the agent here
       // offers one, but the persistence keeps the raw options for inspection.
       assert.ok(pause.blockedOn.options.length >= 2);
-      await fs.writeFile(decisionFile, JSON.stringify({ grant: "allow" }));
+      await fs.writeFile(decisionFile, JSON.stringify({ grant: "allow", requestId: pause.blockedOn.requestId, decisionId: pause.blockedOn.decisionId }));
       await outcomePromise;
     } finally {
       for (const key of Object.keys(env)) {

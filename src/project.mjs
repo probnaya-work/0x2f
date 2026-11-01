@@ -36,10 +36,10 @@ harness that 0x2F did not ship — an ACP-compatible agent or a headless
 command — so adding a new harness needs no source changes:
 
   {
-    "id": "gemini",
-    "displayName": "Gemini CLI",
+    "id": "cursor",
+    "displayName": "Cursor",
     "transport": "acp",
-    "command": ["gemini", "--acp"]
+    "command": ["cursor", "--acp"]
   }
 
   {

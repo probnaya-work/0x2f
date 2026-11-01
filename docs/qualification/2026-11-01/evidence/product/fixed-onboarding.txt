@@ -1,0 +1,5 @@
+0x2F UI: http://127.0.0.1:56561
+{"wrongWorkspace":{"requested":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-onboarding-Jd7ATe/repo-b","reused":{"error":"Port 56561 is serving 0x2F for another workspace (/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-onboarding-Jd7ATe/repo-a). Open this workspace on another port: 2f ui <port>."},"actual":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-onboarding-Jd7ATe/repo-a"}}
+{"shippedManifestExample":{"code":0,"out":"PROVIDER            INTEGRATION   AVAILABLE\n\nclaude-code         native        no\ncodex               native        no\ndeepseek-harness    native        no\ngemini              native        no\nopencode            acp           yes\ncursor              acp           no\n","err":""}}
+{"spaces":{"cli":{"code":0,"out":"Created #001: Task from installed path with spaces\nOpen: 2f open 1\nFake is running in the background.\n","err":""},"status":"ready","pid":63851,"log":"[01:28:04] launching Fake (fake)\n[01:28:04] session started: unknown\n[01:28:04] outcome: ready\n"}}
+{"scratch":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-onboarding-Jd7ATe"}

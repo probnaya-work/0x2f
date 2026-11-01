@@ -95,7 +95,7 @@ export function createApp(runtime, opts = {}) {
     try {
       switch (intent.type) {
         case "allow": {
-          const task = await actions.allowWork(intent.id);
+          const task = await actions.allowWork(intent.id, { decisionId: intent.decisionId ?? null });
           setFlash(
             task.live
               ? "allowed · " + ref(intent.id) + " continues in the same run"
@@ -104,7 +104,7 @@ export function createApp(runtime, opts = {}) {
           break;
         }
         case "reject": {
-          await actions.rejectWork(intent.id);
+          await actions.rejectWork(intent.id, { decisionId: intent.decisionId ?? null });
           setFlash(
             "declined · " + ref(intent.id) + " continues with the request withdrawn",
             "warn"

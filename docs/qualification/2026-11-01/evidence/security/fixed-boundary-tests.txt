@@ -1,0 +1,147 @@
+0x2F UI: http://127.0.0.1:57862
+✔ POST /api/tasks creates a task through the shared action and starts it on the node (35.807125ms)
+0x2F UI: http://127.0.0.1:57893
+✔ POST /api/tasks without a title -> 400 from the shared action (3.3415ms)
+0x2F UI: http://127.0.0.1:57895
+✔ GET /api/tasks and GET /api/tasks/:id (with result) (23.685417ms)
+0x2F UI: http://127.0.0.1:57935
+✔ POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400 (28.289ms)
+0x2F UI: http://127.0.0.1:58007
+✔ POST /api/tasks/:id/close moves the task to done (8.153458ms)
+0x2F UI: http://127.0.0.1:58012
+✔ unknown routes -> 404; missing task -> 404 (2.223875ms)
+0x2F UI: http://127.0.0.1:58020
+✔ server binds to localhost by default (local-first, not LAN-exposed) (0.740833ms)
+0x2F UI: http://127.0.0.1:58022
+✔ SSE delivers normalized task.created when a task is created through the API (28.793959ms)
+0x2F UI: http://127.0.0.1:58040
+✔ GET / serves the 0x2F Web shell and its module assets (7.226958ms)
+0x2F UI: http://127.0.0.1:58044
+✔ GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint (2.8115ms)
+0x2F UI: http://127.0.0.1:58046
+✔ the bootstrap meta tag survives this server's own CSP — a real browser would actually read it (1.062125ms)
+0x2F UI: http://127.0.0.1:58048
+✔ GET /api/status also carries workspace + node (symmetry with the bootstrap payload) (0.804833ms)
+0x2F UI: http://127.0.0.1:58050
+✔ a workspace directory name that could break out of the meta attribute is escaped safely (1.31025ms)
+0x2F UI: http://127.0.0.1:58052
+✔ the browser client's full module graph is served (no blank-page regressions) (10.161375ms)
+0x2F UI: http://127.0.0.1:58057
+✔ GET /api/events/history returns the persisted normalized log per task (4.685916ms)
+0x2F UI: http://127.0.0.1:58059
+✔ a task with no event log yet is still present in the history (3.775375ms)
+0x2F UI: http://127.0.0.1:58061
+✔ GET /api/providers lists the registry (default first) with normalized descriptors (1.383375ms)
+0x2F UI: http://127.0.0.1:58063
+✔ POST /api/tasks creates through the selected provider (4.610458ms)
+0x2F UI: http://127.0.0.1:58067
+✔ POST /api/tasks with an unknown provider -> 400 from the shared action (1.102834ms)
+0x2F UI: http://127.0.0.1:58069
+✔ POST /api/tasks/:id/rerun starts a second run under the same task through the shared action (6.945125ms)
+0x2F UI: http://127.0.0.1:58071
+✔ DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence) (8.301625ms)
+0x2F UI: http://127.0.0.1:58078
+✔ POST /api/tasks/:id/correct records a SEND-BACK correction as its own event (5.54175ms)
+0x2F UI: http://127.0.0.1:58082
+✔ DECISION FLOW: a body-less rerun POST is a valid request, not a 500 (5.557541ms)
+0x2F UI: http://127.0.0.1:58084
+✔ DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run (8.291416ms)
+0x2F UI: http://127.0.0.1:58088
+✔ DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run (5.820917ms)
+0x2F UI: http://127.0.0.1:58092
+✔ DECISION FLOW: distinct request ids are distinct gestures (6.488667ms)
+0x2F UI: http://127.0.0.1:58099
+✔ every API failure is explicit, valid JSON (never an empty or partial body) (6.685ms)
+0x2F UI: http://127.0.0.1:58103
+✔ GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404 (5.058ms)
+0x2F UI: http://127.0.0.1:58106
+✔ GET /api/tasks/:id includes the projected run history (4.063541ms)
+0x2F UI: http://127.0.0.1:58108
+✔ POST /api/tasks/:id/answer records the human's decision answer (6.638416ms)
+0x2F UI: http://127.0.0.1:58112
+✔ ALLOW on a decision is refused over the API; ANSWER on a permission is refused (9.223167ms)
+0x2F UI: http://127.0.0.1:58114
+✔ a non-resumable NEEDS YOU task can be closed over the API without invoking the provider (4.679125ms)
+✔ a relay cannot forge a command: envelopes without the pairing key never execute (4386.767875ms)
+✔ a tampered envelope (bit flip in the ciphertext) is rejected (4302.445666ms)
+✔ a captured command envelope cannot be replayed to execute twice (110.409667ms)
+✔ replay protection survives a Mac/runtime restart (persisted ack cache) (262.408875ms)
+✔ legitimate retries (same requestId) return the same ack without double execution (100.944959ms)
+✔ a re-paired (rotated) Mac rejects envelopes from the old phone key (4406.957167ms)
+✔ relay state and persisted state hold no task/source/result payloads (255.709875ms)
+✔ the remote projection drops raw inputs, diffs, session ids, absolute paths and base (0.493416ms)
+✔ the full remote-control loop works end-to-end over the E2E channel (103.705542ms)
+✔ isPrivateLanIp accepts RFC1918 ranges and rejects everything else (0.89525ms)
+✔ detectLanAddress finds a private IPv4 and skips internal/loopback (0.210417ms)
+✔ LAN re-pair brings the runtime up BEFORE rotating (the runtime hosts the relay) (8.4265ms)
+Port 4242 is used by another 0x2F runtime or process — pairing on port 4243 instead.
+✔ LAN pairing falls back to a free port when the requested port is foreign (2.892875ms)
+0x2F UI: http://0.0.0.0:57869
+✔ LAN hosts get the client + relay protocol only; the local API stays loopback-only (16.628792ms)
+0x2F UI: http://0.0.0.0:57897
+✔ LAN peers cannot obtain local credentials or call the local API with a forged loopback Host (38.344417ms)
+0x2F UI: http://0.0.0.0:57973
+✔ LAN relay requests cannot replay the local plaintext response cache (2.548875ms)
+0x2F UI: http://0.0.0.0:57984
+✔ a real private TCP peer cannot bootstrap local auth through a loopback destination (5.0675ms)
+0x2F UI: http://0.0.0.0:57995
+✔ WebSocket upgrades share the LAN peer, Host, browser, and active-pairing gates (130.095125ms)
+0x2F UI: http://0.0.0.0:58096
+✔ the LAN surface closes when `2f pair --off` disables the config (123.8155ms)
+0x2F UI: http://0.0.0.0:58123
+✔ health reports lan so `2f pair` knows whether a running runtime serves the phone (1.9615ms)
+0x2F UI: http://0.0.0.0:58125
+✔ a phone pairs over the LAN and controls a task; the local API stays off-LAN (270.037125ms)
+0x2F UI: http://0.0.0.0:58132
+✔ the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle) (3146.080958ms)
+✔ an agent-registered pairing token always has an expiry (never claimable forever) (45.855792ms)
+✔ a re-pair token (rotate-registered) cannot be claimed after it expires (23.23075ms)
+✔ a phone session expires after its TTL and stops authenticating (21.122375ms)
+✔ 2f pair --off revokes remote access at the relay: sessions and tokens die immediately (21.519583ms)
+✔ a stale session stays dead after the Mac reconnects post-revocation (35.231041ms)
+✔ re-pairing (rotate) retires old sessions; only the new token's session works (21.16825ms)
+✔ a plain reconnect (same generation) does NOT revoke the phone session (51.844709ms)
+✔ rotation is authorized by the current deviceSecret; a wrong secret changes nothing (19.661583ms)
+relay: The relay rejected the current device credential (Unknown device or bad deviceSecret.). — starting a fresh device identity for this Mac.
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ 2f pair falls back to a fresh identity when the relay rejects the old credential (1599.642917ms)
+✔ plain-HTTP relay URLs are refused except loopback and private-LAN development (0.360042ms)
+✔ 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one (252.886375ms)
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ relay.json and the relay state file are written with mode 0600 (826.981916ms)
+✔ hosted defaults are https and pass the relay transport policy (0.19675ms)
+✔ 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults (0.286459ms)
+✔ 2f pair with no flags resolves the LAN transport (same Wi-Fi) (2.139583ms)
+✔ 2f pair --relay still resolves the hosted transport; --lan forces LAN (2.854458ms)
+✔ 2f pair with no LAN address fails closed with a clear message (0.844875ms)
+✔ a plain-HTTP env override of the relay default is still refused (0.783209ms)
+0x2F UI: http://127.0.0.1:57863
+✔ idempotency replay still requires authentication and the local browser boundary (32.967583ms)
+0x2F UI: http://127.0.0.1:57896
+✔ unauthenticated /api requests are refused with 401 — no task can be started (20.353583ms)
+0x2F UI: http://127.0.0.1:57926
+✔ a wrong or absent token is refused; the correct token is accepted (4.635583ms)
+0x2F UI: http://127.0.0.1:57938
+✔ the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow) (14.116708ms)
+0x2F UI: http://127.0.0.1:57976
+✔ a foreign Host header (DNS rebinding) is refused on every route (2.794292ms)
+0x2F UI: http://127.0.0.1:57989
+✔ cross-origin requests are refused even with a valid token (11.899041ms)
+0x2F UI: http://127.0.0.1:58008
+✔ Sec-Fetch-Site: cross-site and same-site browser requests are refused (6.310708ms)
+0x2F UI: http://127.0.0.1:58013
+✔ the full C1 chain: no unauthenticated or cross-site path starts agent work (2.065ms)
+0x2F UI: http://127.0.0.1:58018
+✔ request bodies over the cap are refused with 413 (declared and streamed) (2.408416ms)
+0x2F UI: http://127.0.0.1:58025
+✔ oversized inputs are refused by the shared actions — the CLI and the API share the caps (7.313292ms)
+0x2F UI: http://127.0.0.1:58030
+✔ the health probe is unauthenticated but Host-guarded; static assets carry the CSP (3.743333ms)
+ℹ tests 83
+ℹ suites 0
+ℹ pass 83
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14526.540333

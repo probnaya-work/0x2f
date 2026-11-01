@@ -1,0 +1,5 @@
+Cloning into '/home/bogart/0x2f-qualification-20261101/checkout'...
+fatal: Remote branch qualification/2026-11-01 not found in upstream origin
+bash: line 1: cd: /home/bogart/0x2f-qualification-20261101/checkout: No such file or directory
+fatal: not a git repository (or any of the parent directories): .git
+fatal: not a git repository (or any of the parent directories): .git

@@ -1,0 +1,8 @@
+ M package.json
+ M src/cli.mjs
+ M src/web/app.js
+?? scripts/test.mjs
+From /home/bogart/0x2f-qualification-20261101/incoming/0x2f-platform-final-source.bundle
+ * branch            HEAD       -> FETCH_HEAD
+HEAD is now at 8882951 fix: explain that closing a task does not cancel execution
+88829516c445cddebb7f5383d1b2a1fb03cf0828

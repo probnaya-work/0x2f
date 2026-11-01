@@ -1,0 +1,904 @@
+Local-only suite: Node v26.11.1; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+
+> 0x2f@0.1.4 test
+> node --test "test/*.test.mjs"
+
+✔ INTERACTIVE E2E: permission request -> NEEDS YOU -> ALLOW -> the same run continues to READY (589.330125ms)
+✔ INTERACTIVE E2E: REJECT answers with the rejection and the run continues (1183.945375ms)
+✔ ACP: a completed turn maps to ready with the session id, result and progress events (209.719875ms)
+✔ ACP: a decision block maps to needs_you/decision via the Work convention (224.103917ms)
+✔ ACP: an early stop reason maps to failed (316.420875ms)
+✔ ACP: the agent exiting before completing maps to failed (875.116709ms)
+✔ ACP: a malformed initialize response fails clearly (1243.550458ms)
+✔ ACP: a missing session id fails clearly instead of inventing one (765.800625ms)
+✔ ACP: permission requests are auto-declined with the explicit deny policy (headless) (525.120667ms)
+✔ ACP: permission requests are auto-approved with the approve policy (544.308709ms)
+✔ ACP: one bound decision resolves only one queued permission request (2420.168125ms)
+✔ ACP: unbound, mismatched, and unknown grants leave the active request pending (2555.635625ms)
+✔ ACP: an allow-only request without a decision channel is cancelled (451.938959ms)
+✔ ACP: reusing a native RPC id cannot replay a previous occurrence's grant (1286.158125ms)
+✔ ACP: interactive permission requests pause for the human and answer in place (638.843458ms)
+✔ ACP: interactive reject answers with the reject option and the run continues (470.531708ms)
+✔ ACP: interactive ambiguous options are never guessed — only mappable actions are offered (435.40425ms)
+✔ ACP: the agent dying while an interactive permission waits fails the run (189.295417ms)
+✔ ACP: resume loads the session and prompts it (158.292083ms)
+✔ ACP: resume fails clearly when the agent lacks the loadSession capability (367.208292ms)
+✔ ACP: unknown notifications and non-mappable updates never break the run (167.644959ms)
+✔ ACP: cancel sends session/cancel and the run ends failed (169.600333ms)
+✔ simultaneous human notes retain every acknowledged constraint (137.454875ms)
+✔ distinct concurrent permission resumes admit exactly one execution (30.740625ms)
+✔ live permissions and closed in-flight executions cannot be rerun (20.070041ms)
+✔ spawn failure is durably failed instead of stranded working (13.266292ms)
+✔ non-text action inputs are rejected before persistence or execution (13.878375ms)
+✔ a gesture bound to an earlier permission cannot authorize the current occurrence (19.65075ms)
+✔ createWork creates a persistent task and starts execution on the node (20.856167ms)
+✔ createWork rejects an empty title with the shared error (1.530792ms)
+✔ resumeWork on a needs_you task hands execution back to the node (15.327ms)
+✔ allowWork/rejectWork are the same action with a different grant (21.699708ms)
+✔ resumeWork on a non-needs_you task throws the CLI's exact error (shared logic) (12.956667ms)
+✔ resumeWork without a resumable session throws the CLI's exact error (28.47525ms)
+✔ closeWork moves any task to done and records task.closed (18.919375ms)
+✔ getWork returns the task with its final result (32.219834ms)
+✔ listWork returns persisted tasks (what the CLI and the API both render) (35.12375ms)
+✔ CLI and HTTP API are the same actions: the runtime factory both use produces identical outcomes (19.093208ms)
+✔ createWork selects the execution provider explicitly (20.412084ms)
+✔ createWork defaults to the runtime default provider (claude-code) (9.628791ms)
+✔ createWork rejects an unknown provider with the shared error (0.705167ms)
+✔ createWork persists model when reliably known (separate concern from provider) (14.791833ms)
+✔ resumeWork refuses a decision block: decisions are answered, not allowed/rejected (13.384084ms)
+✔ answerWork records the human's answer to a decision; the task stays needs_you (15.917958ms)
+✔ answerWork validates: needs_you decision only, non-empty answer (21.0355ms)
+✔ a non-resumable NEEDS YOU task can still be closed without invoking the provider (18.535833ms)
+✔ resumeWork refuses a permission block on a provider that cannot resume (capability, not parity faking) (18.24525ms)
+✔ correctWork records a SEND-BACK correction as its own event, apart from a note (18.068584ms)
+✔ correctWork validates: a correction is required and bounded (11.850375ms)
+✔ getTaskDiff returns one entry per file.changed event, with real hunks when git has a baseline (45.993625ms)
+0x2F UI: http://127.0.0.1:59757
+✔ POST /api/tasks creates a task through the shared action and starts it on the node (42.318458ms)
+0x2F UI: http://127.0.0.1:59762
+✔ POST /api/tasks without a title -> 400 from the shared action (5.415583ms)
+0x2F UI: http://127.0.0.1:59764
+✔ GET /api/tasks and GET /api/tasks/:id (with result) (30.20725ms)
+0x2F UI: http://127.0.0.1:59770
+✔ POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400 (57.275125ms)
+0x2F UI: http://127.0.0.1:59780
+✔ permission HTTP actions refuse stale or missing displayed decision IDs (58.638541ms)
+0x2F UI: http://127.0.0.1:59782
+✔ POST /api/tasks/:id/close moves the task to done (18.930125ms)
+0x2F UI: http://127.0.0.1:59784
+✔ unknown routes -> 404; missing task -> 404 (4.048041ms)
+0x2F UI: http://127.0.0.1:59787
+✔ server binds to localhost by default (local-first, not LAN-exposed) (1.085625ms)
+0x2F UI: http://127.0.0.1:59788
+✔ SSE delivers normalized task.created when a task is created through the API (53.498084ms)
+0x2F UI: http://127.0.0.1:59791
+✔ GET / serves the 0x2F Web shell and its module assets (15.458167ms)
+0x2F UI: http://127.0.0.1:59795
+✔ GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint (3.411875ms)
+0x2F UI: http://127.0.0.1:59797
+✔ the bootstrap meta tag survives this server's own CSP — a real browser would actually read it (2.080292ms)
+0x2F UI: http://127.0.0.1:59799
+✔ GET /api/status also carries workspace + node (symmetry with the bootstrap payload) (2.591708ms)
+0x2F UI: http://127.0.0.1:59801
+✔ a workspace directory name that could break out of the meta attribute is escaped safely (3.788041ms)
+0x2F UI: http://127.0.0.1:59803
+✔ the browser client's full module graph is served (no blank-page regressions) (22.010875ms)
+0x2F UI: http://127.0.0.1:59806
+✔ GET /api/events/history returns the persisted normalized log per task (11.147583ms)
+0x2F UI: http://127.0.0.1:59808
+✔ a task with no event log yet is still present in the history (11.009917ms)
+0x2F UI: http://127.0.0.1:59810
+✔ GET /api/providers lists the registry (default first) with normalized descriptors (3.044542ms)
+0x2F UI: http://127.0.0.1:59812
+✔ POST /api/tasks creates through the selected provider (23.899875ms)
+0x2F UI: http://127.0.0.1:59814
+✔ POST /api/tasks with an unknown provider -> 400 from the shared action (3.074833ms)
+0x2F UI: http://127.0.0.1:59816
+✔ POST /api/tasks/:id/rerun starts a second run under the same task through the shared action (37.013334ms)
+0x2F UI: http://127.0.0.1:59818
+✔ DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence) (23.199583ms)
+0x2F UI: http://127.0.0.1:59821
+✔ POST /api/tasks/:id/correct records a SEND-BACK correction as its own event (26.045875ms)
+0x2F UI: http://127.0.0.1:59823
+✔ DECISION FLOW: a body-less rerun POST is a valid request, not a 500 (34.810667ms)
+0x2F UI: http://127.0.0.1:59825
+✔ DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run (23.062125ms)
+0x2F UI: http://127.0.0.1:59828
+✔ DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run (17.195833ms)
+0x2F UI: http://127.0.0.1:59831
+✔ DECISION FLOW: distinct request ids are distinct gestures (20.369541ms)
+0x2F UI: http://127.0.0.1:59834
+✔ every API failure is explicit, valid JSON (never an empty or partial body) (17.9815ms)
+0x2F UI: http://127.0.0.1:59837
+✔ GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404 (16.762291ms)
+0x2F UI: http://127.0.0.1:59840
+✔ GET /api/tasks/:id includes the projected run history (10.710084ms)
+0x2F UI: http://127.0.0.1:59842
+✔ POST /api/tasks/:id/answer records the human's decision answer (13.836416ms)
+0x2F UI: http://127.0.0.1:59844
+✔ ALLOW on a decision is refused over the API; ANSWER on a permission is refused (25.468916ms)
+0x2F UI: http://127.0.0.1:59846
+✔ a non-resumable NEEDS YOU task can be closed over the API without invoking the provider (21.234917ms)
+0x2F UI: http://127.0.0.1:59756
+✔ REGRESSION: the ~1,000 character brief that dogfooding rejected is accepted (39.169583ms)
+0x2F UI: http://127.0.0.1:59760
+✔ run 1's persisted input carries the full brief, not the title (18.348916ms)
+0x2F UI: http://127.0.0.1:59765
+✔ a short brief behaves exactly as it did before briefs existed (22.497542ms)
+0x2F UI: http://127.0.0.1:59769
+✔ the slug is built from the derived title, so a long brief cannot produce a monstrous directory name (14.545208ms)
+0x2F UI: http://127.0.0.1:59772
+✔ the brief is bounded: MAX_BRIEF is enforced at the action boundary (11.644875ms)
+0x2F UI: http://127.0.0.1:59774
+✔ the brief is bounded at the API boundary too, with the same message (3.427958ms)
+0x2F UI: http://127.0.0.1:59776
+✔ a blank brief is still refused — one required field, clearly named (10.268334ms)
+0x2F UI: http://127.0.0.1:59778
+✔ creating a task derives its title with no provider process at all (15.8005ms)
+0x2F UI: http://127.0.0.1:59779
+✔ a task created before briefs existed still reads correctly (no migration) (12.198375ms)
+✔ npm run check rejects invalid JavaScript instead of reporting success (379.629ms)
+✔ npm run check checks nested source directories and rejects invalid Python helpers (766.322792ms)
+✔ npm run check accepts valid sources and skips dependency directories (349.113541ms)
+✔ permission -> allow -> successful resume: the SAME session continues and the run completes (1035.619542ms)
+✔ permission -> allow -> failed resume: the run FAILS honestly (kind resume), never pretends the grant continued (1696.088417ms)
+✔ incomplete selectors refuse before creating work, rerunning, pairing or launching UI (967.905208ms)
+✔ CLI: the dogfooding loop — new, rerun through another provider, open, open --run (2731.724375ms)
+✔ 2f version prints the package version only (91.084625ms)
+✔ 2f --version prints the package version only (123.530583ms)
+✔ 2f -v prints the package version only (98.906709ms)
+﹣ E2E: `2f providers` detects codex and a task runs to READY through the real CLI (0.636833ms) # codex executable not available (set CODEX_BIN or install Codex CLI)
+﹣ E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (0.183917ms) # codex executable not available (set CODEX_BIN or install Codex CLI)
+﹣ E2E: command_execution is recorded honestly as tool activity, never as file.changed (0.176708ms) # codex executable not available (set CODEX_BIN or install Codex CLI)
+﹣ E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (0.133875ms) # codex executable not available (set CODEX_BIN or install Codex CLI)
+﹣ E2E: the same task can switch away from codex to another provider without losing task context (0.15025ms) # codex executable not available (set CODEX_BIN or install Codex CLI)
+✔ codex is registered with honest capabilities (0.8765ms)
+✔ codexBin honors CODEX_BIN (0.088583ms)
+✔ classifyCodexFailure: auth failures classify with the codex login remedy (0.233959ms)
+✔ classifyCodexFailure: non-auth failures stay unclassified (0.048833ms)
+✔ normalizeCodexRun: result text -> ready with the session id (0.574ms)
+✔ normalizeCodexRun: result with the shared decision protocol -> needs_you/decision (0.459083ms)
+✔ normalizeCodexRun: an explicit blocker report is failed, never READY (0.18225ms)
+✔ normalizeCodexRun: a partial limitation inside a completed result is still ready (0.520084ms)
+✔ normalizeCodexRun: error -> failed with auth classification (0.178917ms)
+✔ parser: a completed run maps to run.started + tool events + ready (4.139084ms)
+✔ parser: an auth failure maps to a failed outcome with classification (0.597333ms)
+✔ parser: the shared decision protocol in the result -> needs_you/decision (0.660584ms)
+✔ parser: reasoning summaries surface as progress, never as the result (0.4815ms)
+✔ parser: transient reconnect notices are ignored (not task progress) (0.165334ms)
+✔ parser: stray non-JSON lines are ignored without breaking the stream (0.09625ms)
+✔ start() runs codex exec --json and normalizes a successful run (597.81875ms)
+✔ start() passes -m model when provided and surfaces a failed turn (846.878042ms)
+✔ resume() resumes the SAME thread via codex exec resume <id> (1244.459791ms)
+✔ resume() without a session id fails loudly (0.294209ms)
+✔ start() fails cleanly when codex is not installed (1.700875ms)
+✔ user config is preserved by default; account-default execution is explicit (1097.786917ms)
+✔ command provider: declares the conservative capabilities (0.66075ms)
+✔ command provider: success maps to ready with the result and a run.started event (712.431833ms)
+✔ command provider: a non-zero exit maps to failed with the stderr message (1232.56775ms)
+✔ command provider: a missing executable fails cleanly (1.256375ms)
+✔ command provider: the Work decision convention maps stdout to needs_you/decision (884.396125ms)
+✔ normalizeCommandRun: exit 0 / non-zero / empty stderr (0.237833ms)
+✔ substituteCommand replaces only the known placeholders (0.083ms)
+✔ a normal result without the section is not a decision (0.429875ms)
+✔ merely mentioning the convention is not a decision (0.099208ms)
+✔ REGRESSION /02: 'None.' plus explanation under the heading is not a decision (0.079209ms)
+✔ a bare 'None' section is not a decision (0.044333ms)
+✔ REQUIRED: no is an explicit no-decision signal (0.043167ms)
+✔ a non-positive REQUIRED value is not a decision (0.047042ms)
+✔ a question without the positive signal is not a decision (malformed block) (0.044833ms)
+✔ REQUIRED: yes with no readable question is incomplete, not a decision (0.231542ms)
+✔ REQUIRED: yes + QUESTION is a genuine decision; the question is preserved (0.083125ms)
+✔ REQUIRED: yes with the question as prose after the marker is preserved (0.081875ms)
+✔ the signal is case-insensitive; keys may be lowercase (0.046209ms)
+✔ a long question is capped at a generous storage guard (4000), never dropped (0.202416ms)
+✔ a question well under the storage guard is never truncated (0.057625ms)
+✔ a multi-paragraph question after QUESTION: is preserved verbatim, newlines and all (0.040875ms)
+✔ a multi-paragraph question with no QUESTION: field keeps its paragraph breaks (0.04375ms)
+✔ a decision block is the LAST section: later ## headings bound it (0.030875ms)
+✔ normalizeDshRun: the /02 capture -> READY, not needs_you (0.812041ms)
+✔ normalizeDshRun: explicit protocol -> needs_you/decision with the question (0.169417ms)
+✔ normalizeOutcome (Claude): explicit protocol -> needs_you/decision; prose -> ready (0.471792ms)
+✔ normalizeCommandRun: explicit protocol -> needs_you/decision; prose -> ready (0.082208ms)
+✔ deepseek-harness is registered with honest capabilities (0.609708ms)
+✔ normalizeDshRun: exit 0 -> ready with the final assistant text (0.968ms)
+✔ normalizeDshRun: exit 0 + explicit decision protocol -> needs_you/decision (shared Work convention) (0.704083ms)
+✔ normalizeDshRun: exit 0 + an explicit blocker report -> failed (kind blocked), never READY (0.699209ms)
+✔ normalizeDshRun: exit 1 -> failed with the stderr message (0.183958ms)
+✔ normalizeDshRun: exit 1 without stderr -> failed with a code message (0.152042ms)
+✔ start() runs dsh --profile headless and normalizes a successful run (903.285083ms)
+✔ start() maps a failing dsh run to failed (1239.397125ms)
+✔ start() fails cleanly when dsh is not installed (1.88675ms)
+✔ taskDiff returns real hunks for a tracked, modified file (132.28075ms)
+✔ taskDiff reads an untracked file as a whole-file addition (141.553584ms)
+✔ taskDiff reports a file without hunks when the workspace is not a git repository (12.12725ms)
+✔ taskDiff dedupes repeated reports and keeps report order (122.705041ms)
+✔ taskDiff reports a file outside the workspace without hunks — never diffs elsewhere (78.262917ms)
+✔ taskDiff shows a tracked deletion when the reported file is gone (100.148083ms)
+✔ the packed artifact supports the full first-install journey (2230.3985ms)
+✔ WebCrypto and the pure-JS fallback derive the identical key (2016.246291ms)
+✔ the fallback derivation stays responsive (yields between PBKDF2 batches) (1800.574459ms)
+✔ envelopes encrypt on one path and decrypt on the other (both directions) (52.039542ms)
+✔ a tampered AAD (wrong from/requestId) is rejected on both paths (49.105625ms)
+✔ AAD encoding is the fixed wire contract (0.15275ms)
+✔ randomId is a UUID v4 even where crypto.randomUUID is absent (0.172708ms)
+✔ a relay cannot forge a command: envelopes without the pairing key never execute (4404.654417ms)
+✔ a tampered envelope (bit flip in the ciphertext) is rejected (4302.435208ms)
+✔ a captured command envelope cannot be replayed to execute twice (107.72075ms)
+✔ replay protection survives a Mac/runtime restart (persisted ack cache) (268.3545ms)
+✔ legitimate retries (same requestId) return the same ack without double execution (103.842709ms)
+✔ a re-paired (rotated) Mac rejects envelopes from the old phone key (4429.341958ms)
+✔ relay state and persisted state hold no task/source/result payloads (257.696375ms)
+✔ the remote projection drops raw inputs, diffs, session ids, absolute paths and base (1.0075ms)
+✔ the full remote-control loop works end-to-end over the E2E channel (106.417084ms)
+✔ event model exposes exactly the normalized Work event types (1.399458ms)
+✔ normalizeEvent stamps type and timestamp; rejects unknown types (1.368541ms)
+✔ workEvent attaches a taskId (0.291208ms)
+✔ bus fans events out and supports unsubscribe (0.321416ms)
+✔ tailer emits each new log line exactly once, in order (49.16225ms)
+✔ tailer does not consume a partial line until it is complete (94.522791ms)
+✔ tailer ignores malformed lines without breaking the stream (22.671125ms)
+﹣ E2E: `2f providers` detects gemini and a task runs to READY through the real CLI (0.495041ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+﹣ E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works (0.149583ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+﹣ E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context (0.152375ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+﹣ E2E: the same task can switch away from gemini to another provider without losing task context (0.142708ms) # gemini executable not available (set GEMINI_BIN or install Gemini CLI)
+✔ gemini is registered with honest capabilities (0.429417ms)
+✔ geminiBin honors GEMINI_BIN (0.072417ms)
+✔ geminiApprovalArgs: auto_edit is the default; yolo/default are explicit overrides (0.315917ms)
+✔ classifyGeminiFailure: no-auth exit 41 classifies with the settings/API-key remedy (0.159583ms)
+✔ classifyGeminiFailure: in-run API auth text classifies even with a non-auth exit code (0.096375ms)
+✔ classifyGeminiFailure: non-auth failures stay unclassified (0.045333ms)
+✔ normalizeGeminiRun: successful result -> ready with the session id (0.558959ms)
+✔ normalizeGeminiRun: result text with the shared decision protocol -> needs_you/decision (0.345334ms)
+✔ normalizeGeminiRun: result error -> failed with auth classification (0.731584ms)
+✔ normalizeGeminiRun: no result event is failed, never ready — even on exit 0 (0.182042ms)
+✔ normalizeGeminiRun: no output at all reads as the install/auth prompt (0.128166ms)
+✔ normalizeGeminiRun: no-auth exit 41 with the settings message classifies as auth (0.073791ms)
+✔ parser: a completed run maps to run.started + tool events + file.changed + ready (5.433125ms)
+✔ parser: the shared decision protocol in the result -> needs_you/decision (0.696417ms)
+✔ parser: a handled fatal error maps to failed with auth classification (0.682333ms)
+✔ parser: an interrupted run (no result event) stays failed despite exit 0 (0.410541ms)
+✔ parser: stray non-JSON lines are ignored without breaking the stream (0.15225ms)
+✔ parser: transient error events (severity warning/error) never decide the outcome (0.146375ms)
+✔ start() runs gemini -p stream-json and normalizes a successful run (775.793416ms)
+✔ start() passes -m model and the approval mode; surfaces a no-auth exit 41 (537.509791ms)
+✔ resume() resumes the SAME session via --resume <uuid> and carries the grant prompt (530.295208ms)
+✔ resume() with a missing session (exit 42) fails with the resume error, unclassified (528.715792ms)
+✔ resume() without a session id fails loudly (0.283792ms)
+✔ start() fails cleanly when gemini is not installed (1.071125ms)
+✔ isPrivateLanIp accepts RFC1918 ranges and rejects everything else (0.443541ms)
+✔ detectLanAddress finds a private IPv4 and skips internal/loopback (0.094833ms)
+✔ LAN re-pair brings the runtime up BEFORE rotating (the runtime hosts the relay) (8.389209ms)
+Port 4242 is used by another 0x2F runtime or process — pairing on port 4243 instead.
+✔ LAN pairing falls back to a free port when the requested port is foreign (3.011292ms)
+0x2F UI: http://0.0.0.0:59853
+✔ LAN hosts get the client + relay protocol only; the local API stays loopback-only (18.247ms)
+0x2F UI: http://0.0.0.0:59867
+✔ LAN peers cannot obtain local credentials or call the local API with a forged loopback Host (33.630167ms)
+0x2F UI: http://0.0.0.0:59926
+✔ LAN relay requests cannot replay the local plaintext response cache (3.683458ms)
+0x2F UI: http://0.0.0.0:59929
+✔ a real private TCP peer cannot bootstrap local auth through a loopback destination (5.611167ms)
+0x2F UI: http://0.0.0.0:59934
+✔ WebSocket upgrades share the LAN peer, Host, browser, and active-pairing gates (134.06775ms)
+0x2F UI: http://0.0.0.0:59948
+✔ the LAN surface closes when `2f pair --off` disables the config (124.960583ms)
+0x2F UI: http://0.0.0.0:59953
+✔ health reports lan so `2f pair` knows whether a running runtime serves the phone (1.735167ms)
+0x2F UI: http://0.0.0.0:59955
+✔ a phone pairs over the LAN and controls a task; the local API stays off-LAN (322.426ms)
+0x2F UI: http://0.0.0.0:59966
+✔ the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle) (2780.240917ms)
+✔ lifecycle exposes the five Work statuses (0.651916ms)
+✔ working + ready outcome -> ready (0.717375ms)
+✔ working + failed outcome -> failed with error (0.054083ms)
+✔ working + permission outcome -> needs_you with blockedOn.type=permission (0.047167ms)
+✔ working + decision outcome -> needs_you with blockedOn.type=decision (0.047333ms)
+✔ needs_you + beginResume(allow) -> working, blockedOn cleared, attempts bumped (0.071541ms)
+✔ full lifecycle: working -> needs_you -> working -> ready -> done (0.076333ms)
+✔ beginResume on a non-needs_you task throws (0.157625ms)
+✔ closeTask works from needs_you too (user abandons) (0.0535ms)
+✔ FAILURE_KINDS includes the blocked kind (0.08275ms)
+✔ classifyResult: an explicit blocker report is failed, not ready (0.375667ms)
+✔ classifyResult: a task-level passive blocker is failed (0.380417ms)
+✔ classifyResult: a partial limitation is NOT a blocker (work was done) (0.247ms)
+✔ classifyResult: a warning about a subtask never becomes a blocker (0.091625ms)
+✔ classifyResult: an explicit decision protocol still wins over ready (0.232958ms)
+✔ classifyResult: plain completed text is ready (0.035375ms)
+✔ blockedResultText: returns the agent's own explanation sentence, capped (0.040167ms)
+✔ contenders serialize, release on throw, and recover a killed owner (232.507458ms)
+✔ a live owner times out without being stolen; empty released directories are replaceable (32.10875ms)
+✔ an asynchronous EAGAIN during worker start rejects and closes the log descriptor (6.889292ms)
+✔ an asynchronous EAGAIN during worker resume rejects and closes the log descriptor (2.27225ms)
+✔ worker startup waits for the child spawn event before returning its PID (2.011375ms)
+✔ worker launches close the parent's log descriptor after start and resume (4.972958ms)
+✔ a failed worker spawn also closes the parent's log descriptor (1.877166ms)
+✔ a package path containing spaces and URL characters launches an existing worker path (4.674917ms)
+✔ startExecution spawns the detached worker on this machine and returns its pid (0.761375ms)
+✔ startExecution passes the current run number to the worker (0.115ms)
+✔ resumeExecution spawns the worker in resume mode with the grant (0.116917ms)
+✔ resolveWorkspace maps the logical 'local' workspace to the local path (0.097917ms)
+✔ cancelExecution is a best-effort stop of the recorded pid (0.071458ms)
+✔ the node is a swappable seam: the same contract a remote node would implement (0.049625ms)
+✔ worker records repository-observed file.changed events for a provider without file-change reporting (1077.754375ms)
+✔ a provider that DOES declare file-change reporting is observed too (authoritative on-disk state) (1026.051792ms)
+✔ recovery refuses a rerun while an orphan command still writes, then allows it after the group exits (835.865ms)
+✔ a terminal worker can drain its POSIX group before normal rerun admission (459.455042ms)
+✔ a saved-session permission cannot resume while the previous group still owns a descendant (1590.66875ms)
+✔ the packed artifact ships only the local product (312.844416ms)
+✔ an agent-registered pairing token always has an expiry (never claimable forever) (43.423584ms)
+✔ a re-pair token (rotate-registered) cannot be claimed after it expires (25.751292ms)
+✔ a phone session expires after its TTL and stops authenticating (23.926958ms)
+✔ 2f pair --off revokes remote access at the relay: sessions and tokens die immediately (27.243375ms)
+✔ a stale session stays dead after the Mac reconnects post-revocation (37.446917ms)
+✔ re-pairing (rotate) retires old sessions; only the new token's session works (24.041792ms)
+✔ a plain reconnect (same generation) does NOT revoke the phone session (53.086875ms)
+✔ rotation is authorized by the current deviceSecret; a wrong secret changes nothing (22.455833ms)
+relay: The relay rejected the current device credential (Unknown device or bad deviceSecret.). — starting a fresh device identity for this Mac.
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ 2f pair falls back to a fresh identity when the relay rejects the old credential (1605.01075ms)
+✔ plain-HTTP relay URLs are refused except loopback and private-LAN development (0.388208ms)
+✔ 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one (254.0695ms)
+The relay has not confirmed the pairing token yet (no answer). The runtime may still be starting, or the relay may be unreachable. The token will register as soon as the agent connects — you can still open the URL on your phone.
+✔ relay.json and the relay state file are written with mode 0600 (829.142625ms)
+✔ hosted defaults are https and pass the relay transport policy (0.101042ms)
+✔ 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults (0.102542ms)
+✔ 2f pair with no flags resolves the LAN transport (same Wi-Fi) (1.566583ms)
+✔ 2f pair --relay still resolves the hosted transport; --lan forces LAN (1.874667ms)
+✔ 2f pair with no LAN address fails closed with a clear message (0.43975ms)
+✔ a plain-HTTP env override of the relay default is still refused (0.537458ms)
+✔ canonicalPath: leading ./ and interior . segments collapse (0.36525ms)
+✔ canonicalPath: the three spellings of one file are identical (0.058666ms)
+✔ canonicalPath: resolves .. lexically but never escapes the repository root (0.138708ms)
+✔ canonicalPath: empty and root-like inputs are stable (0.360375ms)
+✔ REGRESSION: exit-0 run blocked on file-edit permission -> needs_you, reason=permission (0.865ms)
+✔ REGRESSION at the task layer: v0 marked this READY; v0.2 marks it needs_you (0.951458ms)
+✔ after approval, resume outcome on the same session -> working -> ready (1.386417ms)
+✔ clean successful run -> ready (1.086167ms)
+✔ result with is_error=true -> failed (0.285375ms)
+✔ result text with a real decision section -> needs_you/decision (0.493625ms)
+✔ result text with 'None' decision section -> ready (0.170667ms)
+✔ denials win even when is_error is also true (blocked, not failed) (0.095333ms)
+✔ createWork refuses a manually selected unavailable provider BEFORE persisting anything (3.880916ms)
+✔ an unavailable manual provider is never turned into AUTO (1.387292ms)
+✔ rerunWork refuses an explicitly selected unavailable provider; the previous run survives (12.531041ms)
+✔ AUTO keeps excluding unavailable providers (never routes to a missing executable) (1.348667ms)
+✔ an unspecified request is not a manual selection: the runtime default keeps its historical behavior (8.13425ms)
+0x2F UI: http://127.0.0.1:60004
+✔ POST /api/tasks with an unavailable provider -> 400 from the shared action (the Web UI is not the authority) (20.881208ms)
+✔ the same task through both providers -> ready with the same result (1360.87375ms)
+✔ a decision block normalizes identically through both providers (1279.5095ms)
+✔ classifyClaudeFailure: the exact dogfooding 401 message is classified as auth (0.711083ms)
+✔ classifyClaudeFailure: an ordinary execution failure is not classified (0.100875ms)
+✔ classifyClaudeFailure: other common auth phrasings are also recognized (0.051125ms)
+✔ normalizeOutcome: an is_error result with an auth message carries failure.kind=auth (0.098917ms)
+✔ normalizeOutcome: an ordinary is_error result carries no failure classification (0.043292ms)
+✔ applyOutcome persists a recognized failure.kind onto the task (0.67425ms)
+✔ applyOutcome drops an unrecognized failure.kind — no unvetted string reaches the UI (0.059ms)
+✔ applyOutcome clears a stale failure once the task recovers (needs_you / ready) (0.046208ms)
+✔ a real process exit on a 401 stderr message classifies as auth (802.756875ms)
+✔ a real process exit on an unrelated crash is not classified (856.769333ms)
+0x2F UI: http://127.0.0.1:60007
+✔ API: configured providers appear in /api/providers with their integration type (16.966125ms)
+✔ CLI: `2f providers` lists natives and configured providers with availability (189.338791ms)
+✔ E2E: a configured command provider runs the task through the real worker (956.793375ms)
+✔ E2E: a configured ACP provider runs the task through the real worker and persists the session id (1107.645208ms)
+✔ E2E: native + ACP + command providers coexist in one workspace (10.668542ms)
+✔ every manifest example generated by init loads alongside built-in providers (14.18175ms)
+✔ manifests: a valid ACP manifest and a valid command manifest (0.222167ms)
+✔ manifests: shell and repository-relative executables carry a trust warning (0.176708ms)
+✔ manifests: every failure mode fails loudly, naming the file (0.605833ms)
+✔ manifests: a manifest cannot shadow a built-in provider (0.240042ms)
+✔ loadManifestProviders: no providers dir means nothing configured (1.019625ms)
+✔ loadManifestProviders: builds acp + command providers from files; duplicate ids fail (4.121542ms)
+✔ loadManifestProviders: invalid JSON fails clearly (1.835459ms)
+✔ registry: native + configured providers coexist behind one contract (2.519666ms)
+✔ registry: a manifest error fails runtime creation loudly (never silent) (1.817667ms)
+✔ registry: availability resolves the configured executable deterministically (3.852708ms)
+✔ registry: the register() seam adds providers and refuses duplicates (0.661583ms)
+✔ executableAvailable: PATH resolution and absolute paths, cheap and sync (1.189209ms)
+✔ registry: built-in OpenCode uses ACP without a workspace manifest (0.364041ms)
+✔ registry: an existing OpenCode manifest keeps its explicit descriptor (1.607417ms)
+✔ pidAlive: signal-0 existence probe with EPERM treated as alive (0.485333ms)
+✔ an orphaned working run is failed with the crashed classification, preserving history and session (13.784916ms)
+✔ an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time (8.542125ms)
+✔ a task with no recorded pid is also recovered (worker died before pid persisted) (7.904333ms)
+✔ a working task whose worker is alive is never touched (5.855125ms)
+✔ completed tasks and non-live human stops are left alone even with a dead pid (12.328417ms)
+✔ a dead live-permission worker is recovered while its saved session survives (6.399209ms)
+✔ a live-permission worker that is still alive is never recovered (4.60225ms)
+✔ recovery finalizes a closed task's interrupted run without reopening the task (8.370167ms)
+✔ recovery merges fresh input and skips a replaced worker from an older snapshot (10.465292ms)
+✔ concurrent recovery sweeps finalize an interrupted run only once (23.940583ms)
+✔ legacy tasks (no run records) are recovered without crashing (6.069291ms)
+✔ failInterruptedRun with no startedAt writes no duration (6.026709ms)
+✔ a recovered task can be rerun normally (the working guard no longer blocks it) (11.964166ms)
+✔ recovery is idempotent: a second sweep leaves the failed task alone (7.12225ms)
+✔ buildRefineInstruction embeds the note and the refinement rules (0.528416ms)
+✔ cleanRefinedText trims and unwraps a single code fence (0.120041ms)
+✔ raw text is sent to the refinement service: claude print mode with tools denied (823.217ms)
+✔ does NOT fall back to dsh headless — refinement only runs a tool-denied model (2.134958ms)
+✔ prefers claude-code's text mode when both providers are available (732.221208ms)
+✔ fails gracefully with a clear error when no refinement model is available (2.187584ms)
+✔ empty, whitespace-only, and over-long notes are refused before any model call (7.551666ms)
+✔ a failing model run rejects and leaves the caller's text untouched (444.42875ms)
+✔ an empty model response is a failure, never a blank brief (509.26725ms)
+✔ a hanging refinement times out instead of leaving the composer stuck (262.842ms)
+✔ a failing claude path surfaces its error and never falls back to dsh (376.263042ms)
+✔ when every available path fails, the preferred path's error is reported (532.613208ms)
+✔ a failure reported on stdout is surfaced with the provider label (736.681458ms)
+0x2F UI: http://127.0.0.1:60182
+✔ POST /api/refine returns the refined text; repeated REFINE creates no tasks and starts no execution (638.089958ms)
+0x2F UI: http://127.0.0.1:60220
+✔ START after refinement creates the Task using the refined text (290.867042ms)
+0x2F UI: http://127.0.0.1:60227
+✔ START without refinement behaves exactly as today (4.987583ms)
+0x2F UI: http://127.0.0.1:60229
+✔ a failed refinement does not destroy the original text: START still uses it (419.555375ms)
+0x2F UI: http://127.0.0.1:60235
+✔ POST /api/refine refuses empty or missing input with 400 and never spawns the model (2.511417ms)
+✔ a normal pair-hello still confirms: the liveness check does not fire on the happy path (120.362208ms)
+✔ writing the confirmed pairing does not make the poller swap the config object (183.712083ms)
+✔ the config vanishing during the pairing ceremony never throws (787.114333ms)
+✔ a pair-hello arriving with no live config is refused, not crashed on (106.351042ms)
+✔ permission occurrence IDs reach phone snapshots and events as freshness preconditions (0.601625ms)
+✔ projectTask: a recognized failure.kind (and adapter remedy) crosses the relay (0.311709ms)
+✔ projectTask: an unrecognized kind never reaches the phone — re-vetted, not trusted (0.046583ms)
+✔ projectTask: no failure field at all projects to undefined, exactly as before (0.047709ms)
+✔ projectTask: failure.remedy is bounded like any other adapter-authored field (0.077042ms)
+✔ the closed vocabulary the relay checks against is the same one core/lifecycle.mjs owns (0.0775ms)
+✔ projectWorkspaceLabel: the basename only, never the absolute path (0.08975ms)
+✔ projectWorkspaceLabel: a long name is truncated from the LEFT so the distinguishing tail survives (0.043959ms)
+✔ projectSnapshot: carries a bounded workspace label and node — never the absolute base (0.1025ms)
+✔ projectSnapshot: absent base/node project to null, not a crash or an empty string standing in for absence (0.08225ms)
+✔ projectBlockedOn: the decision cap is raised to 4000, matching core/lifecycle.mjs's storage guard (0.043416ms)
+✔ projectBlockedOn: a question under the cap is passed through completely, newlines intact (0.036541ms)
+✔ projectBlockedOn: a genuine over-cap cut is marked explicitly, never a bare ellipsis (0.106625ms)
+✔ projectBlockedOn: an absolute workspace path inside a decision question is still stripped (0.038667ms)
+✔ projectTask carries the full brief — a long brief is not cut for the phone (0.050708ms)
+✔ the relay's brief bound IS the action's bound — the remote surface loses nothing (0.096209ms)
+✔ a brief beyond the bound is cut EXPLICITLY and flagged for the UI to say so (0.183416ms)
+✔ a task with no brief falls back to its title, as legacy tasks require (0.046875ms)
+✔ an absolute workspace path quoted inside a brief is still stripped (0.036084ms)
+✔ projectTask: a READY task carries its projected result, base paths stripped (0.030958ms)
+✔ projectTask: result is gated to states that show one — a stale result.md never leaks onto a failed task (0.036167ms)
+✔ projectSnapshot: READY tasks carry their result when the agent supplies resultsByTask (0.052125ms)
+✔ projectRun: outcome, duration and provider cross the relay for run history (0.040375ms)
+✔ relPath: ./src/foo.mjs, src/foo.mjs and /w/src/foo.mjs project identically (0.045167ms)
+✔ relPath: out-of-workspace paths flatten to the basename — never an absolute path (0.029458ms)
+✔ the phone sees the safe user-facing result in the snapshot, task detail and run detail (178.781334ms)
+✔ a failed task never leaks a stale result.md to the phone (139.988958ms)
+✔ the Mac authenticates outbound; unpaired and mismatched hellos are rejected (9.648292ms)
+✔ a pairing token is one-time: a second claim fails (122.094334ms)
+✔ an expired pairing token cannot be claimed (2.775916ms)
+✔ the phone pairs end-to-end and pulls a redacted snapshot (127.338542ms)
+✔ creating a Task through the encrypted channel starts it on the Mac's node (208.996208ms)
+✔ redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac (133.783792ms)
+✔ ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions (122.9845ms)
+✔ remote permission commands refuse stale or missing displayed occurrence IDs (151.130625ms)
+✔ a duplicate requestId returns the cached acknowledgement and never executes twice (109.853791ms)
+✔ the Mac is offline: status reports offline and commands answer 503 — never queued (152.595833ms)
+✔ a relay restart loses no session and keeps the phone paired (1307.851458ms)
+✔ the relay holds no task content — state and state.json are content-free (217.000667ms)
+✔ the relay is a broker: it serves no client or pairing page (100.7575ms)
+✔ pairing claims and command forwarding are rate limited (2.107584ms)
+0x2F UI: http://127.0.0.1:60179
+✔ the local server reports mode 'local' — the client keeps its local behavior (1.5155ms)
+✔ a remote command whose response is lost settles with an honest error (never hangs forever) (275.053417ms)
+✔ the timeout error is surfaced, not silently retried into a double action (714.81825ms)
+✔ render groups needs_you tasks under NEEDS YOU with the reason (1.773208ms)
+✔ decision reason renders its own label (0.096291ms)
+✔ empty render (0.052167ms)
+✔ a realistic provider result parses into headings, prose, lists and code (0.930708ms)
+✔ headings cap at three display levels and ordered lists parse (0.087541ms)
+✔ unbalanced markers stay literal text instead of becoming markup (0.064292ms)
+✔ provider prose carrying HTML stays inert text tokens (0.132167ms)
+✔ code blocks keep newlines and long unbroken lines verbatim (0.072583ms)
+✔ empty, blank and plain input degrade gracefully (0.054208ms)
+✔ a decision question parses inline for the NEEDS YOU card (0.059292ms)
+✔ router: AUTO with a single available provider picks it deterministically (1.688875ms)
+✔ router: preference ordering wins over registry order (0.375292ms)
+✔ router: an unavailable preferred provider is skipped (deterministic fallback) (0.217791ms)
+✔ router: no compatible provider fails clearly, never silently (0.388166ms)
+✔ router: the configured default resolves an unspecified request (0.159209ms)
+✔ router: orderCandidates is deterministic and preference-first (0.07675ms)
+✔ router: routing config is validated strictly, naming the file (3.790708ms)
+✔ router: absent routing config means the runtime default applies (0.566708ms)
+✔ actions: createWork with provider auto routes and persists the decision (14.399ms)
+✔ actions: the configured routing default routes an unspecified request (8.757167ms)
+✔ actions: without routing config an unspecified request keeps the runtime default (9.213666ms)
+✔ actions: a manual override bypasses the router entirely (8.414833ms)
+✔ actions: AUTO with nothing available fails clearly instead of guessing (1.1815ms)
+✔ actions: rerun --provider auto re-routes and keeps the previous run (11.754375ms)
+0x2F UI: http://127.0.0.1:60086
+✔ API: GET /api/routing exposes the configured default and preference (23.261333ms)
+0x2F UI: http://127.0.0.1:60090
+✔ API: POST /api/tasks with provider auto routes through the shared action (21.6555ms)
+✔ CLI: 2f new --provider auto routes through the real worker; 2f open shows the decision (874.145042ms)
+✔ an existing task (no runs) is interpreted as one historical run without rewriting it (0.505792ms)
+✔ legacy run timing comes from the real event log when it exists (0.08025ms)
+✔ legacy outcomes: needs_you / failed / working / done are read from state when no event is terminal (0.057958ms)
+✔ makeRunRecord creates an in-flight run; updateRun persists outcome and timing (0.094917ms)
+✔ updateRun is a no-op for legacy tasks (their history stays interpreted) (0.043958ms)
+✔ currentRunNumber is the last record for sequential runs; 1 for legacy (0.059833ms)
+✔ createWork persists the first run with the task (15.337166ms)
+✔ rerunWork appends a second run under the SAME task without overwriting the first (14.063333ms)
+✔ rerunWork without a provider retries through the task's current provider (11.647541ms)
+✔ rerunWork refuses while the task is working (sequential runs only) (8.009166ms)
+✔ rerunWork rejects an unknown provider with the shared error (10.678583ms)
+✔ rerunWork materializes a legacy task's history before appending the new run (8.22ms)
+✔ getRun returns one run's own result; an unknown run is a 404 (8.046ms)
+✔ getWork includes the projected run history (8.572875ms)
+✔ eventsForRun attributes run-tagged events to their run and legacy events to run 1 (0.252292ms)
+✔ DOGFOODING: the same task through claude-code then deepseek-harness persists as two runs (1279.943458ms)
+✔ DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2 (824.564667ms)
+✔ DOGFOODING: a needs_you run is preserved in history with its block (669.222ms)
+✔ DOGFOODING: a failed rerun is preserved in history; the previous ready run is untouched (826.7135ms)
+0x2F UI: http://127.0.0.1:60101
+✔ idempotency replay still requires authentication and the local browser boundary (28.987ms)
+0x2F UI: http://127.0.0.1:60114
+✔ unauthenticated /api requests are refused with 401 — no task can be started (14.61575ms)
+0x2F UI: http://127.0.0.1:60117
+✔ a wrong or absent token is refused; the correct token is accepted (2.958958ms)
+0x2F UI: http://127.0.0.1:60120
+✔ the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow) (12.671625ms)
+0x2F UI: http://127.0.0.1:60124
+✔ a foreign Host header (DNS rebinding) is refused on every route (2.620333ms)
+0x2F UI: http://127.0.0.1:60132
+✔ cross-origin requests are refused even with a valid token (10.146375ms)
+0x2F UI: http://127.0.0.1:60137
+✔ Sec-Fetch-Site: cross-site and same-site browser requests are refused (7.382166ms)
+0x2F UI: http://127.0.0.1:60140
+✔ the full C1 chain: no unauthenticated or cross-site path starts agent work (1.836917ms)
+0x2F UI: http://127.0.0.1:60143
+✔ request bodies over the cap are refused with 413 (declared and streamed) (2.051791ms)
+0x2F UI: http://127.0.0.1:60146
+✔ oversized inputs are refused by the shared actions — the CLI and the API share the caps (5.392583ms)
+0x2F UI: http://127.0.0.1:60148
+✔ the health probe is unauthenticated but Host-guarded; static assets carry the CSP (3.140417ms)
+✔ SIGTERM shuts the runtime down cleanly without terminating the detached worker (3088.307416ms)
+✔ a task left working with a dead worker is recovered on the next runtime start (3124.884833ms)
+✔ a genuinely running task survives a runtime restart untouched (4357.547125ms)
+✔ SIGINT is a clean shutdown too (244.38675ms)
+✔ seeded tasks never sound — a task already READY at seed stays silent (2.322625ms)
+✔ working -> ready via run.completed earns one READY intent (0.18325ms)
+✔ one transition arriving as several events sounds once (dedupe) (0.298167ms)
+✔ needs_user plus its task.updated sounds once (dedupe) (0.128375ms)
+✔ several tasks READY within the window produce ONE gesture (0.180708ms)
+✔ NEEDS YOU beats a pending READY in the same window (0.172458ms)
+✔ READY arriving while NEEDS YOU is pending stays NEEDS YOU (0.153709ms)
+✔ a re-entry after working is a NEW transition, not a replay (0.112333ms)
+✔ separate windows stay separate gestures (0.20675ms)
+✔ stale replayed events (written before the seed) are ignored (0.231958ms)
+✔ a genuine transition after the seed is not filtered by the replay guard (0.135583ms)
+✔ reseed (reconnect) suppresses a transition the fresh state already shows (0.114875ms)
+✔ normal execution makes no sound — and failed is tracked, not signalled (0.16175ms)
+✔ task.closed and task.created are silent (0.082958ms)
+✔ flush fires a pending intent immediately (test seam) (0.115333ms)
+✔ independent processes cannot collide task IDs or overwrite identical briefs (422.697083ms)
+✔ incomplete task directories reserve their ID and existing prompt bytes (8.066917ms)
+✔ independent processes retain every task context mutation (253.305083ms)
+✔ valid JSON with invalid task shape cannot poison the ledger or redirect task writes (10.552167ms)
+✔ createTask writes task.json/prompt.md/run.log and assigns sequential ids (80.29775ms)
+✔ listTasks returns newest id first; findTask looks up by id (19.155208ms)
+✔ updateTask bumps updatedAt; readTaskResult/readTaskLog read back files (14.75725ms)
+✔ appendEvent appends normalized JSON lines to events.jsonl (7.960416ms)
+✔ task state files are written owner-only (0600) (8.509625ms)
+✔ writeJson/writeText are atomic: temp file + rename, no leftovers, 0600 preserved (6.973917ms)
+✔ sectionOf extracts a result section up to the next heading (0.467834ms)
+✔ createWork persists run 1's input per run; the original prompt.md is untouched (25.334791ms)
+✔ run 1's result, verification and changed files appear in run 2's prompt — but never a transcript (23.249458ms)
+✔ a user constraint added after run 1 appears in run 2's prompt, not run 1's (20.617667ms)
+✔ noteWork records Task context without starting or resuming an execution (15.924ms)
+✔ answerWork keeps existing decision behavior AND lands the answer in Task context (16.206084ms)
+✔ same-provider resume keeps the existing session: no new run, no new per-run prompt (11.359667ms)
+✔ previous run records, results and the original prompt stay immutable across reruns (46.153542ms)
+✔ DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session (1565.111375ms)
+✔ worker ready preserves notes and corrections recorded during execution (299.208125ms)
+✔ worker failed preserves notes and corrections recorded during execution (161.593125ms)
+✔ an exception while publishing a result preserves input and finalizes the run as failed (160.061625ms)
+✔ closing a running task remains done when its run becomes ready (155.282167ms)
+✔ closing a running task remains done when its run becomes failed (153.617708ms)
+✔ a worker superseded by newer run cannot publish result or terminal events (154.866625ms)
+✔ a worker superseded by different worker PID cannot publish result or terminal events (174.358292ms)
+✔ a live permission cannot start another run and its resolved worker preserves new input (2398.131459ms)
+✔ concurrent session grants reserve exactly one resumed execution (2147.474333ms)
+✔ startup recovery fails a dead worker paused on a live permission (178.357125ms)
+✔ a short one-line brief IS its own title — nothing changes for simple input (0.655833ms)
+✔ a blank brief derives nothing and is not treated as incomplete (0.330834ms)
+✔ a multi-paragraph engineering brief yields a scannable title and stays incomplete (0.11175ms)
+✔ the title is the first sentence, not the first paragraph (0.053917ms)
+✔ an abbreviation does not end the sentence early (0.0595ms)
+✔ a version number does not split the title mid-number (0.053208ms)
+✔ a brief with no terminal punctuation is wholly the title (0.044625ms)
+✔ CJK sentence terminators end a sentence without a following space (0.247292ms)
+✔ leading markdown decoration is stripped from the title (0.061833ms)
+✔ a decorated one-line brief is complete — the title represents all of it (0.09725ms)
+✔ a brief that merely wraps across lines is complete once normalized (0.062375ms)
+✔ an over-long first sentence is cut at a word boundary, never mid-word (0.145583ms)
+✔ text with no spaces at all still truncates safely (no word boundary to find) (0.221458ms)
+✔ a CJK run with no spaces truncates without hanging or over-cutting (0.1695ms)
+✔ a title at exactly the target is not truncated (0.0495ms)
+✔ the derived title always fits the storage guard with room to spare (0.505833ms)
+✔ briefBody is empty when the title already says everything (0.058416ms)
+✔ briefBody is the REST of the brief — the heading sentence is never repeated (0.038583ms)
+✔ briefBody preserves the structure of everything after the opening sentence (0.035792ms)
+✔ a TRUNCATED title renders the whole brief — a remainder would start mid-thought (0.026042ms)
+✖ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (23670.799167ms)
+✖ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (20589.171ms)
+✔ NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size (2242.541459ms)
+✔ RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset (462.567791ms)
+✔ decodeKeys: a lone ESC chunk is Escape; ESC with more bytes is a modifier (1.044792ms)
+✔ decodeKeys: Shift+Enter decodes when the terminal can deliver it (0.092541ms)
+✔ decodeKeys: plain keys, control keys and a paste (0.115875ms)
+✔ isPrintable rejects modified keys, so Ctrl+z never lands in a draft (0.043375ms)
+✔ j/k move the selection and clamp at both ends (0.231084ms)
+✔ tab cycles the filter and shift-tab cycles it back (0.060791ms)
+✔ / searches title, brief and number, and esc clears filter and search together (0.106084ms)
+✔ Enter and x resolve to the action each Work state is actually waiting for (0.136375ms)
+✔ Enter on a permission fires immediately; Enter on a decision asks for text first (0.065959ms)
+✔ an input commits to an intent, and esc throws the draft away (0.110833ms)
+✔ x on a decision is SAVE ONLY — the same answer, without spending a run (0.065541ms)
+✔ p retargets only the NEXT run, and moving the selection forgets it (0.057625ms)
+✔ d refuses on a task with nothing to show, and says so instead of opening an empty view (0.070625ms)
+✔ the composer: Alt+Enter briefs, Shift+Enter or Ctrl+n adds a newline, Enter creates, Ctrl+z reverts (0.12275ms)
+✔ q and Ctrl+c both detach (0.033833ms)
+✔ oneline protects the grid from provider text without eating the design's spacing (0.102584ms)
+✔ cut, pad and shortPath keep a cell to its measure (0.05875ms)
+✔ cellWord ellipsis-truncates long provider words and keeps the column gap (0.072125ms)
+✔ wrap keeps paragraph breaks — a decision question is prose, not a label (0.064167ms)
+✔ renderLine pads and truncates to exactly the column count (0.083291ms)
+✔ renderLine emits truecolor when the terminal has it and 256 when it does not (0.066042ms)
+✔ colorSupport follows the documented capability contract (0.060459ms)
+✔ 256-color fallback quantizes the palette onto the canonical xterm cube (0.04625ms)
+✔ a cell's own background wins; every other cell sits on the frame's ground (0.062916ms)
+✔ the painter rewrites only the rows that changed, and repaints fully on resize (0.1ms)
+✔ projectTask maps Work status onto the design's state keys, never the reverse (0.023167ms)
+✔ a decision's question reaches the model in full — nothing truncates it on the way (10.357583ms)
+✔ a permission halt carries the operation, the path and whether it resumes in place (2.9895ms)
+✔ the human record is read from the event log, so NOTE, ANSWER and CORRECTION stay distinguishable (5.188708ms)
+✔ provider identity is derived, so a configured provider is not a blank column (0.095167ms)
+✔ every rendered row is exactly the terminal width, at every size (5.313292ms)
+✔ both themes paint their own ground, in every mode and at every size (5.684167ms)
+✔ the two palettes are the design's, and they never share an ink (0.133ms)
+✔ the frame shows the workspace, the counts, the halt and the action it is waiting for (2.795666ms)
+✔ the last three rows above the bottom gutter are a fixed footer that the panes never scroll into (2.676125ms)
+✔ help, the composer and the changes view each render their own full frame (3.392458ms)
+✔ the changes view draws the REAL diff from the working tree, loaded on d (91.690708ms)
+✔ a working rerun's rule draws a measured percentage against its prior runs (5.147375ms)
+✔ an empty workspace says so instead of rendering a broken grid (0.432875ms)
+✔ overview -> detail -> a NEEDS YOU permission -> back, against the real runtime (14.33025ms)
+✔ TUI allow carries the displayed occurrence and refuses a stale snapshot (17.60075ms)
+✔ TUI reject carries the displayed occurrence and refuses a stale snapshot (11.126083ms)
+✔ ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not (7.460458ms)
+✔ SEND BACK records the correction on the task, then rebuilds the next run from it (5.659417ms)
+✔ RETRY reruns a failed task on the same provider; the intent has not changed (5.385792ms)
+✔ ACCEPT closes the task through the shared action, and the ledger re-groups it (3.5855ms)
+✔ a refusal from the shared action is surfaced verbatim, never swallowed or worked around (4.087458ms)
+✔ the TUI never writes Work state itself — the store is only reached through actions (0.713667ms)
+✔ an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor (3.169917ms)
+0x2F UI: http://127.0.0.1:60185
+✔ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (18.343042ms)
+0x2F UI: http://127.0.0.1:60192
+✔ launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL (2.061833ms)
+0x2F UI: http://127.0.0.1:60194
+✔ launchUi refuses a healthy runtime for another workspace without opening it (2.448458ms)
+0x2F UI: http://127.0.0.1:60197
+✔ launchUi recognizes the same workspace through a symlink (3.100083ms)
+✔ launchUi cannot reuse an unidentified runtime or accept another workspace during startup (1.523292ms)
+✔ runtime startup closes the parent's log descriptor on success and spawn failure (1.628625ms)
+✔ a package path with spaces and URL characters supplies an existing runtime entry path (3.995833ms)
+✔ launchUi starts a missing runtime, waits for health, and opens the browser (1.01275ms)
+✔ launchUi --no-browser starts the runtime but opens nothing (0.516042ms)
+✔ launchUi reports 'another process owns the port' instead of an opaque EADDRINUSE (1.387375ms)
+✔ launchUi times out with a pointer at the runtime log when health never arrives (125.93675ms)
+✔ launchUi surfaces 'another process' discovered during the wait (1.027458ms)
+✔ openBrowser spawns the platform opener and resolves; a missing opener resolves false (0.17275ms)
+✔ startServer rejects with a clear error when another process owns the port (0.873625ms)
+✔ stepArgument reads whatever the tool input names as its target (0.656958ms)
+✔ toSteps turns tool.started, file.changed and commands into distinct units (1.140792ms)
+✔ markClass reads the event shape the step was built from, not a tool name (0.109ms)
+✔ the last progress line survives as the live activity when no step follows (0.070958ms)
+✔ the worker's duplicated needs_user events collapse into one halt (0.082417ms)
+✔ a resume the human authorised becomes a YOU step (0.1015ms)
+✔ an answered decision becomes a YOU step in the ledger (0.113458ms)
+✔ an interactive ACP permission becomes a YOU step when resolved in place (0.0635ms)
+✔ step arguments and changed files are shown as project paths, not machine paths (0.089208ms)
+✔ a file changed twice produces two marks — one per real event, never deduped in the trace (0.084041ms)
+✔ tail keeps the most recent N units and drops halt/fail (positions, not units) (0.084167ms)
+✔ tail drops the oldest units silently once the budget is exceeded (0.129834ms)
+✔ the trace draws one fixed-width cell per unit, never scaled by how long it took (0.116667ms)
+✔ the point of execution is the luminous head, and it is drawn last (0.048542ms)
+✔ an interruption tears the track open instead of capping it (0.044292ms)
+✔ a finished run's track is struck in graphite, with no head (0.040542ms)
+✔ a long run is bounded by the tail budget, not strided (0.96125ms)
+✔ a change mark is drawn in the accent, distinct from an ordinary tool mark (0.07025ms)
+✔ a coarse provider draws a single ambient bar — never a per-interval dot (0.0705ms)
+✔ the coarse ambient bar's width is capped, so elapsed time never reads as a step count (0.034041ms)
+✔ a coarse frame carries the halt tear exactly once and draws no phase frame (0.033458ms)
+✔ brackets: CHANGES spans the first to the last change mark, only when declared (0.105958ms)
+✔ brackets: two separated runs of edits give two brackets (0.038792ms)
+✔ brackets: labels that would print on top of each other are dropped, not stacked (0.119875ms)
+✔ brackets: zero evidence in the tail is a valid, complete reading (0.033541ms)
+✔ sections: a dimension shows only when actually present, and CHECKS never exists (0.134458ms)
+✔ sections: declared true with nothing observed yet is not a section — and not a lie (0.024417ms)
+✔ sections: observed facts render even against a false declaration, and flag the drift (0.038166ms)
+✔ sections: RESULT is gated on status and real result text, FAILURE takes precedence (0.063542ms)
+✔ capabilityNote: result-on-completion fires only while a coarse provider is working (0.032666ms)
+✔ capabilityNote: never fires a capability-gap note merely from a declaration (0.018833ms)
+✔ fidelity is a declaration, never an inference from the event log (0.028584ms)
+✔ a rich provider with no steps yet reads as rich, not coarse, with nothing to show (0.44975ms)
+✔ a coarse provider draws the single ambient trace, never the old three-phase frame (0.10375ms)
+✔ a coarse working row carries the result-on-completion note and no data sections (0.06075ms)
+✔ working shows ACTIVITY/FILES/COMMANDS when present; needs_you drops COMMANDS (0.147708ms)
+✔ ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never ACTIVITY (0.091875ms)
+✔ failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop (0.161625ms)
+✔ done carries no EXPANDED trace — the whole fix for the old three-empty-band screen (0.1455ms)
+✔ a coarse ready row reports files as absent (no section), not as zero (0.099917ms)
+✔ projectRow renders the Needs You state from the normalized blockedOn (0.076208ms)
+✔ projectRow renders a decision block, not just permissions (0.071458ms)
+✔ projectRow distinguishes permission from decision for the interaction surface (0.057917ms)
+✔ projectRow renders the ready result from the files the run actually changed (0.061625ms)
+✔ projectRow compresses a done task and archives its trace, as the design does (0.055375ms)
+✔ a closed row's sub keeps a fixed width so EXECUTION reads as a grid (0.156834ms)
+✔ projectRow surfaces failure, a state the design does not draw (0.06975ms)
+✔ execution metadata is secondary: node and provider, never the headline (0.039333ms)
+✔ the ledger orders by what wants you first and opens a halted task (0.146584ms)
+✔ ledger helpers (0.0345ms)
+✔ progressPercent: a finished run is 100%, whatever it did (0.049584ms)
+✔ progressPercent: a halted run reports null — the halt marker is the readout (0.016292ms)
+✔ progressPercent: run 1 has no baseline, so there is no percentage (0.032708ms)
+✔ progressPercent: a working rerun measures elapsed against its prior runs (0.035208ms)
+✔ progressPercent: a working run is never claimed complete — capped at 99 (0.025167ms)
+✔ progressPercent: the current run's own record is never its own baseline (0.022459ms)
+✔ a run measured in hours reads as hours, not as 479 minutes (0.018417ms)
+✔ projectRuns formats run records into ledger rows without inventing fields (0.098041ms)
+✔ projectRuns maps needs_you/working states into the ledger vocabulary (0.02725ms)
+✔ projectRow exposes interactive permission options without inventing them (0.274542ms)
+✔ a long intent keeps the expanded heading proportionate (smallest typography adjustment) (0.198542ms)
+✔ projectRow exposes the AUTO routing decision of the current run (0.06025ms)
+✔ time parked on a human is not counted in the trace's tail selection (0.063208ms)
+✔ firstSentence: a one-line question is the whole heading, nothing left over (0.029542ms)
+✔ firstSentence: splits a multi-paragraph question at its first sentence (0.019291ms)
+✔ firstSentence: a question with no terminal punctuation is still a valid heading (0.016292ms)
+✔ projectRow splits a decision's question into heading + body for the card to render (0.029375ms)
+✔ a permission halt (not a decision) has no question split — permWhy is used as-is (0.028875ms)
+✔ inferFailureKind: an explicit task.failure.kind is trusted as-is (0.022167ms)
+✔ inferFailureKind: legacy tasks with no failure field are inferred from the stored error (0.020791ms)
+✔ authFailureCopy: with a remedy, the hint is shown verbatim in its own slot (0.029583ms)
+✔ authFailureCopy: without a remedy, a generic sign-in sentence names the provider and machine (0.015791ms)
+✔ authFailureLine: the one-line summary shared by the compact row, arg and mobile (0.021166ms)
+✔ projectRow: a classified auth failure reads STOPPED AT, not FAILED AT (0.0405ms)
+✔ projectRow: an unclassified failure is completely unaffected by the new fields (0.023708ms)
+✔ a decision question with a fenced code block in its body renders intact (0.258792ms)
+✔ briefBody is empty when the derived title already represents the whole brief (0.026125ms)
+✔ a decorated or wrapped brief does not render a body that only repeats the heading (0.041208ms)
+✔ a real multi-paragraph brief renders in full under the heading (0.066542ms)
+✔ a task written before briefs existed renders no duplicate body (0.023583ms)
+✔ briefTruncated is carried through so a cut remote brief can say it was cut (0.035917ms)
+✔ a coarse run's collapsed bar leaves room for the live head inside --col-exec (0.152959ms)
+✔ a closed coarse run archives its ambient bar in the rule colour too (0.0205ms)
+✔ toSteps: file.changed events carry their source (provider vs worktree) (0.043708ms)
+✔ sections: repository-observed changes render for a provider without file-change reporting, with no drift (0.035958ms)
+✔ sections: provider-REPORTED files against a false declaration still flag the drift (0.03325ms)
+✔ brackets: observed changes draw the CHANGES bracket even without the declared capability (0.032625ms)
+✔ projectRuns: every run row carries number, provider, duration and outcome state (0.044542ms)
+✔ projectRuns: duration falls back to completedAt - startedAt; absent timing shows — (0.0285ms)
+✔ sections: provider + observed spellings of ONE file aggregate to ONE logical file (0.029833ms)
+✔ sections: transient provider events that never persisted are NOT counted when observation exists (0.026ms)
+✔ sections: without observation, provider-reported paths are canonicalized and deduped (0.022583ms)
+✔ parsePorcelain: status lines become { code, path }, renames take the destination (0.836875ms)
+✔ snapshotWorktree returns null when the directory is not a git repository (13.844917ms)
+✔ changedSince reports files introduced or altered during the run (73.937625ms)
+✔ a file already dirty before the run is not re-reported when it stays dirty (72.0055ms)
+✔ gitignored paths are invisible to the observation (0x2F's own .work never counts) (72.329833ms)
+✔ changedSince returns null without a baseline (non-git workspace) (0.41ms)
+ℹ tests 710
+ℹ suites 0
+ℹ pass 699
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 9
+ℹ todo 0
+ℹ duration_ms 66242.386959
+
+✖ failing tests:
+
+test at test/tui-pty-e2e.test.mjs:84:1
+✖ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (23670.799167ms)
+  Error: TUI: timed out after 20000ms waiting for the send-back flash
+  --- screen ---
+    0x2F ~/work-tui-pty-tXmCOb       ● 01:45:12  │ #001  Inspect the submit path and add retry handling            READY
+    ! 0  ✕ 0  ✓ 1  ▶ 0  · 0                      │ ─────────────────────────────────────────────────────────────────────
+    ──────────────────────────────────────────── │ TASK     open 0m · 1 run · 1 note
+                                                 │ RUN 1    AL ALPHA               0:03  complete · awaiting you
+    READY ───────────────────────────────────── 1│ ON       Aleksandrs-MacBook-Air.local · work-tui-pty-tXmCOb
+    ❯✓ 001 Inspect the submit path and add … AL  │
+        1 file changed                           │ TRACE    run 1 · 5 events
+                                                 │   TOOL     EDIT S… src/app.ts                                    0:00
+                                                 │   CHANGE   CHANGED src/app.ts                                    0:00
+                                                 │   HALT     HALT    waiting on your permission                    0:02
+                                                 │   HUMAN    YOU     allowed the request · continuing the same r…  0:03
+                                                 │   CHANGE   CHANGED src/app.ts                                    0:03
+                                                 │
+                                                 │ ON TASK  kept across every run
+                                                 │   CORRECTION Use a 503, not a 429                           run 1
+                                                 │
+                                                 │ READY   nothing committed · the changes are in the working tree
+                                                 │   src/app.ts
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │ ─────────────────────────────────────────────────────────────────────
+                                                 │   ↵ ACCEPT   x SEND BACK   c NOTE
+    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    › n to submit work
+    ↵ accept   x send back   c note   d changes   j/k move   / search   tab all   n new   ? keys   q detach
+  --- raw tail ---
+  "150;161;170;48;2;22;28;33m~/work-tui-pty-tXmCOb       \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33m● \u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m01:45:12\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m  \u001b[0m\u001b[38;2;57;67;75;48;2;22;28;33m│\u001b[0m\u001b[38;2;93;104;112;48;2;22;28;33m #001  \u001b[0m\u001b[38;2;226;232;238;48;2;22;28;33;1mInspect the submit path and add retry handling\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m            \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33;1mREADY\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m \u001b[0m\u001b[48;2;22;28;33m \u001b[0m\u001b[0m"
+  --- relay stderr ---
+  
+      at Object.waitFor (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty/driver.mjs:472:13)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty-e2e.test.mjs:200:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at test/tui-pty-e2e.test.mjs:285:1
+✖ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (20589.171ms)
+  Error: TUI: timed out after 20000ms waiting for the rerun flash
+  --- screen ---
+    0x2F ~/work-tui-pty-7ldOmD       ● 01:45:32  │ #001  Re-authenticate the ingest worker                        FAILED
+    ! 0  ✕ 1  ✓ 0  ▶ 0  · 0                      │ ─────────────────────────────────────────────────────────────────────
+    ──────────────────────────────────────────── │ TASK     open 0m · 1 run · 0 notes
+                                                 │ RUN 1    BR BRAVO               0:00  stopped
+    FAILED ──────────────────────────────────── 1│ ON       Aleksandrs-MacBook-Air.local · work-tui-pty-7ldOmD
+    ❯✕ 001 Re-authenticate the ingest worker BR  │
+        before anything was reported             │ TRACE    run 1 · 1 event
+                                                 │   FAIL     FAILED  Authentication failed: invalid API key (401…  0:00
+                                                 │
+                                                 │ FAILED   run 1 on BRAVO stopped at 0:00
+                                                 │   at      before anything was reported
+                                                 │   reason  Authentication failed: invalid API key (401 expired).
+                                                 │   state   nothing was reported as changed
+                                                 │           Bravo's authentication is no longer valid. 0x2F cannot
+                                                 │           authenticate a provider for you.
+                                                 │           a retry keeps the title, your notes and every answer
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │ ─────────────────────────────────────────────────────────────────────
+                                                 │   ↵ RETRY ON CHARLIE   x DROP   c NOTE
+    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    › n to submit work
+    ↵ retry on charlie   x drop   c note   j/k move   / search   tab all   n new   ? keys   q detach
+  --- raw tail ---
+  "150;161;170;48;2;22;28;33m~/work-tui-pty-7ldOmD       \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33m● \u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m01:45:32\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m  \u001b[0m\u001b[38;2;57;67;75;48;2;22;28;33m│\u001b[0m\u001b[38;2;93;104;112;48;2;22;28;33m #001  \u001b[0m\u001b[38;2;226;232;238;48;2;22;28;33;1mRe-authenticate the ingest worker\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m                        \u001b[0m\u001b[38;2;231;146;116;48;2;22;28;33;1mFAILED\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m \u001b[0m\u001b[48;2;22;28;33m \u001b[0m\u001b[0m"
+  --- relay stderr ---
+  
+      at Object.waitFor (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty/driver.mjs:472:13)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty-e2e.test.mjs:318:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+npm notice
+npm notice New major version of npm available! 11.20.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

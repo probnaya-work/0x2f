@@ -25,10 +25,10 @@
 //   agent_message_chunk       -> progress
 //   tool_call with locations  -> tool.started / file.changed (only when the
 //                                agent actually reports them — never invented)
-//   session/request_permission-> auto-resolved per manifest policy (deny by
-//                                default), recorded as progress; a headless
-//                                worker cannot answer a mid-run prompt, so
-//                                this is never mapped to a fake needs_you halt
+//   session/request_permission-> queued live needs_you by default; one human
+//                                decision resolves one request occurrence.
+//                                Explicit deny/approve policies auto-resolve
+//                                headlessly and record progress.
 //   session/prompt end_turn   -> run.completed / ready (or needs_you/decision
 //                                via the shared Work prompt convention)
 //   cancelled / refusal / early limits -> run.failed
@@ -40,6 +40,7 @@
 
 import fs from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { classifyResult } from "../core/lifecycle.mjs";
 import { substituteCommand } from "./manifests.mjs";
 
@@ -228,7 +229,9 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
 
     // Graceful teardown: close stdin (agents exit on EOF), then kill.
     let shutdownTimer = null;
+    let childClosed = false;
     const shutdown = () => {
+      if (childClosed) return;
       try {
         child.stdin?.end();
       } catch {
@@ -270,7 +273,9 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
     // --- JSON-RPC client ----------------------------------------------------
     let nextId = 0;
     const pending = new Map(); // id -> { resolve, reject, timer }
-    const permissionPending = new Map(); // requestId -> sessionId
+    const permissionPending = new Map(); // requestId -> queued/active request
+    const permissionQueue = [];
+    let activePermission = null;
     let buffer = "";
 
     const rpc = {
@@ -311,6 +316,9 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       },
 
       cancelPendingPermissions() {
+        clearPollTimers();
+        activePermission = null;
+        permissionQueue.length = 0;
         for (const [requestId] of permissionPending) {
           rpc.respond(requestId, {
             outcome: { outcome: "cancelled" }
@@ -334,7 +342,12 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
     function answerPermission(requestId, request) {
       const options = Array.isArray(request.params?.options) ? request.params.options : [];
       if (permissions === "interactive") {
-        startInteractivePermission(requestId, request, options);
+        // RPC ids may be reused after a response. A fresh local occurrence
+        // id prevents saved grant bytes authorizing a later tool request.
+        const entry = { requestId, request, options, decisionId: randomUUID() };
+        permissionPending.set(requestId, entry);
+        permissionQueue.push(entry);
+        startNextInteractivePermission();
         return;
       }
       const kind = permissions === "approve" ? "allow_" : "reject_";
@@ -372,10 +385,25 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       return typeof locations[0]?.path === "string" ? locations[0].path : null;
     }
 
+    function startNextInteractivePermission() {
+      if (settled || activePermission) return;
+      const next = permissionQueue.shift();
+      if (!next) return;
+      activePermission = next;
+      startInteractivePermission(next);
+    }
+
+    function finishInteractivePermission(entry) {
+      permissionPending.delete(entry.requestId);
+      if (activePermission === entry) activePermission = null;
+      startNextInteractivePermission();
+    }
+
     // Interactive: persist the request for the human, emit needs_user, and
     // wait on the decision file. Only ACTUALLY SUPPLIED context is shown —
     // never invented from prose.
-    function startInteractivePermission(requestId, request, options) {
+    function startInteractivePermission(entry) {
+      const { requestId, request, options } = entry;
       const tool = request.params?.toolCall ?? {};
       const allowOption = pickOption(options, "allow_");
       const rejectOption = pickOption(options, "reject_");
@@ -393,27 +421,22 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
         canAllow: allowOption !== null,
         canReject: rejectOption !== null,
         requestId,
+        decisionId: entry.decisionId,
         raw: tool
       };
-      permissionPending.set(requestId, {
-        sessionId: request.params?.sessionId,
-        allowOption,
-        rejectOption
-      });
-
-      onEvent({ type: "needs_user", reason: "permission", blockedOn });
+      const surfaced = Promise.resolve(onEvent({ type: "needs_user", reason: "permission", blockedOn }));
 
       if (!decisionFile) {
         // No decision channel (a direct provider test, or a caller that did
         // not wire the worker's permission file). Never approve silently:
         // fall back to declining the request headlessly.
-        const fallback = rejectOption ?? allowOption;
+        const fallback = rejectOption;
         rpc.respond(requestId, {
           outcome: fallback
             ? { outcome: "selected", optionId: fallback.optionId }
             : { outcome: "cancelled" }
         });
-        permissionPending.delete(requestId);
+        finishInteractivePermission(entry);
         onEvent({
           type: "progress",
           text: `${manifest.displayName} requested permission but no interactive decision channel exists — declined by headless policy`
@@ -421,39 +444,44 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
         return;
       }
 
+      let polling = false;
       const timer = setInterval(async () => {
-        let decision = null;
+        if (polling || settled || activePermission !== entry) return;
+        polling = true;
         try {
-          decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+          await surfaced;
+          const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+          if (
+            decision?.requestId !== requestId || decision?.decisionId !== entry.decisionId ||
+            (decision.grant !== "allow" && decision.grant !== "reject") ||
+            settled || activePermission !== entry
+          ) return;
+          // Consume this request's decision before exposing another request.
+          // If removal fails, leave it pending rather than reuse a grant.
+          await fs.unlink(decisionFile);
+          if (settled || activePermission !== entry) return;
+          clearInterval(timer);
+          pollTimers.delete(timer);
+          const optionId =
+            decision.grant === "allow" ? allowOption?.optionId : rejectOption?.optionId;
+          // Persist resolution BEFORE the agent can complete this turn or the
+          // next queued request becomes visible to the worker.
+          try {
+            await onEvent({ type: "permission.resolved", grant: decision.grant, requestId, decisionId: entry.decisionId });
+          } catch {
+            /* best-effort — the completion path still settles the run */
+          }
+          if (settled || activePermission !== entry) return;
+          rpc.respond(requestId, {
+            outcome: optionId
+              ? { outcome: "selected", optionId }
+              : { outcome: "cancelled" }
+          });
+          finishInteractivePermission(entry);
         } catch {
-          return; // not written yet — keep waiting
-        }
-        if (!decision?.grant) return;
-        clearInterval(timer);
-        pollTimers.delete(timer);
-        permissionPending.delete(requestId);
-        const optionId =
-          decision.grant === "allow" ? allowOption?.optionId : rejectOption?.optionId;
-        // Surface the resolution to the worker BEFORE answering the agent.
-        // The worker's permission.resolved handler rewrites the task to
-        // "working" while the same run continues; answering first would let
-        // the agent's completion settle the run (ready) and then be clobbered
-        // back to "working" by the fire-and-forget handler landing last —
-        // a finished run stuck at working forever.
-        try {
-          await onEvent({ type: "permission.resolved", grant: decision.grant });
-        } catch {
-          /* best-effort — the completion path still settles the run */
-        }
-        rpc.respond(requestId, {
-          outcome: optionId
-            ? { outcome: "selected", optionId }
-            : { outcome: "cancelled" }
-        });
-        try {
-          await fs.rm(decisionFile, { force: true });
-        } catch {
-          /* best-effort */
+          // Missing/malformed decisions and failed consumption keep waiting.
+        } finally {
+          polling = false;
         }
       }, 250);
       pollTimers.add(timer);
@@ -463,7 +491,6 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
       // A server-initiated REQUEST (has id + method) — answer it.
       if (message.id !== undefined && message.id !== null && typeof message.method === "string") {
         if (message.method === "session/request_permission") {
-          permissionPending.set(message.id, message.params?.sessionId);
           answerPermission(message.id, message);
         }
         // Unknown server methods get a clear error response, never a hang.
@@ -605,14 +632,19 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
     });
 
     child.on("close", code => {
-      // If we already settled (a stopReason arrived), this is the teardown.
-      if (settled) return;
-      // The agent exited without completing the turn.
+      childClosed = true;
+      if (shutdownTimer) clearTimeout(shutdownTimer);
+      // Completed or failed sessions must not retain timeout handles after
+      // the actual process closes. Otherwise an already-finished worker
+      // keeps its execution group alive for the entire shutdown grace period.
       for (const [, entry] of pending) {
         if (entry.timer) clearTimeout(entry.timer);
         entry.reject(new Error(`${manifest.id} exited before responding.`));
       }
       pending.clear();
+      // If we already settled (a stopReason arrived), this is the teardown.
+      if (settled) return;
+      // The agent exited without completing the turn.
       settle({
         status: "failed",
         error:

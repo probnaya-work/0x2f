@@ -1,0 +1,45 @@
+Independent final verification, 2026-11-01. Production source read-only.
+All fixture providers local. HTTP/relay tests used loopback-only socket access.
+
+$ node /tmp/qualification-final-acp-verification.mjs
+Exit 0.
+{"case":"same-rpc-id-stale-nonce","rpcRequestId":100,"occurrenceChanged":true,"responsesAfterOldNonce":1,"secondAuthorized":false}
+{"case":"sequential-request-id-reuse","permissionTools":["First operation","Different second operation"],"sameRequestId":true,"outcome":"ready","responses":[{"stage":0,"response":{"outcome":{"outcome":"selected","optionId":"allow"}}},{"stage":1,"response":{"outcome":{"outcome":"selected","optionId":"reject"}}}],"base":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualification-acp-reuse-qTTPiG"}
+
+$ node /tmp/qualification-final-spawn-verification.mjs
+Exit 0.
+{"case":"ui-async-spawn-error","handled":true,"parentLogFdClosed":true,"unrefCalled":false}
+{"case":"worker-async-spawn-error","handled":true,"parentLogFdClosed":true,"taskStatus":"failed","failureKind":"crashed","unrefCalled":false}
+
+$ node /tmp/qualification-final-http-verification.mjs
+Exit 0.
+0x2F UI: http://127.0.0.1:59632
+{"case":"cross-route-no-private-data","target":"/","status":404,"privateDataLeaked":false}
+{"case":"cross-route-no-private-data","target":"/api/health","status":404,"privateDataLeaked":false}
+{"case":"cross-route-no-private-data","target":"/app/app.js","status":404,"privateDataLeaked":false}
+{"case":"same-route-authenticated-replay","status":201,"sameTask":true,"unauthenticatedSameRouteStatus":401}
+{"case":"stale-displayed-gesture","action":"allow","body":null,"status":409,"permissionFileCreated":false}
+{"case":"stale-displayed-gesture","action":"allow","body":{},"status":409,"permissionFileCreated":false}
+{"case":"stale-displayed-gesture","action":"allow","body":{"decisionId":"shown-allow"},"status":409,"permissionFileCreated":false}
+{"case":"current-displayed-gesture","action":"allow","status":202,"correctOccurrenceWritten":true}
+{"case":"stale-displayed-gesture","action":"reject","body":null,"status":409,"permissionFileCreated":false}
+{"case":"stale-displayed-gesture","action":"reject","body":{},"status":409,"permissionFileCreated":false}
+{"case":"stale-displayed-gesture","action":"reject","body":{"decisionId":"shown-reject"},"status":409,"permissionFileCreated":false}
+{"case":"current-displayed-gesture","action":"reject","status":202,"correctOccurrenceWritten":true}
+
+$ node --test --test-name-pattern='permission HTTP|remote permission|occurrence|stale.*permission' test/api.test.mjs test/relay.test.mjs test/relay-projection.test.mjs test/tui.test.mjs
+Exit 0.
+0x2F UI: http://127.0.0.1:59644
+✔ permission HTTP actions refuse stale or missing displayed decision IDs (42.148167ms)
+✔ permission occurrence IDs reach phone snapshots and events as freshness preconditions (0.766917ms)
+✔ remote permission commands refuse stale or missing displayed occurrence IDs (137.132167ms)
+✔ TUI allow carries the displayed occurrence and refuses a stale snapshot (16.834291ms)
+✔ TUI reject carries the displayed occurrence and refuses a stale snapshot (8.703541ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 738.408709

@@ -1,0 +1,5 @@
+(version 1)
+(allow default)
+(deny network*)
+(allow network* (local ip "localhost:*"))
+(allow network-outbound (remote ip "localhost:*"))

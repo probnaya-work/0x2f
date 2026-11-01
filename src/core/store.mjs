@@ -7,8 +7,10 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { defaultProviderId } from "../providers/index.mjs";
 import { WorkError } from "./errors.mjs";
+import { withFileLock } from "./lock.mjs";
 
 export const cwd = () => process.cwd();
 
@@ -85,6 +87,19 @@ export function createStore(base = process.cwd()) {
   const tasksDir = () => path.join(workDir(), "tasks");
   const taskDir = slug => path.join(tasksDir(), slug);
   const eventLogPath = slug => path.join(taskDir(slug), "events.jsonl");
+  const lockPath = name => path.join(workDir(), "locks", name);
+  const withTaskLock = (slug, fn) => withFileLock(
+    lockPath(`task-${createHash("sha256").update(slug).digest("hex")}`), fn
+  );
+
+  // Read-modify-write must share a lock with workers and other CLI/server
+  // processes. Atomic rename alone prevents torn JSON, not lost updates.
+  async function mutateTask(slug, fn) {
+    return withTaskLock(slug, async () => {
+      const fresh = await readJson(path.join(taskDir(slug), "task.json"));
+      return updateTask(await fn(fresh));
+    });
+  }
 
   async function listTasks() {
     const dir = tasksDir();
@@ -98,7 +113,9 @@ export function createStore(base = process.cwd()) {
       const meta = path.join(dir, entry.name, "task.json");
       if (!(await exists(meta))) continue;
       try {
-        out.push(await readJson(meta));
+        const task = await readJson(meta);
+        if (task && Number.isSafeInteger(task.id) && task.id > 0 &&
+          task.slug === entry.name && typeof task.title === "string") out.push(task);
       } catch {
         // v0: ignore malformed folders
       }
@@ -117,6 +134,12 @@ export function createStore(base = process.cwd()) {
   // task record because every surface needs it (a detail view shows it, the
   // relay projects it); prompt.md stays the agent-facing assembly.
   async function createTask({ title, brief, prompt }, opts = {}) {
+    return withFileLock(lockPath("allocation"), () =>
+      createTaskUnlocked({ title, brief, prompt }, opts)
+    );
+  }
+
+  async function createTaskUnlocked({ title, brief, prompt }, opts = {}) {
     const provider = opts.provider ?? defaultProviderId;
     const node = opts.node ?? "local";
     const workspace = opts.workspace ?? "local";
@@ -126,11 +149,18 @@ export function createStore(base = process.cwd()) {
     // none and is interpreted as one historical run.
     const runs = opts.runs;
 
+    // Reserve IDs from directory names as well as readable metadata. A crash
+    // or malformed task.json must never make an existing ID reusable.
+    await fs.mkdir(tasksDir(), { recursive: true });
+    const entries = await fs.readdir(tasksDir());
     const all = await listTasks();
-    const id = all.reduce((max, t) => Math.max(max, t.id), 0) + 1;
+    const max = all.reduce((n, task) => Math.max(n, task.id), 0);
+    const id = entries.reduce((n, name) =>
+      Math.max(n, Number(/^(\d+)-/.exec(name)?.[1] ?? 0)), max) + 1;
+    if (!Number.isSafeInteger(id)) throw new WorkError("Task ID range exhausted.");
     const slug = `${String(id).padStart(3, "0")}-${slugify(title)}`;
     const dir = taskDir(slug);
-    await fs.mkdir(dir, { recursive: true });
+    await fs.mkdir(dir);
     // The task directory is owner-only too: its listing would reveal task
     // slugs to other local users even though the files are unreadable.
     await fs.chmod(dir, 0o700).catch(() => {});
@@ -146,6 +176,7 @@ export function createStore(base = process.cwd()) {
       // construction, and no migration is needed.
       brief,
       status: "working",
+      ...(opts.pid ? { pid: opts.pid } : {}),
       execution: {
         provider,
         node,
@@ -310,6 +341,8 @@ export function createStore(base = process.cwd()) {
     createTask,
     findTask,
     updateTask,
+    withTaskLock,
+    mutateTask,
     readTaskResult,
     readRunResult,
     writeRunPrompt,

@@ -1,0 +1,11 @@
+{"type":"task.created","at":"2026-11-01T14:04:01.248Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:01.409Z","taskId":1,"sessionId":"01a1976c-a1f8-78f2-9a24-a5493894d5bb","run":1}
+{"type":"progress","at":"2026-11-01T14:04:01.427Z","taskId":1,"text":"## Result\nblocked on a choice\n\n## Needs human decision\nREQUIRED: yes\nQUESTION: Which backend should the retry use?","run":1}
+{"type":"needs_user","at":"2026-11-01T14:04:01.436Z","taskId":1,"reason":"decision","blockedOn":{"type":"decision","text":"Which backend should the retry use?"},"run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:01.436Z","taskId":1,"status":"needs_you","run":1}
+{"type":"task.answered","at":"2026-11-01T14:04:01.556Z","taskId":1,"answer":"use backend A"}
+{"type":"task.updated","at":"2026-11-01T14:04:01.621Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T14:04:01.760Z","taskId":1,"sessionId":"01a1976c-a357-72b2-a254-1e750fb54dc9","run":2}
+{"type":"progress","at":"2026-11-01T14:04:01.776Z","taskId":1,"text":"## Result\ncontinued with the answer\n## Needs human decision\nNone","run":2}
+{"type":"run.completed","at":"2026-11-01T14:04:01.786Z","taskId":1,"status":"ready","run":2}
+{"type":"task.updated","at":"2026-11-01T14:04:01.786Z","taskId":1,"status":"ready","run":2}

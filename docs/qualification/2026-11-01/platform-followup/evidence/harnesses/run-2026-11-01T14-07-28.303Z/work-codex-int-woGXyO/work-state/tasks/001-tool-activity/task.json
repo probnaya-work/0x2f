@@ -1,0 +1,32 @@
+{
+  "id": 1,
+  "slug": "001-tool-activity",
+  "title": "Tool activity",
+  "brief": "Tool activity",
+  "status": "ready",
+  "pid": 8261,
+  "execution": {
+    "provider": "codex",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "01a1976f-cc98-7752-b667-111bc09cdd24"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "codex",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:07:28.555Z",
+      "requestedProvider": "codex",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "01a1976f-cc98-7752-b667-111bc09cdd24",
+      "completedAt": "2026-11-01T14:07:29.286Z",
+      "durationMs": 731
+    }
+  ],
+  "createdAt": "2026-11-01T14:07:28.557Z",
+  "updatedAt": "2026-11-01T14:07:29.286Z",
+  "processGroupId": 8261
+}

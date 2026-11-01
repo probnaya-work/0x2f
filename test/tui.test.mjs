@@ -58,7 +58,8 @@ function fakeNode() {
 async function makeRuntime() {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-tui-"));
   const node = fakeNode();
-  return { runtime: createRuntime(base, { node }), node, base };
+  const env = Object.assign(Object.create(process.env), { CLAUDE_BIN: process.execPath });
+  return { runtime: createRuntime(base, { node, env }), node, base };
 }
 
 // A task parked on the human, as a provider run would leave it. `live` marks
@@ -68,6 +69,12 @@ async function blockTask(runtime, brief, blockedOn, { live = false } = {}) {
   const task = await runtime.actions.createWork({ brief });
   const blocked = applyOutcome(task, { status: "needs_you", blockedOn: { ...blockedOn, live } });
   blocked.execution = { ...task.execution, externalSessionId: live ? undefined : "sess-1" };
+  // A live permission belongs to a live worker; this fixture's inert node
+  // has no process of its own, so use the test's PID and a concrete request.
+  if (live) {
+    blocked.pid = process.pid;
+    blocked.blockedOn.requestId = task.id;
+  }
   await runtime.store.updateTask(blocked);
   return blocked;
 }
@@ -736,6 +743,34 @@ test("overview -> detail -> a NEEDS YOU permission -> back, against the real run
   assert.equal(after.length, 38);
   assert.ok(after.join("\n").includes("drizzle"));
 });
+
+for (const [action, key] of [["allow", { name: "enter" }], ["reject", KEY("x")]]) {
+  test(`TUI ${action} carries the displayed occurrence and refuses a stale snapshot`, async () => {
+    const { runtime, base } = await makeRuntime();
+    const app = createApp(runtime);
+    try {
+      const task = await blockTask(runtime, "Synthetic live permission", {
+        type: "permission", tool: "Edit", decisionId: "shown-occurrence"
+      }, { live: true });
+      await app.refresh();
+      assert.equal(app.selected().halt.decisionId, "shown-occurrence");
+      await runtime.store.updateTask({ ...task, blockedOn: { ...task.blockedOn, decisionId: "newer-occurrence" } });
+      const intent = await app.key(key);
+      assert.deepEqual(intent, { type: action, id: task.id, decisionId: "shown-occurrence" });
+      assert.match(app.state.flash.text, /permission request changed/);
+      const decisionFile = path.join(runtime.store.taskDir(task.slug), "permission.json");
+      await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+      await app.refresh();
+      await app.key(key);
+      const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+      assert.equal(decision.decisionId, "newer-occurrence");
+      assert.equal(decision.grant, action);
+    } finally {
+      app.dispose();
+      await fs.rm(base, { recursive: true, force: true });
+    }
+  });
+}
 
 test("ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not", async () => {
   const { runtime, node } = await makeRuntime();

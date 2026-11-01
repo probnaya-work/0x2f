@@ -1,0 +1,389 @@
+{
+  "live": false,
+  "scratch": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-dsh-switch-mock-kQ6sV3",
+  "models": {
+    "deepseek": "deepseek-v4-flash",
+    "gemini": "gemini-3.5-flash-lite"
+  },
+  "before": {
+    "version": 1,
+    "approvedUsd": 5,
+    "limits": {
+      "turns": 8,
+      "requests": 16,
+      "perTurn": 2,
+      "bodyBytes": 65536,
+      "outputTokens": 1024,
+      "turnMs": 90000,
+      "budgetUsd": 5,
+      "responseBytes": 262144
+    },
+    "model": "gemini-3.5-flash-lite",
+    "turns": [
+      {
+        "id": "retry-controlled-local-failure",
+        "requests": 0,
+        "functionCalls": 0,
+        "started": 1793553818854,
+        "writePath": null,
+        "failLocally": true,
+        "deadline": 1793553908854
+      },
+      {
+        "id": "gemini-live-retry-decision",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553820046,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553910046
+      },
+      {
+        "id": "gemini-answer-rerun",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553863727,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553953727
+      },
+      {
+        "id": "gemini-saved-session-resume",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553890104,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553980104
+      },
+      {
+        "id": "gemini-acp-permission",
+        "requests": 2,
+        "functionCalls": 1,
+        "started": 1793553915449,
+        "writePath": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/workspace/permission-roundtrip.txt",
+        "failLocally": false,
+        "deadline": 1793554005449
+      },
+      {
+        "id": "gemini-explicit-note-rerun",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793554094116,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793554184116
+      }
+    ],
+    "requests": 6,
+    "reservedUsd": 0.1510692,
+    "usageEstimateUsd": 0.0163001,
+    "stopped": false
+  },
+  "after": {
+    "version": 1,
+    "approvedUsd": 5,
+    "limits": {
+      "turns": 8,
+      "requests": 16,
+      "perTurn": 2,
+      "bodyBytes": 65536,
+      "outputTokens": 1024,
+      "turnMs": 90000,
+      "budgetUsd": 5,
+      "responseBytes": 262144
+    },
+    "model": "gemini-3.5-flash-lite",
+    "turns": [
+      {
+        "id": "retry-controlled-local-failure",
+        "requests": 0,
+        "functionCalls": 0,
+        "started": 1793553818854,
+        "writePath": null,
+        "failLocally": true,
+        "deadline": 1793553908854
+      },
+      {
+        "id": "gemini-live-retry-decision",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553820046,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553910046
+      },
+      {
+        "id": "gemini-answer-rerun",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553863727,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553953727
+      },
+      {
+        "id": "gemini-saved-session-resume",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793553890104,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793553980104
+      },
+      {
+        "id": "gemini-acp-permission",
+        "requests": 2,
+        "functionCalls": 1,
+        "started": 1793553915449,
+        "writePath": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/workspace/permission-roundtrip.txt",
+        "failLocally": false,
+        "deadline": 1793554005449
+      },
+      {
+        "id": "gemini-explicit-note-rerun",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793554094116,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793554184116
+      },
+      {
+        "id": "deepseek-cross-provider-switch",
+        "provider": "deepseek",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793555063141,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793555153141
+      },
+      {
+        "id": "gemini-return-from-deepseek",
+        "provider": "gemini",
+        "requests": 1,
+        "functionCalls": 0,
+        "started": 1793555064617,
+        "writePath": null,
+        "failLocally": false,
+        "deadline": 1793555154617
+      }
+    ],
+    "requests": 8,
+    "reservedUsd": 0.1864726,
+    "usageEstimateUsd": 0.0163861,
+    "stopped": false,
+    "deepseekReservedUsd": 0.008371799999999999
+  },
+  "results": [
+    {
+      "passed": true,
+      "provider": "deepseek-harness",
+      "turnId": "deepseek-cross-provider-switch",
+      "taskId": 1,
+      "slug": "001-qualify-a-human-choice",
+      "previousRuns": 4,
+      "currentRuns": 5,
+      "result": "## Result\nteal NOTE_ROUNDTRIP_01 DSH_SWITCH_01 GEMINI_BACK_01\n## Evidence\nPrior colour and note retained.\n## Changes\nNone\n## Verification\nok\n## Needs human decision\nREQUIRED: no\n",
+      "sameTaskIdentity": true,
+      "notesInPrompt": true,
+      "finalStatus": "done",
+      "budget": {
+        "version": 1,
+        "approvedUsd": 5,
+        "limits": {
+          "turns": 8,
+          "requests": 16,
+          "perTurn": 2,
+          "bodyBytes": 65536,
+          "outputTokens": 1024,
+          "turnMs": 90000,
+          "budgetUsd": 5,
+          "responseBytes": 262144
+        },
+        "model": "gemini-3.5-flash-lite",
+        "turns": [
+          {
+            "id": "retry-controlled-local-failure",
+            "requests": 0,
+            "functionCalls": 0,
+            "started": 1793553818854,
+            "writePath": null,
+            "failLocally": true,
+            "deadline": 1793553908854
+          },
+          {
+            "id": "gemini-live-retry-decision",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553820046,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553910046
+          },
+          {
+            "id": "gemini-answer-rerun",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553863727,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553953727
+          },
+          {
+            "id": "gemini-saved-session-resume",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553890104,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553980104
+          },
+          {
+            "id": "gemini-acp-permission",
+            "requests": 2,
+            "functionCalls": 1,
+            "started": 1793553915449,
+            "writePath": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/workspace/permission-roundtrip.txt",
+            "failLocally": false,
+            "deadline": 1793554005449
+          },
+          {
+            "id": "gemini-explicit-note-rerun",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793554094116,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793554184116
+          },
+          {
+            "id": "deepseek-cross-provider-switch",
+            "provider": "deepseek",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793555063141,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793555153141
+          }
+        ],
+        "requests": 7,
+        "reservedUsd": 0.159441,
+        "usageEstimateUsd": 0.0163301,
+        "stopped": false,
+        "deepseekReservedUsd": 0.008371799999999999
+      }
+    },
+    {
+      "passed": true,
+      "provider": "gemini",
+      "turnId": "gemini-return-from-deepseek",
+      "taskId": 1,
+      "slug": "001-qualify-a-human-choice",
+      "previousRuns": 5,
+      "currentRuns": 6,
+      "result": "## Result\nteal NOTE_ROUNDTRIP_01 DSH_SWITCH_01 GEMINI_BACK_01\n## Evidence\nPrior colour and note retained.\n## Changes\nNone\n## Verification\nok\n## Needs human decision\nREQUIRED: no",
+      "sameTaskIdentity": true,
+      "notesInPrompt": true,
+      "finalStatus": "done",
+      "budget": {
+        "version": 1,
+        "approvedUsd": 5,
+        "limits": {
+          "turns": 8,
+          "requests": 16,
+          "perTurn": 2,
+          "bodyBytes": 65536,
+          "outputTokens": 1024,
+          "turnMs": 90000,
+          "budgetUsd": 5,
+          "responseBytes": 262144
+        },
+        "model": "gemini-3.5-flash-lite",
+        "turns": [
+          {
+            "id": "retry-controlled-local-failure",
+            "requests": 0,
+            "functionCalls": 0,
+            "started": 1793553818854,
+            "writePath": null,
+            "failLocally": true,
+            "deadline": 1793553908854
+          },
+          {
+            "id": "gemini-live-retry-decision",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553820046,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553910046
+          },
+          {
+            "id": "gemini-answer-rerun",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553863727,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553953727
+          },
+          {
+            "id": "gemini-saved-session-resume",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793553890104,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793553980104
+          },
+          {
+            "id": "gemini-acp-permission",
+            "requests": 2,
+            "functionCalls": 1,
+            "started": 1793553915449,
+            "writePath": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/workspace/permission-roundtrip.txt",
+            "failLocally": false,
+            "deadline": 1793554005449
+          },
+          {
+            "id": "gemini-explicit-note-rerun",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793554094116,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793554184116
+          },
+          {
+            "id": "deepseek-cross-provider-switch",
+            "provider": "deepseek",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793555063141,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793555153141
+          },
+          {
+            "id": "gemini-return-from-deepseek",
+            "provider": "gemini",
+            "requests": 1,
+            "functionCalls": 0,
+            "started": 1793555064617,
+            "writePath": null,
+            "failLocally": false,
+            "deadline": 1793555154617
+          }
+        ],
+        "requests": 8,
+        "reservedUsd": 0.1864726,
+        "usageEstimateUsd": 0.0163861,
+        "stopped": false,
+        "deepseekReservedUsd": 0.008371799999999999
+      }
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"base":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-flags-JHUrQ1","args":["new","Task missing provider selector","--provider"],"code":0,"stdout":"Created #001: Task missing provider selector\nOpen: 2f open 1\nFake is running in the background.\n","stderr":"","tasks":[{"id":1,"provider":"fake","status":"ready"}]}

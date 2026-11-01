@@ -1,0 +1,9 @@
+agent-default-model:
+  provider: deepseek-official
+  model: deepseek-v4-flash
+  reasoningEffort: high
+llm-deepseek:
+  thinking: enabled
+  reasoningEffort: high
+  maxTokens: 1024
+  streamIdleTimeoutMs: 90000

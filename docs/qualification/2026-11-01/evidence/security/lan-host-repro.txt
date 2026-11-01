@@ -1,0 +1,4 @@
+0x2F UI: http://0.0.0.0:57452
+{"label":"baseline","destination":"loopback","actualPrivateTcpSource":true,"shell":200,"credentialIssued":true,"tasks":200,"privateTaskDisclosed":true,"mutation":201,"actionInvoked":1}
+0x2F UI: http://0.0.0.0:57456
+{"label":"fixed","destination":"loopback","actualPrivateTcpSource":true,"shell":403,"credentialIssued":false,"tasks":403,"privateTaskDisclosed":false,"mutation":403,"actionInvoked":0}

@@ -1,0 +1,20 @@
+Captured UTC: 2026-11-01T14:16:46.003123+00:00
+$ ["sw_vers"]
+ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83
+Exit: 0
+$ ["uname", "-a"]
+Darwin Aleksandrs-MacBook-Air.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:11:03 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8132 arm64
+Exit: 0
+$ ["arch"]
+arm64Exit: 0
+$ ["python3", "--version"]
+Python 3.9.6
+Exit: 0
+$ ["git", "--version"]
+git version 2.54.0 (Apple Git-157)
+Exit: 0
+$ ["git", "rev-parse", "HEAD"]
+88829516c445cddebb7f5383d1b2a1fb03cf0828
+Exit: 0

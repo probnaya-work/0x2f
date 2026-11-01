@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "approvedUsd": 5,
+  "limits": {
+    "turns": 8,
+    "requests": 16,
+    "perTurn": 2,
+    "bodyBytes": 65536,
+    "outputTokens": 1024,
+    "turnMs": 90000,
+    "budgetUsd": 5,
+    "responseBytes": 262144
+  },
+  "model": "gemini-3.5-flash-lite",
+  "turns": [
+    {
+      "id": "retry-controlled-local-failure",
+      "requests": 0,
+      "functionCalls": 0,
+      "started": 1793553818854,
+      "writePath": null,
+      "failLocally": true,
+      "deadline": 1793553908854
+    },
+    {
+      "id": "gemini-live-retry-decision",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553820046,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553910046
+    },
+    {
+      "id": "gemini-answer-rerun",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553863727,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553953727
+    },
+    {
+      "id": "gemini-saved-session-resume",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553890104,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553980104
+    },
+    {
+      "id": "gemini-acp-permission",
+      "requests": 2,
+      "functionCalls": 1,
+      "started": 1793553915449,
+      "writePath": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-approved-live-ZJcbO9/workspace/permission-roundtrip.txt",
+      "failLocally": false,
+      "deadline": 1793554005449
+    },
+    {
+      "id": "gemini-explicit-note-rerun",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793554094116,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793554184116
+    },
+    {
+      "id": "deepseek-cross-provider-switch",
+      "provider": "deepseek",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793554929789,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793555019789
+    },
+    {
+      "id": "gemini-return-from-deepseek",
+      "provider": "gemini",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793554933422,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793555023422
+    }
+  ],
+  "requests": 8,
+  "reservedUsd": 0.1866244,
+  "usageEstimateUsd": 0.0202138,
+  "stopped": false,
+  "deepseekReservedUsd": 0.008369399999999999
+}

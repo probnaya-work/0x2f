@@ -1,0 +1,43 @@
+{
+  "id": 1,
+  "slug": "001-switch-providers",
+  "title": "Switch providers",
+  "brief": "Switch providers",
+  "status": "ready",
+  "execution": {
+    "provider": "other",
+    "node": "local",
+    "workspace": "local"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:09.646Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "522e80d4-e6de-47bf-bf55-385cbab110e9",
+      "completedAt": "2026-11-01T14:04:10.562Z",
+      "durationMs": 916
+    },
+    {
+      "run": 2,
+      "provider": "other",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:10.705Z",
+      "requestedProvider": "other",
+      "outcome": "ready",
+      "attempts": 1,
+      "completedAt": "2026-11-01T14:04:11.072Z",
+      "durationMs": 367
+    }
+  ],
+  "createdAt": "2026-11-01T14:04:09.650Z",
+  "updatedAt": "2026-11-01T14:04:11.072Z",
+  "pid": 97816,
+  "processGroupId": 97816
+}

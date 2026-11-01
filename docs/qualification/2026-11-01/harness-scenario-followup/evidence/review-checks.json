@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-01T18:33:15.000975+00:00",
+  "executionGroups": [
+    56404,
+    59005,
+    60505
+  ],
+  "liveProcesses": [],
+  "existingCredentialValuesFoundInEvidence": 0,
+  "codexAuthModeAfter": "chatgpt",
+  "codexLoginStatusAfter": "Logged in using ChatGPT",
+  "secretsCopied": false,
+  "scanScope": "retained text evidence, exact existing Codex id/access/refresh values in memory, no values logged"
+}

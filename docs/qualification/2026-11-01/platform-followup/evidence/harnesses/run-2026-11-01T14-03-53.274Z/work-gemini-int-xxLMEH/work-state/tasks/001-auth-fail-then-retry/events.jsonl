@@ -1,0 +1,9 @@
+{"type":"task.created","at":"2026-11-01T14:04:04.647Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:04:05.661Z","taskId":1,"sessionId":"207d78d0-d204-4d5e-a275-32ce19b7e7b6","run":1}
+{"type":"run.failed","at":"2026-11-01T14:04:05.732Z","taskId":1,"error":"[API Error: {\"error\":{\"code\":401,\"message\":\"API key not valid. Please pass a valid API key.\",\"status\":\"INVALID_ARGUMENT\"}}]","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:05.732Z","taskId":1,"status":"failed","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:05.852Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T14:04:06.770Z","taskId":1,"sessionId":"6081068d-0c77-44e2-8473-b4347284c563","run":2}
+{"type":"progress","at":"2026-11-01T14:04:06.788Z","taskId":1,"text":"## Result\nretry succeeded\n## Needs human decision\nNone","run":2}
+{"type":"run.completed","at":"2026-11-01T14:04:06.825Z","taskId":1,"status":"ready","run":2}
+{"type":"task.updated","at":"2026-11-01T14:04:06.825Z","taskId":1,"status":"ready","run":2}

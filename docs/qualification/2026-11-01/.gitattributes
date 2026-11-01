@@ -1,0 +1,2 @@
+# Preserve captured terminal padding and test diagnostics byte-for-byte.
+evidence/**/*.txt -whitespace

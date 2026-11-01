@@ -331,6 +331,29 @@ test("ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions", 
   assert.deepEqual((await runtime.store.findTask(task.id)).status, "done");
 });
 
+test("remote permission commands refuse stale or missing displayed occurrence IDs", async t => {
+  const { runtime, phone } = await makeHarness(t);
+  for (const action of ["allow", "reject"]) {
+    const task = await runtime.actions.createWork({ brief: "Synthetic remote permission" });
+    const old = { type: "permission", live: true, tool: "Edit", requestId: 100, decisionId: "shown-" + action };
+    await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: old });
+    const shown = (await phone.snapshot()).tasks.find(t => t.id === task.id);
+    assert.equal(shown.blockedOn.decisionId, old.decisionId);
+    const current = { ...old, decisionId: "newer-" + action };
+    await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: current });
+    const decisionFile = path.join(runtime.store.taskDir(task.slug), "permission.json");
+    for (const body of [undefined, {}, { decisionId: shown.blockedOn.decisionId }]) {
+      await assert.rejects(() => phone.api(`/api/tasks/${task.id}/${action}`, { method: "POST", body }), /permission request changed/);
+      await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+      assert.equal((await runtime.store.findTask(task.id)).blockedOn.decisionId, current.decisionId);
+    }
+    await phone.api(`/api/tasks/${task.id}/${action}`, { method: "POST", body: { decisionId: current.decisionId } });
+    const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+    assert.equal(decision.decisionId, current.decisionId);
+    assert.equal(decision.grant, action);
+  }
+});
+
 test("a duplicate requestId returns the cached acknowledgement and never executes twice", async t => {
   const { node, phone } = await makeHarness(t);
   const requestId = "fixed-rid-" + Math.random().toString(36).slice(2, 10);

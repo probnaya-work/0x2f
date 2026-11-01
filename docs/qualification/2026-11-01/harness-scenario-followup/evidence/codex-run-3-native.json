@@ -1,0 +1,230 @@
+{
+  "source": "/Users/bogart/.codex/sessions/2026/11/01/rollout-2026-11-01T18-28-25-01a1985e-afd2-7640-b792-fe014426397e.jsonl",
+  "sessionId": "01a1985e-afd2-7640-b792-fe014426397e",
+  "records": [
+    {
+      "timestamp": "2026-11-01T18:28:25.182Z",
+      "type": "session_meta",
+      "payload": {
+        "id": "01a1985e-afd2-7640-b792-fe014426397e",
+        "cwd": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+        "originator": "Codex Desktop",
+        "cli_version": "0.166.0",
+        "source": "exec",
+        "model_provider": "openai"
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:26.124Z",
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace",
+        "model": "gpt-6.1-sol",
+        "approval_policy": "never",
+        "sandbox_policy": {
+          "type": "workspace-write",
+          "network_access": false,
+          "exclude_tmpdir_env_var": false,
+          "exclude_slash_tmp": false
+        },
+        "effort": "high"
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:29.884Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call",
+        "name": "exec",
+        "call_id": "call_052432a224754ac5b91516408e748b35",
+        "input": "text(await tools.exec_command({cmd:\"pwd; rg --files -g '!node_modules' -g '!\\\\.work/**' -g '!*lock*' -g 'AGENTS.md' -g 'duration*' -g 'package.json' -g 'README*'; git status --short; ls -l duration.mjs duration.test.mjs; cat duration.mjs; cat duration.test.mjs\",max_output_tokens:16000}));\n"
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:30.161Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call_output",
+        "call_id": "call_052432a224754ac5b91516408e748b35",
+        "output": [
+          {
+            "type": "input_text",
+            "text": "Script completed\nWall time 0.1 seconds\nOutput:\n"
+          },
+          {
+            "type": "input_text",
+            "text": "{\"chunk_id\":\"e35c8a\",\"wall_time_seconds\":0.000001958,\"exit_code\":0,\"original_token_count\":2206,\"output\":\"/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace\\nduration.test.mjs\\nREADME.md\\nduration.mjs\\n?? duration.mjs\\n?? duration.test.mjs\\n-rwxr-xr-x@ 1 bogart  staff  2104 Nov  1 18:27 duration.mjs\\n-rw-r--r--@ 1 bogart  staff  6420 Nov  1 18:27 duration.test.mjs\\n#!/usr/bin/env node\\n\\nimport { realpathSync } from 'node:fs';\\nimport { fileURLToPath } from 'node:url';\\n\\nexport function formatDuration(seconds) {\\n  if (!Number.isSafeInteger(seconds) || seconds < 0) {\\n    throw new RangeError('Seconds must be a non-negative safe integer.');\\n  }\\n\\n  const hours = Math.floor(seconds / 3600);\\n  const minutes = Math.floor((seconds % 3600) / 60);\\n  const remainder = seconds % 60;\\n  return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;\\n}\\n\\n// The final assertion requires the actual end of input, including no newline.\\nconst canonicalInteger = /^(?:0|[1-9][0-9]*)(?![\\\\s\\\\S])/;\\n\\nfunction parseSeconds(token) {\\n  if (!canonicalInteger.test(token)) {\\n    return null;\\n  }\\n  const value = Number(token);\\n  return Number.isSafeInteger(value) ? value : null;\\n}\\n\\nfunction formatArgs(args) {\\n  if (args[0] === '--sum') {\\n    if (args.length < 2) {\\n      return null;\\n    }\\n    let total = 0n;\\n    for (const token of args.slice(1)) {\\n      const value = parseSeconds(token);\\n      if (value === null) {\\n        return null;\\n      }\\n      total += BigInt(value);\\n    }\\n    if (total > BigInt(Number.MAX_SAFE_INTEGER)) {\\n      return null;\\n    }\\n    return formatDuration(Number(total));\\n  }\\n\\n  if (args.length !== 1) {\\n    return null;\\n  }\\n  const value = parseSeconds(args[0]);\\n  return value === null ? null : formatDuration(value);\\n}\\n\\n// argv[1] may be a non-canonical alias (for example /var/... on macOS), so\\n// compare real paths instead of URL strings.\\nfunction isEntryPoint() {\\n  if (!process.argv[1]) {\\n    return false;\\n  }\\n  try {\\n    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));\\n  } catch {\\n    return false;\\n  }\\n}\\n\\nif (isEntryPoint()) {\\n  const formatted = formatArgs(process.argv.slice(2));\\n  if (formatted === null) {\\n    console.error(\\n      'Usage: duration.mjs <seconds> | --sum <seconds>... ' +\\n        '(non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)',\\n    );\\n    process.exitCode = 1;\\n  } else {\\n    console.log(formatted);\\n  }\\n}\\nimport assert from 'node:assert/strict';\\nimport { mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';\\nimport { spawnSync } from 'node:child_process';\\nimport { tmpdir } from 'node:os';\\nimport { join } from 'node:path';\\nimport test from 'node:test';\\nimport { fileURLToPath } from 'node:url';\\nimport { formatDuration } from './duration.mjs';\\n\\nconst script = fileURLToPath(new URL('./duration.mjs', import.meta.url));\\nconst cases = [\\n  [0, '0:00:00'],\\n  [1, '0:00:01'],\\n  [59, '0:00:59'],\\n  [60, '0:01:00'],\\n  [61, '0:01:01'],\\n  [3599, '0:59:59'],\\n  [3600, '1:00:00'],\\n  [3661, '1:01:01'],\\n  [86399, '23:59:59'],\\n  [86400, '24:00:00'],\\n  [360000, '100:00:00'],\\n  [Number.MAX_SAFE_INTEGER - 1, '2501999792983:36:30'],\\n  [Number.MAX_SAFE_INTEGER, '2501999792983:36:31'],\\n];\\n\\nfor (const [seconds, expected] of cases) {\\n  test(`formats ${seconds} seconds as ${expected}`, () => {\\n    assert.equal(formatDuration(seconds), expected);\\n  });\\n}\\n\\ntest('rejects invalid numeric values and non-number inputs without coercion', () => {\\n  for (const value of [\\n    -1, -60, 0.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1,\\n    '60', '', null, undefined, true, false, 60n, {}, [], Symbol('seconds'),\\n  ]) {\\n    assert.throws(() => formatDuration(value), RangeError);\\n  }\\n});\\n\\nfor (const [seconds, expected] of cases) {\\n  test(`CLI formats ${seconds}`, () => {\\n    const result = spawnSync(process.execPath, [script, String(seconds)], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.equal(result.status, 0);\\n    assert.equal(result.stdout, `${expected}\\\\n`);\\n    assert.equal(result.stderr, '');\\n  });\\n}\\n\\nconst sumCases = [\\n  [['0'], '0:00:00'],\\n  [['0', '0', '0'], '0:00:00'],\\n  [['0', '59', '1'], '0:01:00'],\\n  [['59', '1'], '0:01:00'],\\n  [['1', '59'], '0:01:00'],\\n  [['3599', '1'], '1:00:00'],\\n  [['3600', '3661', '86400'], '26:01:01'],\\n  [['86399', '1', '3600'], '25:00:00'],\\n  [['9007199254740990', '1'], '2501999792983:36:31'],\\n  [['9007199254740991'], '2501999792983:36:31'],\\n];\\n\\nfor (const [operands, expected] of sumCases) {\\n  test(`CLI --sum ${operands.join(' ')} formats ${expected}`, () => {\\n    const result = spawnSync(process.execPath, [script, '--sum', ...operands], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.equal(result.status, 0);\\n    assert.equal(result.stdout, `${expected}\\\\n`);\\n    assert.equal(result.stderr, '');\\n  });\\n}\\n\\nconst invalidSums = [\\n  [],\\n  ['1e2'],\\n  ['1', '1e2'],\\n  ['1', '-1'],\\n  [''],\\n  ['01'],\\n  ['1.0'],\\n  ['1', ' 2'],\\n  ['--sum'],\\n  ['9007199254740992'],\\n  ['9007199254740991', '1'],\\n  ['9007199254740991', '9007199254740991'],\\n  ['9'.repeat(400)],\\n];\\n\\nfor (const operands of invalidSums) {\\n  test(`CLI --sum rejects ${JSON.stringify(operands)}`, () => {\\n    const result = spawnSync(process.execPath, [script, '--sum', ...operands], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.notEqual(result.status, 0);\\n    assert.equal(result.stdout, '');\\n    assert.match(result.stderr, /safe integer/i);\\n  });\\n}\\n\\nconst invalidArguments = [\\n  [], ['0', '1'], ['1', '2', '3'], [''], ['-1'], ['-0'], ['+1'], ['00'], ['01'],\\n  ['1.0'], ['0.5'], ['1e3'], ['0x10'], ['NaN'], ['Infinity'], [' 1'], ['1 '],\\n  ['1\\\\n'], ['1\\\\r\\\\n'], ['\\\\t1'], ['1\\\\t'], ['1_000'], ['\uff11\uff12'], ['--help'],\\n  ['9007199254740992'], ['9007199254740993'], ['9'.repeat(400)],\\n];\\n\\nfor (const args of invalidArguments) {\\n  test(`CLI rejects ${JSON.stringify(args)}`, () => {\\n    const result = spawnSync(process.execPath, [script, ...args], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.notEqual(result.status, 0);\\n    assert.equal(result.stdout, '');\\n    assert.match(result.stderr, /non-negative safe integer/);\\n  });\\n}\\n\\ntest('importing the module has no CLI side effects', () => {\\n  const url = new URL('./duration.mjs', import.meta.url).href;\\n  const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(url)})`], {\\n    encoding: 'utf8',\\n  });\\n  assert.ifError(result.error);\\n  assert.equal(result.status, 0);\\n  assert.equal(result.stdout, '');\\n  assert.equal(result.stderr, '');\\n});\\n\\ntest('importing from another script has no CLI side effects', () => {\\n  const dir = mkdtempSync(join(tmpdir(), 'duration-import-'));\\n  try {\\n    const runner = join(dir, 'runner.mjs');\\n    const url = new URL('./duration.mjs', import.meta.url).href;\\n    writeFileSync(runner, `import ${JSON.stringify(url)};\\\\n`);\\n    const result = spawnSync(process.execPath, [runner, '0'], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.status, 0);\\n    assert.equal(result.stdout, '');\\n    assert.equal(result.stderr, '');\\n  } finally {\\n    rmSync(dir, { recursive: true, force: true });\\n  }\\n});\\n\\ntest('runs through a non-canonical symlink path alias', { skip: process.platform === 'win32' }, () => {\\n  const dir = mkdtempSync(join(tmpdir(), 'duration-alias-'));\\n  try {\\n    const alias = join(dir, 'duration.mjs');\\n    symlinkSync(script, alias);\\n    const result = spawnSync(alias, ['0'], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.equal(result.status, 0);\\n    assert.equal(result.stdout, '0:00:00\\\\n');\\n    assert.equal(result.stderr, '');\\n  } finally {\\n    rmSync(dir, { recursive: true, force: true });\\n  }\\n});\\n\\ntest(\\n  'runs through the macOS /var path alias',\\n  { skip: process.platform !== 'darwin' || !script.startsWith('/private/') },\\n  () => {\\n    const alias = script.replace(/^\\\\/private/, '');\\n    const result = spawnSync(alias, ['1'], { encoding: 'utf8' });\\n    assert.ifError(result.error);\\n    assert.equal(result.signal, null);\\n    assert.equal(result.status, 0);\\n    assert.equal(result.stdout, '0:00:01\\\\n');\\n    assert.equal(result.stderr, '');\\n  },\\n);\\n\\ntest('script has a shebang and runs directly as an executable', { skip: process.platform === 'win32' }, () => {\\n  assert.ok(readFileSync(script, 'utf8').startsWith('#!/usr/bin/env node\\\\n'));\\n  assert.notEqual(statSync(script).mode & 0o111, 0);\\n  const result = spawnSync(script, ['3661'], { encoding: 'utf8' });\\n  assert.ifError(result.error);\\n  assert.equal(result.status, 0);\\n  assert.equal(result.stdout, '1:01:01\\\\n');\\n  assert.equal(result.stderr, '');\\n});\\n\"}"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:30.162Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "token_count",
+        "info": {
+          "total_token_usage": {
+            "input_tokens": 27345,
+            "cached_input_tokens": 13184,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 152,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 27497
+          },
+          "last_token_usage": {
+            "input_tokens": 27345,
+            "cached_input_tokens": 13184,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 152,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 27497
+          },
+          "last_usage_includes_reasoning": true,
+          "model_context_window": 475000
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:43.085Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call",
+        "name": "exec",
+        "call_id": "call_1dfe5fc5142e4b83bb3843580c696918",
+        "input": "const results = await Promise.allSettled([\n  tools.exec_command({cmd:\"ls -la; cat README.md; for base in . .. ../.. ../../.. ../../../..; do if [ -f \\\"$base/AGENTS.md\\\" ]; then cat \\\"$base/AGENTS.md\\\"; fi; done\", max_output_tokens:4000}),\n  tools.exec_command({cmd:\"node --version; node --test duration.test.mjs\",max_output_tokens:12000})\n]); for (let i=0;i<results.length;i++) text({check:i,...results[i]});\n"
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:44.696Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call_output",
+        "call_id": "call_1dfe5fc5142e4b83bb3843580c696918",
+        "output": [
+          {
+            "type": "input_text",
+            "text": "Script completed\nWall time 1.6 seconds\nOutput:\n"
+          },
+          {
+            "type": "input_text",
+            "text": "{\"check\":0,\"status\":\"fulfilled\",\"value\":{\"chunk_id\":\"c0b4e1\",\"wall_time_seconds\":0.000003042,\"exit_code\":0,\"original_token_count\":139,\"output\":\"total 40\\ndrwxr-xr-x@  8 bogart  staff   256 Nov  1 18:24 .\\ndrwx------@  6 bogart  staff   192 Nov  1 18:21 ..\\ndrwxr-xr-x@ 12 bogart  staff   384 Nov  1 18:28 .git\\n-rw-r--r--@  1 bogart  staff     7 Nov  1 18:21 .gitignore\\ndrwxr-xr-x@ 10 bogart  staff   320 Nov  1 18:28 .work\\n-rw-r--r--@  1 bogart  staff    93 Nov  1 18:21 README.md\\n-rwxr-xr-x@  1 bogart  staff  2104 Nov  1 18:27 duration.mjs\\n-rw-r--r--@  1 bogart  staff  6420 Nov  1 18:27 duration.test.mjs\\n# Disposable duration CLI qualification\\n\\nOnly task code and tests belong in this repository.\\n\"}}"
+          },
+          {
+            "type": "input_text",
+            "text": "{\"check\":1,\"status\":\"fulfilled\",\"value\":{\"chunk_id\":\"d56216\",\"wall_time_seconds\":1.407189542,\"exit_code\":0,\"original_token_count\":1183,\"output\":\"v24.14.0\\n\u2714 formats 0 seconds as 0:00:00 (1.040625ms)\\n\u2714 formats 1 seconds as 0:00:01 (0.041834ms)\\n\u2714 formats 59 seconds as 0:00:59 (0.036458ms)\\n\u2714 formats 60 seconds as 0:01:00 (0.034542ms)\\n\u2714 formats 61 seconds as 0:01:01 (0.031375ms)\\n\u2714 formats 3599 seconds as 0:59:59 (0.031875ms)\\n\u2714 formats 3600 seconds as 1:00:00 (0.027417ms)\\n\u2714 formats 3661 seconds as 1:01:01 (0.023959ms)\\n\u2714 formats 86399 seconds as 23:59:59 (0.036417ms)\\n\u2714 formats 86400 seconds as 24:00:00 (0.064667ms)\\n\u2714 formats 360000 seconds as 100:00:00 (0.03775ms)\\n\u2714 formats 9007199254740990 seconds as 2501999792983:36:30 (0.027042ms)\\n\u2714 formats 9007199254740991 seconds as 2501999792983:36:31 (0.018417ms)\\n\u2714 rejects invalid numeric values and non-number inputs without coercion (0.19175ms)\\n\u2714 CLI formats 0 (24.297417ms)\\n\u2714 CLI formats 1 (20.235083ms)\\n\u2714 CLI formats 59 (19.785875ms)\\n\u2714 CLI formats 60 (19.533584ms)\\n\u2714 CLI formats 61 (20.438583ms)\\n\u2714 CLI formats 3599 (20.308292ms)\\n\u2714 CLI formats 3600 (19.864958ms)\\n\u2714 CLI formats 3661 (19.601375ms)\\n\u2714 CLI formats 86399 (20.6115ms)\\n\u2714 CLI formats 86400 (19.973334ms)\\n\u2714 CLI formats 360000 (19.558709ms)\\n\u2714 CLI formats 9007199254740990 (19.351125ms)\\n\u2714 CLI formats 9007199254740991 (19.0265ms)\\n\u2714 CLI --sum 0 formats 0:00:00 (20.28325ms)\\n\u2714 CLI --sum 0 0 0 formats 0:00:00 (19.598542ms)\\n\u2714 CLI --sum 0 59 1 formats 0:01:00 (19.452208ms)\\n\u2714 CLI --sum 59 1 formats 0:01:00 (19.319292ms)\\n\u2714 CLI --sum 1 59 formats 0:01:00 (19.397125ms)\\n\u2714 CLI --sum 3599 1 formats 1:00:00 (19.984875ms)\\n\u2714 CLI --sum 3600 3661 86400 formats 26:01:01 (20.224291ms)\\n\u2714 CLI --sum 86399 1 3600 formats 25:00:00 (20.529333ms)\\n\u2714 CLI --sum 9007199254740990 1 formats 2501999792983:36:31 (19.019208ms)\\n\u2714 CLI --sum 9007199254740991 formats 2501999792983:36:31 (19.408208ms)\\n\u2714 CLI --sum rejects [] (18.968208ms)\\n\u2714 CLI --sum rejects [\\\"1e2\\\"] (19.090459ms)\\n\u2714 CLI --sum rejects [\\\"1\\\",\\\"1e2\\\"] (19.870042ms)\\n\u2714 CLI --sum rejects [\\\"1\\\",\\\"-1\\\"] (20.159667ms)\\n\u2714 CLI --sum rejects [\\\"\\\"] (27.586375ms)\\n\u2714 CLI --sum rejects [\\\"01\\\"] (22.697625ms)\\n\u2714 CLI --sum rejects [\\\"1.0\\\"] (21.492708ms)\\n\u2714 CLI --sum rejects [\\\"1\\\",\\\" 2\\\"] (20.32475ms)\\n\u2714 CLI --sum rejects [\\\"--sum\\\"] (20.107083ms)\\n\u2714 CLI --sum rejects [\\\"9007199254740992\\\"] (20.568958ms)\\n\u2714 CLI --sum rejects [\\\"9007199254740991\\\",\\\"1\\\"] (19.800583ms)\\n\u2714 CLI --sum rejects [\\\"9007199254740991\\\",\\\"9007199254740991\\\"] (19.885625ms)\\n\u2714 CLI --sum rejects [\\\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\\\"] (20.577ms)\\n\u2714 CLI rejects [] (19.461709ms)\\n\u2714 CLI rejects [\\\"0\\\",\\\"1\\\"] (18.730917ms)\\n\u2714 CLI rejects [\\\"1\\\",\\\"2\\\",\\\"3\\\"] (19.684959ms)\\n\u2714 CLI rejects [\\\"\\\"] (20.628084ms)\\n\u2714 CLI rejects [\\\"-1\\\"] (19.544042ms)\\n\u2714 CLI rejects [\\\"-0\\\"] (19.192709ms)\\n\u2714 CLI rejects [\\\"+1\\\"] (19.947417ms)\\n\u2714 CLI rejects [\\\"00\\\"] (19.528583ms)\\n\u2714 CLI rejects [\\\"01\\\"] (19.3885ms)\\n\u2714 CLI rejects [\\\"1.0\\\"] (19.049916ms)\\n\u2714 CLI rejects [\\\"0.5\\\"] (18.782708ms)\\n\u2714 CLI rejects [\\\"1e3\\\"] (18.8235ms)\\n\u2714 CLI rejects [\\\"0x10\\\"] (19.101958ms)\\n\u2714 CLI rejects [\\\"NaN\\\"] (19.723375ms)\\n\u2714 CLI rejects [\\\"Infinity\\\"] (19.293542ms)\\n\u2714 CLI rejects [\\\" 1\\\"] (18.628292ms)\\n\u2714 CLI rejects [\\\"1 \\\"] (18.490167ms)\\n\u2714 CLI rejects [\\\"1\\\\n\\\"] (18.287ms)\\n\u2714 CLI rejects [\\\"1\\\\r\\\\n\\\"] (18.9315ms)\\n\u2714 CLI rejects [\\\"\\\\t1\\\"] (18.97175ms)\\n\u2714 CLI rejects [\\\"1\\\\t\\\"] (19.613084ms)\\n\u2714 CLI rejects [\\\"1_000\\\"] (19.572167ms)\\n\u2714 CLI rejects [\\\"\uff11\uff12\\\"] (19.40925ms)\\n\u2714 CLI rejects [\\\"--help\\\"] (19.215666ms)\\n\u2714 CLI rejects [\\\"9007199254740992\\\"] (18.996709ms)\\n\u2714 CLI rejects [\\\"9007199254740993\\\"] (18.50625ms)\\n\u2714 CLI rejects [\\\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999\\\"] (19.321333ms)\\n\u2714 importing the module has no CLI side effects (18.760709ms)\\n\u2714 importing from another script has no CLI side effects (20.105625ms)\\n\u2714 runs through a non-canonical symlink path alias (21.057875ms)\\n\u2714 runs through the macOS /var path alias (22.813167ms)\\n\u2714 script has a shebang and runs directly as an executable (24.179958ms)\\n\u2139 tests 82\\n\u2139 suites 0\\n\u2139 pass 82\\n\u2139 fail 0\\n\u2139 cancelled 0\\n\u2139 skipped 0\\n\u2139 todo 0\\n\u2139 duration_ms 1414.05125\\n\"}}"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:28:44.696Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "token_count",
+        "info": {
+          "total_token_usage": {
+            "input_tokens": 57884,
+            "cached_input_tokens": 40448,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 559,
+            "reasoning_output_tokens": 277,
+            "total_tokens": 58443
+          },
+          "last_token_usage": {
+            "input_tokens": 30539,
+            "cached_input_tokens": 27264,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 407,
+            "reasoning_output_tokens": 277,
+            "total_tokens": 30946
+          },
+          "last_usage_includes_reasoning": true,
+          "model_context_window": 475000
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:29:04.286Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call",
+        "name": "exec",
+        "call_id": "call_103791d90aad43239f8f418a65bbcfd0",
+        "input": "text(await tools.exec_command({cmd:\"node --input-type=module <<'NODE'\\nimport assert from 'node:assert/strict';\\nimport { spawnSync } from 'node:child_process';\\nimport { realpathSync, statSync } from 'node:fs';\\nimport { resolve } from 'node:path';\\nimport { formatDuration } from './duration.mjs';\\n\\nconst script = resolve('duration.mjs');\\nconst maximum = BigInt(Number.MAX_SAFE_INTEGER);\\nconst expected = n => `${n / 3600n}:${String(n / 60n % 60n).padStart(2, '0')}:${String(n % 60n).padStart(2, '0')}`;\\nlet apiChecks = 0;\\nfor (let i = 0n; i < 10000n; i++) {\\n  for (const n of [i, maximum - i, (i * 6364136223846793005n + 1442695040888963407n) % (maximum + 1n)]) {\\n    assert.equal(formatDuration(Number(n)), expected(n));\\n    apiChecks++;\\n  }\\n}\\nassert.equal(formatDuration(-0), '0:00:00');\\nlet cliChecks = 0;\\nfunction check(command, args, output) {\\n  const r = spawnSync(command, args, { encoding: 'utf8', cwd: '/' });\\n  assert.ifError(r.error);\\n  assert.equal(r.signal, null);\\n  if (output === null) {\\n    assert.notEqual(r.status, 0, JSON.stringify(args));\\n    assert.equal(r.stdout, '');\\n    assert.ok(r.stderr.length > 0);\\n  } else {\\n    assert.equal(r.status, 0, r.stderr);\\n    assert.equal(r.stdout, output);\\n    assert.equal(r.stderr, '');\\n  }\\n  cliChecks++;\\n}\\nconst alias = script.replace(/^\\\\/private/, '');\\nassert.equal(realpathSync(script), realpathSync(alias));\\nassert.equal(statSync(script).mode & 0o777, 0o755);\\nconst good = [\\n  [['0'], '0:00:00\\\\n'],\\n  [['--sum', '0', '59', '1'], '0:01:00\\\\n'],\\n  [['--sum', '3599', '1', '86400'], '25:00:00\\\\n'],\\n  [['--sum', '9007199254740989', '1', '1', '0'], `${expected(maximum)}\\\\n`],\\n  [['--sum', ...Array(1000).fill('1')], '0:16:40\\\\n'],\\n];\\nfor (const [args, output] of good) {\\n  check(script, args, output);\\n  check(alias, args, output);\\n  check(process.execPath, [alias, ...args], output);\\n}\\nfor (const token of ['1\\\\n', '1\\\\r\\\\n', '1\\\\u2028', '1\\\\u2029', '+0', '-0', '00', '0x10', '1e2', '\uff11\uff12', '1_000', '', '\\\\t0', '0 ']) {\\n  check(script, ['--sum', '60', token, '0'], null);\\n  check(alias, [token], null);\\n}\\nfor (const args of [\\n  ['--sum'], ['--sum', '9007199254740991', '0', '1'],\\n  ['--sum', '9007199254740990', '1', '1'], ['--sum', '9007199254740993'],\\n  ['--sum', '0', '--sum'], ['0', '--sum', '1'],\\n]) check(alias, args, null);\\ncheck(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(new URL('./duration.mjs', import.meta.url).href)})`], '');\\nconsole.log(JSON.stringify({apiOracleComparisons: apiChecks, negativeZero: 'passed', independentCLIChecks: cliChecks, macOSAlias: alias, executableMode: '755', result: 'all passed'}, null, 2));\\nNODE\\n\\ngit diff --exit-code; git status --short; shasum -a 256 duration.mjs duration.test.mjs; nl -ba duration.mjs; nl -ba duration.test.mjs\",max_output_tokens:10000}));\n"
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:29:05.491Z",
+      "type": "response_item",
+      "payload": {
+        "type": "custom_tool_call_output",
+        "call_id": "call_103791d90aad43239f8f418a65bbcfd0",
+        "output": [
+          {
+            "type": "input_text",
+            "text": "Script completed\nWall time 1.2 seconds\nOutput:\n"
+          },
+          {
+            "type": "input_text",
+            "text": "{\"chunk_id\":\"5274b8\",\"wall_time_seconds\":1.033457417,\"exit_code\":0,\"original_token_count\":2711,\"output\":\"{\\n  \\\"apiOracleComparisons\\\": 30000,\\n  \\\"negativeZero\\\": \\\"passed\\\",\\n  \\\"independentCLIChecks\\\": 50,\\n  \\\"macOSAlias\\\": \\\"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-codex-opencode-kNRBTW/workspace/duration.mjs\\\",\\n  \\\"executableMode\\\": \\\"755\\\",\\n  \\\"result\\\": \\\"all passed\\\"\\n}\\n?? duration.mjs\\n?? duration.test.mjs\\n2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607  duration.mjs\\n8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866  duration.test.mjs\\n     1\\t#!/usr/bin/env node\\n     2\\t\\n     3\\timport { realpathSync } from 'node:fs';\\n     4\\timport { fileURLToPath } from 'node:url';\\n     5\\t\\n     6\\texport function formatDuration(seconds) {\\n     7\\t  if (!Number.isSafeInteger(seconds) || seconds < 0) {\\n     8\\t    throw new RangeError('Seconds must be a non-negative safe integer.');\\n     9\\t  }\\n    10\\t\\n    11\\t  const hours = Math.floor(seconds / 3600);\\n    12\\t  const minutes = Math.floor((seconds % 3600) / 60);\\n    13\\t  const remainder = seconds % 60;\\n    14\\t  return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;\\n    15\\t}\\n    16\\t\\n    17\\t// The final assertion requires the actual end of input, including no newline.\\n    18\\tconst canonicalInteger = /^(?:0|[1-9][0-9]*)(?![\\\\s\\\\S])/;\\n    19\\t\\n    20\\tfunction parseSeconds(token) {\\n    21\\t  if (!canonicalInteger.test(token)) {\\n    22\\t    return null;\\n    23\\t  }\\n    24\\t  const value = Number(token);\\n    25\\t  return Number.isSafeInteger(value) ? value : null;\\n    26\\t}\\n    27\\t\\n    28\\tfunction formatArgs(args) {\\n    29\\t  if (args[0] === '--sum') {\\n    30\\t    if (args.length < 2) {\\n    31\\t      return null;\\n    32\\t    }\\n    33\\t    let total = 0n;\\n    34\\t    for (const token of args.slice(1)) {\\n    35\\t      const value = parseSeconds(token);\\n    36\\t      if (value === null) {\\n    37\\t        return null;\\n    38\\t      }\\n    39\\t      total += BigInt(value);\\n    40\\t    }\\n    41\\t    if (total > BigInt(Number.MAX_SAFE_INTEGER)) {\\n    42\\t      return null;\\n    43\\t    }\\n    44\\t    return formatDuration(Number(total));\\n    45\\t  }\\n    46\\t\\n    47\\t  if (args.length !== 1) {\\n    48\\t    return null;\\n    49\\t  }\\n    50\\t  const value = parseSeconds(args[0]);\\n    51\\t  return value === null ? null : formatDuration(value);\\n    52\\t}\\n    53\\t\\n    54\\t// argv[1] may be a non-canonical alias (for example /var/... on macOS), so\\n    55\\t// compare real paths instead of URL strings.\\n    56\\tfunction isEntryPoint() {\\n    57\\t  if (!process.argv[1]) {\\n    58\\t    return false;\\n    59\\t  }\\n    60\\t  try {\\n    61\\t    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));\\n    62\\t  } catch {\\n    63\\t    return false;\\n    64\\t  }\\n    65\\t}\\n    66\\t\\n    67\\tif (isEntryPoint()) {\\n    68\\t  const formatted = formatArgs(process.argv.slice(2));\\n    69\\t  if (formatted === null) {\\n    70\\t    console.error(\\n    71\\t      'Usage: duration.mjs <seconds> | --sum <seconds>... ' +\\n    72\\t        '(non-negative safe integers in canonical decimal form; sum must not exceed Number.MAX_SAFE_INTEGER)',\\n    73\\t    );\\n    74\\t    process.exitCode = 1;\\n    75\\t  } else {\\n    76\\t    console.log(formatted);\\n    77\\t  }\\n    78\\t}\\n     1\\timport assert from 'node:assert/strict';\\n     2\\timport { mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';\\n     3\\timport { spawnSync } from 'node:child_process';\\n     4\\timport { tmpdir } from 'node:os';\\n     5\\timport { join } from 'node:path';\\n     6\\timport test from 'node:test';\\n     7\\timport { fileURLToPath } from 'node:url';\\n     8\\timport { formatDuration } from './duration.mjs';\\n     9\\t\\n    10\\tconst script = fileURLToPath(new URL('./duration.mjs', import.meta.url));\\n    11\\tconst cases = [\\n    12\\t  [0, '0:00:00'],\\n    13\\t  [1, '0:00:01'],\\n    14\\t  [59, '0:00:59'],\\n    15\\t  [60, '0:01:00'],\\n    16\\t  [61, '0:01:01'],\\n    17\\t  [3599, '0:59:59'],\\n    18\\t  [3600, '1:00:00'],\\n    19\\t  [3661, '1:01:01'],\\n    20\\t  [86399, '23:59:59'],\\n    21\\t  [86400, '24:00:00'],\\n    22\\t  [360000, '100:00:00'],\\n    23\\t  [Number.MAX_SAFE_INTEGER - 1, '2501999792983:36:30'],\\n    24\\t  [Number.MAX_SAFE_INTEGER, '2501999792983:36:31'],\\n    25\\t];\\n    26\\t\\n    27\\tfor (const [seconds, expected] of cases) {\\n    28\\t  test(`formats ${seconds} seconds as ${expected}`, () => {\\n    29\\t    assert.equal(formatDuration(seconds), expected);\\n    30\\t  });\\n    31\\t}\\n    32\\t\\n    33\\ttest('rejects invalid numeric values and non-number inputs without coercion', () => {\\n    34\\t  for (const value of [\\n    35\\t    -1, -60, 0.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1,\\n    36\\t    '60', '', null, undefined, true, false, 60n, {}, [], Symbol('seconds'),\\n    37\\t  ]) {\\n    38\\t    assert.throws(() => formatDuration(value), RangeError);\\n    39\\t  }\\n    40\\t});\\n    41\\t\\n    42\\tfor (const [seconds, expected] of cases) {\\n    43\\t  test(`CLI formats ${seconds}`, () => {\\n    44\\t    const result = spawnSync(process.execPath, [script, String(seconds)], { encoding: 'utf8' });\\n    45\\t    assert.ifError(result.error);\\n    46\\t    assert.equal(result.signal, null);\\n    47\\t    assert.equal(result.status, 0);\\n    48\\t    assert.equal(result.stdout, `${expected}\\\\n`);\\n    49\\t    assert.equal(result.stderr, '');\\n    50\\t  });\\n    51\\t}\\n    52\\t\\n    53\\tconst sumCases = [\\n    54\\t  [['0'], '0:00:00'],\\n    55\\t  [['0', '0', '0'], '0:00:00'],\\n    56\\t  [['0', '59', '1'], '0:01:00'],\\n    57\\t  [['59', '1'], '0:01:00'],\\n    58\\t  [['1', '59'], '0:01:00'],\\n    59\\t  [['3599', '1'], '1:00:00'],\\n    60\\t  [['3600', '3661', '86400'], '26:01:01'],\\n    61\\t  [['86399', '1', '3600'], '25:00:00'],\\n    62\\t  [['9007199254740990', '1'], '2501999792983:36:31'],\\n    63\\t  [['9007199254740991'], '2501999792983:36:31'],\\n    64\\t];\\n    65\\t\\n    66\\tfor (const [operands, expected] of sumCases) {\\n    67\\t  test(`CLI --sum ${operands.join(' ')} formats ${expected}`, () => {\\n    68\\t    const result = spawnSync(process.execPath, [script, '--sum', ...operands], { encoding: 'utf8' });\\n    69\\t    assert.ifError(result.error);\\n    70\\t    assert.equal(result.signal, null);\\n    71\\t    assert.equal(result.status, 0);\\n    72\\t    assert.equal(result.stdout, `${expected}\\\\n`);\\n    73\\t    assert.equal(result.stderr, '');\\n    74\\t  });\\n    75\\t}\\n    76\\t\\n    77\\tconst invalidSums = [\\n    78\\t  [],\\n    79\\t  ['1e2'],\\n    80\\t  ['1', '1e2'],\\n    81\\t  ['1', '-1'],\\n    82\\t  [''],\\n    83\\t  ['01'],\\n    84\\t  ['1.0'],\\n    85\\t  ['1', ' 2'],\\n    86\\t  ['--sum'],\\n    87\\t  ['9007199254740992'],\\n    88\\t  ['9007199254740991', '1'],\\n    89\\t  ['9007199254740991', '9007199254740991'],\\n    90\\t  ['9'.repeat(400)],\\n    91\\t];\\n    92\\t\\n    93\\tfor (const operands of invalidSums) {\\n    94\\t  test(`CLI --sum rejects ${JSON.stringify(operands)}`, () => {\\n    95\\t    const result = spawnSync(process.execPath, [script, '--sum', ...operands], { encoding: 'utf8' });\\n    96\\t    assert.ifError(result.error);\\n    97\\t    assert.equal(result.signal, null);\\n    98\\t    assert.notEqual(result.status, 0);\\n    99\\t    assert.equal(result.stdout, '');\\n   100\\t    assert.match(result.stderr, /safe integer/i);\\n   101\\t  });\\n   102\\t}\\n   103\\t\\n   104\\tconst invalidArguments = [\\n   105\\t  [], ['0', '1'], ['1', '2', '3'], [''], ['-1'], ['-0'], ['+1'], ['00'], ['01'],\\n   106\\t  ['1.0'], ['0.5'], ['1e3'], ['0x10'], ['NaN'], ['Infinity'], [' 1'], ['1 '],\\n   107\\t  ['1\\\\n'], ['1\\\\r\\\\n'], ['\\\\t1'], ['1\\\\t'], ['1_000'], ['\uff11\uff12'], ['--help'],\\n   108\\t  ['9007199254740992'], ['9007199254740993'], ['9'.repeat(400)],\\n   109\\t];\\n   110\\t\\n   111\\tfor (const args of invalidArguments) {\\n   112\\t  test(`CLI rejects ${JSON.stringify(args)}`, () => {\\n   113\\t    const result = spawnSync(process.execPath, [script, ...args], { encoding: 'utf8' });\\n   114\\t    assert.ifError(result.error);\\n   115\\t    assert.equal(result.signal, null);\\n   116\\t    assert.notEqual(result.status, 0);\\n   117\\t    assert.equal(result.stdout, '');\\n   118\\t    assert.match(result.stderr, /non-negative safe integer/);\\n   119\\t  });\\n   120\\t}\\n   121\\t\\n   122\\ttest('importing the module has no CLI side effects', () => {\\n   123\\t  const url = new URL('./duration.mjs', import.meta.url).href;\\n   124\\t  const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(url)})`], {\\n   125\\t    encoding: 'utf8',\\n   126\\t  });\\n   127\\t  assert.ifError(result.error);\\n   128\\t  assert.equal(result.status, 0);\\n   129\\t  assert.equal(result.stdout, '');\\n   130\\t  assert.equal(result.stderr, '');\\n   131\\t});\\n   132\\t\\n   133\\ttest('importing from another script has no CLI side effects', () => {\\n   134\\t  const dir = mkdtempSync(join(tmpdir(), 'duration-import-'));\\n   135\\t  try {\\n   136\\t    const runner = join(dir, 'runner.mjs');\\n   137\\t    const url = new URL('./duration.mjs', import.meta.url).href;\\n   138\\t    writeFileSync(runner, `import ${JSON.stringify(url)};\\\\n`);\\n   139\\t    const result = spawnSync(process.execPath, [runner, '0'], { encoding: 'utf8' });\\n   140\\t    assert.ifError(result.error);\\n   141\\t    assert.equal(result.status, 0);\\n   142\\t    assert.equal(result.stdout, '');\\n   143\\t    assert.equal(result.stderr, '');\\n   144\\t  } finally {\\n   145\\t    rmSync(dir, { recursive: true, force: true });\\n   146\\t  }\\n   147\\t});\\n   148\\t\\n   149\\ttest('runs through a non-canonical symlink path alias', { skip: process.platform === 'win32' }, () => {\\n   150\\t  const dir = mkdtempSync(join(tmpdir(), 'duration-alias-'));\\n   151\\t  try {\\n   152\\t    const alias = join(dir, 'duration.mjs');\\n   153\\t    symlinkSync(script, alias);\\n   154\\t    const result = spawnSync(alias, ['0'], { encoding: 'utf8' });\\n   155\\t    assert.ifError(result.error);\\n   156\\t    assert.equal(result.signal, null);\\n   157\\t    assert.equal(result.status, 0);\\n   158\\t    assert.equal(result.stdout, '0:00:00\\\\n');\\n   159\\t    assert.equal(result.stderr, '');\\n   160\\t  } finally {\\n   161\\t    rmSync(dir, { recursive: true, force: true });\\n   162\\t  }\\n   163\\t});\\n   164\\t\\n   165\\ttest(\\n   166\\t  'runs through the macOS /var path alias',\\n   167\\t  { skip: process.platform !== 'darwin' || !script.startsWith('/private/') },\\n   168\\t  () => {\\n   169\\t    const alias = script.replace(/^\\\\/private/, '');\\n   170\\t    const result = spawnSync(alias, ['1'], { encoding: 'utf8' });\\n   171\\t    assert.ifError(result.error);\\n   172\\t    assert.equal(result.signal, null);\\n   173\\t    assert.equal(result.status, 0);\\n   174\\t    assert.equal(result.stdout, '0:00:01\\\\n');\\n   175\\t    assert.equal(result.stderr, '');\\n   176\\t  },\\n   177\\t);\\n   178\\t\\n   179\\ttest('script has a shebang and runs directly as an executable', { skip: process.platform === 'win32' }, () => {\\n   180\\t  assert.ok(readFileSync(script, 'utf8').startsWith('#!/usr/bin/env node\\\\n'));\\n   181\\t  assert.notEqual(statSync(script).mode & 0o111, 0);\\n   182\\t  const result = spawnSync(script, ['3661'], { encoding: 'utf8' });\\n   183\\t  assert.ifError(result.error);\\n   184\\t  assert.equal(result.status, 0);\\n   185\\t  assert.equal(result.stdout, '1:01:01\\\\n');\\n   186\\t  assert.equal(result.stderr, '');\\n   187\\t});\\n\"}"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:29:05.491Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "token_count",
+        "info": {
+          "total_token_usage": {
+            "input_tokens": 91049,
+            "cached_input_tokens": 71168,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1743,
+            "reasoning_output_tokens": 372,
+            "total_tokens": 92792
+          },
+          "last_token_usage": {
+            "input_tokens": 33165,
+            "cached_input_tokens": 30720,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1184,
+            "reasoning_output_tokens": 95,
+            "total_tokens": 34349
+          },
+          "last_usage_includes_reasoning": true,
+          "model_context_window": 475000
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-01T18:29:12.805Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "token_count",
+        "info": {
+          "total_token_usage": {
+            "input_tokens": 129579,
+            "cached_input_tokens": 105344,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2102,
+            "reasoning_output_tokens": 443,
+            "total_tokens": 131681
+          },
+          "last_token_usage": {
+            "input_tokens": 38530,
+            "cached_input_tokens": 34176,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 359,
+            "reasoning_output_tokens": 71,
+            "total_tokens": 38889
+          },
+          "last_usage_includes_reasoning": true,
+          "model_context_window": 475000
+        }
+      }
+    }
+  ]
+}

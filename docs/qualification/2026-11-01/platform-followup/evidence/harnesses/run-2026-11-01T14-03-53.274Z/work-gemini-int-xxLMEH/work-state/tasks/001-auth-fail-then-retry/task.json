@@ -1,0 +1,46 @@
+{
+  "id": 1,
+  "slug": "001-auth-fail-then-retry",
+  "title": "Auth fail then retry",
+  "brief": "Auth fail then retry",
+  "status": "ready",
+  "execution": {
+    "provider": "gemini",
+    "node": "local",
+    "workspace": "local",
+    "externalSessionId": "6081068d-0c77-44e2-8473-b4347284c563"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:04.637Z",
+      "requestedProvider": "gemini",
+      "outcome": "failed",
+      "attempts": 1,
+      "externalSessionId": "207d78d0-d204-4d5e-a275-32ce19b7e7b6",
+      "completedAt": "2026-11-01T14:04:05.731Z",
+      "durationMs": 1094,
+      "error": "[API Error: {\"error\":{\"code\":401,\"message\":\"API key not valid. Please pass a valid API key.\",\"status\":\"INVALID_ARGUMENT\"}}]"
+    },
+    {
+      "run": 2,
+      "provider": "gemini",
+      "node": "local",
+      "workspace": "local",
+      "startedAt": "2026-11-01T14:04:05.847Z",
+      "requestedProvider": "gemini",
+      "outcome": "ready",
+      "attempts": 1,
+      "externalSessionId": "6081068d-0c77-44e2-8473-b4347284c563",
+      "completedAt": "2026-11-01T14:04:06.823Z",
+      "durationMs": 976
+    }
+  ],
+  "createdAt": "2026-11-01T14:04:04.642Z",
+  "updatedAt": "2026-11-01T14:04:06.823Z",
+  "pid": 97135,
+  "processGroupId": 97135
+}

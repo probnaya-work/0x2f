@@ -1,0 +1,14 @@
+✔ parsePorcelain: status lines become { code, path }, renames take the destination (0.840458ms)
+✔ snapshotWorktree returns null when the directory is not a git repository (11.916416ms)
+✔ changedSince reports files introduced or altered during the run (73.783375ms)
+✔ a file already dirty before the run is not re-reported when it stays dirty (60.109334ms)
+✔ gitignored paths are invisible to the observation (0x2F's own .work never counts) (62.207ms)
+✔ changedSince returns null without a baseline (non-git workspace) (0.374625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 259.87475

@@ -27,6 +27,7 @@
 import { spawn as defaultSpawn } from "node:child_process";
 import fsSync from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { currentRunNumber } from "../core/runs.mjs";
 
 export function createLocalNode({ workspace, spawn = defaultSpawn, kill = process.kill } = {}) {
@@ -38,27 +39,39 @@ export function createLocalNode({ workspace, spawn = defaultSpawn, kill = proces
     throw new Error(`Local execution node cannot resolve workspace "${workspaceId}".`);
   }
 
-  function spawnWorker({ base, slug, run = 1, mode, grant }) {
+  async function spawnWorker({ base, slug, run = 1, mode, grant }) {
     const worker = new URL("../worker.mjs", import.meta.url);
     const logPath = path.join(base, ".work", "tasks", slug, "run.log");
     // The node owns where this run's output goes; don't assume the task dir
     // exists yet (in practice the action creates it before launching).
     fsSync.mkdirSync(path.dirname(logPath), { recursive: true });
-    const logFd = fsSync.openSync(logPath, "a");
-    // run.log captures the provider's output — keep it owner-only.
-    fsSync.chmodSync(logPath, 0o600);
+    const logFd = fsSync.openSync(logPath, "a", 0o600);
+    try {
+      // run.log captures the provider's output — keep it owner-only.
+      fsSync.fchmodSync(logFd, 0o600);
 
-    // The run number is explicit: the worker records it on events and uses it
-    // to finalize the right run record, never guessing which run it is.
-    const args = [worker.pathname, base, slug, String(run)];
-    if (mode === "resume") args.push("resume", grant);
+      // The run number is explicit: the worker records it on events and uses it
+      // to finalize the right run record, never guessing which run it is.
+      const args = [fileURLToPath(worker), base, slug, String(run)];
+      if (mode === "resume") args.push("resume", grant);
 
-    const child = spawn(process.execPath, args, {
-      detached: true,
-      stdio: ["ignore", logFd, logFd]
-    });
-    child.unref();
-    return child.pid;
+      const child = spawn(process.execPath, args, {
+        detached: true,
+        stdio: ["ignore", logFd, logFd]
+      });
+      // Resource exhaustion and OS launch failures are emitted asynchronously.
+      // Reserve a worker PID only after the child actually starts.
+      await new Promise((resolve, reject) => {
+        child.once("error", reject);
+        child.once("spawn", resolve);
+      });
+      child.unref();
+      return child.pid;
+    } finally {
+      // spawn duplicates the descriptor for the child. A long-lived runtime
+      // must release its own copy after every launch, including failed spawns.
+      fsSync.closeSync(logFd);
+    }
   }
 
   return {

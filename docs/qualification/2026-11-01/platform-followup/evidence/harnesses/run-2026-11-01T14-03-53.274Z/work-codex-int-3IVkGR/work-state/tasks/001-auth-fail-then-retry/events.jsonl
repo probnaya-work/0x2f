@@ -1,0 +1,9 @@
+{"type":"task.created","at":"2026-11-01T14:03:54.060Z","taskId":1,"status":"working"}
+{"type":"run.started","at":"2026-11-01T14:03:54.219Z","taskId":1,"sessionId":"01a1976c-85e3-7a01-9670-cc66073fe50f","run":1}
+{"type":"run.failed","at":"2026-11-01T14:04:00.453Z","taskId":1,"error":"unexpected status 401 Unauthorized: Invalid API key provided, url: http://127.0.0.1:49702/v1/responses","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:00.453Z","taskId":1,"status":"failed","run":1}
+{"type":"task.updated","at":"2026-11-01T14:04:00.521Z","taskId":1,"status":"working","run":2}
+{"type":"run.started","at":"2026-11-01T14:04:00.656Z","taskId":1,"sessionId":"01a1976c-9f07-7952-9ae9-496fbc9a26ab","run":2}
+{"type":"progress","at":"2026-11-01T14:04:00.672Z","taskId":1,"text":"## Result\nretry succeeded\n## Needs human decision\nNone","run":2}
+{"type":"run.completed","at":"2026-11-01T14:04:00.682Z","taskId":1,"status":"ready","run":2}
+{"type":"task.updated","at":"2026-11-01T14:04:00.682Z","taskId":1,"status":"ready","run":2}

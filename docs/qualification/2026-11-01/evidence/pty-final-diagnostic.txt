@@ -1,0 +1,109 @@
+Local-only suite: Node v26.11.1; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+✖ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (23806.7835ms)
+✖ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (20604.721917ms)
+✔ NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size (2284.299875ms)
+✔ RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset (447.876167ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 2
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57210.13075
+
+✖ failing tests:
+
+test at test/tui-pty-e2e.test.mjs:84:1
+✖ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (23806.7835ms)
+  Error: TUI: timed out after 20000ms waiting for the send-back flash
+  --- screen ---
+    0x2F ~/work-tui-pty-bkr5Qk       ● 01:46:49  │ #001  Inspect the submit path and add retry handling            READY
+    ! 0  ✕ 0  ✓ 1  ▶ 0  · 0                      │ ─────────────────────────────────────────────────────────────────────
+    ──────────────────────────────────────────── │ TASK     open 0m · 1 run · 1 note
+                                                 │ RUN 1    AL ALPHA               0:03  complete · awaiting you
+    READY ───────────────────────────────────── 1│ ON       Aleksandrs-MacBook-Air.local · work-tui-pty-bkr5Qk
+    ❯✓ 001 Inspect the submit path and add … AL  │
+        1 file changed                           │ TRACE    run 1 · 5 events
+                                                 │   TOOL     EDIT S… src/app.ts                                    0:00
+                                                 │   CHANGE   CHANGED src/app.ts                                    0:00
+                                                 │   HALT     HALT    waiting on your permission                    0:02
+                                                 │   HUMAN    YOU     allowed the request · continuing the same r…  0:03
+                                                 │   CHANGE   CHANGED src/app.ts                                    0:03
+                                                 │
+                                                 │ ON TASK  kept across every run
+                                                 │   CORRECTION Use a 503, not a 429                           run 1
+                                                 │
+                                                 │ READY   nothing committed · the changes are in the working tree
+                                                 │   src/app.ts
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │ ─────────────────────────────────────────────────────────────────────
+                                                 │   ↵ ACCEPT   x SEND BACK   c NOTE
+    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    › n to submit work
+    ↵ accept   x send back   c note   d changes   j/k move   / search   tab all   n new   ? keys   q detach
+  --- raw tail ---
+  "150;161;170;48;2;22;28;33m~/work-tui-pty-bkr5Qk       \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33m● \u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m01:46:49\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m  \u001b[0m\u001b[38;2;57;67;75;48;2;22;28;33m│\u001b[0m\u001b[38;2;93;104;112;48;2;22;28;33m #001  \u001b[0m\u001b[38;2;226;232;238;48;2;22;28;33;1mInspect the submit path and add retry handling\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m            \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33;1mREADY\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m \u001b[0m\u001b[48;2;22;28;33m \u001b[0m\u001b[0m"
+  --- relay stderr ---
+  
+      at Object.waitFor (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty/driver.mjs:472:13)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty-e2e.test.mjs:200:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at test/tui-pty-e2e.test.mjs:285:1
+✖ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (20604.721917ms)
+  Error: TUI: timed out after 20000ms waiting for the rerun flash
+  --- screen ---
+    0x2F ~/work-tui-pty-UA9uuF       ● 01:47:09  │ #001  Re-authenticate the ingest worker                        FAILED
+    ! 0  ✕ 1  ✓ 0  ▶ 0  · 0                      │ ─────────────────────────────────────────────────────────────────────
+    ──────────────────────────────────────────── │ TASK     open 0m · 1 run · 0 notes
+                                                 │ RUN 1    BR BRAVO               0:00  stopped
+    FAILED ──────────────────────────────────── 1│ ON       Aleksandrs-MacBook-Air.local · work-tui-pty-UA9uuF
+    ❯✕ 001 Re-authenticate the ingest worker BR  │
+        before anything was reported             │ TRACE    run 1 · 1 event
+                                                 │   FAIL     FAILED  Authentication failed: invalid API key (401…  0:00
+                                                 │
+                                                 │ FAILED   run 1 on BRAVO stopped at 0:00
+                                                 │   at      before anything was reported
+                                                 │   reason  Authentication failed: invalid API key (401 expired).
+                                                 │   state   nothing was reported as changed
+                                                 │           Bravo's authentication is no longer valid. 0x2F cannot
+                                                 │           authenticate a provider for you.
+                                                 │           a retry keeps the title, your notes and every answer
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │
+                                                 │ ─────────────────────────────────────────────────────────────────────
+                                                 │   ↵ RETRY ON CHARLIE   x DROP   c NOTE
+    ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    › n to submit work
+    ↵ retry on charlie   x drop   c note   j/k move   / search   tab all   n new   ? keys   q detach
+  --- raw tail ---
+  "150;161;170;48;2;22;28;33m~/work-tui-pty-UA9uuF       \u001b[0m\u001b[38;2;122;201;165;48;2;22;28;33m● \u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m01:47:09\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m  \u001b[0m\u001b[38;2;57;67;75;48;2;22;28;33m│\u001b[0m\u001b[38;2;93;104;112;48;2;22;28;33m #001  \u001b[0m\u001b[38;2;226;232;238;48;2;22;28;33;1mRe-authenticate the ingest worker\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m                        \u001b[0m\u001b[38;2;231;146;116;48;2;22;28;33;1mFAILED\u001b[0m\u001b[38;2;150;161;170;48;2;22;28;33m \u001b[0m\u001b[48;2;22;28;33m \u001b[0m\u001b[0m"
+  --- relay stderr ---
+  
+      at Object.waitFor (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty/driver.mjs:472:13)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/tui-pty-e2e.test.mjs:318:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

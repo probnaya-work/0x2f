@@ -1,0 +1,3369 @@
+{
+  "capturedAt": "2026-11-01T14:15:51.760199+00:00",
+  "retainedPath": "/private/tmp/0x2f-harness-generated-state-00zpg99j",
+  "reason": "Reconstructable generated binary session databases and bundled system skills kept outside review evidence; original file bytes preserved at retained path. These homes used no real credentials.",
+  "moved": [
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "8acb46ba5758e82225a4e0d18874745d2ce13fdeef5ad68765bd455ab46e9d74"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "4427c3fa6d9aa8dfcad4f0a5f13c5a096e6b4954ba1d8e532b8c4f8d5ad75edd"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "fadc3aac9f356d4e4daf912c15b83709e71348865d811374c226362d0a51a423"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "f83f489515e48678c6362a33772ab057ecde7878cc29127d5e24e332b45ff77b"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "7f2e38e8219e8d05c6838570434e61780f5c33ba2a59d3ff96cc14ece15b8eae"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "e93b921215b945a2382eefc945d44f82da2b52a6d9dd7b6a6e1060d458c547ba"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "02095936ac83deef4cb2e2ad8061344e20ce0174ac717989a75062e46bbc4260"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "c3d16d308558412f97abb8df02293cb2ca9d47d46ac33d3ffa292dcd5451f026"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "0f3cebd2394c97f7af30fe0a5d8125ef817374da27cd95f792d8005cf52eb2d0"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "b4a4176a1087ddb05ab8c0121f9b76e1edf31a409c62aa26b2ebff02cdfc69ef"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/state_5.sqlite-wal",
+      "bytes": 2389632,
+      "sha256": "b9359602697665aa8ec37b96bde41cfcfa9267668e020822c1edcf5ede1268e1"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "fb0f0f5d752a92d659fcab1ae5531689e5de9bfb87209341a2dcb7233382f4a3"
+    },
+    {
+      "path": "resume-2026-11-01T14-09-14.933Z/codex-home/thread_history_1.sqlite-wal",
+      "bytes": 374952,
+      "sha256": "043c81662bd67b6fb08cce177988d3d2f2c0d87f87443e1ba65aa4fe165cdb98"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "af263181ba7a2b58f702bec23bffedf2d63f4b84f099dd9108f8c2445427b862"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "e031f0a052696bf06b51e944157ecad1ee1bd74fa42b502a90d77273f0e2285c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "d41fe61d24a7447402d95a976e78b78391ebd06169d8d0cbda6d532189430c7a"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "19e713cd6dd82b1724d88f5cf3f0c13a072dfdb71cb24a7ee60c3912beb9c72c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "72baf48f52a54648a7a950f702d73d05269821d88f46a62798fd3570f817202c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "6318e8dcbf13afe27a6e2e63f350f3d4885eb4c86e2cd33a381b1eda6f91664b"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "586fcf12c1040f545bec27f3c5e09e2e8e326b0cfa543468b5fb6203a64db96b"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "db5de1a4d06f07878a07a2dbdddcd61a78e1d3d3c320637c6e9bd5f9c3b93f99"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "6082652d0eea602ee60fcb17ed7c629ae0867a5d831d763289ef106a21da118f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "de6a794ab832712629d43ce80c1bb82e07dfbd162e595a8faff369215aa2f744"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/state_5.sqlite-wal",
+      "bytes": 2369032,
+      "sha256": "bd84a8cff5d4840deaefe6ba062825cbdf4f47af61455cbf85e2e9112a2ed8aa"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "3141eb8e27b78c47d8cdf9e14ab3e130af0192caffe45494888dfbef26e72a41"
+    },
+    {
+      "path": "resume-2026-11-01T14-11-51.390Z/codex-home/thread_history_1.sqlite-wal",
+      "bytes": 374952,
+      "sha256": "d46eedab4858d37b229838d9528e92ed853de3bb1c515da4a1ad5083c89f88a9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "bb5aae16c002c2e18b784a5d04e9a6b6cf4dca3160ad410cb034b0ea2a214109"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "f7f2e165cfe5c5f2087b4b7dae42463c555d528c964132f905f02d1bf1bb06fd"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "b6cf07d4909c44a2fe60fd38dee707656ea685396491d0ae3384e2a8ad5c6c3e"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "12c99c40195ab7bc240bb484e96fe398e37e63641e236e079bedfef31c686c17"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "4387c285a29e98c410514e055fe36a0481efcea8fb79f782b3824d3074cbdc43"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "4fc277d9b8aa4f94bca33dfcff6bc8d77dcbfae39bba20000804ca54adbb56d5"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "0e17e84891474bcf061765dd765a2db416ff63f8c6a562ba256f5e75e9818b6a"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "a7391d1253eff9bea08acc79868fca20d337c3ae121d79348a3b77582aeea371"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "ca6dcf6351683852c8cedc4aea3533a4f7be71dd273b2fcb4a4ca84e7e732543"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "0d5eaf8ea2632f44484cbdb7e1b9d4877c38458196100f8c7e754d51498e5a89"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/state_5.sqlite-wal",
+      "bytes": 2657432,
+      "sha256": "94272247b1fd66286b5ef164687a3f12189e77a44e3c4c124cf275475af61a79"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "5d6aaa9760528c6dfb969c701cbfd077908a59b9e3c6b513940a5764650ae303"
+    },
+    {
+      "path": "resume-2026-11-01T14-14-06.634Z/codex-home/thread_history_1.sqlite-wal",
+      "bytes": 490312,
+      "sha256": "d993c0c6143bd4db659615d3a5cd81b466e71f88a47889177df4b945e5b09554"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "2fab3838edc53c640ee13e056b320a820ce392ef6c0ae39c9ccf302dd3b83a9a"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "75cb8c5f8b8709f05413888fb41cee157abd2a1e6c04c385760be34f5d28002f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "958e7b87a58240515cd3158cd2833b7b3368f94a33223e3c83e7c6cb3d23ba59"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "37802b29dd467c2b6962b4a1cc8f8001baed4e8e8793efcdf20a99585469f5a4"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "6ddec5e64f9d3578f162e5801df3155a6bb125223453fe63f767866aa3360e53"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "2148f9e2feab0d82a1f949fafe7e06f44f4b16d2a08070deda67bbdf095e55ae"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "113791fc3ec69410e8ba65059f742e8f127ed7293d2deafe85919f736ca16208"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "68f98d7dc4502ebfe41b8cf9c672024918f9f5be10c691ffe3a97f2fb51bb192"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "7e9a90c44292ecd054832d628638272a5db734f6f1beaab4454eaf65e1b035b5"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "7964f57ff5e5872da99831a9213b8f8a862668f62fd28ea3cdbb3724547832b6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/state_5.sqlite-wal",
+      "bytes": 2401992,
+      "sha256": "13699cd8a6d9dc25d5d455336b128f3597d00fb121b2d624b0d19a6673dfb0c0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "b732d51d5e6f2078c7377399efe64944dd2cd933e88fe46b7fce3010cfd84d93"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-0DlaNE/thread_history_1.sqlite-wal",
+      "bytes": 374952,
+      "sha256": "9a8a53c4b5e4c52c0d69f26840a305dd42fb4d97671121d2a70e148daa1996c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "6d3a5aac232fcd6fb72f9beb9cb52a4ca7280887d1d0f71be299c57515b89a16"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "22ad8db840f9f789d54548bb4a0fd1134a94d3522bedd1e35a2033fee9983f19"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "ac6342df40e774eee1c1f936af6b2b15b5e06c94c2f6f4c0b17bc60293c6ab38"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "5899abbf0c469f70374ff62a88e73210d734376871cca3657c756b5fa0dfcb40"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "6b46775946765102880ee990b1f78ee54c81ad898f19ce85872571e407709806"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "d1ced89aa3c7106142dfd02ac554f663b5d17506322eb9be2d4ecf186ff1b6c4"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "ef0fec3ced38016e14d5a19d356d547f6d430ac43b769df5e1ccedb10756cfc8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "3d8556bb91a5ff9d980586e6966e1e4abe3370906340412b5fa79a37f8d3379a"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "df267e1cc37e37910f999e397429129ca172438920e834388e49cc7eb447ec2b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "fdaa39fbcfde5132115b362b1dbc08391eed9d18f92f3347914c67b8630cb6dd"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/state_5.sqlite-wal",
+      "bytes": 2632712,
+      "sha256": "2697e0ea56f61e154a0ef93e0ce8b51dfc70246981ef17d83166a133666b8f02"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/thread_history_1.sqlite",
+      "bytes": 20480,
+      "sha256": "e4b0c8c220db32c0df065039ad17f7c7e9e9483843b5dada3b9c742a59ebbe3f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "6ada7e264c743aecf5e6f012252353783995faed86e6f07fab051ff1e5f37802"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-2ufTPo/thread_history_1.sqlite-wal",
+      "bytes": 477952,
+      "sha256": "76ab6720fd4e743feb03ae8fad4b985fdd4d2821c67bd8ca03ea3c705c72b29e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "dd9cda8168531c9dd9f31802cb931d98c995530d43d71f69e8ef2a8fe0ba88ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "804c03a9d66b5df35bd088871487aeb207b39b00befcd2675fa71880b8c2c8de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "f3d58336794917280d16cbea926bd95e1e73ee94b6bbf787b80f0d0a9ff1618d"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "0b030676c1c395ea539a14374902a4714590e98719a21a3781b33af66b8a4e41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "359f46b9cd812188256dca6a0889c30d376f0e2cdc9cb2ec6706a30560cdbb45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "b90fcb5feed12651038bd40b4b53c9e49ef73441a1f99e54aaff188ae97220da"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "7cd0ce8f276433c47f1617fe7712084aa0bdb2a9682f5ac7823c5bcfa5e00e7f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "44aa45ebe6f8c20676f97804f268ef23a036fef30bb717ce89a6d4847d13799c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "df02b56ba62f297cb98227ec0b5db61355e9739315d04a794f08d57e3ab461f0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "6293f88d49200b1f7a66867a70d2364a8b36eeb3b1898febd89ffcbf18fff0d4"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/state_5.sqlite-wal",
+      "bytes": 2669792,
+      "sha256": "1d88f14e343dc58b0e3010325c817aedf6b11ed2e80b547957671a8e2de4a00e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "a7a61b8cd6987c7094e4f1b38f8f944ff17e34be6e91d060277fb8114c43e543"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-COQvGr/thread_history_1.sqlite-wal",
+      "bytes": 515032,
+      "sha256": "a7d38ec20a1ca42a194fd84fed4e3633a334af84e3a2ea82e11ad4561ef09562"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "b13b9dc501e5c08801dc38b8c97bc6151416069c2c958b0f27862c5d13a4840c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "d0e3b9d18546674f7f008f8d5bce9057e2a04c5d56d783887e58843bc74d01b3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "5578b4dc41e784494516fb3902060b16e198610e2602d1c4c587147bc8aa9b39"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "1c01c0ced4bbb169c1976b796c036fc8612d8c011117a4b454410810241ce6d6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "deb99a51116129efd10f3662274b6cd04af1747278b47d5a62ef77c170a19511"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "ff4998cc6c0393d0cbada08b3467d053c07266a6126a582c84e999c97047532a"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "f656e65cb80925ff4b2b104f72beecf3d4b493b495562287cd21387e352d90dd"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "e216f0ee424e23fe99c44f32b3bf14f3369c6aedd21e1293be46054a2ad36fed"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "7ce0dafe50ebc56972e11f5136a1955b76fab4563074b4220e71429b4b2255b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "27b4292e886c04e090d43643c772904defe00a892420abbaa77b899fd50b28fd"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/state_5.sqlite-wal",
+      "bytes": 2401992,
+      "sha256": "c0596e7841f026a9f2b4021479dd1a018afb42d70ca802a940ac415b7c1c1866"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "10b5006d06a7153c92e721e81db61dec185484591fbceb3146eb8b825fd27676"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-HM9DDO/thread_history_1.sqlite-wal",
+      "bytes": 374952,
+      "sha256": "80b813c38f2f4352153e143d4559ed910b9ab7f3928ec0b21e4504c65bedd1fc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "705aa6784153b34e5caef761adc0aef5a4f504cc9c6b3fba4573aaa3baacf788"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "d81161137563a286b648ca3afba6631aef7dc705817c5be3c5a45693a4880f5d"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "029ef3e85dc75218ccae92c9d0764360a71decc5f0e4c0682f1771813dde9e0f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "a7ef59d3b3bc854f532d921522a3727a16cac849afa0d410c6263f1ae124a7be"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "f11b77293e64757e80dc085cd7fb718bc0194f897be27264a9721b6ae54349e6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "1074b0a2dee4d9ad935629c79d05e0a3e2a6d1c130771dc65266e47d01a65bbf"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "90dad0ffc4a27be100e24e5e6bb02ea74621690cd19e288083960e2b592c5408"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "00cf02c07cb8ff7938493aa198f0a433e8118936cbfbf32a086c21516a8253be"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "ee14fcf214022a3854b473df2aa0bb025040c77ed63035a23a969f3688b59a5a"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "ee9b0bb6473adc5207858410ca8642ad68d7b296bfd506230665eeb3d72ed84c"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/state_5.sqlite-wal",
+      "bytes": 2443192,
+      "sha256": "a481b53351891b9da47df4908c301321c4f1660353e53f90b8c1cddc1a806882"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "2498d73f636260ba3c2f65905ec2ddc8fd9c59efc2ae9a4755a4c22e43ff157e"
+    },
+    {
+      "path": "run-2026-11-01T14-03-53.274Z/work-codex-int-home-o5UUi3/thread_history_1.sqlite-wal",
+      "bytes": 387312,
+      "sha256": "41abe214c474a36b1b6a148fff63115ffac033690306d3c5be9c1c9ed8b41005"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "cfbc4d6c4a5209338dcd6e5fdcadf28aeeb68a5b164f9bbffb4db7b78dacb5bf"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "9ad37993e7cdf57fffab1e3a7b944700a6c2165849a2592b0874085bb138948a"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "814f119290ca921ab979f447eed5c0f74881f6f10babe1e523fbde8d106222db"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "135c8fe510cf3958a987f7d32cde9b4b4314e847326b2bb1daa2d29f0c00913f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "d665a0e86c9719ed73f2b2c6df070ed3218f8dfd4c63d883dc077313d0452552"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "157a78a5fc176933991f6642c990d8a1a6cb6aeaf402c75967f581ff402115eb"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "04e5e4d9bebf96fbca7b7b8fc24d3feeefd90df040dec25d111133a779e3faa0"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "e0fcb56d8442230c57fa33d9ca50c33df7c5d3e6d48a7f142b184464e4192462"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "9a1cb3d96b62a55c154d6faf09560b168277f9239ad5048056f40be27758199d"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "9fea90f8b2624124e8184a7a1686baa3b963bac56a7b61e29b0156a90c814366"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/state_5.sqlite-wal",
+      "bytes": 2467912,
+      "sha256": "70cc5ee20fe044c27eff67de93b50dfdb39468f737f27950363ca512aa215b08"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "27685e1b1e0a6a16e46e0e101a91ea2953e656847d196ece451dfbc66c27e45d"
+    },
+    {
+      "path": "run-2026-11-01T14-07-28.303Z/work-codex-int-home-8NiGFw/thread_history_1.sqlite-wal",
+      "bytes": 416152,
+      "sha256": "a2f5610088038f2bbe6dbf7f435cc7ffd02931b9683f92f831a466238e314b1c"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/goals_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/goals_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "e86f7f12f1839b3bf36d1f540feb31dcd157f953e4e25fdd00f715c5f8dbca79"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/goals_1.sqlite-wal",
+      "bytes": 74192,
+      "sha256": "e85ef2a615dfb3b54597b0b94bdd2c29e33562832cd331a7fe2591197f4da840"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/logs_2.sqlite",
+      "bytes": 49152,
+      "sha256": "02ae579394fd8f7c6caef74d5495dd4739333219160e510f62697e4ea998405c"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/logs_2.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "a6785b0b42d5a09fcddd4216f872a543e534b85f25dbe5e87039ec7dc56e6419"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/logs_2.sqlite-wal",
+      "bytes": 115392,
+      "sha256": "9ea0ca39620a43af6cec2d46b4ff779027fce0737872c99b7aa80b6f51aa3c49"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/memories_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/memories_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "49837a19940628a76899bef78381d6d60c5c2b7739f550f702e07fc30e533c94"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/memories_1.sqlite-wal",
+      "bytes": 86552,
+      "sha256": "e7713413b7f503021a08f52cc489fde10e636a218571684d3981aff1bcb633f3"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/queue_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/queue_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "f7e59ab36910c133aaf83952f1360f8514010f462b9752d95a17a7adf1746bf9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/queue_1.sqlite-wal",
+      "bytes": 82432,
+      "sha256": "f47d007f6d638655135d830a0f040c852d3fdcdc2b055a2eb82b94dc073a1d56"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/.codex-system-skills.marker",
+      "bytes": 17,
+      "sha256": "626d55b2d6105b5e8ad04dc5a654a2fb922c4f517d9df3239b68c157f01ec0b9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/SKILL.md",
+      "bytes": 19201,
+      "sha256": "681ddb4ad6d06a2acc78a3535b583f8d0c1ea800ecda3d56370d3310fd2cd4ba"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/agents/openai.yaml",
+      "bytes": 275,
+      "sha256": "9ca574af14580dc7a2a3dc37a1796d17f93cb8850be66501f0799ef8603e9dc0"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/assets/imagegen-small.svg",
+      "bytes": 2889,
+      "sha256": "cff5f34f57ff60b3ee92eaedd17b15e96dd4b9e776df3e78936c9e00d42be294"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/assets/imagegen.png",
+      "bytes": 1711,
+      "sha256": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/references/cli.md",
+      "bytes": 9655,
+      "sha256": "ecfc2e09261a0feb3482517a5fa0ff410cb7d1958e3cbd2ac6b61586f5b81405"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/references/codex-network.md",
+      "bytes": 1779,
+      "sha256": "c88298ca4481f6116a16fa7987434fc977f8b311c1bbc0c3d862ffd0c5981148"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/references/image-api.md",
+      "bytes": 6072,
+      "sha256": "dc975d7af8a4888967251a0276014b4a71ea30455294944b762256373ce3e569"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/references/prompting.md",
+      "bytes": 8282,
+      "sha256": "b210b051c775860267080941eba968212bf0ac7fce581d75c5dcc217d8293f8b"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/references/sample-prompts.md",
+      "bytes": 17617,
+      "sha256": "70474177d151855b175c6133de2aae1d90b7f146b0dab50ec830972c47d72183"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/scripts/image_gen.py",
+      "bytes": 34667,
+      "sha256": "b4345cf835e5b593b97df6bb2b70bda493b8a97eee4cabbc99b2fa57dba9b448"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/imagegen/scripts/remove_chroma_key.py",
+      "bytes": 13905,
+      "sha256": "a5893c4bd04b21abced33731ea89d2ac428e81d92a0368eb18ffbe4fda5253e2"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/LICENSE.txt",
+      "bytes": 10776,
+      "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/SKILL.md",
+      "bytes": 5437,
+      "sha256": "aa6829e21df2223167c85d2e49b6337a7345c84c1033f1ec10182c7882b36d45"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/agents/openai.yaml",
+      "bytes": 370,
+      "sha256": "44b9efac6be1bae32d869aa2942fecbe4dcae82682ee03e4120f2f9b7d4658ec"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/assets/openai-small.svg",
+      "bytes": 1091,
+      "sha256": "45be1f0757eb18889eefb1e7db79668ef46a275dc4e0e78e8df5ebd7f6cdeadc"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/assets/openai.png",
+      "bytes": 1429,
+      "sha256": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/codex-self-knowledge.md",
+      "bytes": 7417,
+      "sha256": "8c8fb00e6e5cb1977924f5164684a6095427fa828bbc765225f17d9aeb79a912"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/latest-model.md",
+      "bytes": 1339,
+      "sha256": "7e5b9437c6ad98a73da46ba3f7f5c86f88aea2a15242318f32c487eb28a90852"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/mcp-diagnostics.md",
+      "bytes": 2318,
+      "sha256": "49bbd2f73df7bbd7f86c80425dea4da2d301c22046080399a36bfc0ca49509e9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/model-migration.md",
+      "bytes": 5631,
+      "sha256": "138c05dd06047b069a7aab09e657b6a6a0d25b6959cbe2473baae95f47e72883"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/model-selection.md",
+      "bytes": 1344,
+      "sha256": "ba2d164abbca30435a460a0bc3a7d82398dce2bdf092705c98ba55b3f3af38a8"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/official-docs.md",
+      "bytes": 3337,
+      "sha256": "7962f2dce55089b93bde4115bb89fd42f20993c1597a2b13edd4956f463875b9"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/prompting-guide.md",
+      "bytes": 10128,
+      "sha256": "5c791edd5bfc9363cb4251ac3ccd3b1dbac3bb2a6654f78606a9d2357c97c172"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/upgrade-guide.md",
+      "bytes": 1503,
+      "sha256": "63352ece4bd1ee82b225bb4cb4fa2ea4f0dbf57a308845fa30f2c8d7f1d291d1"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/references/upgrading-to-gpt-6-astra.md",
+      "bytes": 19676,
+      "sha256": "cacacdfe0b516f7420af51df10dfa0829bf67c4a670544d58992f6ce4ac22583"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+      "bytes": 15668,
+      "sha256": "1ea0ca869e3fdf06e83a9972fc4c602b0505a96b22e4b0d9629656f5b545e5ff"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/scripts/resolve-latest-model-info",
+      "bytes": 1038,
+      "sha256": "7354dbb030ca0736dd633a7ca1b930cf640abd40370725dea3a458cb51d49523"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/openai-docs/scripts/resolve-latest-model-info.cjs",
+      "bytes": 3916,
+      "sha256": "589b89515ab63fff87efde0b9c76eb72e674582aebc3afbc29ceae09abddafe3"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/review-agent/SKILL.md",
+      "bytes": 2661,
+      "sha256": "07079efd0dc76f05fade424e5dfb048dce1de2df7626e1a4f56292a4f3f92228"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/review-agent/agents/openai.yaml",
+      "bytes": 252,
+      "sha256": "4d867a46d15e36ac880176484aae160f59855340c6059b2ea6ab9fbc9af084de"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/SKILL.md",
+      "bytes": 15311,
+      "sha256": "6656e54755638e8efcf275a472b9672eaa8a9a1b9e59dc210e275b03b59e1e66"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/agents/openai.yaml",
+      "bytes": 183,
+      "sha256": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/assets/skill-creator-small.svg",
+      "bytes": 1319,
+      "sha256": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/assets/skill-creator.png",
+      "bytes": 1563,
+      "sha256": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/license.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/references/openai_yaml.md",
+      "bytes": 2356,
+      "sha256": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/scripts/generate_openai_yaml.py",
+      "bytes": 6669,
+      "sha256": "816df12072d74faf924d802a6599a139997e1441e90bfe4869ec304f2e5e2851"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/scripts/init_skill.py",
+      "bytes": 10314,
+      "sha256": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-creator/scripts/quick_validate.py",
+      "bytes": 4249,
+      "sha256": "ee6dba90f44d37171c5a6edb8095979c54919ff6822c1a907afca2e78c48738c"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/LICENSE.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/SKILL.md",
+      "bytes": 3367,
+      "sha256": "d68b77e5bbb34dedab89d134da52855f140fc4b4299b80104f534e3b9e98f8ee"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/agents/openai.yaml",
+      "bytes": 221,
+      "sha256": "5ce223d8b1070b82c42298538f1b8d376f788eb9e7a42a987e8c094070d73f0e"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/assets/skill-installer-small.svg",
+      "bytes": 923,
+      "sha256": "3928703ff00dc1a681e7a22401843b7edcbd4b2051651ce4c43b75f7e140504e"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/assets/skill-installer.png",
+      "bytes": 1086,
+      "sha256": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/scripts/github_utils.py",
+      "bytes": 659,
+      "sha256": "61c1bbe2ae217433b4b6f9f09f21aca4df52c12598068343ade719f706e4859b"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/scripts/install-skill-from-github.py",
+      "bytes": 11917,
+      "sha256": "38f311b75664bb063808f982c600271ebc4b560830f491705190f88a94e3e781"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/skills/.system/skill-installer/scripts/list-skills.py",
+      "bytes": 2948,
+      "sha256": "9d6dfb2abf3afeee7f027a89fb1626b918a973da18f4eb6c25681286301beb41"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/state_5.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/state_5.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "513b0458801b52759659007a0493d3b350f97128a0a8c07d7c64462e456a8d30"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/state_5.sqlite-wal",
+      "bytes": 2657432,
+      "sha256": "00b352bccd7a683deb45adc711fffefdf8018bfb362a0ab6978280581c5ef54a"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/thread_history_1.sqlite",
+      "bytes": 4096,
+      "sha256": "4eeb710c739848e62f0d53d04057e17375b4af741c9b441f2a546f6ed860c79f"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/thread_history_1.sqlite-shm",
+      "bytes": 32768,
+      "sha256": "69fbaac637baa69cf00553420d0a320bb185aa6bf1fc9605438ddb2db027e0aa"
+    },
+    {
+      "path": "run-2026-11-01T14-15-14.382Z/work-codex-int-home-zpWwN8/thread_history_1.sqlite-wal",
+      "bytes": 490312,
+      "sha256": "2e6522f4fbf9b162c5459e60b5ba3ac38696cb791b423b2f4d2f595bee68053e"
+    }
+  ],
+  "stateFoldersRenamedToAvoidGitignore": [
+    "run-2026-11-01T14-07-28.303Z/work-codex-int-woGXyO/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-codex-int-3IVkGR/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-codex-int-GIXlXP/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-gemini-int-3zr5bu/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-gemini-int-HfNAjT/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-codex-int-vu8YWt/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-codex-int-vv8kU9/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-codex-int-WzYrYD/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-gemini-int-H3aa9H/work-state",
+    "run-2026-11-01T14-03-53.274Z/work-gemini-int-xxLMEH/work-state"
+  ]
+}

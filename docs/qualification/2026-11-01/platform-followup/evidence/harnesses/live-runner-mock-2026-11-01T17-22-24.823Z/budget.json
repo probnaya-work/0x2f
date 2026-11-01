@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "approvedUsd": 5,
+  "limits": {
+    "turns": 8,
+    "requests": 16,
+    "perTurn": 2,
+    "bodyBytes": 65536,
+    "outputTokens": 1024,
+    "turnMs": 90000,
+    "budgetUsd": 5,
+    "responseBytes": 262144
+  },
+  "model": "gemini-3.5-flash-lite",
+  "turns": [
+    {
+      "id": "retry-controlled-local-failure",
+      "requests": 0,
+      "functionCalls": 0,
+      "started": 1793553744909,
+      "writePath": null,
+      "failLocally": true,
+      "deadline": 1793553834909
+    },
+    {
+      "id": "gemini-live-retry-decision",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553745989,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553835989
+    },
+    {
+      "id": "gemini-answer-rerun",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553759559,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553849559
+    },
+    {
+      "id": "gemini-saved-session-resume",
+      "requests": 1,
+      "functionCalls": 0,
+      "started": 1793553760335,
+      "writePath": null,
+      "failLocally": false,
+      "deadline": 1793553850335
+    },
+    {
+      "id": "gemini-acp-permission",
+      "requests": 2,
+      "functionCalls": 1,
+      "started": 1793553761052,
+      "writePath": "/private/tmp/0x2f-approved-live-0kpi4w/workspace/permission-roundtrip.txt",
+      "failLocally": false,
+      "deadline": 1793553851052
+    }
+  ],
+  "requests": 5,
+  "reservedUsd": 0.1232606,
+  "usageEstimateUsd": 0.0000775,
+  "stopped": false
+}

@@ -1,0 +1,9 @@
+Node v20.0.0; npm 9.6.4; darwin/arm64; Python 3.9.6
+Command: ["/private/tmp/0x2f-node-matrix-downloads/node-v20.0.0-darwin-arm64/bin/node","docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs"]
+CWD: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-s2mC9t/checkout
+Local-only suite: Node v20.0.0; 6 exact dependency cache entries; vendor CLIs absent from PATH; inherited credentials omitted.
+
+> 0x2f@0.1.4 test
+> node --test "test/*.test.mjs"
+
+Could not find '/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-matrix-v20.0.0-s2mC9t/checkout/test/*.test.mjs'

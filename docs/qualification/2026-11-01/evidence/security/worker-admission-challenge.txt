@@ -1,0 +1,2 @@
+{"scenario":"reserved-by-another-pid","skipped":true,"stateUnchanged":true,"permissionUnchanged":true,"providerInvoked":false,"eventsWritten":false,"resultWritten":false}
+{"scenario":"superseded-run","skipped":true,"stateUnchanged":true,"permissionUnchanged":true,"providerInvoked":false,"eventsWritten":false,"resultWritten":false}

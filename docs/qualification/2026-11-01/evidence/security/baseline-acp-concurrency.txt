@@ -1,0 +1,5 @@
+{"trial":1,"humanGrantsWritten":1,"requestsShown":[100,101],"allowedRequests":[101,100],"outcome":"ready"}
+{"trial":2,"humanGrantsWritten":1,"requestsShown":[100,101],"allowedRequests":[101,100],"outcome":"ready"}
+{"trial":3,"humanGrantsWritten":1,"requestsShown":[100,101],"allowedRequests":[100,101],"outcome":"ready"}
+{"trial":4,"humanGrantsWritten":1,"requestsShown":[100,101],"allowedRequests":[100,101],"outcome":"ready"}
+{"trial":5,"humanGrantsWritten":1,"requestsShown":[100,101],"allowedRequests":[101,100],"outcome":"ready"}

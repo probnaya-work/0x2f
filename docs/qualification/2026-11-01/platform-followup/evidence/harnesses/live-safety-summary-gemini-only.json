@@ -1,0 +1,24 @@
+{
+  "capturedAt": "2026-11-01T17:32:18.715270+00:00",
+  "liveTasks": [
+    {
+      "taskId": 1,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    },
+    {
+      "taskId": 2,
+      "status": "done",
+      "recordedPidExists": false,
+      "recordedGroupAlive": false,
+      "workerIdentityMatchesScratch": false
+    }
+  ],
+  "noKnownLiveWorkerOrRecordedGroup": true,
+  "reviewTreeGeneratedBinaryArtifacts": [],
+  "reviewTreeSymlinks": [],
+  "reviewTreeCredentialValueFiles": [],
+  "note": "Only owned scratch state and process identity were inspected. No credential values or process command lines are retained. Scratch HOME stays outside repository; evidence copies only task state and isolated nonsecret gateway settings."
+}

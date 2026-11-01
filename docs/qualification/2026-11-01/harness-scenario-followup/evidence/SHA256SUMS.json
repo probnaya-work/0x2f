@@ -1,0 +1,977 @@
+[
+  {
+    "path": "01-codex-started/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "01-codex-started/task-state/events.jsonl",
+    "bytes": 86,
+    "sha256": "585bb6ab6184e59441315f27137641ce384c92c7efe21c138d165b260ee5c3bc"
+  },
+  {
+    "path": "01-codex-started/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "01-codex-started/task-state/run.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "01-codex-started/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "01-codex-started/task-state/task.json",
+    "bytes": 1839,
+    "sha256": "99e58877fcd3a42990f9986301831bb5ca0e1e43d1edcc6e2220a512bc0fa423"
+  },
+  {
+    "path": "02-codex-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "02-codex-ready/program/duration.mjs",
+    "bytes": 1034,
+    "sha256": "92eac2bcdf8b47fc0778b16a4efde2380d4d8cc564513d5bd467eaab57484b41"
+  },
+  {
+    "path": "02-codex-ready/program/duration.test.mjs",
+    "bytes": 3180,
+    "sha256": "882d248c169a7cc7bed2188f093f6a7c5caf4d5712cad7d6c30559a82ed454d2"
+  },
+  {
+    "path": "02-codex-ready/task-state/events.jsonl",
+    "bytes": 4671,
+    "sha256": "eacf335cf1730331df0efeede2fd9217390ac91dbd1d1a0b6bced218829e2510"
+  },
+  {
+    "path": "02-codex-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "02-codex-ready/task-state/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "02-codex-ready/task-state/run.log",
+    "bytes": 1680,
+    "sha256": "dbfd36868cd87fb9050bf2542551b476c0d0ca2e6cbf52f74794a7161093d379"
+  },
+  {
+    "path": "02-codex-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "02-codex-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "02-codex-ready/task-state/task.json",
+    "bytes": 2043,
+    "sha256": "632b911c02e2c28aede1d7fcb825ae133e9d1760814312769dc0481de5fb1c97"
+  },
+  {
+    "path": "03-note-only/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "03-note-only/program/duration.mjs",
+    "bytes": 1034,
+    "sha256": "92eac2bcdf8b47fc0778b16a4efde2380d4d8cc564513d5bd467eaab57484b41"
+  },
+  {
+    "path": "03-note-only/program/duration.test.mjs",
+    "bytes": 3180,
+    "sha256": "882d248c169a7cc7bed2188f093f6a7c5caf4d5712cad7d6c30559a82ed454d2"
+  },
+  {
+    "path": "03-note-only/task-state/events.jsonl",
+    "bytes": 5901,
+    "sha256": "d30801d799e71d1a5df1762848ccaf8d50ec881cfd7942bef021c9ab42d84869"
+  },
+  {
+    "path": "03-note-only/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "03-note-only/task-state/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "03-note-only/task-state/run.log",
+    "bytes": 1680,
+    "sha256": "dbfd36868cd87fb9050bf2542551b476c0d0ca2e6cbf52f74794a7161093d379"
+  },
+  {
+    "path": "03-note-only/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "03-note-only/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "03-note-only/task-state/task.json",
+    "bytes": 3317,
+    "sha256": "1e4f308965e29e8e110281ceac8618e8e5b02e62ea8c237f8d2bd5e4a0886bf0"
+  },
+  {
+    "path": "04-opencode-started/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "04-opencode-started/program/duration.mjs",
+    "bytes": 1034,
+    "sha256": "92eac2bcdf8b47fc0778b16a4efde2380d4d8cc564513d5bd467eaab57484b41"
+  },
+  {
+    "path": "04-opencode-started/program/duration.test.mjs",
+    "bytes": 3180,
+    "sha256": "882d248c169a7cc7bed2188f093f6a7c5caf4d5712cad7d6c30559a82ed454d2"
+  },
+  {
+    "path": "04-opencode-started/task-state/events.jsonl",
+    "bytes": 5995,
+    "sha256": "b51b0edf8e9b87bcd7cb61aa22daf8cf1311dc2efe9a1453e49a5114a33597e0"
+  },
+  {
+    "path": "04-opencode-started/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "04-opencode-started/task-state/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "04-opencode-started/task-state/run.log",
+    "bytes": 1680,
+    "sha256": "dbfd36868cd87fb9050bf2542551b476c0d0ca2e6cbf52f74794a7161093d379"
+  },
+  {
+    "path": "04-opencode-started/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "04-opencode-started/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "04-opencode-started/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "04-opencode-started/task-state/task.json",
+    "bytes": 3501,
+    "sha256": "e0ba8c33754e408aed9fb5f501a08c3fcfc6da19e2abaf069eff4cff69a57685"
+  },
+  {
+    "path": "05-opencode-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "05-opencode-ready/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "05-opencode-ready/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "05-opencode-ready/task-state/events.jsonl",
+    "bytes": 16104,
+    "sha256": "6a79f6b46e8fb130feef1661cef00222b0f78dc5f6556360b7321f182efdf161"
+  },
+  {
+    "path": "05-opencode-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "05-opencode-ready/task-state/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "05-opencode-ready/task-state/run.log",
+    "bytes": 6839,
+    "sha256": "7b054c0bc68569f8da5dc4ef6156ee52a8bc796f327be3f50a314f4422c8eb22"
+  },
+  {
+    "path": "05-opencode-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "05-opencode-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "05-opencode-ready/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "05-opencode-ready/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "05-opencode-ready/task-state/task.json",
+    "bytes": 3693,
+    "sha256": "c72e28aa4a20c5eb1f2e7e6632a679a6f39c4ceb24f02d22d1428311d5318d96"
+  },
+  {
+    "path": "06-runtime-reopened/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "06-runtime-reopened/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "06-runtime-reopened/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/events.jsonl",
+    "bytes": 16104,
+    "sha256": "6a79f6b46e8fb130feef1661cef00222b0f78dc5f6556360b7321f182efdf161"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/run.log",
+    "bytes": 6839,
+    "sha256": "7b054c0bc68569f8da5dc4ef6156ee52a8bc796f327be3f50a314f4422c8eb22"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "06-runtime-reopened/task-state/task.json",
+    "bytes": 3693,
+    "sha256": "c72e28aa4a20c5eb1f2e7e6632a679a6f39c4ceb24f02d22d1428311d5318d96"
+  },
+  {
+    "path": "07-codex-return-started/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "07-codex-return-started/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "07-codex-return-started/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "07-codex-return-started/task-state/events.jsonl",
+    "bytes": 16702,
+    "sha256": "b50ee4512133227b9c36c947b7c4ff1099b0ff65812fb2fc0a13f2787dcc9bce"
+  },
+  {
+    "path": "07-codex-return-started/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "07-codex-return-started/task-state/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "07-codex-return-started/task-state/run.log",
+    "bytes": 6839,
+    "sha256": "7b054c0bc68569f8da5dc4ef6156ee52a8bc796f327be3f50a314f4422c8eb22"
+  },
+  {
+    "path": "07-codex-return-started/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "07-codex-return-started/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "07-codex-return-started/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "07-codex-return-started/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "07-codex-return-started/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "07-codex-return-started/task-state/task.json",
+    "bytes": 4379,
+    "sha256": "3eb438f435c9ba3586ae2d54de03a1e948a1919ad0caad4923ad81fbead46fd3"
+  },
+  {
+    "path": "08-final-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "08-final-ready/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "08-final-ready/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "08-final-ready/task-state/events.jsonl",
+    "bytes": 22774,
+    "sha256": "1b11b2872027b57fc4b413099484701ef28d80ab8aeb9b1a3896fda1673307f2"
+  },
+  {
+    "path": "08-final-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "08-final-ready/task-state/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "08-final-ready/task-state/run.log",
+    "bytes": 7927,
+    "sha256": "3eb3250f4c6b87281fc27561f65796f9ea386f96ad152659a283bda55234356e"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "08-final-ready/task-state/runs/3/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "08-final-ready/task-state/task.json",
+    "bytes": 4583,
+    "sha256": "0f3dc633c0987154fb7ae9a70df36ecfc0689e522ee5cf22670b23082337fe58"
+  },
+  {
+    "path": "09-closed/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "09-closed/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "09-closed/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "09-closed/task-state/events.jsonl",
+    "bytes": 22856,
+    "sha256": "a032b74061848f7cad6b79b5915b9cb4acf4fa82bf2cb4314833babd845d9085"
+  },
+  {
+    "path": "09-closed/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "09-closed/task-state/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "09-closed/task-state/run.log",
+    "bytes": 7927,
+    "sha256": "3eb3250f4c6b87281fc27561f65796f9ea386f96ad152659a283bda55234356e"
+  },
+  {
+    "path": "09-closed/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "09-closed/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "09-closed/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "09-closed/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "09-closed/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "09-closed/task-state/runs/3/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "09-closed/task-state/task.json",
+    "bytes": 4582,
+    "sha256": "df73162b1203769490dfd0417f492c7fd682fb73f44a0c9b0ad21b3852d3a24b"
+  },
+  {
+    "path": "0x2f-0.1.4.tgz",
+    "bytes": 271408,
+    "sha256": "2b19cbff7f1e9c65ca3d57fc084c24fb16d9dbded86fd71b6874f6ca9333831f"
+  },
+  {
+    "path": "10-reopened-done/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "10-reopened-done/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "10-reopened-done/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "10-reopened-done/task-state/events.jsonl",
+    "bytes": 22856,
+    "sha256": "a032b74061848f7cad6b79b5915b9cb4acf4fa82bf2cb4314833babd845d9085"
+  },
+  {
+    "path": "10-reopened-done/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "10-reopened-done/task-state/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "10-reopened-done/task-state/run.log",
+    "bytes": 7927,
+    "sha256": "3eb3250f4c6b87281fc27561f65796f9ea386f96ad152659a283bda55234356e"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "10-reopened-done/task-state/runs/3/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "10-reopened-done/task-state/task.json",
+    "bytes": 4582,
+    "sha256": "df73162b1203769490dfd0417f492c7fd682fb73f44a0c9b0ad21b3852d3a24b"
+  },
+  {
+    "path": "11-done-after-runtime-restart/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "11-done-after-runtime-restart/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "11-done-after-runtime-restart/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/events.jsonl",
+    "bytes": 22856,
+    "sha256": "a032b74061848f7cad6b79b5915b9cb4acf4fa82bf2cb4314833babd845d9085"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/run.log",
+    "bytes": 7927,
+    "sha256": "3eb3250f4c6b87281fc27561f65796f9ea386f96ad152659a283bda55234356e"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/runs/3/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "11-done-after-runtime-restart/task-state/task.json",
+    "bytes": 4582,
+    "sha256": "df73162b1203769490dfd0417f492c7fd682fb73f44a0c9b0ad21b3852d3a24b"
+  },
+  {
+    "path": "brief.txt",
+    "bytes": 1150,
+    "sha256": "2954f99bc1cf30799c296dd740f498c651992edd8eb36b9c476e646ae05322dd"
+  },
+  {
+    "path": "checkpoints.jsonl",
+    "bytes": 10343,
+    "sha256": "ed646d3f5b1a479e64c087779d777fb4f9bfc5ab886f401a2abf639ec0a68967"
+  },
+  {
+    "path": "codex-run-1-native.json",
+    "bytes": 34294,
+    "sha256": "510209f0b5b11b60c03e6367fd4a2212b4ab5a59e2d1ee14fec12b48838c22f1"
+  },
+  {
+    "path": "codex-run-3-native.json",
+    "bytes": 38429,
+    "sha256": "3a0afca98eb4afa021f2ff4262d958f25248eb9ba67a08136174f9d12eda9179"
+  },
+  {
+    "path": "commands.jsonl",
+    "bytes": 26611,
+    "sha256": "c56e52644cfa5a184c04ec1b0e53aa0b14755016caf28f7d091f35eefca03fd5"
+  },
+  {
+    "path": "duration.mjs.diff",
+    "bytes": 2623,
+    "sha256": "9e7029940d87b8e34b812b6c213238c6de4ab7335f7731adc0d76c3eed993657"
+  },
+  {
+    "path": "duration.test.mjs.diff",
+    "bytes": 4261,
+    "sha256": "f15c40a6515485659715c1c00f61a9c5168155f4f7cb892fb39f5a4d9a8488b2"
+  },
+  {
+    "path": "final-independent-verification.json",
+    "bytes": 4901,
+    "sha256": "8e4f08257f518ff397b93f810ea433e336ff854718105f304063e69a2206bb41"
+  },
+  {
+    "path": "final-program-tests.tap",
+    "bytes": 4723,
+    "sha256": "662f3f438752ccb8e60a52bac54bdfd39bd35fdd43f6db1366be2592af83a6ca"
+  },
+  {
+    "path": "initial-independent-verification.json",
+    "bytes": 2334,
+    "sha256": "189041c5151107fde0d5bab2a0ca56ffabcaf48af628a77b88818e89a7fed9a5"
+  },
+  {
+    "path": "initial-program-tests.tap",
+    "bytes": 2927,
+    "sha256": "142f4ba964211ff37fb341df723ef6fe71443a2d886416056df0d65aa4acd63c"
+  },
+  {
+    "path": "installation.json",
+    "bytes": 21569,
+    "sha256": "1cfedeef36714aea87fa16e3dc1796e43f8d9911dedea2d5806119bd7652c9f3"
+  },
+  {
+    "path": "inventory.json",
+    "bytes": 13034,
+    "sha256": "756cbdb8c4a10ff10919abe23039ea6a2dd26dfca76cc73021c5c93ff785e5e8"
+  },
+  {
+    "path": "opencode-acp-preflight.json",
+    "bytes": 8007,
+    "sha256": "3c51398a9dcb98a4053fd6da70282ebb814da132d19bba033a9209bf1bc8fda0"
+  },
+  {
+    "path": "opencode-independent-verification.json",
+    "bytes": 4906,
+    "sha256": "aa69cbbc97f75ec814ba05c93df73cae87a23211442c8bf6a66fc63243c89006"
+  },
+  {
+    "path": "opencode-native-session.json",
+    "bytes": 74896,
+    "sha256": "ac314b35740afcb02eef75f456e737e67bdfacc32dd99f9d2b3d6adeaa9eecd6"
+  },
+  {
+    "path": "opencode-program-tests.tap",
+    "bytes": 4715,
+    "sha256": "cc6ecba99cfa2d698cb213869d42e18c77bf389fc814ec8f3bea410ba4068be4"
+  },
+  {
+    "path": "processes.jsonl",
+    "bytes": 70921,
+    "sha256": "62e05e2e21bf7fa2e4b1e9ae31963724fab05f60a079bf9030a0b83afdcf03ec"
+  },
+  {
+    "path": "repository-check.log",
+    "bytes": 255,
+    "sha256": "b197c7abfcf2fb2ac4e25e51bd409e0cc22f6366cc268ed50f1fd8b880c9585e"
+  },
+  {
+    "path": "repository-checks.json",
+    "bytes": 993,
+    "sha256": "03ca01475136b95b5eec9a223944f919794e8911bd1edc2ea1fd6e4bccbd533b"
+  },
+  {
+    "path": "repository-initial-check.log",
+    "bytes": 255,
+    "sha256": "b197c7abfcf2fb2ac4e25e51bd409e0cc22f6366cc268ed50f1fd8b880c9585e"
+  },
+  {
+    "path": "repository-initial-checks.json",
+    "bytes": 993,
+    "sha256": "0bcc82cfdcfb6c56d227a0b4e73d238dd3b9b67d32f2e7193af183c2b9c9c605"
+  },
+  {
+    "path": "repository-initial-test.log",
+    "bytes": 74528,
+    "sha256": "2eeec5f24987352b86d747aa0dd3e87e2b0793ece4d8c47e91e146dd3e094756"
+  },
+  {
+    "path": "repository-test.log",
+    "bytes": 67398,
+    "sha256": "f7d4adfb07ae4f099ff3f7b890061ae9965780ba31db7ed95dd7ceda42308a32"
+  },
+  {
+    "path": "review-checks.json",
+    "bytes": 409,
+    "sha256": "17ffd5f6be8484e3d35b6efe69697a81d32d9174577d7d0e75201aecfca5fc08"
+  },
+  {
+    "path": "runtime-restarts.jsonl",
+    "bytes": 843,
+    "sha256": "c311ae665b70c5c483c9554a6968ef595a18db7da1b99b9eca726abc9b5afdde"
+  },
+  {
+    "path": "user-constraint.txt",
+    "bytes": 1156,
+    "sha256": "7b7e3ee19ccc20b8a885f228550190ed24d0e39f9fc4da3c3a6c7ea73987d66a"
+  },
+  {
+    "path": "verified-receipt.json",
+    "bytes": 1939,
+    "sha256": "4581f331355dfb0aaecf1bae2cfdd62bd7e71c4d2e1aa00ad119c40b33b28d61"
+  },
+  {
+    "path": "watch-run-1-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "watch-run-1-ready/program/duration.mjs",
+    "bytes": 1034,
+    "sha256": "92eac2bcdf8b47fc0778b16a4efde2380d4d8cc564513d5bd467eaab57484b41"
+  },
+  {
+    "path": "watch-run-1-ready/program/duration.test.mjs",
+    "bytes": 3180,
+    "sha256": "882d248c169a7cc7bed2188f093f6a7c5caf4d5712cad7d6c30559a82ed454d2"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/events.jsonl",
+    "bytes": 4671,
+    "sha256": "eacf335cf1730331df0efeede2fd9217390ac91dbd1d1a0b6bced218829e2510"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/run.log",
+    "bytes": 1680,
+    "sha256": "dbfd36868cd87fb9050bf2542551b476c0d0ca2e6cbf52f74794a7161093d379"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "watch-run-1-ready/task-state/task.json",
+    "bytes": 2043,
+    "sha256": "632b911c02e2c28aede1d7fcb825ae133e9d1760814312769dc0481de5fb1c97"
+  },
+  {
+    "path": "watch-run-2-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "watch-run-2-ready/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "watch-run-2-ready/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/events.jsonl",
+    "bytes": 16104,
+    "sha256": "6a79f6b46e8fb130feef1661cef00222b0f78dc5f6556360b7321f182efdf161"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/run.log",
+    "bytes": 6839,
+    "sha256": "7b054c0bc68569f8da5dc4ef6156ee52a8bc796f327be3f50a314f4422c8eb22"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "watch-run-2-ready/task-state/task.json",
+    "bytes": 3693,
+    "sha256": "c72e28aa4a20c5eb1f2e7e6632a679a6f39c4ceb24f02d22d1428311d5318d96"
+  },
+  {
+    "path": "watch-run-3-ready/program/README.md",
+    "bytes": 93,
+    "sha256": "7e4842e7c3375c8168b04c80e42e835c825aec86661d48fa8509d50d37785c0c"
+  },
+  {
+    "path": "watch-run-3-ready/program/duration.mjs",
+    "bytes": 2104,
+    "sha256": "2c8854608c32e804b948f64ad41db2b7eecd15456454b9551ec3397dadf92607"
+  },
+  {
+    "path": "watch-run-3-ready/program/duration.test.mjs",
+    "bytes": 6420,
+    "sha256": "8333e5c99aa3bd551475cd6b9a1e588e5e900bdbadc6f4a6f955b95cdc2d8866"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/events.jsonl",
+    "bytes": 22774,
+    "sha256": "1b11b2872027b57fc4b413099484701ef28d80ab8aeb9b1a3896fda1673307f2"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/run.log",
+    "bytes": 7927,
+    "sha256": "3eb3250f4c6b87281fc27561f65796f9ea386f96ad152659a283bda55234356e"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/1/prompt.md",
+    "bytes": 3177,
+    "sha256": "5309f82548198043fda3178826f7e8f53864c0db269d22527944025340f7719c"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/1/result.md",
+    "bytes": 774,
+    "sha256": "eca9d2ed734b33d851d36f4ad23424941643e1a44dfeeb1a68767fd7d211e0cc"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/2/prompt.md",
+    "bytes": 5829,
+    "sha256": "19376874f78b62fe9cb8d2b82f6baba0ee2158324f871bde426d0e6805f2a248"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/2/result.md",
+    "bytes": 2525,
+    "sha256": "9d2516fc0781bb4ed7feaf49d225e330dca805522d3e4e51b05d493e58d0ab32"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/3/prompt.md",
+    "bytes": 9383,
+    "sha256": "6f3b6185915e42eda310dd5e56371780ecffcd2277b9884365fa32b5c73a3036"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/runs/3/result.md",
+    "bytes": 1080,
+    "sha256": "a13fc782c5f811baca151305bca167c0fc1f81115a942537304ff658d12b2d48"
+  },
+  {
+    "path": "watch-run-3-ready/task-state/task.json",
+    "bytes": 4583,
+    "sha256": "0f3dc633c0987154fb7ae9a70df36ecfc0689e522ee5cf22670b23082337fe58"
+  }
+]
