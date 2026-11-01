@@ -1,0 +1,2278 @@
+
+> 0x2f@0.1.4 test
+> node --test "test/*.test.mjs"
+
+✔ INTERACTIVE E2E: permission request -> NEEDS YOU -> ALLOW -> the same run continues to READY (1343.568083ms)
+✔ INTERACTIVE E2E: REJECT answers with the rejection and the run continues (1542.283666ms)
+✔ ACP: a completed turn maps to ready with the session id, result and progress events (425.850958ms)
+✔ ACP: a decision block maps to needs_you/decision via the Work convention (1410.374541ms)
+✔ ACP: an early stop reason maps to failed (1048.048709ms)
+✔ ACP: the agent exiting before completing maps to failed (1098.141666ms)
+✔ ACP: a malformed initialize response fails clearly (1196.23925ms)
+✔ ACP: a missing session id fails clearly instead of inventing one (1426.806084ms)
+✔ ACP: permission requests are auto-declined with the explicit deny policy (headless) (1167.37725ms)
+✔ ACP: permission requests are auto-approved with the approve policy (834.383334ms)
+✔ ACP: interactive permission requests pause for the human and answer in place (1300.235958ms)
+✔ ACP: interactive reject answers with the reject option and the run continues (564.560875ms)
+✔ ACP: interactive ambiguous options are never guessed — only mappable actions are offered (625.002583ms)
+✔ ACP: the agent dying while an interactive permission waits fails the run (165.258375ms)
+✔ ACP: resume loads the session and prompts it (156.042791ms)
+✔ ACP: resume fails clearly when the agent lacks the loadSession capability (309.382417ms)
+✔ ACP: unknown notifications and non-mappable updates never break the run (142.777458ms)
+✔ ACP: cancel sends session/cancel and the run ends failed (170.567667ms)
+✔ createWork creates a persistent task and starts execution on the node (39.31075ms)
+✔ createWork rejects an empty title with the shared error (1.759042ms)
+✔ resumeWork on a needs_you task hands execution back to the node (14.115792ms)
+✔ allowWork/rejectWork are the same action with a different grant (12.456542ms)
+✔ resumeWork on a non-needs_you task throws the CLI's exact error (shared logic) (8.204ms)
+✔ resumeWork without a resumable session throws the CLI's exact error (9.687917ms)
+✔ closeWork moves any task to done and records task.closed (10.282875ms)
+✔ getWork returns the task with its final result (12.637166ms)
+✔ listWork returns persisted tasks (what the CLI and the API both render) (16.832958ms)
+✔ CLI and HTTP API are the same actions: the runtime factory both use produces identical outcomes (10.459625ms)
+✔ createWork selects the execution provider explicitly (9.873542ms)
+✔ createWork defaults to the runtime default provider (claude-code) (6.977ms)
+✔ createWork rejects an unknown provider with the shared error (0.744375ms)
+✔ createWork persists model when reliably known (separate concern from provider) (7.231375ms)
+✔ resumeWork refuses a decision block: decisions are answered, not allowed/rejected (9.484667ms)
+✔ answerWork records the human's answer to a decision; the task stays needs_you (20.368333ms)
+✔ answerWork validates: needs_you decision only, non-empty answer (14.008458ms)
+✔ a non-resumable NEEDS YOU task can still be closed without invoking the provider (63.320041ms)
+✔ resumeWork refuses a permission block on a provider that cannot resume (capability, not parity faking) (12.256958ms)
+✔ correctWork records a SEND-BACK correction as its own event, apart from a note (8.645208ms)
+✔ correctWork validates: a correction is required and bounded (7.8655ms)
+✔ getTaskDiff returns one entry per file.changed event, with real hunks when git has a baseline (27.264709ms)
+✖ POST /api/tasks creates a task through the shared action and starts it on the node (10.7705ms)
+✖ POST /api/tasks without a title -> 400 from the shared action (2.544667ms)
+✖ GET /api/tasks and GET /api/tasks/:id (with result) (2.060875ms)
+✖ POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400 (1.52975ms)
+✖ POST /api/tasks/:id/close moves the task to done (1.042792ms)
+✖ unknown routes -> 404; missing task -> 404 (1.1155ms)
+✖ server binds to localhost by default (local-first, not LAN-exposed) (1.273084ms)
+✖ SSE delivers normalized task.created when a task is created through the API (2.809667ms)
+✖ GET / serves the 0x2F Web shell and its module assets (0.781834ms)
+✖ GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint (1.552833ms)
+✖ the bootstrap meta tag survives this server's own CSP — a real browser would actually read it (0.739792ms)
+✖ GET /api/status also carries workspace + node (symmetry with the bootstrap payload) (1.558ms)
+✖ a workspace directory name that could break out of the meta attribute is escaped safely (2.082625ms)
+✖ the browser client's full module graph is served (no blank-page regressions) (0.75ms)
+✖ GET /api/events/history returns the persisted normalized log per task (0.747792ms)
+✖ a task with no event log yet is still present in the history (0.92ms)
+✖ GET /api/providers lists the registry (default first) with normalized descriptors (1.200667ms)
+✖ POST /api/tasks creates through the selected provider (1.255542ms)
+✖ POST /api/tasks with an unknown provider -> 400 from the shared action (1.040375ms)
+✖ POST /api/tasks/:id/rerun starts a second run under the same task through the shared action (0.966417ms)
+✖ DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence) (0.782041ms)
+✖ POST /api/tasks/:id/correct records a SEND-BACK correction as its own event (0.803042ms)
+✖ DECISION FLOW: a body-less rerun POST is a valid request, not a 500 (0.796083ms)
+✖ DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run (0.749167ms)
+✖ DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run (0.76225ms)
+✖ DECISION FLOW: distinct request ids are distinct gestures (0.655291ms)
+✖ every API failure is explicit, valid JSON (never an empty or partial body) (0.927459ms)
+✖ GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404 (0.729167ms)
+✖ GET /api/tasks/:id includes the projected run history (0.836625ms)
+✖ POST /api/tasks/:id/answer records the human's decision answer (0.986209ms)
+✖ ALLOW on a decision is refused over the API; ANSWER on a permission is refused (1.15175ms)
+✖ a non-resumable NEEDS YOU task can be closed over the API without invoking the provider (0.98075ms)
+✖ REGRESSION: the ~1,000 character brief that dogfooding rejected is accepted (10.489167ms)
+✖ run 1's persisted input carries the full brief, not the title (2.366041ms)
+✖ a short brief behaves exactly as it did before briefs existed (2.261625ms)
+✖ the slug is built from the derived title, so a long brief cannot produce a monstrous directory name (1.575542ms)
+✖ the brief is bounded: MAX_BRIEF is enforced at the action boundary (1.000917ms)
+✖ the brief is bounded at the API boundary too, with the same message (1.525125ms)
+✖ a blank brief is still refused — one required field, clearly named (0.960833ms)
+✖ creating a task derives its title with no provider process at all (1.038541ms)
+✖ a task created before briefs existed still reads correctly (no migration) (1.0545ms)
+✔ permission -> allow -> successful resume: the SAME session continues and the run completes (1674.032583ms)
+✔ permission -> allow -> failed resume: the run FAILS honestly (kind resume), never pretends the grant continued (1765.326041ms)
+✔ CLI: the dogfooding loop — new, rerun through another provider, open, open --run (3692.444125ms)
+✔ 2f version prints the package version only (136.946666ms)
+✔ 2f --version prints the package version only (99.975333ms)
+✔ 2f -v prints the package version only (102.79675ms)
+✖ E2E: `2f providers` detects codex and a task runs to READY through the real CLI (11.476625ms)
+✖ E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (1.104542ms)
+✖ E2E: command_execution is recorded honestly as tool activity, never as file.changed (1.141833ms)
+✖ E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (1.505167ms)
+✖ E2E: the same task can switch away from codex to another provider without losing task context (1.742125ms)
+✔ codex is registered with honest capabilities (0.4715ms)
+✔ codexBin honors CODEX_BIN (0.073792ms)
+✔ classifyCodexFailure: auth failures classify with the codex login remedy (0.253208ms)
+✔ classifyCodexFailure: non-auth failures stay unclassified (0.051292ms)
+✔ normalizeCodexRun: result text -> ready with the session id (0.570667ms)
+✔ normalizeCodexRun: result with the shared decision protocol -> needs_you/decision (0.294625ms)
+✔ normalizeCodexRun: an explicit blocker report is failed, never READY (0.413166ms)
+✔ normalizeCodexRun: a partial limitation inside a completed result is still ready (0.440541ms)
+✔ normalizeCodexRun: error -> failed with auth classification (0.162792ms)
+✔ parser: a completed run maps to run.started + tool events + ready (5.964667ms)
+✔ parser: an auth failure maps to a failed outcome with classification (0.55475ms)
+✔ parser: the shared decision protocol in the result -> needs_you/decision (0.73325ms)
+✔ parser: reasoning summaries surface as progress, never as the result (0.230292ms)
+✔ parser: transient reconnect notices are ignored (not task progress) (0.095208ms)
+✔ parser: stray non-JSON lines are ignored without breaking the stream (0.041458ms)
+✔ start() runs codex exec --json and normalizes a successful run (494.834541ms)
+✔ start() passes -m model when provided and surfaces a failed turn (1398.558041ms)
+✔ resume() resumes the SAME thread via codex exec resume <id> (1381.944375ms)
+✔ resume() without a session id fails loudly (0.263041ms)
+✔ start() fails cleanly when codex is not installed (2.24425ms)
+✔ user config is preserved by default; account-default execution is explicit (1294.10625ms)
+✔ command provider: declares the conservative capabilities (1.661917ms)
+✔ command provider: success maps to ready with the result and a run.started event (705.431875ms)
+✔ command provider: a non-zero exit maps to failed with the stderr message (1392.69475ms)
+✔ command provider: a missing executable fails cleanly (0.872708ms)
+✔ command provider: the Work decision convention maps stdout to needs_you/decision (1391.166792ms)
+✔ normalizeCommandRun: exit 0 / non-zero / empty stderr (0.147542ms)
+✔ substituteCommand replaces only the known placeholders (0.063166ms)
+✔ a normal result without the section is not a decision (0.444ms)
+✔ merely mentioning the convention is not a decision (0.103917ms)
+✔ REGRESSION /02: 'None.' plus explanation under the heading is not a decision (0.105ms)
+✔ a bare 'None' section is not a decision (0.0525ms)
+✔ REQUIRED: no is an explicit no-decision signal (0.048667ms)
+✔ a non-positive REQUIRED value is not a decision (0.054792ms)
+✔ a question without the positive signal is not a decision (malformed block) (0.038458ms)
+✔ REQUIRED: yes with no readable question is incomplete, not a decision (0.2895ms)
+✔ REQUIRED: yes + QUESTION is a genuine decision; the question is preserved (0.086083ms)
+✔ REQUIRED: yes with the question as prose after the marker is preserved (0.086667ms)
+✔ the signal is case-insensitive; keys may be lowercase (0.049417ms)
+✔ a long question is capped at a generous storage guard (4000), never dropped (0.128875ms)
+✔ a question well under the storage guard is never truncated (0.041416ms)
+✔ a multi-paragraph question after QUESTION: is preserved verbatim, newlines and all (0.032917ms)
+✔ a multi-paragraph question with no QUESTION: field keeps its paragraph breaks (0.03675ms)
+✔ a decision block is the LAST section: later ## headings bound it (0.032333ms)
+✔ normalizeDshRun: the /02 capture -> READY, not needs_you (0.588292ms)
+✔ normalizeDshRun: explicit protocol -> needs_you/decision with the question (0.043333ms)
+✔ normalizeOutcome (Claude): explicit protocol -> needs_you/decision; prose -> ready (0.284291ms)
+✔ normalizeCommandRun: explicit protocol -> needs_you/decision; prose -> ready (0.045167ms)
+✔ deepseek-harness is registered with honest capabilities (0.918958ms)
+✔ normalizeDshRun: exit 0 -> ready with the final assistant text (1.175208ms)
+✔ normalizeDshRun: exit 0 + explicit decision protocol -> needs_you/decision (shared Work convention) (0.659583ms)
+✔ normalizeDshRun: exit 0 + an explicit blocker report -> failed (kind blocked), never READY (0.333333ms)
+✔ normalizeDshRun: exit 1 -> failed with the stderr message (0.116125ms)
+✔ normalizeDshRun: exit 1 without stderr -> failed with a code message (0.116375ms)
+✔ start() runs dsh --profile headless and normalizes a successful run (1000.246292ms)
+✔ start() maps a failing dsh run to failed (1179.870208ms)
+✔ start() fails cleanly when dsh is not installed (1.522708ms)
+✔ taskDiff returns real hunks for a tracked, modified file (110.094292ms)
+✔ taskDiff reads an untracked file as a whole-file addition (127.631125ms)
+✔ taskDiff reports a file without hunks when the workspace is not a git repository (13.1005ms)
+✔ taskDiff dedupes repeated reports and keeps report order (150.693875ms)
+✔ taskDiff reports a file outside the workspace without hunks — never diffs elsewhere (105.601041ms)
+✔ taskDiff shows a tracked deletion when the reported file is gone (128.4275ms)
+﹣ the packed artifact supports the full first-install journey (690.995625ms) # registry unreachable; cannot resolve ws: npm error code ENOTFOUND
+✔ WebCrypto and the pure-JS fallback derive the identical key (1706.92825ms)
+✔ the fallback derivation stays responsive (yields between PBKDF2 batches) (1870.263584ms)
+✔ envelopes encrypt on one path and decrypt on the other (both directions) (120.084583ms)
+✔ a tampered AAD (wrong from/requestId) is rejected on both paths (80.776708ms)
+✔ AAD encoding is the fixed wire contract (0.126875ms)
+✔ randomId is a UUID v4 even where crypto.randomUUID is absent (0.151083ms)
+✖ a relay cannot forge a command: envelopes without the pairing key never execute (4.109833ms)
+✖ a tampered envelope (bit flip in the ciphertext) is rejected (1.591584ms)
+✖ a captured command envelope cannot be replayed to execute twice (1.090333ms)
+✖ replay protection survives a Mac/runtime restart (persisted ack cache) (1.009416ms)
+✖ legitimate retries (same requestId) return the same ack without double execution (1.484709ms)
+✖ a re-paired (rotated) Mac rejects envelopes from the old phone key (0.779583ms)
+✖ relay state and persisted state hold no task/source/result payloads (0.495875ms)
+✔ the remote projection drops raw inputs, diffs, session ids, absolute paths and base (0.516292ms)
+✖ the full remote-control loop works end-to-end over the E2E channel (0.6235ms)
+✔ event model exposes exactly the normalized Work event types (0.961167ms)
+✔ normalizeEvent stamps type and timestamp; rejects unknown types (0.857916ms)
+✔ workEvent attaches a taskId (0.07225ms)
+✔ bus fans events out and supports unsubscribe (0.094083ms)
+✔ tailer emits each new log line exactly once, in order (46.191708ms)
+✔ tailer does not consume a partial line until it is complete (93.849792ms)
+✔ tailer ignores malformed lines without breaking the stream (23.120292ms)
+✖ E2E: `2f providers` detects gemini and a task runs to READY through the real CLI (3.141416ms)
+✖ E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works (0.660833ms)
+✖ E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context (0.32275ms)
+✖ E2E: the same task can switch away from gemini to another provider without losing task context (0.379375ms)
+✔ gemini is registered with honest capabilities (0.415583ms)
+✔ geminiBin honors GEMINI_BIN (0.063875ms)
+✔ geminiApprovalArgs: auto_edit is the default; yolo/default are explicit overrides (0.311625ms)
+✔ classifyGeminiFailure: no-auth exit 41 classifies with the settings/API-key remedy (0.158667ms)
+✔ classifyGeminiFailure: in-run API auth text classifies even with a non-auth exit code (0.095416ms)
+✔ classifyGeminiFailure: non-auth failures stay unclassified (0.048167ms)
+✔ normalizeGeminiRun: successful result -> ready with the session id (0.579333ms)
+✔ normalizeGeminiRun: result text with the shared decision protocol -> needs_you/decision (0.249166ms)
+✔ normalizeGeminiRun: result error -> failed with auth classification (0.068916ms)
+✔ normalizeGeminiRun: no result event is failed, never ready — even on exit 0 (0.086334ms)
+✔ normalizeGeminiRun: no output at all reads as the install/auth prompt (0.066792ms)
+✔ normalizeGeminiRun: no-auth exit 41 with the settings message classifies as auth (0.040459ms)
+✔ parser: a completed run maps to run.started + tool events + file.changed + ready (2.789125ms)
+✔ parser: the shared decision protocol in the result -> needs_you/decision (0.311959ms)
+✔ parser: a handled fatal error maps to failed with auth classification (0.361042ms)
+✔ parser: an interrupted run (no result event) stays failed despite exit 0 (0.413875ms)
+✔ parser: stray non-JSON lines are ignored without breaking the stream (0.084708ms)
+✔ parser: transient error events (severity warning/error) never decide the outcome (0.072583ms)
+✔ start() runs gemini -p stream-json and normalizes a successful run (1235.398125ms)
+✔ start() passes -m model and the approval mode; surfaces a no-auth exit 41 (1088.903292ms)
+✔ resume() resumes the SAME session via --resume <uuid> and carries the grant prompt (737.988125ms)
+✔ resume() with a missing session (exit 42) fails with the resume error, unclassified (1230.93025ms)
+✔ resume() without a session id fails loudly (0.254417ms)
+✔ start() fails cleanly when gemini is not installed (1.068958ms)
+
+Interrupted while running:
+
+⚠ test/lan-mode.test.mjs (test/lan-mode.test.mjs:1:1)
+⚠ test/lifecycle.test.mjs (test/lifecycle.test.mjs:1:1)
+⚠ test/node-local.test.mjs (test/node-local.test.mjs:1:1)
+⚠ test/observed-files.test.mjs (test/observed-files.test.mjs:1:1)
+⚠ test/package.test.mjs (test/package.test.mjs:1:1)
+⚠ test/pairing-security.test.mjs (test/pairing-security.test.mjs:1:1)
+⚠ test/paths.test.mjs (test/paths.test.mjs:1:1)
+⚠ test/permission-regression.test.mjs (test/permission-regression.test.mjs:1:1)
+⚠ test/provider-availability.test.mjs (test/provider-availability.test.mjs:1:1)
+⚠ test/provider-equivalence.test.mjs (test/provider-equivalence.test.mjs:1:1)
+⚠ test/provider-failure.test.mjs (test/provider-failure.test.mjs:1:1)
+⚠ test/provider-integration.test.mjs (test/provider-integration.test.mjs:1:1)
+⚠ test/provider-manifests.test.mjs (test/provider-manifests.test.mjs:1:1)
+⚠ test/recover.test.mjs (test/recover.test.mjs:1:1)
+⚠ test/refine.test.mjs (test/refine.test.mjs:1:1)
+⚠ test/relay-config-race.test.mjs (test/relay-config-race.test.mjs:1:1)
+⚠ test/relay-projection.test.mjs (test/relay-projection.test.mjs:1:1)
+⚠ test/relay-result.test.mjs (test/relay-result.test.mjs:1:1)
+⚠ test/relay.test.mjs (test/relay.test.mjs:1:1)
+⚠ test/remote-timeout.test.mjs (test/remote-timeout.test.mjs:1:1)
+⚠ test/render.test.mjs (test/render.test.mjs:1:1)
+⚠ test/rich.test.mjs (test/rich.test.mjs:1:1)
+⚠ test/routing.test.mjs (test/routing.test.mjs:1:1)
+⚠ test/runs.test.mjs (test/runs.test.mjs:1:1)
+⚠ test/security.test.mjs (test/security.test.mjs:1:1)
+⚠ test/serve.test.mjs (test/serve.test.mjs:1:1)
+⚠ test/sound-policy.test.mjs (test/sound-policy.test.mjs:1:1)
+⚠ test/store.test.mjs (test/store.test.mjs:1:1)
+⚠ test/task-context.test.mjs (test/task-context.test.mjs:1:1)
+⚠ test/title.test.mjs (test/title.test.mjs:1:1)
+⚠ test/tui-pty-e2e.test.mjs (test/tui-pty-e2e.test.mjs:1:1)
+⚠ test/tui.test.mjs (test/tui.test.mjs:1:1)
+⚠ test/ui-launch.test.mjs (test/ui-launch.test.mjs:1:1)
+⚠ test/web-ledger.test.mjs (test/web-ledger.test.mjs:1:1)
+⚠ test/worktree.test.mjs (test/worktree.test.mjs:1:1)
+✔ isPrivateLanIp accepts RFC1918 ranges and rejects everything else (0.4095ms)
+✔ detectLanAddress finds a private IPv4 and skips internal/loopback (0.093667ms)
+✔ LAN re-pair brings the runtime up BEFORE rotating (the runtime hosts the relay) (5.440375ms)
+Port 4242 is used by another 0x2F runtime or process — pairing on port 4243 instead.
+✔ LAN pairing falls back to a free port when the requested port is foreign (2.462166ms)
+✖ LAN hosts get the client + relay protocol only; the local API stays loopback-only (4.261042ms)
+✖ the LAN surface closes when `2f pair --off` disables the config (2.16575ms)
+✖ health reports lan so `2f pair` knows whether a running runtime serves the phone (1.396833ms)
+✖ a phone pairs over the LAN and controls a task; the local API stays off-LAN (1.231333ms)
+✖ the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle) (0.985084ms)
+✖ test/lan-mode.test.mjs (909727.329667ms)
+✔ lifecycle exposes the five Work statuses (0.652375ms)
+✔ working + ready outcome -> ready (0.792292ms)
+✔ working + failed outcome -> failed with error (0.064833ms)
+✔ working + permission outcome -> needs_you with blockedOn.type=permission (0.049959ms)
+✔ working + decision outcome -> needs_you with blockedOn.type=decision (0.052ms)
+✔ needs_you + beginResume(allow) -> working, blockedOn cleared, attempts bumped (0.127791ms)
+✔ full lifecycle: working -> needs_you -> working -> ready -> done (0.099042ms)
+✔ beginResume on a non-needs_you task throws (0.311959ms)
+✔ closeTask works from needs_you too (user abandons) (0.058666ms)
+✔ FAILURE_KINDS includes the blocked kind (0.0935ms)
+✔ classifyResult: an explicit blocker report is failed, not ready (0.387375ms)
+✔ classifyResult: a task-level passive blocker is failed (0.391333ms)
+✔ classifyResult: a partial limitation is NOT a blocker (work was done) (0.16225ms)
+✔ classifyResult: a warning about a subtask never becomes a blocker (0.064167ms)
+✔ classifyResult: an explicit decision protocol still wins over ready (0.348ms)
+✔ classifyResult: plain completed text is ready (0.188958ms)
+✔ blockedResultText: returns the agent's own explanation sentence, capped (0.118875ms)
+✔ startExecution spawns the detached worker on this machine and returns its pid (1.915125ms)
+✔ startExecution passes the current run number to the worker (0.142709ms)
+✔ resumeExecution spawns the worker in resume mode with the grant (0.123625ms)
+✔ resolveWorkspace maps the logical 'local' workspace to the local path (0.189542ms)
+✔ cancelExecution is a best-effort stop of the recorded pid (0.095042ms)
+✔ the node is a swappable seam: the same contract a remote node would implement (0.06925ms)
+✔ worker records repository-observed file.changed events for a provider without file-change reporting (1164.169708ms)
+✔ a provider that DOES declare file-change reporting is observed too (authoritative on-disk state) (1437.749791ms)
+✔ the packed artifact ships only the local product (320.478958ms)
+✖ an agent-registered pairing token always has an expiry (never claimable forever) (4.486875ms)
+✖ a re-pair token (rotate-registered) cannot be claimed after it expires (1.018958ms)
+✖ a phone session expires after its TTL and stops authenticating (0.502458ms)
+✖ 2f pair --off revokes remote access at the relay: sessions and tokens die immediately (0.608375ms)
+✖ a stale session stays dead after the Mac reconnects post-revocation (0.995625ms)
+✖ re-pairing (rotate) retires old sessions; only the new token's session works (1.048792ms)
+✖ a plain reconnect (same generation) does NOT revoke the phone session (2.00125ms)
+✖ rotation is authorized by the current deviceSecret; a wrong secret changes nothing (1.056584ms)
+✖ 2f pair falls back to a fresh identity when the relay rejects the old credential (2.634375ms)
+✔ plain-HTTP relay URLs are refused except loopback and private-LAN development (0.695875ms)
+✖ 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one (1.988792ms)
+✖ relay.json and the relay state file are written with mode 0600 (1.241792ms)
+✔ hosted defaults are https and pass the relay transport policy (0.359792ms)
+✔ 0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults (0.222833ms)
+✔ 2f pair with no flags resolves the LAN transport (same Wi-Fi) (6.399292ms)
+✔ 2f pair --relay still resolves the hosted transport; --lan forces LAN (8.397125ms)
+✔ 2f pair with no LAN address fails closed with a clear message (1.091167ms)
+✔ a plain-HTTP env override of the relay default is still refused (0.983292ms)
+✔ canonicalPath: leading ./ and interior . segments collapse (0.854042ms)
+✔ canonicalPath: the three spellings of one file are identical (0.224875ms)
+✔ canonicalPath: resolves .. lexically but never escapes the repository root (0.421833ms)
+✔ canonicalPath: empty and root-like inputs are stable (0.840208ms)
+✔ REGRESSION: exit-0 run blocked on file-edit permission -> needs_you, reason=permission (0.869209ms)
+✔ REGRESSION at the task layer: v0 marked this READY; v0.2 marks it needs_you (0.945291ms)
+✔ after approval, resume outcome on the same session -> working -> ready (1.366625ms)
+✔ clean successful run -> ready (0.886625ms)
+✔ result with is_error=true -> failed (0.127625ms)
+✔ result text with a real decision section -> needs_you/decision (0.249ms)
+✔ result text with 'None' decision section -> ready (0.078666ms)
+✔ denials win even when is_error is also true (blocked, not failed) (0.043584ms)
+✔ createWork refuses a manually selected unavailable provider BEFORE persisting anything (5.275542ms)
+✔ an unavailable manual provider is never turned into AUTO (1.632291ms)
+✔ rerunWork refuses an explicitly selected unavailable provider; the previous run survives (9.573667ms)
+✔ AUTO keeps excluding unavailable providers (never routes to a missing executable) (1.754333ms)
+✔ an unspecified request is not a manual selection: the runtime default keeps its historical behavior (5.739083ms)
+✖ POST /api/tasks with an unavailable provider -> 400 from the shared action (the Web UI is not the authority) (4.842292ms)
+✔ the same task through both providers -> ready with the same result (2145.977292ms)
+✔ a decision block normalizes identically through both providers (2229.647666ms)
+✔ classifyClaudeFailure: the exact dogfooding 401 message is classified as auth (0.746791ms)
+✔ classifyClaudeFailure: an ordinary execution failure is not classified (0.126333ms)
+✔ classifyClaudeFailure: other common auth phrasings are also recognized (0.05475ms)
+✔ normalizeOutcome: an is_error result with an auth message carries failure.kind=auth (0.101708ms)
+✔ normalizeOutcome: an ordinary is_error result carries no failure classification (0.047416ms)
+✔ applyOutcome persists a recognized failure.kind onto the task (0.899375ms)
+✔ applyOutcome drops an unrecognized failure.kind — no unvetted string reaches the UI (0.169125ms)
+✔ applyOutcome clears a stale failure once the task recovers (needs_you / ready) (0.104292ms)
+✔ a real process exit on a 401 stderr message classifies as auth (1139.640791ms)
+✔ a real process exit on an unrelated crash is not classified (1439.658125ms)
+✖ API: configured providers appear in /api/providers with their integration type (5.953625ms)
+✔ CLI: `2f providers` lists natives and configured providers with availability (144.561417ms)
+✔ E2E: a configured command provider runs the task through the real worker (1335.429458ms)
+✔ E2E: a configured ACP provider runs the task through the real worker and persists the session id (1416.599916ms)
+✔ E2E: native + ACP + command providers coexist in one workspace (8.159167ms)
+✔ manifests: a valid ACP manifest and a valid command manifest (0.562958ms)
+✔ manifests: shell and repository-relative executables carry a trust warning (0.149375ms)
+✔ manifests: every failure mode fails loudly, naming the file (0.306375ms)
+✔ manifests: a manifest cannot shadow a built-in provider (0.098875ms)
+✔ loadManifestProviders: no providers dir means nothing configured (2.251ms)
+✔ loadManifestProviders: builds acp + command providers from files; duplicate ids fail (9.101709ms)
+✔ loadManifestProviders: invalid JSON fails clearly (0.932625ms)
+✔ registry: native + configured providers coexist behind one contract (1.172041ms)
+✔ registry: a manifest error fails runtime creation loudly (never silent) (0.885458ms)
+✔ registry: availability resolves the configured executable deterministically (2.322083ms)
+✔ registry: the register() seam adds providers and refuses duplicates (0.442166ms)
+✔ executableAvailable: PATH resolution and absolute paths, cheap and sync (0.799291ms)
+✔ registry: built-in OpenCode uses ACP without a workspace manifest (0.192084ms)
+✔ registry: an existing OpenCode manifest keeps its explicit descriptor (0.845833ms)
+✔ pidAlive: signal-0 existence probe with EPERM treated as alive (0.430959ms)
+✔ an orphaned working run is failed with the crashed classification, preserving history and session (8.78625ms)
+✔ an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time (5.9295ms)
+✔ a task with no recorded pid is also recovered (worker died before pid persisted) (4.619375ms)
+✔ a working task whose worker is alive is never touched (4.38625ms)
+✔ non-working tasks are left alone even with a dead pid (6.651417ms)
+✔ legacy tasks (no run records) are recovered without crashing (2.273ms)
+✔ failInterruptedRun with no startedAt writes no duration (1.8805ms)
+✔ a recovered task can be rerun normally (the working guard no longer blocks it) (4.017583ms)
+✔ recovery is idempotent: a second sweep leaves the failed task alone (2.745917ms)
+✔ buildRefineInstruction embeds the note and the refinement rules (0.4955ms)
+✔ cleanRefinedText trims and unwraps a single code fence (0.116458ms)
+✔ raw text is sent to the refinement service: claude print mode with tools denied (1341.484458ms)
+✔ does NOT fall back to dsh headless — refinement only runs a tool-denied model (1.352542ms)
+✔ prefers claude-code's text mode when both providers are available (1360.159041ms)
+✔ fails gracefully with a clear error when no refinement model is available (0.57425ms)
+✔ empty, whitespace-only, and over-long notes are refused before any model call (1.1255ms)
+✔ a failing model run rejects and leaves the caller's text untouched (842.220083ms)
+✔ an empty model response is a failure, never a blank brief (1057.875ms)
+✔ a hanging refinement times out instead of leaving the composer stuck (202.626042ms)
+✔ a failing claude path surfaces its error and never falls back to dsh (359.228833ms)
+✔ when every available path fails, the preferred path's error is reported (411.218708ms)
+✔ a failure reported on stdout is surfaced with the provider label (510.173042ms)
+✖ POST /api/refine returns the refined text; repeated REFINE creates no tasks and starts no execution (2.7385ms)
+✖ START after refinement creates the Task using the refined text (0.768583ms)
+✖ START without refinement behaves exactly as today (0.302541ms)
+✖ a failed refinement does not destroy the original text: START still uses it (0.502208ms)
+✖ POST /api/refine refuses empty or missing input with 400 and never spawns the model (0.419833ms)
+✖ a normal pair-hello still confirms: the liveness check does not fire on the happy path (3.822541ms)
+✖ writing the confirmed pairing does not make the poller swap the config object (1.190209ms)
+✖ the config vanishing during the pairing ceremony never throws (0.9715ms)
+✖ a pair-hello arriving with no live config is refused, not crashed on (0.7935ms)
+✔ projectTask: a recognized failure.kind (and adapter remedy) crosses the relay (0.766292ms)
+✔ projectTask: an unrecognized kind never reaches the phone — re-vetted, not trusted (0.065875ms)
+✔ projectTask: no failure field at all projects to undefined, exactly as before (0.042375ms)
+✔ projectTask: failure.remedy is bounded like any other adapter-authored field (0.064458ms)
+✔ the closed vocabulary the relay checks against is the same one core/lifecycle.mjs owns (0.083709ms)
+✔ projectWorkspaceLabel: the basename only, never the absolute path (0.093875ms)
+✔ projectWorkspaceLabel: a long name is truncated from the LEFT so the distinguishing tail survives (0.0455ms)
+✔ projectSnapshot: carries a bounded workspace label and node — never the absolute base (0.100875ms)
+✔ projectSnapshot: absent base/node project to null, not a crash or an empty string standing in for absence (0.051958ms)
+✔ projectBlockedOn: the decision cap is raised to 4000, matching core/lifecycle.mjs's storage guard (0.377042ms)
+✔ projectBlockedOn: a question under the cap is passed through completely, newlines intact (0.06225ms)
+✔ projectBlockedOn: a genuine over-cap cut is marked explicitly, never a bare ellipsis (0.133291ms)
+✔ projectBlockedOn: an absolute workspace path inside a decision question is still stripped (0.058959ms)
+✔ projectTask carries the full brief — a long brief is not cut for the phone (0.05525ms)
+✔ the relay's brief bound IS the action's bound — the remote surface loses nothing (0.039708ms)
+✔ a brief beyond the bound is cut EXPLICITLY and flagged for the UI to say so (0.036458ms)
+✔ a task with no brief falls back to its title, as legacy tasks require (0.026875ms)
+✔ an absolute workspace path quoted inside a brief is still stripped (0.034041ms)
+✔ projectTask: a READY task carries its projected result, base paths stripped (0.031208ms)
+✔ projectTask: result is gated to states that show one — a stale result.md never leaks onto a failed task (0.037584ms)
+✔ projectSnapshot: READY tasks carry their result when the agent supplies resultsByTask (0.067166ms)
+✔ projectRun: outcome, duration and provider cross the relay for run history (0.045625ms)
+✔ relPath: ./src/foo.mjs, src/foo.mjs and /w/src/foo.mjs project identically (0.066917ms)
+✔ relPath: out-of-workspace paths flatten to the basename — never an absolute path (0.02925ms)
+✖ the phone sees the safe user-facing result in the snapshot, task detail and run detail (3.661209ms)
+✖ a failed task never leaks a stale result.md to the phone (1.058625ms)
+✖ the Mac authenticates outbound; unpaired and mismatched hellos are rejected (4.003667ms)
+✖ a pairing token is one-time: a second claim fails (1.00325ms)
+✖ an expired pairing token cannot be claimed (0.631916ms)
+✖ the phone pairs end-to-end and pulls a redacted snapshot (0.892375ms)
+✖ creating a Task through the encrypted channel starts it on the Mac's node (0.710708ms)
+✖ redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac (0.526417ms)
+✖ ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions (0.461792ms)
+✖ a duplicate requestId returns the cached acknowledgement and never executes twice (0.465916ms)
+✖ the Mac is offline: status reports offline and commands answer 503 — never queued (0.596792ms)
+✖ a relay restart loses no session and keeps the phone paired (0.677208ms)
+✖ the relay holds no task content — state and state.json are content-free (0.588959ms)
+✖ the relay is a broker: it serves no client or pairing page (0.501333ms)
+✖ pairing claims and command forwarding are rate limited (0.400875ms)
+✖ the local server reports mode 'local' — the client keeps its local behavior (1.046375ms)
+✖ a remote command whose response is lost settles with an honest error (never hangs forever) (2.570917ms)
+✖ the timeout error is surfaced, not silently retried into a double action (0.377125ms)
+✔ render groups needs_you tasks under NEEDS YOU with the reason (1.036542ms)
+✔ decision reason renders its own label (0.0815ms)
+✔ empty render (0.050208ms)
+✔ a realistic provider result parses into headings, prose, lists and code (0.899417ms)
+✔ headings cap at three display levels and ordered lists parse (0.087208ms)
+✔ unbalanced markers stay literal text instead of becoming markup (0.062084ms)
+✔ provider prose carrying HTML stays inert text tokens (0.132667ms)
+✔ code blocks keep newlines and long unbroken lines verbatim (0.073208ms)
+✔ empty, blank and plain input degrade gracefully (0.056917ms)
+✔ a decision question parses inline for the NEEDS YOU card (0.054875ms)
+✔ router: AUTO with a single available provider picks it deterministically (0.817667ms)
+✔ router: preference ordering wins over registry order (0.117291ms)
+✔ router: an unavailable preferred provider is skipped (deterministic fallback) (0.0705ms)
+✔ router: no compatible provider fails clearly, never silently (0.097958ms)
+✔ router: the configured default resolves an unspecified request (0.101416ms)
+✔ router: orderCandidates is deterministic and preference-first (0.064ms)
+✔ router: routing config is validated strictly, naming the file (2.852708ms)
+✔ router: absent routing config means the runtime default applies (0.524875ms)
+✔ actions: createWork with provider auto routes and persists the decision (5.176959ms)
+✔ actions: the configured routing default routes an unspecified request (3.845542ms)
+✔ actions: without routing config an unspecified request keeps the runtime default (2.711666ms)
+✔ actions: a manual override bypasses the router entirely (3.083292ms)
+✔ actions: AUTO with nothing available fails clearly instead of guessing (0.832917ms)
+✔ actions: rerun --provider auto re-routes and keeps the previous run (3.899541ms)
+✖ API: GET /api/routing exposes the configured default and preference (2.75625ms)
+✖ API: POST /api/tasks with provider auto routes through the shared action (1.655084ms)
+✔ CLI: 2f new --provider auto routes through the real worker; 2f open shows the decision (1556.325916ms)
+✔ an existing task (no runs) is interpreted as one historical run without rewriting it (0.479ms)
+✔ legacy run timing comes from the real event log when it exists (0.116959ms)
+✔ legacy outcomes: needs_you / failed / working / done are read from state when no event is terminal (0.060291ms)
+✔ makeRunRecord creates an in-flight run; updateRun persists outcome and timing (0.095458ms)
+✔ updateRun is a no-op for legacy tasks (their history stays interpreted) (0.042042ms)
+✔ currentRunNumber is the last record for sequential runs; 1 for legacy (0.054291ms)
+✔ createWork persists the first run with the task (6.725459ms)
+✔ rerunWork appends a second run under the SAME task without overwriting the first (5.361334ms)
+✔ rerunWork without a provider retries through the task's current provider (5.026625ms)
+✔ rerunWork refuses while the task is working (sequential runs only) (2.60825ms)
+✔ rerunWork rejects an unknown provider with the shared error (2.413875ms)
+✔ rerunWork materializes a legacy task's history before appending the new run (2.755834ms)
+✔ getRun returns one run's own result; an unknown run is a 404 (2.840167ms)
+✔ getWork includes the projected run history (2.208417ms)
+✔ eventsForRun attributes run-tagged events to their run and legacy events to run 1 (0.097375ms)
+✔ DOGFOODING: the same task through claude-code then deepseek-harness persists as two runs (2361.2565ms)
+✔ DOGFOODING: a needs_you run reopens on resume and finalizes with attempts=2 (1079.080292ms)
+✔ DOGFOODING: a needs_you run is preserved in history with its block (722.197917ms)
+✔ DOGFOODING: a failed rerun is preserved in history; the previous ready run is untouched (876.946291ms)
+✖ unauthenticated /api requests are refused with 401 — no task can be started (4.02025ms)
+✖ a wrong or absent token is refused; the correct token is accepted (0.916583ms)
+✖ the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow) (0.364458ms)
+✖ a foreign Host header (DNS rebinding) is refused on every route (0.348083ms)
+✖ cross-origin requests are refused even with a valid token (0.316ms)
+✖ Sec-Fetch-Site: cross-site and same-site browser requests are refused (0.290125ms)
+✖ the full C1 chain: no unauthenticated or cross-site path starts agent work (0.295959ms)
+✖ request bodies over the cap are refused with 413 (declared and streamed) (0.411917ms)
+✖ oversized inputs are refused by the shared actions — the CLI and the API share the caps (0.321625ms)
+✖ the health probe is unauthenticated but Host-guarded; static assets carry the CSP (0.401917ms)
+✖ SIGTERM shuts the runtime down cleanly without terminating the detached worker (10009.699416ms)
+✖ a task left working with a dead worker is recovered on the next runtime start (10011.526291ms)
+✖ a genuinely running task survives a runtime restart untouched (10007.102666ms)
+✖ SIGINT is a clean shutdown too (10007.175416ms)
+✔ seeded tasks never sound — a task already READY at seed stays silent (1.555458ms)
+✔ working -> ready via run.completed earns one READY intent (0.157417ms)
+✔ one transition arriving as several events sounds once (dedupe) (0.073167ms)
+✔ needs_user plus its task.updated sounds once (dedupe) (0.060542ms)
+✔ several tasks READY within the window produce ONE gesture (0.090125ms)
+✔ NEEDS YOU beats a pending READY in the same window (0.0725ms)
+✔ READY arriving while NEEDS YOU is pending stays NEEDS YOU (0.060291ms)
+✔ a re-entry after working is a NEW transition, not a replay (0.08325ms)
+✔ separate windows stay separate gestures (0.06175ms)
+✔ stale replayed events (written before the seed) are ignored (0.088667ms)
+✔ a genuine transition after the seed is not filtered by the replay guard (0.057042ms)
+✔ reseed (reconnect) suppresses a transition the fresh state already shows (0.044458ms)
+✔ normal execution makes no sound — and failed is tracked, not signalled (0.066083ms)
+✔ task.closed and task.created are silent (0.036792ms)
+✔ flush fires a pending intent immediately (test seam) (0.053375ms)
+✔ createTask writes task.json/prompt.md/run.log and assigns sequential ids (5.522583ms)
+✔ listTasks returns newest id first; findTask looks up by id (2.950917ms)
+✔ updateTask bumps updatedAt; readTaskResult/readTaskLog read back files (8.143458ms)
+✔ appendEvent appends normalized JSON lines to events.jsonl (2.056583ms)
+✔ task state files are written owner-only (0600) (1.8065ms)
+✔ writeJson/writeText are atomic: temp file + rename, no leftovers, 0600 preserved (1.301417ms)
+✔ sectionOf extracts a result section up to the next heading (0.412333ms)
+✔ createWork persists run 1's input per run; the original prompt.md is untouched (6.259584ms)
+✔ run 1's result, verification and changed files appear in run 2's prompt — but never a transcript (4.973959ms)
+✔ a user constraint added after run 1 appears in run 2's prompt, not run 1's (5.366292ms)
+✔ noteWork records Task context without starting or resuming an execution (3.496542ms)
+✔ answerWork keeps existing decision behavior AND lands the answer in Task context (3.382167ms)
+✔ same-provider resume keeps the existing session: no new run, no new per-run prompt (2.434458ms)
+✔ previous run records, results and the original prompt stay immutable across reruns (5.627791ms)
+✔ DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session (2205.528125ms)
+✔ a short one-line brief IS its own title — nothing changes for simple input (0.605584ms)
+✔ a blank brief derives nothing and is not treated as incomplete (0.304625ms)
+✔ a multi-paragraph engineering brief yields a scannable title and stays incomplete (0.102333ms)
+✔ the title is the first sentence, not the first paragraph (0.054625ms)
+✔ an abbreviation does not end the sentence early (0.058166ms)
+✔ a version number does not split the title mid-number (0.051542ms)
+✔ a brief with no terminal punctuation is wholly the title (0.052167ms)
+✔ CJK sentence terminators end a sentence without a following space (0.224292ms)
+✔ leading markdown decoration is stripped from the title (0.06025ms)
+✔ a decorated one-line brief is complete — the title represents all of it (0.089834ms)
+✔ a brief that merely wraps across lines is complete once normalized (0.062ms)
+✔ an over-long first sentence is cut at a word boundary, never mid-word (0.073208ms)
+✔ text with no spaces at all still truncates safely (no word boundary to find) (0.049917ms)
+✔ a CJK run with no spaces truncates without hanging or over-cutting (0.059875ms)
+✔ a title at exactly the target is not truncated (0.044334ms)
+✔ the derived title always fits the storage guard with room to spare (0.379375ms)
+✔ briefBody is empty when the title already says everything (0.065083ms)
+✔ briefBody is the REST of the brief — the heading sentence is never repeated (0.039084ms)
+✔ briefBody preserves the structure of everything after the opening sentence (0.035ms)
+✔ a TRUNCATED title renders the whole brief — a remainder would start mid-thought (0.029208ms)
+✔ GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission -> ALLOW -> READY -> diff -> SEND BACK -> decision -> ANSWER & CONTINUE -> READY -> ACCEPT -> DONE -> overview -> quit (4663.86275ms)
+✔ RETRY: a normalized provider-auth failure shows the auth band; p switches the next run to another provider; RETRY runs it and ACCEPT closes (1405.552834ms)
+✔ NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? help opens and closes, and a resize repaints the frame at the new size (2284.101708ms)
+✔ RESTORATION: SIGTERM and ⌃C both restore the terminal — alt screen off, cursor back, styles reset (461.103792ms)
+✔ decodeKeys: a lone ESC chunk is Escape; ESC with more bytes is a modifier (0.825459ms)
+✔ decodeKeys: Shift+Enter decodes when the terminal can deliver it (0.105709ms)
+✔ decodeKeys: plain keys, control keys and a paste (0.228042ms)
+✔ isPrintable rejects modified keys, so Ctrl+z never lands in a draft (0.050334ms)
+✔ j/k move the selection and clamp at both ends (0.24925ms)
+✔ tab cycles the filter and shift-tab cycles it back (0.285334ms)
+✔ / searches title, brief and number, and esc clears filter and search together (0.143792ms)
+✔ Enter and x resolve to the action each Work state is actually waiting for (0.170958ms)
+✔ Enter on a permission fires immediately; Enter on a decision asks for text first (0.077209ms)
+✔ an input commits to an intent, and esc throws the draft away (0.124959ms)
+✔ x on a decision is SAVE ONLY — the same answer, without spending a run (0.3705ms)
+✔ p retargets only the NEXT run, and moving the selection forgets it (0.076417ms)
+✔ d refuses on a task with nothing to show, and says so instead of opening an empty view (0.076834ms)
+✔ the composer: Alt+Enter briefs, Shift+Enter or Ctrl+n adds a newline, Enter creates, Ctrl+z reverts (0.1215ms)
+✔ q and Ctrl+c both detach (0.039875ms)
+✔ oneline protects the grid from provider text without eating the design's spacing (0.121125ms)
+✔ cut, pad and shortPath keep a cell to its measure (0.065334ms)
+✔ cellWord ellipsis-truncates long provider words and keeps the column gap (0.076084ms)
+✔ wrap keeps paragraph breaks — a decision question is prose, not a label (0.069542ms)
+✔ renderLine pads and truncates to exactly the column count (0.09025ms)
+✔ renderLine emits truecolor when the terminal has it and 256 when it does not (0.065583ms)
+✔ colorSupport follows the documented capability contract (0.067ms)
+✔ 256-color fallback quantizes the palette onto the canonical xterm cube (0.052625ms)
+✔ a cell's own background wins; every other cell sits on the frame's ground (0.063334ms)
+✔ the painter rewrites only the rows that changed, and repaints fully on resize (0.103708ms)
+✔ projectTask maps Work status onto the design's state keys, never the reverse (0.022333ms)
+✔ a decision's question reaches the model in full — nothing truncates it on the way (8.612083ms)
+✔ a permission halt carries the operation, the path and whether it resumes in place (2.438583ms)
+✔ the human record is read from the event log, so NOTE, ANSWER and CORRECTION stay distinguishable (3.597417ms)
+✔ provider identity is derived, so a configured provider is not a blank column (0.080625ms)
+✔ every rendered row is exactly the terminal width, at every size (3.784083ms)
+✔ both themes paint their own ground, in every mode and at every size (4.783375ms)
+✔ the two palettes are the design's, and they never share an ink (0.125958ms)
+✔ the frame shows the workspace, the counts, the halt and the action it is waiting for (2.664084ms)
+✔ the last three rows above the bottom gutter are a fixed footer that the panes never scroll into (2.338084ms)
+✔ help, the composer and the changes view each render their own full frame (2.569917ms)
+✔ the changes view draws the REAL diff from the working tree, loaded on d (82.89525ms)
+✔ a working rerun's rule draws a measured percentage against its prior runs (2.871458ms)
+✔ an empty workspace says so instead of rendering a broken grid (0.244083ms)
+✔ overview -> detail -> a NEEDS YOU permission -> back, against the real runtime (4.378208ms)
+✔ ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not (5.514375ms)
+✔ SEND BACK records the correction on the task, then rebuilds the next run from it (3.745542ms)
+✔ RETRY reruns a failed task on the same provider; the intent has not changed (3.194792ms)
+✔ ACCEPT closes the task through the shared action, and the ledger re-groups it (2.679417ms)
+✔ a refusal from the shared action is surfaced verbatim, never swallowed or worked around (2.11575ms)
+✔ the TUI never writes Work state itself — the store is only reached through actions (0.460208ms)
+✖ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (4.626166ms)
+✖ launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL (0.824833ms)
+✔ launchUi starts a missing runtime, waits for health, and opens the browser (1.226708ms)
+✔ launchUi --no-browser starts the runtime but opens nothing (0.449458ms)
+
+  #  /opt/homebrew/Cellar/node/26.11.1/bin/node[57203]: void node::InternalCallbackScope::Close() at ../src/api/callback.cc:190
+  #  Assertion failed: (env_->execution_async_id()) == (0)
+
+----- Native stack trace -----
+
+ 1: 0x1055a7e10 node::(anonymous namespace)::DefaultAbortHandler(char const*, char const*) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 2: 0x1055a7db8 node::Assert(node::AssertionInfo const&) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 3: 0x104229a18 node::InternalCallbackScope::Close() [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 4: 0x1042296bc node::InternalCallbackScope::~InternalCallbackScope() [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 5: 0x10429dc38 node::Environment::RunAndClearNativeImmediates(bool) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 6: 0x10429d00c node::Environment::CheckImmediate(uv_check_s*) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+ 7: 0x1004303dc uv__run_check [/opt/homebrew/Cellar/libuv/1.53.0/lib/libuv.1.0.0.dylib]
+ 8: 0x10042ac80 uv_run [/opt/homebrew/Cellar/libuv/1.53.0/lib/libuv.1.0.0.dylib]
+ 9: 0x10422a474 node::SpinEventLoopInternal(node::Environment*) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+10: 0x104363ac0 node::NodeMainInstance::Run(node::ExitCode*, node::Environment*) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+11: 0x1043637f8 node::NodeMainInstance::Run() [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+12: 0x1042cf074 node::Start(int, char**) [/opt/homebrew/Cellar/node/26.11.1/lib/libnode.147.dylib]
+13: 0x18c6e44e4 start [/usr/lib/dyld]
+✔ stepArgument reads whatever the tool input names as its target (0.647958ms)
+✔ toSteps turns tool.started, file.changed and commands into distinct units (1.13325ms)
+✔ markClass reads the event shape the step was built from, not a tool name (0.123833ms)
+✔ the last progress line survives as the live activity when no step follows (0.071875ms)
+✔ the worker's duplicated needs_user events collapse into one halt (0.085833ms)
+✔ a resume the human authorised becomes a YOU step (0.103709ms)
+✔ an answered decision becomes a YOU step in the ledger (0.1155ms)
+✔ an interactive ACP permission becomes a YOU step when resolved in place (0.067667ms)
+✔ step arguments and changed files are shown as project paths, not machine paths (0.0935ms)
+✔ a file changed twice produces two marks — one per real event, never deduped in the trace (0.099792ms)
+✔ tail keeps the most recent N units and drops halt/fail (positions, not units) (0.085875ms)
+✔ tail drops the oldest units silently once the budget is exceeded (0.133417ms)
+✔ the trace draws one fixed-width cell per unit, never scaled by how long it took (0.1245ms)
+✔ the point of execution is the luminous head, and it is drawn last (0.056375ms)
+✔ an interruption tears the track open instead of capping it (0.044583ms)
+✔ a finished run's track is struck in graphite, with no head (0.045208ms)
+✔ a long run is bounded by the tail budget, not strided (1.005791ms)
+✔ a change mark is drawn in the accent, distinct from an ordinary tool mark (0.101334ms)
+✔ a coarse provider draws a single ambient bar — never a per-interval dot (0.081417ms)
+✔ the coarse ambient bar's width is capped, so elapsed time never reads as a step count (0.040458ms)
+✔ a coarse frame carries the halt tear exactly once and draws no phase frame (0.03725ms)
+✔ brackets: CHANGES spans the first to the last change mark, only when declared (0.129458ms)
+✔ brackets: two separated runs of edits give two brackets (0.041084ms)
+✔ brackets: labels that would print on top of each other are dropped, not stacked (0.126458ms)
+✔ brackets: zero evidence in the tail is a valid, complete reading (0.032042ms)
+✔ sections: a dimension shows only when actually present, and CHECKS never exists (0.145542ms)
+✔ sections: declared true with nothing observed yet is not a section — and not a lie (0.025417ms)
+✔ sections: observed facts render even against a false declaration, and flag the drift (0.030375ms)
+✔ sections: RESULT is gated on status and real result text, FAILURE takes precedence (0.067625ms)
+✔ capabilityNote: result-on-completion fires only while a coarse provider is working (0.039125ms)
+✔ capabilityNote: never fires a capability-gap note merely from a declaration (0.019875ms)
+✔ fidelity is a declaration, never an inference from the event log (0.029ms)
+✔ a rich provider with no steps yet reads as rich, not coarse, with nothing to show (0.467667ms)
+✔ a coarse provider draws the single ambient trace, never the old three-phase frame (0.112834ms)
+✔ a coarse working row carries the result-on-completion note and no data sections (0.064791ms)
+✔ working shows ACTIVITY/FILES/COMMANDS when present; needs_you drops COMMANDS (0.164417ms)
+✔ ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never ACTIVITY (0.090083ms)
+✔ failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop (0.158917ms)
+✔ done carries no EXPANDED trace — the whole fix for the old three-empty-band screen (0.153208ms)
+✔ a coarse ready row reports files as absent (no section), not as zero (0.099792ms)
+✔ projectRow renders the Needs You state from the normalized blockedOn (0.077458ms)
+✔ projectRow renders a decision block, not just permissions (0.073666ms)
+✔ projectRow distinguishes permission from decision for the interaction surface (0.059833ms)
+✔ projectRow renders the ready result from the files the run actually changed (0.057917ms)
+✔ projectRow compresses a done task and archives its trace, as the design does (0.063167ms)
+✔ a closed row's sub keeps a fixed width so EXECUTION reads as a grid (0.157917ms)
+✔ projectRow surfaces failure, a state the design does not draw (0.075833ms)
+✔ execution metadata is secondary: node and provider, never the headline (0.037042ms)
+✔ the ledger orders by what wants you first and opens a halted task (0.143667ms)
+✔ ledger helpers (0.034375ms)
+✔ progressPercent: a finished run is 100%, whatever it did (0.051084ms)
+✔ progressPercent: a halted run reports null — the halt marker is the readout (0.014917ms)
+✔ progressPercent: run 1 has no baseline, so there is no percentage (0.029584ms)
+✔ progressPercent: a working rerun measures elapsed against its prior runs (0.034125ms)
+✔ progressPercent: a working run is never claimed complete — capped at 99 (0.024959ms)
+✔ progressPercent: the current run's own record is never its own baseline (0.0245ms)
+✔ a run measured in hours reads as hours, not as 479 minutes (0.01725ms)
+✔ projectRuns formats run records into ledger rows without inventing fields (0.097125ms)
+✔ projectRuns maps needs_you/working states into the ledger vocabulary (0.029333ms)
+✔ projectRow exposes interactive permission options without inventing them (0.042125ms)
+✔ a long intent keeps the expanded heading proportionate (smallest typography adjustment) (0.132084ms)
+✔ projectRow exposes the AUTO routing decision of the current run (0.048208ms)
+✔ time parked on a human is not counted in the trace's tail selection (0.0515ms)
+✔ firstSentence: a one-line question is the whole heading, nothing left over (0.02575ms)
+✔ firstSentence: splits a multi-paragraph question at its first sentence (0.018542ms)
+✔ firstSentence: a question with no terminal punctuation is still a valid heading (0.015541ms)
+✔ projectRow splits a decision's question into heading + body for the card to render (0.026625ms)
+✔ a permission halt (not a decision) has no question split — permWhy is used as-is (0.028459ms)
+✔ inferFailureKind: an explicit task.failure.kind is trusted as-is (0.025ms)
+✔ inferFailureKind: legacy tasks with no failure field are inferred from the stored error (0.022625ms)
+✔ authFailureCopy: with a remedy, the hint is shown verbatim in its own slot (0.029834ms)
+✔ authFailureCopy: without a remedy, a generic sign-in sentence names the provider and machine (0.015417ms)
+✔ authFailureLine: the one-line summary shared by the compact row, arg and mobile (0.020375ms)
+✔ projectRow: a classified auth failure reads STOPPED AT, not FAILED AT (0.039583ms)
+✔ projectRow: an unclassified failure is completely unaffected by the new fields (0.022916ms)
+✔ a decision question with a fenced code block in its body renders intact (0.234542ms)
+✔ briefBody is empty when the derived title already represents the whole brief (0.025ms)
+✔ a decorated or wrapped brief does not render a body that only repeats the heading (0.043333ms)
+✔ a real multi-paragraph brief renders in full under the heading (0.0695ms)
+✔ a task written before briefs existed renders no duplicate body (0.023625ms)
+✔ briefTruncated is carried through so a cut remote brief can say it was cut (0.030667ms)
+✔ a coarse run's collapsed bar leaves room for the live head inside --col-exec (0.192ms)
+✔ a closed coarse run archives its ambient bar in the rule colour too (0.021083ms)
+✔ toSteps: file.changed events carry their source (provider vs worktree) (0.031083ms)
+✔ sections: repository-observed changes render for a provider without file-change reporting, with no drift (0.03275ms)
+✔ sections: provider-REPORTED files against a false declaration still flag the drift (0.027125ms)
+✔ brackets: observed changes draw the CHANGES bracket even without the declared capability (0.031083ms)
+✔ projectRuns: every run row carries number, provider, duration and outcome state (0.046667ms)
+✔ projectRuns: duration falls back to completedAt - startedAt; absent timing shows — (0.031ms)
+✔ sections: provider + observed spellings of ONE file aggregate to ONE logical file (0.031667ms)
+✔ sections: transient provider events that never persisted are NOT counted when observation exists (0.02775ms)
+✔ sections: without observation, provider-reported paths are canonicalized and deduped (0.023375ms)
+✔ parsePorcelain: status lines become { code, path }, renames take the destination (0.995833ms)
+✔ snapshotWorktree returns null when the directory is not a git repository (14.062375ms)
+✔ changedSince reports files introduced or altered during the run (79.909416ms)
+✔ a file already dirty before the run is not re-reported when it stays dirty (78.303209ms)
+✔ gitignored paths are invisible to the observation (0x2F's own .work never counts) (70.087791ms)
+✔ changedSince returns null without a baseline (non-git workspace) (0.43675ms)
+ℹ tests 645
+ℹ suites 0
+ℹ pass 522
+ℹ fail 121
+ℹ cancelled 1
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 912315.62
+
+✖ failing tests:
+
+test at test/api.test.mjs:87:1
+✖ POST /api/tasks creates a task through the shared action and starts it on the node (10.7705ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:106:1
+✖ POST /api/tasks without a title -> 400 from the shared action (2.544667ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:118:1
+✖ GET /api/tasks and GET /api/tasks/:id (with result) (2.060875ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:140:1
+✖ POST /api/tasks/:id/allow and /reject resume via the shared action; guards return 400 (1.52975ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:168:1
+✖ POST /api/tasks/:id/close moves the task to done (1.042792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:182:1
+✖ unknown routes -> 404; missing task -> 404 (1.1155ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:196:1
+✖ server binds to localhost by default (local-first, not LAN-exposed) (1.273084ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:207:1
+✖ SSE delivers normalized task.created when a task is created through the API (2.809667ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:246:1
+✖ GET / serves the 0x2F Web shell and its module assets (0.781834ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:308:1
+✖ GET / embeds the workspace label in a bootstrap <meta> tag the client can read before first paint (1.552833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:340:1
+✖ the bootstrap meta tag survives this server's own CSP — a real browser would actually read it (0.739792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:361:1
+✖ GET /api/status also carries workspace + node (symmetry with the bootstrap payload) (1.558ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:376:1
+✖ a workspace directory name that could break out of the meta attribute is escaped safely (2.082625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:401:1
+✖ the browser client's full module graph is served (no blank-page regressions) (0.75ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:449:1
+✖ GET /api/events/history returns the persisted normalized log per task (0.747792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:476:1
+✖ a task with no event log yet is still present in the history (0.92ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:489:1
+✖ GET /api/providers lists the registry (default first) with normalized descriptors (1.200667ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:526:1
+✖ POST /api/tasks creates through the selected provider (1.255542ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:548:1
+✖ POST /api/tasks with an unknown provider -> 400 from the shared action (1.040375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:565:1
+✖ POST /api/tasks/:id/rerun starts a second run under the same task through the shared action (0.966417ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:645:1
+✖ DECISION FLOW: answer then SEND BACK continues the same task (the dogfooding sequence) (0.782041ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:699:1
+✖ POST /api/tasks/:id/correct records a SEND-BACK correction as its own event (0.803042ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:723:1
+✖ DECISION FLOW: a body-less rerun POST is a valid request, not a 500 (0.796083ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:742:1
+✖ DECISION FLOW: SEND BACK is idempotent — a retry never starts a duplicate run (0.749167ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:776:1
+✖ DECISION FLOW: concurrent duplicate SEND BACKs collapse to one run (0.76225ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:802:1
+✖ DECISION FLOW: distinct request ids are distinct gestures (0.655291ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:824:1
+✖ every API failure is explicit, valid JSON (never an empty or partial body) (0.927459ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:880:1
+✖ GET /api/tasks/:id/runs/:n returns one run with its own result; unknown run -> 404 (0.729167ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:904:1
+✖ GET /api/tasks/:id includes the projected run history (0.836625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:939:1
+✖ POST /api/tasks/:id/answer records the human's decision answer (0.986209ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:965:1
+✖ ALLOW on a decision is refused over the API; ANSWER on a permission is refused (1.15175ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/api.test.mjs:997:1
+✖ a non-resumable NEEDS YOU task can be closed over the API without invoking the provider (0.98075ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:85:1
+✖ REGRESSION: the ~1,000 character brief that dogfooding rejected is accepted (10.489167ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:121:1
+✖ run 1's persisted input carries the full brief, not the title (2.366041ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:133:1
+✖ a short brief behaves exactly as it did before briefs existed (2.261625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:149:1
+✖ the slug is built from the derived title, so a long brief cannot produce a monstrous directory name (1.575542ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:166:1
+✖ the brief is bounded: MAX_BRIEF is enforced at the action boundary (1.000917ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:183:1
+✖ the brief is bounded at the API boundary too, with the same message (1.525125ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:195:1
+✖ a blank brief is still refused — one required field, clearly named (0.960833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:209:1
+✖ creating a task derives its title with no provider process at all (1.038541ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/brief.test.mjs:235:1
+✖ a task created before briefs existed still reads correctly (no migration) (1.0545ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/codex-integration.test.mjs:96:1
+✖ E2E: `2f providers` detects codex and a task runs to READY through the real CLI (11.476625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/codex-integration.test.mjs:142:1
+✖ E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (1.104542ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/codex-integration.test.mjs:199:1
+✖ E2E: command_execution is recorded honestly as tool activity, never as file.changed (1.141833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/codex-integration.test.mjs:248:1
+✖ E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (1.505167ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/codex-integration.test.mjs:306:1
+✖ E2E: the same task can switch away from codex to another provider without losing task context (1.742125ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:159:1
+✖ a relay cannot forge a command: envelopes without the pairing key never execute (4.109833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:196:1
+✖ a tampered envelope (bit flip in the ciphertext) is rejected (1.591584ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:226:1
+✖ a captured command envelope cannot be replayed to execute twice (1.090333ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:249:1
+✖ replay protection survives a Mac/runtime restart (persisted ack cache) (1.009416ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:302:1
+✖ legitimate retries (same requestId) return the same ack without double execution (1.484709ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:313:1
+✖ a re-paired (rotated) Mac rejects envelopes from the old phone key (0.779583ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:390:1
+✖ relay state and persisted state hold no task/source/result payloads (0.495875ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/e2e-security.test.mjs:506:1
+✖ the full remote-control loop works end-to-end over the E2E channel (0.6235ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/gemini-integration.test.mjs:96:1
+✖ E2E: `2f providers` detects gemini and a task runs to READY through the real CLI (3.141416ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/gemini-integration.test.mjs:136:1
+✖ E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works (0.660833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/gemini-integration.test.mjs:187:1
+✖ E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context (0.32275ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/gemini-integration.test.mjs:236:1
+✖ E2E: the same task can switch away from gemini to another provider without losing task context (0.379375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/lan-mode.test.mjs:271:1
+✖ LAN hosts get the client + relay protocol only; the local API stays loopback-only (4.261042ms)
+  Error: listen EPERM: operation not permitted 0.0.0.0
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '0.0.0.0'
+  }
+
+test at test/lan-mode.test.mjs:348:1
+✖ the LAN surface closes when `2f pair --off` disables the config (2.16575ms)
+  Error: listen EPERM: operation not permitted 0.0.0.0
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '0.0.0.0'
+  }
+
+test at test/lan-mode.test.mjs:372:1
+✖ health reports lan so `2f pair` knows whether a running runtime serves the phone (1.396833ms)
+  Error: listen EPERM: operation not permitted 0.0.0.0
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '0.0.0.0'
+  }
+
+test at test/lan-mode.test.mjs:385:1
+✖ a phone pairs over the LAN and controls a task; the local API stays off-LAN (1.231333ms)
+  Error: listen EPERM: operation not permitted 0.0.0.0
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '0.0.0.0'
+  }
+
+test at test/lan-mode.test.mjs:500:1
+✖ the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto subtle) (0.985084ms)
+  Error: listen EPERM: operation not permitted 0.0.0.0
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '0.0.0.0'
+  }
+
+test at test/lan-mode.test.mjs:1:1
+✖ test/lan-mode.test.mjs (909727.329667ms)
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at test/pairing-security.test.mjs:195:1
+✖ an agent-registered pairing token always has an expiry (never claimable forever) (4.486875ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:213:1
+✖ a re-pair token (rotate-registered) cannot be claimed after it expires (1.018958ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:239:1
+✖ a phone session expires after its TTL and stops authenticating (0.502458ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:255:1
+✖ 2f pair --off revokes remote access at the relay: sessions and tokens die immediately (0.608375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:274:1
+✖ a stale session stays dead after the Mac reconnects post-revocation (0.995625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:302:1
+✖ re-pairing (rotate) retires old sessions; only the new token's session works (1.048792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:344:1
+✖ a plain reconnect (same generation) does NOT revoke the phone session (2.00125ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:378:1
+✖ rotation is authorized by the current deviceSecret; a wrong secret changes nothing (1.056584ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:395:1
+✖ 2f pair falls back to a fresh identity when the relay rejects the old credential (2.634375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:457:1
+✖ 2f pair refuses a public plain-HTTP relay; the agent refuses to connect to one (1.988792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/pairing-security.test.mjs:493:1
+✖ relay.json and the relay state file are written with mode 0600 (1.241792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/provider-availability.test.mjs:170:1
+✖ POST /api/tasks with an unavailable provider -> 400 from the shared action (the Web UI is not the authority) (4.842292ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/provider-integration.test.mjs:117:1
+✖ API: configured providers appear in /api/providers with their integration type (5.953625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/refine.test.mjs:384:1
+✖ POST /api/refine returns the refined text; repeated REFINE creates no tasks and starts no execution (2.7385ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/refine.test.mjs:411:1
+✖ START after refinement creates the Task using the refined text (0.768583ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/refine.test.mjs:453:1
+✖ START without refinement behaves exactly as today (0.302541ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/refine.test.mjs:469:1
+✖ a failed refinement does not destroy the original text: START still uses it (0.502208ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/refine.test.mjs:493:1
+✖ POST /api/refine refuses empty or missing input with 400 and never spawns the model (0.419833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-config-race.test.mjs:141:1
+✖ a normal pair-hello still confirms: the liveness check does not fire on the happy path (3.822541ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-config-race.test.mjs:159:1
+✖ writing the confirmed pairing does not make the poller swap the config object (1.190209ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-config-race.test.mjs:173:1
+✖ the config vanishing during the pairing ceremony never throws (0.9715ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-config-race.test.mjs:203:1
+✖ a pair-hello arriving with no live config is refused, not crashed on (0.7935ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-result.test.mjs:117:1
+✖ the phone sees the safe user-facing result in the snapshot, task detail and run detail (3.661209ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay-result.test.mjs:136:1
+✖ a failed task never leaks a stale result.md to the phone (1.058625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:176:1
+✖ the Mac authenticates outbound; unpaired and mismatched hellos are rejected (4.003667ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:199:1
+✖ a pairing token is one-time: a second claim fails (1.00325ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:210:1
+✖ an expired pairing token cannot be claimed (0.631916ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:235:1
+✖ the phone pairs end-to-end and pulls a redacted snapshot (0.892375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:246:1
+✖ creating a Task through the encrypted channel starts it on the Mac's node (0.710708ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:261:1
+✖ redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac (0.526417ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:299:1
+✖ ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions (0.461792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:334:1
+✖ a duplicate requestId returns the cached acknowledgement and never executes twice (0.465916ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:343:1
+✖ the Mac is offline: status reports offline and commands answer 503 — never queued (0.596792ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:353:1
+✖ a relay restart loses no session and keeps the phone paired (0.677208ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:383:1
+✖ the relay holds no task content — state and state.json are content-free (0.588959ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:399:1
+✖ the relay is a broker: it serves no client or pairing page (0.501333ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:412:1
+✖ pairing claims and command forwarding are rate limited (0.400875ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/relay.test.mjs:446:1
+✖ the local server reports mode 'local' — the client keeps its local behavior (1.046375ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/remote-timeout.test.mjs:47:1
+✖ a remote command whose response is lost settles with an honest error (never hangs forever) (2.570917ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/remote-timeout.test.mjs:62:1
+✖ the timeout error is surfaced, not silently retried into a double action (0.377125ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/routing.test.mjs:299:1
+✖ API: GET /api/routing exposes the configured default and preference (2.75625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/routing.test.mjs:317:1
+✖ API: POST /api/tasks with provider auto routes through the shared action (1.655084ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:83:1
+✖ unauthenticated /api requests are refused with 401 — no task can be started (4.02025ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:116:1
+✖ a wrong or absent token is refused; the correct token is accepted (0.916583ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:134:1
+✖ the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow) (0.364458ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:169:1
+✖ a foreign Host header (DNS rebinding) is refused on every route (0.348083ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:204:1
+✖ cross-origin requests are refused even with a valid token (0.316ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:256:1
+✖ Sec-Fetch-Site: cross-site and same-site browser requests are refused (0.290125ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:300:1
+✖ the full C1 chain: no unauthenticated or cross-site path starts agent work (0.295959ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:336:1
+✖ request bodies over the cap are refused with 413 (declared and streamed) (0.411917ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:412:1
+✖ oversized inputs are refused by the shared actions — the CLI and the API share the caps (0.321625ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/security.test.mjs:458:1
+✖ the health probe is unauthenticated but Host-guarded; static assets carry the CSP (0.401917ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/serve.test.mjs:205:1
+✖ SIGTERM shuts the runtime down cleanly without terminating the detached worker (10009.699416ms)
+  Error: runtime URL never appeared; output:
+  listen EPERM: operation not permitted 127.0.0.1
+  
+      at Timeout._onTimeout (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/serve.test.mjs:116:20)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/serve.test.mjs:245:1
+✖ a task left working with a dead worker is recovered on the next runtime start (10011.526291ms)
+  Error: runtime URL never appeared; output:
+  listen EPERM: operation not permitted 127.0.0.1
+  
+      at Timeout._onTimeout (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/serve.test.mjs:116:20)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/serve.test.mjs:310:1
+✖ a genuinely running task survives a runtime restart untouched (10007.102666ms)
+  Error: runtime URL never appeared; output:
+  listen EPERM: operation not permitted 127.0.0.1
+  
+      at Timeout._onTimeout (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/serve.test.mjs:116:20)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/serve.test.mjs:356:1
+✖ SIGINT is a clean shutdown too (10007.175416ms)
+  Error: runtime URL never appeared; output:
+  listen EPERM: operation not permitted 127.0.0.1
+  
+      at Timeout._onTimeout (file:///Users/bogart/Dev/PROBNAYA/work-cli-qualification-20261101/test/serve.test.mjs:116:20)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/ui-launch.test.mjs:42:1
+✖ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (4.626166ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }
+
+test at test/ui-launch.test.mjs:84:1
+✖ launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL (0.824833ms)
+  Error: listen EPERM: operation not permitted 127.0.0.1
+      at Server.setupListenHandle [as _listen2] (node:net:2368:21)
+      at listenInCluster (node:net:2499:12)
+      at node:net:2728:7
+      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '127.0.0.1'
+  }

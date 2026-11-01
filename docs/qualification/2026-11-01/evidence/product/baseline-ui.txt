@@ -1,0 +1,110 @@
+0x2F UI: http://127.0.0.1:56526
+✖ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (16.98525ms)
+0x2F UI: http://127.0.0.1:56528
+✔ launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL (2.479375ms)
+0x2F UI: http://127.0.0.1:56530
+✖ launchUi refuses a healthy runtime for another workspace without opening it (2.00575ms)
+0x2F UI: http://127.0.0.1:56532
+✔ launchUi recognizes the same workspace through a symlink (2.112667ms)
+✖ launchUi cannot reuse an unidentified runtime or accept another workspace during startup (0.475708ms)
+✖ runtime startup closes the parent's log descriptor on success and spawn failure (0.81125ms)
+✖ a package path with spaces and URL characters supplies an existing runtime entry path (3.170166ms)
+✔ launchUi starts a missing runtime, waits for health, and opens the browser (2.159042ms)
+✔ launchUi --no-browser starts the runtime but opens nothing (0.60225ms)
+✔ launchUi reports 'another process owns the port' instead of an opaque EADDRINUSE (1.674ms)
+✔ launchUi times out with a pointer at the runtime log when health never arrives (126.834584ms)
+✔ launchUi surfaces 'another process' discovered during the wait (0.817792ms)
+✔ openBrowser spawns the platform opener and resolves; a missing opener resolves false (0.178542ms)
+✔ startServer rejects with a clear error when another process owns the port (1.453917ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 9
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 245.333125
+
+✖ failing tests:
+
+test at test/ui-launch.test.mjs:44:1
+✖ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (16.98525ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - '/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-GQ5fWH'
+  
+      at TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-product-baseline-71bhe9s6/test/ui-launch.test.mjs:53:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-GQ5fWH',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/ui-launch.test.mjs:112:1
+✖ launchUi refuses a healthy runtime for another workspace without opening it (2.00575ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-product-baseline-71bhe9s6/test/ui-launch.test.mjs:119:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /another workspace/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/ui-launch.test.mjs:146:1
+✖ launchUi cannot reuse an unidentified runtime or accept another workspace during startup (0.475708ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-product-baseline-71bhe9s6/test/ui-launch.test.mjs:150:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /workspace identity/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/ui-launch.test.mjs:170:1
+✖ runtime startup closes the parent's log descriptor on success and spawn failure (0.81125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-product-baseline-71bhe9s6/test/ui-launch.test.mjs:181:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { code: 'EBADF' },
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test/ui-launch.test.mjs:198:1
+✖ a package path with spaces and URL characters supplies an existing runtime entry path (3.170166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-09Jj2R/package%20with%20spaces%20%23%20percent%25/src/server-entry.mjs'
+  - '/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-09Jj2R/package with spaces # percent%/src/server-entry.mjs'
+  
+      at TestContext.<anonymous> (file:///private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualify-product-baseline-71bhe9s6/test/ui-launch.test.mjs:214:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-09Jj2R/package%20with%20spaces%20%23%20percent%25/src/server-entry.mjs',
+    expected: '/private/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-ui-09Jj2R/package with spaces # percent%/src/server-entry.mjs',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

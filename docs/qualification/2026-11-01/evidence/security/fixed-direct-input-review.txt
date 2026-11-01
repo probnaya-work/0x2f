@@ -1,0 +1,36 @@
+0x2F UI: http://127.0.0.1:58735
+{
+  "rows": [
+    {
+      "label": "object brief",
+      "status": 400,
+      "error": "Task brief must be text."
+    },
+    {
+      "label": "number brief",
+      "status": 400,
+      "error": "Task brief must be text."
+    },
+    {
+      "label": "object provider",
+      "status": 400,
+      "error": "Provider id must be text."
+    },
+    {
+      "label": "object model",
+      "status": 400,
+      "error": "Model id must be text."
+    },
+    {
+      "label": "object note",
+      "status": 400,
+      "error": "Note must be text."
+    },
+    {
+      "label": "object answer",
+      "status": 400,
+      "error": "Answer must be text."
+    }
+  ],
+  "syntheticActionLaunches": 0
+}

@@ -1,0 +1,20 @@
+✔ simultaneous human notes retain every acknowledged constraint (227.104458ms)
+✔ distinct concurrent permission resumes admit exactly one execution (21.365709ms)
+✔ live permissions and closed in-flight executions cannot be rerun (10.265708ms)
+✔ spawn failure is durably failed instead of stranded working (104.018084ms)
+✔ non-text action inputs are rejected before persistence or execution (18.965583ms)
+✔ a gesture bound to an earlier permission cannot authorize the current occurrence (32.329542ms)
+✔ contenders serialize, release on throw, and recover a killed owner (375.610792ms)
+✔ a live owner times out without being stolen; empty released directories are replaceable (35.959208ms)
+✔ independent processes cannot collide task IDs or overwrite identical briefs (255.494959ms)
+✔ incomplete task directories reserve their ID and existing prompt bytes (4.478791ms)
+✔ independent processes retain every task context mutation (208.932333ms)
+✔ valid JSON with invalid task shape cannot poison the ledger or redirect task writes (4.886875ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 551.050083

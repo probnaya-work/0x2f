@@ -1,0 +1,27 @@
+✔ an asynchronous runtime EAGAIN rejects before health polling and closes its log descriptor (2.808292ms)
+0x2F UI: http://127.0.0.1:58169
+✔ probeUi: a healthy 0x2F runtime answers ok; a plain HTTP server is 'other'; silence is 'down' (15.714125ms)
+0x2F UI: http://127.0.0.1:58175
+✔ launchUi reuses a running 0x2F runtime: no spawn, browser opened with the URL (2.15975ms)
+0x2F UI: http://127.0.0.1:58177
+✔ launchUi refuses a healthy runtime for another workspace without opening it (1.98725ms)
+0x2F UI: http://127.0.0.1:58179
+✔ launchUi recognizes the same workspace through a symlink (2.134875ms)
+✔ launchUi cannot reuse an unidentified runtime or accept another workspace during startup (0.854084ms)
+✔ runtime startup closes the parent's log descriptor on success and spawn failure (0.936583ms)
+✔ a package path with spaces and URL characters supplies an existing runtime entry path (1.896208ms)
+✔ launchUi starts a missing runtime, waits for health, and opens the browser (0.807708ms)
+✔ launchUi --no-browser starts the runtime but opens nothing (0.423667ms)
+✔ launchUi reports 'another process owns the port' instead of an opaque EADDRINUSE (1.455917ms)
+✔ launchUi times out with a pointer at the runtime log when health never arrives (126.568666ms)
+✔ launchUi surfaces 'another process' discovered during the wait (0.656834ms)
+✔ openBrowser spawns the platform opener and resolves; a missing opener resolves false (0.169666ms)
+✔ startServer rejects with a clear error when another process owns the port (0.687ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234.193792

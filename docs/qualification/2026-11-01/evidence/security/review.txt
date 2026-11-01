@@ -1,0 +1,145 @@
+0x2F 0.1.4 security qualification
+Baseline: 809e3ab158a7304c9e07e9c6d95ce30542987460
+Date: 2026-11-01
+
+Scope and safety
+Read architecture.md, remote-control.md, AGENTS.md and relevant source/tests.
+All probes used temporary workspaces, loopback destinations, synthetic task
+actions, or local fake ACP processes. No real credentials, external systems,
+real-provider model requests, or paid workloads were used. Source edits were
+limited to assigned server/ACP files and their regression tests. Parent owns
+the action/store/worker changes independently reviewed below.
+
+Confirmed findings and final behavior
+
+SEC-01: High / P1 / confirmed: LAN Host header bypass.
+In LAN mode the baseline listens on 0.0.0.0 but decides local-vs-LAN routing
+using Host alone. A network client can forge Host:127.0.0.1, obtain the local
+runtime cookie from GET /, read full tasks, and invoke normal local actions
+without pairing token, deviceSecret, code, session, or E2E key.
+Independent real TCP reproduction used a private source address assigned to
+this Mac and destination 127.0.0.1; no peer-address mock was needed.
+Baseline: shell200, cookie issued, tasks200/private sentinel disclosed,
+mutation201/action invoked once. Fixed:403 for all, no credential/disclosure
+or action. Source now checks the accepted TCP peer; IPv4 loopback127/8,
+IPv6::1, and IPv4-mapped loopback remain usable. Private Host requests also
+require a private or local peer. Proxy headers cannot grant local authority.
+Evidence: lan-host-repro.mjs and lan-host-repro.txt.
+
+SEC-02: Medium / P2 / confirmed: idempotency response replay bypass.
+The baseline consults its POST response cache before Host/Origin/Fetch-Site
+or authentication. Knowledge of a cached request id retrieves its private
+response without credentials. Independent review also challenged public
+paths (POST /, /api/health, /app/app.js) and authenticated cross-route reuse.
+Final cache eligibility requires authenticated local POST /api/* excluding
+health; key namespace is [method, pathname, requestId]. Public/static/LAN
+requests cannot reach this plaintext cache. Same key on create, note, close
+executes each distinct operation; same route retries remain idempotent.
+Practical precondition: attacker must know a live cached request id.
+Evidence: security.test.mjs; intermediate-cache-route-failure.txt captures a
+failing adversarial regression before the route-scoping correction.
+
+SEC-03: Medium / P2 / confirmed: WebSocket upgrade boundary omitted.
+With pairing disabled, HTTP /pair Host:evil.example returned403 but /ws
+upgraded successfully. This exposes relay socket/registration availability;
+it does not independently bypass device authentication or AES-GCM command
+verification. Upgrades now share peer/Host/Origin/Fetch-Site predicates and
+require active LAN pairing, including requests from loopback.
+Evidence: WebSocket regression in lan-mode.test.mjs, failed before fix and
+passed with allowed agent connections and disabled/foreign requests covered.
+
+SEC-04: High / P1 / confirmed: one ACP decision authorizes multiple requests.
+A local fake agent sends two distinct permission requests before either is
+answered. Writing one grant authorized both in all five baseline trials.
+The baseline exposes both requests and lets their timers consume one file.
+Final adapter queues one active interactive request, validates allow/reject
+and exact native requestId, and binds a fresh random decisionId to each
+occurrence. RPC ids may be reused; saved bytes from an earlier occurrence
+cannot grant a later operation with that same native id. The decision file
+is removed before exposing the next request. A per-poll in-flight guard
+prevents overlapping async reads. Resolution persistence precedes replies.
+An allow-only request without a decision channel is cancelled.
+Parent actions write both ids and reserve the working transition under the
+task lock, preventing duplicate gestures from rewriting a consumed grant.
+Evidence: baseline-acp-concurrency.mjs/.txt; adversarial adapter regressions
+cover concurrency, missing/mismatched ids, unknown grants, slow callbacks,
+reused RPC id replay, and no-channel allow-only requests.
+Tradeoff: interactive permission requests are presented sequentially.
+
+SEC-05: Medium / P2 / confirmed; fixed by parent: API field types.
+Independent synthetic-node API review found object/number brief and object
+note/answer produced500; model:{} produced201 and invoked the synthetic
+node. Parent's action validation now returns400 for all six malformed cases
+with zero execution admissions. No real provider was ever invoked.
+Evidence: direct-input-review.txt (before), direct-input-review.mjs and
+fixed-direct-input-review.txt (after).
+
+Independent review of parent lock/store/worker implementation
+
+lock-challenge.mjs killed only its own holder process, then ran10 independent
+contenders through500 critical sections protected by an atomic occupancy
+directory. Counter500, zero overlaps. Stale release preserved a replacement
+owner; an empty legacy lock directory could be acquired.
+No mutual-exclusion counterexample found in the actual lock source. A fully
+initialized nonempty candidate is atomically published. Stale cleanup unlinks
+only the observed unique owner marker; nonrecursive rmdir cannot remove a
+live replacement's nonempty directory, even if a contender replaces the old
+empty generation between those operations. Candidate and lock share a parent
+filesystem. PID reuse and conservative EPERM handling can retain a dead lock
+until timeout; this is an availability limitation, not demonstrated overlap.
+Evidence: lock-challenge.mjs and lock-challenge.txt.
+
+worker-admission-challenge.mjs independently launched stale workers for a
+different reserved PID and superseded run. Both exited as skipped; task and
+permission bytes stayed identical; no provider invocation, result file, or
+event publication occurred. Selected real local-worker tests also covered
+fresh notes/corrections, task close, exceptional result publication, changed
+worker/run ownership, concurrent resumes and live-permission crash recovery.
+Evidence: worker-admission-challenge.mjs/.txt and selected test output.
+
+Verification of the final reviewed state
+
+node --test test/security.test.mjs test/lan-mode.test.mjs test/api.test.mjs
+  test/pairing-security.test.mjs test/e2e-security.test.mjs
+PASS83/83, zero failures/skips, about14.53s.
+Output: fixed-boundary-tests.txt.
+
+node --test test/acp-provider.test.mjs test/acp-interactive-e2e.test.mjs
+  test/permission-regression.test.mjs test/task-ownership.test.mjs
+  test/store-concurrency.test.mjs
+PASS44/44, zero failures/skips, about11.38s.
+Output: fixed-permission-state-tests.txt.
+
+Final affected selection after the displayed-occurrence precondition:
+node --test test/security.test.mjs test/lan-mode.test.mjs test/api.test.mjs
+  test/pairing-security.test.mjs test/e2e-security.test.mjs test/relay.test.mjs
+  test/relay-projection.test.mjs test/relay-result.test.mjs test/tui.test.mjs
+  test/web-ledger.test.mjs test/acp-provider.test.mjs
+  test/acp-interactive-e2e.test.mjs
+PASS288/288, zero failures/skips, about14.62s.
+Output: final-security-client-tests.txt. The13 client/source/test files edited
+for that final precondition also passed direct node --check invocations.
+
+An unfiltered npm test escalation was rejected by automatic approval review
+because installed native providers could cause out-of-scope external/paid
+requests. It was not executed or bypassed by this agent. Parent separately
+owns an audited credential-free, vendor-free, offline full-suite runner.
+
+Assumptions and remaining limits
+
+The Mac, phone, executable provider processes, workspace configuration and
+served client code remain trusted. LAN HTTP active interception and hosted
+client-origin compromise are documented trust assumptions, not cryptographic
+bypasses found in this review. Provider argv manifests are configuration of
+executable code, not a sandbox; using argv does not make an explicitly chosen
+shell/interpreter safe for untrusted code.
+
+The final change also binds Web, encrypted remote and TUI gestures to the
+decisionId they displayed. The relay projection carries this public nonce;
+buttons and keyboard intents capture it rather than looking up a newer
+request at dispatch time. HTTP/remote callers missing the nonce on a current
+live occurrence are refused, as are stale values. Tests cover allow/reject
+from a stale task snapshot, no permission file after refusal, then success
+after refresh. The parent's shared action compares the precondition while
+holding the task lock. Bare CLI/direct legacy calls retain their explicit
+current-permission semantics; nonlive/native session resumes stay compatible.

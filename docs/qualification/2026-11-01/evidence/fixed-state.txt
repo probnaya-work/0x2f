@@ -1,0 +1,38 @@
+✔ simultaneous human notes retain every acknowledged constraint (79.297791ms)
+✔ distinct concurrent permission resumes admit exactly one execution (20.264959ms)
+✔ live permissions and closed in-flight executions cannot be rerun (6.933167ms)
+✔ spawn failure is durably failed instead of stranded working (3.425458ms)
+✔ non-text action inputs are rejected before persistence or execution (4.097166ms)
+✔ pidAlive: signal-0 existence probe with EPERM treated as alive (0.491834ms)
+✔ an orphaned working run is failed with the crashed classification, preserving history and session (10.204708ms)
+✔ an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time (6.894792ms)
+✔ a task with no recorded pid is also recovered (worker died before pid persisted) (4.415709ms)
+✔ a working task whose worker is alive is never touched (3.032083ms)
+✔ completed tasks and non-live human stops are left alone even with a dead pid (7.836791ms)
+✔ a dead live-permission worker is recovered while its saved session survives (3.555125ms)
+✔ a live-permission worker that is still alive is never recovered (2.949459ms)
+✔ recovery finalizes a closed task's interrupted run without reopening the task (3.770541ms)
+✔ recovery merges fresh input and skips a replaced worker from an older snapshot (4.012583ms)
+✔ concurrent recovery sweeps finalize an interrupted run only once (22.4055ms)
+✔ legacy tasks (no run records) are recovered without crashing (3.218ms)
+✔ failInterruptedRun with no startedAt writes no duration (3.101208ms)
+✔ a recovered task can be rerun normally (the working guard no longer blocks it) (7.407459ms)
+✔ recovery is idempotent: a second sweep leaves the failed task alone (2.927209ms)
+✔ worker ready preserves notes and corrections recorded during execution (161.01575ms)
+✔ worker failed preserves notes and corrections recorded during execution (132.193125ms)
+✔ an exception while publishing a result preserves input and finalizes the run as failed (132.732083ms)
+✔ closing a running task remains done when its run becomes ready (132.934458ms)
+✔ closing a running task remains done when its run becomes failed (131.101084ms)
+✔ a worker superseded by newer run cannot publish result or terminal events (132.162958ms)
+✔ a worker superseded by different worker PID cannot publish result or terminal events (131.260584ms)
+✔ a live permission cannot start another run and its resolved worker preserves new input (2392.817459ms)
+✔ concurrent session grants reserve exactly one resumed execution (2174.855166ms)
+✔ startup recovery fails a dead worker paused on a live permission (161.651291ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5752.678333

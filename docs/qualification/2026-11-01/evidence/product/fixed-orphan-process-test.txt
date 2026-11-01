@@ -1,0 +1,11 @@
+✔ recovery refuses a rerun while an orphan command still writes, then allows it after the group exits (772.541667ms)
+✔ a terminal worker can drain its POSIX group before normal rerun admission (465.378959ms)
+✔ a saved-session permission cannot resume while the previous group still owns a descendant (1044.232833ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2348.72725

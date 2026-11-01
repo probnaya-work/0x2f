@@ -1,0 +1,4 @@
+
+> 0x2f@0.1.4 check
+> find src test relay scripts deploy -name node_modules -prune -o \( -name '*.mjs' -o -name '*.js' \) -exec node --check {} \; && python3 -c "import ast,glob,sys; [ast.parse(open(f, encoding='utf-8').read(), f) for f in glob.glob('test/tui-pty/*.py')]"
+

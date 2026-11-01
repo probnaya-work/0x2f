@@ -1,0 +1,28 @@
+# Remaining risks and unknowns
+
+| Status / priority | Evidence and impact | Remedy / next verification |
+| --- | --- | --- |
+| **CONFIRMED / P2** — closed task can retain a waiting provider | [Independent local reproduction](evidence/product/qualification-close-permission-output.jsonl): close while working, then receive a live ACP permission. Task stays DONE and provider waits; normal allow/rerun cannot resolve it. This preserves closure and authorization, but resources may remain. | An explicit cancellation/process-ownership contract is needed. Until then, let active runs finish before closing; diagnose and terminate only the known fixture/provider process manually if necessary. No silent approval or unsafe PID-only group kill was added. |
+| **CONFIRMED scope limitation** — provider children can outlive workers | A heartbeat command and fake native harness descendant survived worker exit. [Reproduction](evidence/product/qualification-orphan-command-output.jsonl). The candidate now refuses rerun and non-live resume while their recorded POSIX group survives, with three real-process regressions. | There is still no automatic cancellation/reaping. Manually stop the known old execution before continuation. Old records without group identity, Windows and descendants deliberately creating another process group are unqualified. |
+| **STRONGLY SUPPORTED** — no sandbox across tasks or arbitrary provider descendants | Local workers execute in the same repository; command/ACP integrations rely on harness permissions and may spawn subprocesses. Task locks serialize one task's state, not all source edits across tasks. | Do not treat the runtime as a security sandbox or assume observed git changes prove exclusive authorship. A surviving supervisor/process-container design would be needed for stronger containment claims. |
+| **CONFIRMED design limitation** — recovery is startup-triggered | `serve.mjs` invokes recovery once before serving. Ordinary CLI listing does not continuously sweep orphans. | Restart `2f serve`/the UI runtime after a dead worker; a periodic recovery policy would need admission/liveness tests. |
+| **CONFIRMED design limitation** — local durability is not a transaction | Atomic task.json rename remains intact, but prompt/result/event/config files are separate writes without fsync. | Test abrupt host/filesystem failure on target hardware before claiming power-loss durability. No hardware power-loss experiment was performed. Invalid task folders are preserved and skipped, not automatically repaired. |
+| **CONFIRMED design tradeoff** — active HTTP-LAN pairing interception | Existing trusted-network-only bootstrap is HTTP. E2E does not authenticate client JavaScript delivered by an active MITM. | Use a trusted LAN or independently qualify HTTPS-hosted delivery. See the existing remote-control documentation. |
+| **CONFIRMED advisory** — history polling rereads complete logs | Synthetic 1,000-task fixture reads 8,104,000 bytes per poll, roughly 32 MB/s at nominal 250 ms. [Baseline](evidence/product/baseline-bench.jsonl), [candidate](evidence/product/fixed-bench.jsonl). | Incremental byte-offset tailing is a future optimization. Small warm-filesystem samples do not establish a latency budget; no speculative performance rewrite was made. |
+| **BLOCKED / unqualified** — runtime/platform matrix | Only macOS arm64 / Node 26.11.1 / Python 3.9.6 available. Node >=20 is claimed; no Node20 binary or Linux/Windows environment was available locally. | Run syntax, complete fixture suite, installation and PTY flows on the actual supported minimum Node and OS versions. Do not infer compatibility from this machine. |
+| **BLOCKED / unqualified** — real harness and physical device matrix | New tests use local command/native-output/ACP fixtures. Nine real-binary Codex/Gemini integration tests are explicitly skipped by the safe runner. No paid workloads or phone hardware runs. | Run pinned authorized harnesses against local mocks where possible, and separately authorize/account for real model/device tests. Preserve old observed capability maps until real reobservation. |
+| **BLOCKED / unqualified** — production relay/distribution operations | No hosted relay deployment, credential rotation in a real account, registry publication, real install upgrade fleet or external infrastructure test. | Validate these through normal operator release processes. Local package install/uninstall is evidence for the artifact, not a production release attestation. |
+| **HYPOTHESIS** — network filesystem and PID-reuse availability | Mutex safety is qualified on this local filesystem. PID reuse/EPERM can conservatively keep a lock busy; candidate directories can remain after a killed waiter. | Target filesystem/process-identity tests; use private same-host state only. No automated deletion of unknown state or unrelated process termination. |
+
+Upgrade caution: do not mix old workers with new writers in one active
+workspace. Old workers do not respect the new lock/nonce contract. Finish
+existing executions, replace the local package/runtime, then resume or rerun.
+The artifact version was intentionally not changed during this engineering run.
+
+Resume from the isolated checkout. First read FINAL-REPORT, then run
+`npm ci --offline --ignore-scripts --no-audit --no-fund`, `npm run check`, and
+`node docs/qualification/2026-11-01/evidence/run-fixture-suite.mjs`.
+The last command needs permission to bind local loopback sockets; it omits
+credentials and native provider CLIs and uses a disposable dependency cache.
+Do not replace historical evidence or rerun exploratory baseline scripts as
+though their original assertions describe the corrected product.

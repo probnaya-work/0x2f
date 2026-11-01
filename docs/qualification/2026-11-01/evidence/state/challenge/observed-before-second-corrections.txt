@@ -1,0 +1,26 @@
+Independent second review of in-progress qualification fixes, 2026-11-01.
+No production source modified by this review. All fixture providers and workspaces local.
+
+Targeted existing tests (socket escalation because sandbox listen was EPERM):
+node --test test/security.test.mjs test/lan-mode.test.mjs test/ui-launch.test.mjs test/check.test.mjs
+41 tests, 41 passed, 0 failed, 3714.809708ms.
+
+$ node /tmp/qualification-cache-route-confusion.mjs
+0x2F UI: http://127.0.0.1:57748
+{"case":"unauthenticated-cross-route-replay","originalStatus":201,"target":"/","authHeaderSent":false,"status":201,"replayedPrivateBrief":"Private task content in cache","matchedOriginalId":true}
+{"case":"unauthenticated-cross-route-replay","originalStatus":201,"target":"/api/health","authHeaderSent":false,"status":201,"replayedPrivateBrief":"Private task content in cache","matchedOriginalId":true}
+{"case":"unauthenticated-cross-route-replay","originalStatus":201,"target":"/app/app.js","authHeaderSent":false,"status":201,"replayedPrivateBrief":"Private task content in cache","matchedOriginalId":true}
+
+$ node /tmp/qualification-ui-async-error.mjs
+Exit code 1. Surrounding await ensureRuntime try/catch did not run.
+Error: controlled local spawn EAGAIN
+Emitted 'error' event at:
+    at file:///private/tmp/qualification-ui-async-error.mjs:10:28 {
+  code: 'EAGAIN'
+}
+Node.js v26.11.1
+
+$ node /tmp/qualification-acp-request-reuse.mjs
+{"case":"sequential-request-id-reuse","permissionTools":["First operation","Different second operation"],"sameRequestId":true,"outcome":"ready","responses":[{"stage":0,"response":{"outcome":{"outcome":"selected","optionId":"allow"}}},{"stage":1,"response":{"outcome":{"outcome":"selected","optionId":"allow"}}}],"base":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualification-acp-reuse-o4UaTv"}
+
+JSON-RPC id is a request/response correlation field, not a lifetime-unique permission identity. Primary reference: https://www.jsonrpc.org/specification section 4, id field. The reuse fixture resolves the first request before issuing the second, so no simultaneously pending IDs collide.

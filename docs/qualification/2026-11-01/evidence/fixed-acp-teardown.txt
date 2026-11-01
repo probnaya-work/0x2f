@@ -1,0 +1,10 @@
+✔ ACP ready teardown retains no timeout after its actual child closes (93.826625ms)
+✔ ACP failed teardown retains no timeout after its actual child closes (84.664209ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.228542

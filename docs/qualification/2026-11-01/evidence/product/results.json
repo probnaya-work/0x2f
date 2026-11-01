@@ -1,0 +1,195 @@
+{
+  "baseline_revision": "809e3ab158a7304c9e07e9c6d95ce30542987460",
+  "environment": {
+    "node": "v26.11.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "cpu": "Apple M4",
+    "minimum_node20_verified": false
+  },
+  "policy": "Only local fake provider executables and temporary loopback HTTP servers were used. No real provider requests, public relay calls, or secrets.",
+  "reproduce_probes": "Run from the repository root. QUALIFICATION_ROOT optionally selects an archived baseline source tree with node_modules linked to locally installed dependencies. Example: QUALIFICATION_ROOT=/tmp/baseline node docs/qualification/2026-11-01/evidence/product/qualify-product.mjs",
+  "baseline": {
+    "targeted_tests": {
+      "command": "node --test test/node-local.test.mjs test/check.test.mjs test/provider-manifests.test.mjs",
+      "exit_status": 1,
+      "tests": 27,
+      "passed": 21,
+      "failed": 6,
+      "output": "baseline-targeted.txt"
+    },
+    "ui_tests": {
+      "command": "node --test test/ui-launch.test.mjs",
+      "exit_status": 1,
+      "tests": 14,
+      "passed": 9,
+      "failed": 5,
+      "output": "baseline-ui.txt"
+    },
+    "concurrent_creation": {
+      "invocations_per_scenario": 20,
+      "distinct_briefs_successful": 20,
+      "distinct_briefs_persisted": 20,
+      "distinct_briefs_unique_ids": 10,
+      "identical_briefs_successful": 20,
+      "identical_briefs_persisted": 13,
+      "output": "baseline-product.jsonl"
+    },
+    "parent_log_descriptor_leak": {
+      "launches": 64,
+      "open_descriptors": 64,
+      "output": "baseline-product.jsonl"
+    },
+    "onboarding": {
+      "wrong_workspace_reused": true,
+      "copied_generated_manifest_exit_status": 1,
+      "package_with_spaces_task_status": "working",
+      "worker_error": "MODULE_NOT_FOUND: package%20with%20space/src/worker.mjs",
+      "output": "baseline-onboarding.txt"
+    },
+    "incomplete_provider_flag": {
+      "exit_status": 0,
+      "task_created": true,
+      "output": "baseline-cli-flags.jsonl"
+    },
+    "performance": {
+      "output": "baseline-bench.jsonl",
+      "caveat": "Small warm-filesystem local measurements; no acceptance threshold or cross-platform claim. At 1000 tasks, event polling rereads 8104000 bytes every nominal 250 ms."
+    }
+  },
+  "fixed": {
+    "targeted_tests": {
+      "command": "node --test test/node-local.test.mjs test/check.test.mjs test/provider-manifests.test.mjs",
+      "exit_status": 0,
+      "tests": 30,
+      "passed": 30,
+      "output": "fixed-targeted.txt"
+    },
+    "ui_tests": {
+      "command": "node --test test/ui-launch.test.mjs",
+      "exit_status": 0,
+      "tests": 15,
+      "passed": 15,
+      "output": "fixed-ui.txt"
+    },
+    "syntax_check": {
+      "command": "npm run check",
+      "exit_status": 0,
+      "output": "fixed-check.txt"
+    },
+    "onboarding": {
+      "wrong_workspace_reuse_refused": true,
+      "copied_generated_manifest_exit_status": 0,
+      "package_with_spaces_task_status": "ready",
+      "output": "fixed-onboarding.txt"
+    },
+    "async_spawn": {
+      "command": "node --test --test-name-pattern='EAGAIN|waits for the child spawn' test/node-local.test.mjs test/ui-launch.test.mjs",
+      "tests": 4,
+      "pre_fix_passed": 0,
+      "fixed_passed": 4,
+      "pre_fix_output": "pre-async-spawn.txt",
+      "fixed_output": "fixed-async-spawn.txt",
+      "behavior": "Worker start/resume reject asynchronous EAGAIN, UI rejects before health polling, and log descriptors close on failure. Successful worker starts await the spawn event."
+    },
+    "concurrent_creation": {
+      "invocations_per_scenario": 20,
+      "distinct_briefs_successful": 20,
+      "distinct_briefs_persisted": 20,
+      "distinct_briefs_unique_ids": 20,
+      "identical_briefs_successful": 20,
+      "identical_briefs_persisted": 20,
+      "identical_briefs_unique_ids": 20,
+      "parent_log_descriptors_after_64_launches": 0,
+      "output": "fixed-product.jsonl"
+    }
+  },
+  "scope": "This agent fixed worker/runtime launch descriptors and URL paths, UI workspace identity checks, syntax-check error propagation, generated provider onboarding example, and dependency documentation. Parent agent owns task allocation/lifecycle and CLI parsing corrections.",
+  "compatibility_limit": "No local Node20 binary was available; no download or public registry lookup was performed. Minimum-runtime qualification remains open.",
+  "independent_second_review": {
+    "command": "node --test docs/qualification/2026-11-01/evidence/product/qualification-challenge.test.mjs",
+    "tests": 5,
+    "passed": 5,
+    "output": "qualification-challenge-output.txt",
+    "checks": [
+      "Acknowledged launch-gap note preserved",
+      "Close during launch gap preserved",
+      "Exactly one opposite live grant admitted",
+      "Recovery waits for gated launcher reservation",
+      "20 stale-lock reclaim contenders serialize"
+    ],
+    "remaining_limitation": {
+      "probe": "qualification-close-permission.mjs",
+      "output": "qualification-close-permission-output.jsonl",
+      "observation": "Close an active task, then receive a live ACP permission: task remains done, worker/provider stay alive waiting; allow refuses done and rerun refuses an active execution. Probe terminates its own fixture processes afterward.",
+      "classification": "Operability/resource limitation consistent with declared no-cancellation behavior; no silent permission approval or closure reversal is recommended."
+    },
+    "command_worker_crash": {
+      "severity": "P1 if the strict sequential execution claim covers worker crashes",
+      "probe": "qualification-orphan-command.mjs",
+      "output": "qualification-orphan-command-output.jsonl",
+      "confirmed_transport": "generic command provider only",
+      "expected": "Recovery/rerun confirms the previous provider execution tree has stopped, or refuses rerun with orphan-execution guidance.",
+      "actual": "SIGKILL stops the worker but leaves its silent command child alive and writing. Recovery marks failed/crashed. Rerun starts a second provider while the first continues writing.",
+      "cleanup": "Both recorded workers and both recorded command-provider processes were explicitly terminated and verified dead.",
+      "remedy_options": [
+        "Record and validate local process-group ownership, verify or quiesce the owned group before rerun, and fail closed when ownership cannot be established; platform-specific work is required.",
+        "Use a surviving per-run supervisor/watchdog to own and tear down the provider process tree when the worker dies."
+      ],
+      "insufficient_remedy": "Adding command-provider cancel() only helps graceful termination; a worker killed with SIGKILL cannot run cancellation code.",
+      "production_edits": false,
+      "resolution": {
+        "status": "Rerun admission is now guarded for recorded local POSIX execution groups. Recovery records the orchestration failure and does not kill saved process identities.",
+        "regression": "test/orphan-process.test.mjs",
+        "output": "fixed-orphan-process-test.txt"
+      }
+    },
+    "saved_session_orphan_resume": {
+      "pre_fix_probe": "qualification-orphan-resume.mjs",
+      "pre_fix_output": "qualification-orphan-resume-output.jsonl",
+      "pre_fix_observation": "A fake native CLI left a same-group heartbeat descendant after publishing a saved-session permission. Non-live allow started another session while that descendant remained alive.",
+      "resolution": "The shared process-group admission guard now runs before non-live resume clears old ownership. Live in-place permission grants remain exempt.",
+      "regression": "test/orphan-process.test.mjs",
+      "output": "fixed-orphan-process-test.txt",
+      "tests": 3,
+      "passed": 3,
+      "remaining_scope": [
+        "POSIX only; Windows process-tree ownership remains unqualified.",
+        "Protects newly recorded local execution groups; a descendant that deliberately starts a different process group can escape this guard.",
+        "Legacy task records without processGroupId cannot be retroactively assigned verified process-group ownership.",
+        "Numeric identity reuse may conservatively refuse admission; saved process/group IDs are never automatically killed."
+      ],
+      "cleanup": "Every fixture worker and recorded provider PID is individually terminated and verified dead by test cleanup."
+    }
+  },
+  "pty_terminal_worker_diagnostic": {
+    "probe": "qualification-pty-retry-diagnostic.mjs",
+    "output": "qualification-pty-retry-diagnostic-output.json",
+    "workspace_retained": "/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-tui-pty-9w8xok",
+    "observed_flash": "Task #1 still has execution processes in local process group 79255. Inspect and stop the previous execution before continuing.",
+    "ps_fields": "pid,ppid,pgid,stat,comm only; no process arguments",
+    "group_members_at_retry": [
+      {
+        "pid": 79255,
+        "ppid": 79254,
+        "pgid": 79255,
+        "stat": "Ss",
+        "comm": "/opt/homebrew/Cellar/node/26.11.1/bin/node"
+      }
+    ],
+    "observation": "Only the terminal worker remained in its group, still alive through more than600ms; provider had already exited. The250ms group admission grace expired.",
+    "source_cause": "ACP shutdown unconditionally schedules a referenced2000ms timer, including from child close after the child is already dead. The close path does not clear the timer when the run has already settled.",
+    "production_edits_by_reviewer": false,
+    "proposed_remedy": "Clear the ACP shutdown timer on actual child close and avoid scheduling cleanup for an already-closed child. Preserve the process-group guard.",
+    "resolution": {
+      "review": "ACP shutdown now skips an already-closed child; close clears shutdownTimer and pending RPC timers before returning for settled runs.",
+      "independent_probe_output": "qualification-pty-retry-after-teardown.json",
+      "observed_old_worker_and_group_dead_before_retry": true,
+      "observed_run2_working_at_first_snapshot_ms": 50,
+      "observed_run2_ready_at_snapshot_ms": 100,
+      "group_refusal_observed": false,
+      "timing_caveat": "Observed timestamps from this diagnostic only; no wall-clock acceptance threshold is asserted.",
+      "source_edits_by_reviewer": false
+    }
+  }
+}

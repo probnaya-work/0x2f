@@ -1,0 +1,41 @@
+Baseline 809e3ab158a7304c9e07e9c6d95ce30542987460
+Source was read-only during independent reproductions. Local command and ACP fixtures only.
+
+$ node /tmp/qualification-state-recovery.mjs
+{"case":"note-during-working","expectedNotes":1,"actualNotes":null,"eventRetainsNote":true}
+{"case":"close-during-working","expectedStatus":"done","actualStatus":"ready","eventRetainsClose":true}
+{"case":"rerun-live-permission","expected":"refusal or old worker stopped","actual":"second worker executing while first worker still alive","oldWorkerAlive":true,"newWorkerAlive":true,"runCount":2}
+{"case":"old-worker-clobbers-rerun","expectedRuns":2,"actualRuns":1,"expectedProvider":"gate","actualProvider":"fixtureacp","actualStatus":"failed","eventRuns":[1,2]}
+{"case":"dead-live-permission-recovery","workerAlive":false,"expected":"failed/crashed and rerunnable","recoveredCount":0,"actualPersistedStatus":"needs_you","actualBlockedLive":true,"allowReturnStatus":"working","permissionFileExists":true}
+{"fixtureRoot":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualification-state-ENeT2v"}
+
+$ node /tmp/qualification-duplicate-resume.mjs
+{"case":"concurrent-nonlive-resume","actionStatuses":["fulfilled","fulfilled"],"workerPids":[59028,59029],"providerInstancesExecuting":2,"expectedProviderInstances":1,"base":"/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/qualification-resume-99FZKf"}
+
+$ node --test test/task-ownership.test.mjs
+(before worker/recover implementation and parent action reservations)
+✖ worker ready preserves notes and corrections recorded during execution (137.048667ms)
+✖ worker failed preserves notes and corrections recorded during execution (133.861167ms)
+✖ closing a running task remains done when its run completes (132.09875ms)
+✖ a worker superseded by newer run cannot publish result or terminal events (152.6815ms)
+✖ a worker superseded by different worker PID cannot publish result or terminal events (131.087709ms)
+✖ a live permission cannot start another run and its resolved worker preserves new input (2119.659417ms)
+✖ concurrent session grants reserve exactly one resumed execution (2038.376833ms)
+✖ startup recovery fails a dead worker paused on a live permission (165.453042ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 0
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5075.259875
+
+Failures captured from that run:
+- ready/failed note tests: TypeError, finished.context absent (notes erased).
+- close test: actual 'ready' !== expected 'done'.
+- stale newer run test: actual runs length 1 with old fixture provider; expected preserved run 2 and newer-provider.
+- stale PID test: actual pid 61965, status ready, run ready; expected pid 61934, status working, run working.
+- live permission rerun: AssertionError Missing expected rejection.
+- concurrent session grants: actual fulfilled count 2 !== expected 1.
+- dead paused recovery: actual recovered count 0 !== expected 1.

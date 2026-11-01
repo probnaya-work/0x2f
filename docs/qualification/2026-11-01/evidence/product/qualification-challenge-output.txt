@@ -1,0 +1,16 @@
+NOTE_GAP {"notes":[{"at":"2026-11-01T01:34:20.485Z","text":"Keep this launch-gap constraint"}]}
+✔ an acknowledged note between task publication and launch remains on the task (9.394916ms)
+CLOSE_GAP done
+✔ closing after task publication but before launch is not undone by launch completion (4.122709ms)
+LIVE_GRANTS {"states":["fulfilled","rejected"],"decision":{"grant":"allow","requestId":100,"at":"2026-11-01T01:34:20.497Z"}}
+✔ opposite grants against one live request cannot both acknowledge success (24.774709ms)
+✔ a launcher lock prevents recovery from failing a task before it records its new worker PID (16.313041ms)
+✔ lock reclamation serializes two later callers after a dead PID marker (61.969375ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 175.862042

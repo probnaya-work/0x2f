@@ -1,0 +1,35 @@
+{
+  "rows": [
+    {
+      "label": "object brief",
+      "status": 500,
+      "error": "brief.trim is not a function"
+    },
+    {
+      "label": "number brief",
+      "status": 500,
+      "error": "brief.trim is not a function"
+    },
+    {
+      "label": "object provider",
+      "status": 400,
+      "error": "Unknown execution provider \"[object Object]\". Available: claude-code, codex, deepseek-harness, gemini, opencode."
+    },
+    {
+      "label": "object model",
+      "status": 201,
+      "error": null
+    },
+    {
+      "label": "object note",
+      "status": 500,
+      "error": "note.trim is not a function"
+    },
+    {
+      "label": "object answer",
+      "status": 500,
+      "error": "answer.trim is not a function"
+    }
+  ],
+  "syntheticActionLaunches": 1
+}
