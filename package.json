@@ -34,7 +34,7 @@
   "scripts": {
     "start": "node src/cli.mjs",
     "check": "node scripts/check.mjs",
-    "test": "node --test \"test/*.test.mjs\"",
+    "test": "node scripts/test.mjs",
     "test:tui": "node --test test/tui-pty-e2e.test.mjs",
     "dogfood:tui": "node scripts/dogfood-tui.mjs",
     "review:tui": "node scripts/review-tui.mjs",

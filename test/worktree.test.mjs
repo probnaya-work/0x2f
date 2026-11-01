@@ -25,11 +25,13 @@ function run(args, cwd) {
 async function gitRepo(t) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-worktree-"));
   t.after(() => fs.rm(base, { recursive: true, force: true }));
-  await run(["init"], base);
+  assert.equal((await run(["init"], base)).code, 0, "fixture git init");
   await fs.writeFile(path.join(base, ".gitignore"), ".work/\n");
   await fs.writeFile(path.join(base, "existing.txt"), "before\n");
-  await run(["add", "."], base);
-  await run(["commit", "-m", "initial"], base);
+  assert.equal((await run(["add", "."], base)).code, 0, "fixture git add");
+  const committed = await run(["-c", "user.name=0x2F fixture", "-c", "user.email=fixture@example.invalid",
+    "commit", "-m", "initial"], base);
+  assert.equal(committed.code, 0, `fixture git commit: ${committed.stderr}`);
   return base;
 }
 
