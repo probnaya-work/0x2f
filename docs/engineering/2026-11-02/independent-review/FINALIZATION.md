@@ -83,6 +83,20 @@ not inferred from compilation or capture.isRunning.
 Remaining fault-case observations and final verdict are recorded in the Mobile
 review. The dated Device Hub diagnosis is retained as historical evidence.
 
+### Follow-up rejected-code correction
+
+The expiry test exposed a stop/start loop when local trust validation rejected a
+barcode. Mobile5f8435edb598ef6e73702f1a905bf6c659dc83e4 keeps native preview active,
+suppresses repeated rejected frames, stops capture only on accepted delivery and
+shows explicit CODE EXPIRED/CODE NOT VALID. Trust checks are unchanged. A red
+callback-count regression failed30vs1; all32Swift tests/6suites then passed, as did
+Release and signed physical-iOS builds. The new exact signed Dev17 is installed,
+CodeDirectory98250452b55fbd35dc54bffd1d447dfa686e59bc, bundle manifest digest
+f1714b8e18a4679f08efcf51f666fb23ded08d1b750ea04ac9cbc79bfeb9329f.
+The earlier signed217403c artifact's physical observations remain historical;
+revised refusal/preview/fresh-code acceptance and approved selective revocation
+are not claimed complete until observed. See the updated Mobile report.
+
 ## Subsequent integration and release order
 
 1. 057 #1 may merge into its named engineering base with its reader opt-in;

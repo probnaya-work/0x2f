@@ -2,7 +2,8 @@
 
 Focused follow-up: [FINALIZATION.md](FINALIZATION.md). The latest Linux retry is
 BLOCKED on external free quota after Thinkbox network access returned; Mobile software preview is now removed and
-new signed physical normal-path checks passed. Remaining Mobile fault gates
+initial signed physical normal-path checks passed. A subsequent rejected-code
+loop correction has a new exact signed artifact and targeted retest pending. Remaining Mobile fault gates
 are explicit in its updated report. The original package qualification below
 remains historical evidence for the same unchanged canonical bytes.
 
@@ -12,7 +13,7 @@ remains historical evidence for the same unchanged canonical bytes.
 | --- | --- | --- |
 | [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **CONDITIONAL GO — merge пока удержать** | Исправления и окончательные package contracts прошли. Final Mac/Linux install и contracts прошли. Первый реальный Linux OpenCode run/check прошёл; второй run отказал с `Free usage limit reached`. Условие: успешный полный Linux AI continuation → checks → restore тем же hash. |
 | [057 #1](https://github.com/probnaya-work/057/pull/1) | **GO в заявленную engineering base** | Исправлены persistence/time-window defects; проверены реальные process-generation links, SQLite reopen и отдельный новый Core: source failure/reconnect сохраняет историю. Reader остаётся opt-in. |
-| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **CONDITIONAL GO — physical fault gates открыты** | Diagnostic preview удалён в 217403c; новая signed Dev17 прошла owner-observed normal scanning/rotation/reconnect/permission recovery. Остались interruption/runtime-error, expiry и selective revocation observations; см. follow-up. |
+| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **CONDITIONAL GO — physical fault gates открыты** | Diagnostic preview удалён в 217403c; rejected-QR loop исправлен в 5f8435e (32 tests, новый signed Dev17 установлен). Физические normal-path observations предыдущего артефакта исторические; targeted retest и fault gates открыты; см. follow-up. |
 | [Site #2](https://github.com/probnaya-work/0x2f-site/pull/2) | **GO** | Registry 0.2.0 отделён от unreleased source; ограничения, ссылки и desktop/narrow navigation проверены. Deployment не выполнялся. |
 
 Это четыре отдельных решения. GO на documentation/opt-in observer не является разрешением на

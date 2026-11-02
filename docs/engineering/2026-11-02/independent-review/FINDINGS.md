@@ -40,3 +40,14 @@ store/ontology. Windowed readers retain overlapping identity declarations even
 when execution birth is older than their poll window. Live permission claims
 remain open only to the observation instant. SQLite reopen verifies persistence;
 the fold regression verifies that re-reading never advances last activity.
+
+## Mobile follow-up P2 — rejected barcode restart loop
+
+The owner observed blinking while testing an expired pairing QR. Scanner stopped
+capture before its caller validated the payload; the catch path started it again,
+so the same visible barcode repeated the cycle. Mobile5f8435e delivers accepted
+codes once, suppresses repeated local refusals while preview stays active and
+shows an explicit expiry/invalid message. The trust checks are unchanged.
+A focused red regression failed30callbacksvs1;32Swift tests/6suites and both
+physical-iOS builds passed. New exact signed physical acceptance remains scoped
+in the Mobile report; this correction does not change the 0x2F canonical package.
