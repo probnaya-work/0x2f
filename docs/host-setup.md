@@ -16,7 +16,7 @@ A service does not inherit your interactive shell's PATH or environment.
    excluded from Git. Its task files are the durable state, not the browser.
 3. Copy [the user unit](../deploy/0x2f-user.service) to
    `~/.config/systemd/user/0x2f.service`. Replace its absolute Node/package,
-   workspace and PATH placeholders. Preserve `0X2F_SUPERVISED=1`,
+   workspace and PATH placeholders. Preserve `WORK_SUPERVISED=1`,
    `KillMode=process`, `UMask=0077` and `Restart=always`.
 4. With the host owner's authorization, enable lingering for that user:
    `loginctl enable-linger "$USER"`. Then:
@@ -30,6 +30,10 @@ journalctl --user -u 0x2f -n 50 --no-pager
 systemctl --user restart 0x2f
 systemctl --user stop 0x2f
 ```
+
+`WORK_SUPERVISED` uses a portable environment-variable name. systemd rejects
+names beginning with a digit; the older `0X2F_SUPERVISED` spelling is retained
+only as a runtime compatibility alias. systemd also supplies `INVOCATION_ID`.
 
 An explicit stop is respected. KillMode deliberately leaves detached workers
 alive during a runtime restart/stop. It does not cancel an agent. On startup,

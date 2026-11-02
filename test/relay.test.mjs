@@ -123,11 +123,17 @@ function rawHello(url, frame) {
 // tailer feeding the bus, and a PAIRED phone speaking the E2E protocol.
 async function makeHarness(t) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let agent, tailer, handle;
+  t.after(async () => {
+    // Stop reconnecting/writing producers before closing their server or deleting state.
+    await agent?.stop();
+    tailer?.stop();
+    await handle?.close();
+    await fs.rm(base, { recursive: true, force: true });
+  });
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -146,17 +152,13 @@ async function makeHarness(t) {
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
   tailer.start();
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(
     () => handle.state.devices.get(deviceId)?.online === true,

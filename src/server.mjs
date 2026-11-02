@@ -636,7 +636,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           ok: true,
           mode: "local",
           base: store.base,
-          ...((process.env["0X2F_SUPERVISED"] === "1" || process.env.INVOCATION_ID)
+          ...((process.env.WORK_SUPERVISED === "1" || process.env["0X2F_SUPERVISED"] === "1" || process.env.INVOCATION_ID)
             ? { supervised: true } : {}),
           ...(lanRelay ? { lan: true } : {})
         });
