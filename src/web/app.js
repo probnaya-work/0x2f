@@ -696,19 +696,21 @@ const accept = (id, disposition = "accept") => {
   });
 };
 
-const cancelRun = id => {
+const cancelRun = (id, executionId) => {
   if (remoteBlocked()) return Promise.resolve(false);
-  return act(() => post("/api/tasks/" + id + "/cancel")).then(ok => {
+  return act(() => post("/api/tasks/" + id + "/cancel", { executionId })).then(ok => {
     if (ok) flash("Cancellation requested. Wait for the worker receipt. Partial work stays; external actions are not rolled back.");
     return ok;
   });
 };
 function cancelButton(id) {
-  const pending = state.tasks.find(t => t.id === id)?.cancelRequested;
+  const task = state.tasks.find(t => t.id === id);
+  const pending = task?.cancelRequested;
+  const executionId = task?.execution?.id ?? task?.executionId ?? null;
   const button = actionButton(pending ? "CANCELLING…" : "CANCEL RUN", "", "act-outline", e => {
     e.stopPropagation();
     e.currentTarget.disabled = true;
-    cancelRun(id).finally(() => render());
+    cancelRun(id, executionId).finally(() => render());
   }, "cancel-run-" + id);
   button.disabled = Boolean(pending);
   return button;

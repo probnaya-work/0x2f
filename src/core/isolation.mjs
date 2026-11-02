@@ -38,7 +38,8 @@ export async function prepareWorkspace(base, task, requested = 'auto') {
 }
 
 export async function requireSharedSlot(store, task) {
-  if (task.checkout?.mode !== 'shared') return;
+  // Tasks written by 0.2.0 have no checkout field and execute in this root.
+  if (task.checkout?.mode === 'isolated') return;
   for (const other of await store.listTasks()) {
     if (other.id === task.id || other.checkout?.mode === 'isolated') continue;
     const r = other.runs?.at(-1);
@@ -66,8 +67,14 @@ export async function captureTree(base, artifactRoot) {
     const config = [...names].flatMap(n => ['-c', `filter.${n}.clean=cat`, '-c', `filter.${n}.process=`, '-c', `filter.${n}.required=false`]);
     await git(base, ['read-tree', 'HEAD'], { env }).catch(() => git(base, ['read-tree', '--empty'], { env }));
     await git(base, ['rm', '--cached', '-r', '--ignore-unmatch', '--', '.work'], { env });
-    const paths = await git(base, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...excludeWork]);
-    if (paths) await git(base, [...config, 'add', '-A', '--pathspec-from-file=-', '--pathspec-file-nul'], {
+    // Include HEAD/private-index paths as well as the user's index. Otherwise
+    // a staged deletion disappears from ls-files and is resurrected in evidence.
+    const lists = await Promise.all([
+      git(base, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...excludeWork], { env }),
+      git(base, ['ls-files', '-z', '--cached', '--', ...excludeWork])
+    ]);
+    const paths = [...new Set(lists.flatMap(s => s.split('\0')).filter(Boolean))].map(s => s + '\0').join('');
+    if (paths) await git(base, [...config, '-c', 'core.fileMode=true', 'add', '-f', '-A', '--pathspec-from-file=-', '--pathspec-file-nul'], {
       env: { ...env, GIT_LITERAL_PATHSPECS: '1' }, input: paths
     });
     const tree = (await git(base, ['write-tree'], { env })).trim();
@@ -78,9 +85,10 @@ export async function treeDiff(base, artifactRoot, before, after) {
   if (!before || !after) return null;
   const env = await snapshotEnv(base, artifactRoot);
   const args = ['diff', '--no-ext-diff', '--no-textconv', '--binary', '--full-index', before.tree, after.tree];
-  const patch = await git(base, args, { env });
+  const patchBytes = await git(base, args, { env, encoding: 'buffer' });
+  const patch = patchBytes.toString('utf8'); // display only; transfer keeps bytes
   const files = (await git(base, ['diff', '--name-only', '-z', before.tree, after.tree], { env })).split('\0').filter(Boolean);
-  return { patch, files, before, after, sha256: createHash('sha256').update(patch).digest('hex') };
+  return { patch, patchBytes, files, before, after, sha256: createHash('sha256').update(patchBytes).digest('hex') };
 }
 export async function saveChanges(store, task, run, before, after) {
   const base = task.checkout?.path ?? store.base;
@@ -93,9 +101,9 @@ export async function saveChanges(store, task, run, before, after) {
     return receipt;
   }
   const attemptDir = path.join(dir, 'attempts', task.execution?.id ?? 'legacy');
-  await store.writeText(path.join(attemptDir, 'changes.patch'), changes.patch);
-  await store.writeText(path.join(dir, 'changes.patch'), changes.patch);
-  const receipt = { ...changes, patch: undefined, version: 1, available: true,
+  await store.writeText(path.join(attemptDir, 'changes.patch'), changes.patchBytes);
+  await store.writeText(path.join(dir, 'changes.patch'), changes.patchBytes);
+  const receipt = { ...changes, patch: undefined, patchBytes: undefined, version: 1, available: true,
     attribution: task.checkout?.mode === 'isolated' ? 'observed isolated checkout interval' : 'observed shared workspace interval; includes any concurrent external edits',
     artifact: `runs/${run}/attempts/${task.execution?.id ?? 'legacy'}/changes.patch` };
   await store.writeJson(path.join(attemptDir, 'changes.json'), receipt);

@@ -212,6 +212,8 @@ export function projectTask(task, base, result) {
     ...(brief.truncated ? { briefTruncated: true } : {}),
     status: task.status ?? "working",
     disposition: task.disposition,
+    // An occurrence precondition, not authority or a process identifier.
+    executionId: task.execution?.id,
     cancelRequested: task.cancelRequested ? { at: task.cancelRequested.at, reason: trunc(task.cancelRequested.reason, TRUNC.error, base) } : undefined,
     workspaceMode: task.checkout?.mode,
     provider: task.execution?.provider ?? null,

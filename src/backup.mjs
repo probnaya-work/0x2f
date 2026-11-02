@@ -10,6 +10,30 @@ import { WorkError } from './core/errors.mjs';
 const inside=(base,p)=>p===base||p.startsWith(base+path.sep);
 const hash=data=>createHash('sha256').update(data).digest('hex');
 const ignored=p=>p==='.work/locks'||p.startsWith('.work/locks/');
+// Data symlinks in a checkout are retained as links. Control paths are later
+// traversed and rewritten, so none may redirect outside the copied tree.
+async function validateControlPaths(root) {
+ async function walk(rel) {
+  const full=path.join(root,rel);
+  let s;try{s=await fs.lstat(full);}catch(e){if(e.code==='ENOENT')return;throw e;}
+  if(s.isSymbolicLink())throw new WorkError(`Backup/restore refuses symbolic control path: ${rel}`,409);
+  if(!s.isDirectory())return;
+  for(const name of await fs.readdir(full)) {
+   const child=rel+'/'+name;
+   if(child==='.work/worktrees') {
+    const entries=await fs.lstat(path.join(root,child));
+    if(!entries.isDirectory()||entries.isSymbolicLink())throw new WorkError('Backup/restore refuses symbolic worktree control path.',409);
+    for(const checkout of await fs.readdir(path.join(root,child))) {
+     const p=path.join(root,child,checkout), stat=await fs.lstat(p);
+     if(!stat.isDirectory()||stat.isSymbolicLink())throw new WorkError('Backup/restore refuses symbolic checkout control path.',409);
+     const pointer=await fs.lstat(path.join(p,'.git'));
+     if(!pointer.isFile()||pointer.isSymbolicLink())throw new WorkError('Backup/restore requires a regular checkout Git pointer.',409);
+    }
+   } else await walk(child);
+  }
+ }
+ await walk('.work');await walk('.git');
+}
 async function inventory(root,rel='') {
  const records=[];
  for(const name of (await fs.readdir(path.join(root,rel))).sort()) {
@@ -54,7 +78,7 @@ export async function backupWorkspace(base,destination) {
  const originalAlias=path.resolve(base);base=await fs.realpath(base);destination=path.resolve(destination);
  const parent=await fs.realpath(path.dirname(destination));destination=path.join(parent,path.basename(destination));
  if(inside(base,destination))throw new WorkError('Backup destination must be outside the source workspace.');
- await mustBeAbsent(destination);await selfContainedGit(base);
+ await mustBeAbsent(destination);await validateControlPaths(base);await selfContainedGit(base);
  return withFileLock(path.join(base,'.work/locks/execution-admission'),async()=>{
   await requireQuiescent(base);
   const staging=destination+'.partial-'+randomUUID();
@@ -78,10 +102,13 @@ export async function restoreBackup(backup,destination) {
  const receipt=JSON.parse(await fs.readFile(path.join(backup,'receipt.json'),'utf8'));
  if(receipt.version!==1||typeof receipt.originalBase!=='string'||!Array.isArray(receipt.files)||!Array.isArray(receipt.sourceModes))throw new WorkError('Invalid backup receipt.');
  const source=path.join(backup,'workspace');
+ if(!(await fs.lstat(source)).isDirectory()||(await fs.lstat(source)).isSymbolicLink())throw new WorkError('Backup workspace must be a real directory.');
+ await validateControlPaths(source);
  if(JSON.stringify(await inventory(source))!==JSON.stringify(receipt.files))throw new WorkError('Backup content differs from its receipt; restore refused.',409);
  const staging=destination+'.partial-'+randomUUID();
  try {
   await copyPrivate(source,staging);
+  await validateControlPaths(staging);
   // Retain historical receipts verbatim; only the current checkout locator moves.
   const store=createStore(staging);
   for(const t of await store.listTasks()) {

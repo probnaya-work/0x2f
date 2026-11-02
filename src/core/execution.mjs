@@ -5,7 +5,15 @@ import fs from "node:fs/promises";
 import { execFile } from "node:child_process";
 
 export function reserveExecution(task) {
-  return { ...task, execution: { ...task.execution, id: randomUUID() }, cancelRequested: undefined };
+  const execution = { ...task.execution, id: randomUUID() };
+  // A resumed worker has a new generation. Until it records that identity,
+  // recovery may observe liveness but must not compare to the old worker.
+  delete execution.process;
+  const runs = task.runs?.map((r, i) => i !== task.runs.length - 1 ? r : {
+    ...r, executionId: execution.id, process: undefined, harnessProcess: undefined,
+    processGroupId: undefined, checks: undefined, input: undefined, integration: undefined
+  });
+  return { ...task, ...(runs ? { runs } : {}), execution, cancelRequested: undefined };
 }
 
 export async function processIdentity(pid) {

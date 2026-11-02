@@ -164,7 +164,7 @@ export const geminiProvider = {
     return runGemini({ cwd, args, onEvent });
   },
 
-  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {} }) {
+  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {}, onInput = async () => {} }) {
     if (!externalSessionId) {
       throw new Error("No external session id — this task cannot be resumed.");
     }
@@ -182,6 +182,7 @@ export const geminiProvider = {
       ...geminiApprovalArgs()
     ];
     if (model) args.push("-m", model);
+    await onInput(prompt);
     return runGemini({ cwd, args, onEvent });
   }
 };

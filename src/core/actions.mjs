@@ -216,7 +216,10 @@ export function createActions(ctx) {
       const dir = path.join(store.taskDir(task.slug), "runs", String(record.run), "attempts", record.executionId ?? task.execution?.id ?? "legacy", receipt.artifacts);
       checks.push({ ...receipt, stdout: await store.readText(path.join(dir, "stdout.txt")), stderr: await store.readText(path.join(dir, "stderr.txt")) });
     }
-    return { ...record, checks, result, ...(context ? { context } : {}), ...(input ? { input } : {}) };
+    const deliveredInput = input?.artifact
+      ? await store.readText(path.join(store.taskDir(task.slug), 'runs', String(record.run), 'attempts', record.executionId ?? 'legacy', 'input.md'))
+      : input?.transport?.startsWith('native resume') ? 'Native resume input was not recorded.' : undefined;
+    return { ...record, checks, result, ...(context ? { context } : {}), ...(input ? { input } : {}), ...(deliveredInput !== undefined ? { deliveredInput } : {}) };
   }
 
   // createWork({ brief, provider?, model? }): create the task and start
@@ -492,6 +495,9 @@ export function createActions(ctx) {
     }
     await requireExecutionExit(task, id);
     await requireSharedSlot(store, task);
+    if (task.execution?.id) {
+      await store.writeJson(path.join(store.taskDir(task.slug), 'runs', String(currentRunNumber(task)), 'attempts', task.execution.id, 'execution.json'), task.runs?.at(-1) ?? {});
+    }
     let current = beginResume(task, grant);
     current = updateRun(current, currentRunNumber(current), {
       outcome: "working", attempts: current.execution.attempts,
@@ -617,9 +623,14 @@ export function createActions(ctx) {
     return taskDiff({ base: store.base, files });
   }
 
-  async function cancelWork(id, { reason = "Stopped by user" } = {}) {
+  async function cancelWork(id, { reason = "Stopped by user", executionId } = {}) {
     requireWithin(reason, MAX_NOTE, "Cancellation reason");
     const task = await store.findTask(id);
+    // Interactive clients bind the gesture to the attempt they displayed.
+    // Bare CLI cancellation deliberately addresses the current attempt.
+    if (executionId !== undefined && executionId !== task.execution?.id) {
+      throw new WorkError("The execution changed. Refresh before cancelling this attempt.", 409);
+    }
     const run = task.runs?.at(-1);
     const active = task.status === "working" || task.blockedOn?.live ||
       run?.outcome === "working" || run?.blockedOn?.live;
@@ -642,9 +653,9 @@ export function createActions(ctx) {
     const dir = path.join(store.taskDir(task.slug), "runs", String(run));
     const receipt = await store.readJson(path.join(dir, "changes.json")).catch(() => ({ available: false, reason: "This run predates saved change evidence." }));
     if (!receipt.available) return receipt;
-    const patch = await store.readText(path.join(dir, "changes.patch"));
-    if (createHash("sha256").update(patch).digest("hex") !== receipt.sha256) throw new WorkError("Saved change artifact failed its integrity check.", 409);
-    return { ...receipt, patch };
+    const bytes = await fs.readFile(path.join(dir, "changes.patch"));
+    if (createHash("sha256").update(bytes).digest("hex") !== receipt.sha256) throw new WorkError("Saved change artifact failed its integrity check.", 409);
+    return { ...receipt, patch: bytes.toString("utf8") };
   }
 
   async function applyWork(id) {
@@ -662,7 +673,7 @@ export function createActions(ctx) {
     if (task.appliedTree === changes.after.tree) throw new WorkError("This saved result was already applied.", 409);
     if (cumulative.patch) {
       const artifact = path.join(store.taskDir(task.slug), "apply.patch");
-      await store.writeText(artifact, cumulative.patch);
+      await store.writeText(artifact, cumulative.patchBytes);
       await git(store.base, ["apply", "--check", "--binary", artifact]);
       await git(store.base, ["apply", "--binary", artifact]);
     }

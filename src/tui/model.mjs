@@ -239,6 +239,7 @@ export function projectTask(task, events, opts = {}) {
     status: task.status,
     state,
     provider: task.execution?.provider ?? null,
+    executionId: task.execution?.id,
     providerSig: provider.sig,
     providerName: provider.name,
     coarse: fidelity(task.execution?.provider, providers) === "coarse",

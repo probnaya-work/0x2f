@@ -80,3 +80,21 @@ never switch an older runtime onto tasks actively using isolated worktrees or
 cancellation. To roll back, stop new execution, retain/archive isolated source,
 and restore the corresponding whole private state backup together with its
 release prefix. Do not delete `.work` or silently replay interrupted tasks.
+
+## Independent review corrections
+
+Interactive CANCEL carries the displayed attempt nonce; a stale gesture refuses
+rather than stopping a later run. Bare CLI cancel addresses the current attempt.
+Legacy tasks without checkout metadata share the original workspace and obey
+shared admission. New attempt reservation discards the previous process identity.
+
+Immutable patch hashing/transfer preserves raw bytes, including non-UTF-8 text.
+Snapshot enumeration includes staged deletions and explicitly staged ignored
+files without changing the user's index. TUI patch display decodes text; the
+saved artifact and apply preserve its bytes. Cleanup still refuses data not
+represented by its archive, including normalized CRLF and gitlinks.
+
+Fresh and native-resume input receipts are attempt-specific. Native-resume
+receipts name the exact provider message, rather than reusing the original fresh
+prompt or claiming delivery of newly recorded notes/rules. Older receipts cannot
+be upgraded retroactively. Tool receipt correlation is bound to run and attempt.

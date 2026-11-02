@@ -137,7 +137,7 @@ export const claudeCodeProvider = {
     return runClaude({ cwd, args, onEvent });
   },
 
-  async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {} }) {
+  async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {}, onInput = async () => {} }) {
     const prompt =
       grant === "allow"
         ? ALLOW_PROMPT
@@ -156,6 +156,7 @@ export const claudeCodeProvider = {
       args.push("--permission-mode", "acceptEdits");
     }
     args.push(prompt);
+    await onInput(prompt);
     return runClaude({ cwd, args, onEvent, resuming: true });
   }
 };

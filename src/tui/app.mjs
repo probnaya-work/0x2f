@@ -95,7 +95,7 @@ export function createApp(runtime, opts = {}) {
     try {
       switch (intent.type) {
         case "cancel": {
-          await actions.cancelWork(intent.id);
+          await actions.cancelWork(intent.id, { executionId: intent.executionId });
           setFlash("cancellation requested · partial work stays; wait for the worker receipt", "warn");
           break;
         }
@@ -105,7 +105,7 @@ export function createApp(runtime, opts = {}) {
           const events = (await runtime.store.readEvents(task.slug)).filter(e => (e.run ?? 1) === intent.run);
           const prompt = await runtime.store.readRunPrompt(task, intent.run) ??
             await runtime.store.readText(runtime.store.taskDir(task.slug) + "/prompt.md", "");
-          state = { ...state, review: { ...run, taskId: task.id, run: intent.run, brief: task.brief ?? task.title, prompt, events, input: false } };
+          state = { ...state, review: { ...run, taskId: task.id, run: intent.run, brief: task.brief ?? task.title, prompt: run.deliveredInput ?? prompt, inputTransport: run.input?.transport, events, input: false } };
           break;
         }
         case "allow": {

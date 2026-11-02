@@ -320,7 +320,7 @@ export function apply(state, key, ctx = {}) {
       return { state, intent: secondary.intent };
     }
     case "s":
-      return { state, intent: task && ["running", "working", "needs"].includes(task.state) ? { type: "cancel", id: task.id } : null };
+      return { state, intent: task && ["running", "working", "needs"].includes(task.state) ? { type: "cancel", id: task.id, executionId: task.executionId ?? null } : null };
     case "n":
       return { state: { ...state, mode: "composer" }, intent: null };
     case "t":

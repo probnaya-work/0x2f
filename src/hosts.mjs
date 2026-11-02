@@ -34,6 +34,17 @@ export async function loadHosts(base) {
   return config;
 }
 const sshArgs=h=>['-T','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=10','-o','ControlMaster=no','-o','ControlPath=none','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=1','--',h.target];
+export function hostCommand(h, args) {
+  // Check the pin on the connection that will actually execute the command.
+  // A successful earlier diagnostic connection cannot authorize another host.
+  const script = `const fs=require('node:fs'),c=require('node:crypto'),u=require('node:url');
+const expected=${JSON.stringify(h.machineId)},workspace=${JSON.stringify(h.workspace)},cli=${JSON.stringify(h.cli)};
+const actual=c.createHash('sha256').update(fs.readFileSync('/etc/machine-id','utf8').trim()).digest('hex');
+if(actual!==expected){console.error('SSH target machine identity changed; execution refused.');process.exit(1);}
+process.chdir(workspace);process.argv=[process.execPath,cli,...process.argv.slice(1)];
+import(u.pathToFileURL(cli).href).catch(e=>{console.error(e.message);process.exitCode=1;});`;
+  return [h.node, '-e', script, '--', ...args].map(shellQuote).join(' ');
+}
 export async function inspectHost(h) {
   // This dependency-free probe also works before installing the candidate.
   const script=`const fs=require('node:fs'),os=require('node:os'),c=require('node:crypto');const raw=fs.readFileSync('/etc/machine-id','utf8').trim();console.log(JSON.stringify({id:c.createHash('sha256').update(raw).digest('hex'),platform:process.platform,label:os.hostname()}));`;
@@ -47,7 +58,7 @@ export async function runOnHost(base,id,args,{stdio='inherit'}={}) {
   if(!h) throw new WorkError(`Unknown host ${id}; configure .work/hosts.json explicitly.`);
   const actual=await inspectHost(h);
   if(!args.length) args=['status'];
-  const command=`cd ${shellQuote(h.workspace)} && exec ${[h.node,h.cli,...args].map(shellQuote).join(' ')}`;
+  const command=hostCommand(h,args);
   if(stdio==='inherit') process.stdout.write(`Host ${h.id} · ${actual.label} · ${actual.id.slice(0,12)} · ${h.workspace}\n`);
   return new Promise((resolve,reject)=>{
     const child=spawn('ssh',[...sshArgs(h),command],{stdio});

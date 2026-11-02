@@ -6,6 +6,7 @@ import { runAcceptance } from "./core/acceptance.mjs";
 import { hostIdentity } from "./hosts.mjs";
 import os from "node:os";
 import { processIdentity } from "./core/execution.mjs";
+import { digest } from "./core/context.mjs";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome, beginResume } from "./core/lifecycle.mjs";
@@ -164,7 +165,23 @@ function withState(fn) {
 }
 
 function append(current, type, data = {}) {
-  return store.appendEvent(slug, workEvent(type, current.id, { ...data, run: runNumber }));
+  return store.appendEvent(slug, workEvent(type, current.id, { ...data, run: runNumber, executionId }));
+}
+
+async function recordInput(prompt, transport) {
+  const root = path.join(dir, 'runs', String(runNumber));
+  const artifact = `attempts/${executionId ?? 'legacy'}/input.md`;
+  const receipt = { version: 1, executionId, transport, artifact,
+    characters: typeof prompt === 'string' ? prompt.length : null,
+    sha256: typeof prompt === 'string' ? digest(prompt) : null,
+    projectContext: transport === 'native resume message' ? 'existing provider session; new notes and rules not delivered' : undefined };
+  if (typeof prompt === 'string') await store.writeText(path.join(root, artifact), prompt);
+  await store.writeJson(path.join(root, 'attempts', executionId ?? 'legacy', 'input.json'), receipt);
+  await store.writeJson(path.join(root, 'input.json'), receipt);
+  await store.withTaskLock(slug, async () => {
+    const fresh = await store.readJson(metaPath);
+    if (ownsExecution(fresh)) await store.writeJson(metaPath, updateRun(fresh, runNumber, { input: receipt }));
+  });
 }
 
 function finalizeRun(current, outcome) {
@@ -350,6 +367,7 @@ async function finish(outcome, changed = []) {
       await append(current, "run.cancelled", { reason: stopping.reason, executionId });
     }
     await store.writeJson(metaPath, current);
+    await store.writeJson(path.join(dir, 'runs', String(runNumber), 'attempts', executionId ?? 'legacy', 'execution.json'), current.runs?.find(r => r.run === runNumber) ?? {});
     if (outcome.status === "failed") {
       await append(current, "run.failed", { error: outcome.error ?? "Execution failed" });
     } else if (outcome.status === "needs_you") {
@@ -381,14 +399,17 @@ try {
       if (ownsExecution(fresh)) await append(fresh, "task.updated", { status: fresh.status, grant });
     }));
     log(`resuming session ${task.execution?.externalSessionId ?? "?"} (${grant})`);
+    await recordInput(null, 'native resume; message not recorded');
     outcome = await Promise.race([cancelled, stopping ? cancelled : provider.resume({
       cwd: executionCwd, externalSessionId: task.execution?.externalSessionId, grant, onEvent,
-      permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model
+      permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model,
+      onInput: prompt => recordInput(prompt, 'native resume message')
     })]);
   } else {
     const prompt = (await store.exists(runPromptPath))
       ? await fs.readFile(runPromptPath, "utf8") : await fs.readFile(promptPath, "utf8");
     log(`launching ${provider.displayName} (${provider.id})`);
+    await recordInput(prompt, 'fresh-session prompt');
     outcome = await Promise.race([cancelled, stopping ? cancelled : provider.start({
       cwd: executionCwd, prompt, onEvent, permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model
     })]);

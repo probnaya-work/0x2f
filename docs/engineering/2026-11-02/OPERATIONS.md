@@ -155,3 +155,16 @@ service has been provisioned in this pass. Current Safari supports more than
 one Web Push mechanism; do not assume a service worker alone makes delivery
 reliable. Actual HTTPS origin, subscription, sender and background/closed-device
 qualification are still required ([WebKit](https://webkit.org/blog/16535/)).
+
+### Independent review boundary corrections
+
+HTTP/encrypted remote CANCEL requests must include `executionId` from the
+rendered task; old/stale clients must refresh/update. This public occurrence
+precondition is not execution authority. CLI `2f cancel ID` deliberately means
+the current attempt. The actual SSH execution connection rechecks the machine
+pin before loading the installed CLI, as well as the initial diagnostic probe.
+
+Backup/restore reject symbolic links in control paths (`.work` metadata and Git
+metadata) before any rewriting or repair. Ordinary symlinks in checkout data are
+retained without following their targets. Previously created backups containing
+control-path symlinks are refused even when their receipt hashes match.

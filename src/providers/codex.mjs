@@ -140,7 +140,7 @@ export const codexProvider = {
     return runCodex({ cwd, args, onEvent });
   },
 
-  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {} }) {
+  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {}, onInput = async () => {} }) {
     if (!externalSessionId) {
       throw new Error("No external session id — this task cannot be resumed.");
     }
@@ -151,6 +151,7 @@ export const codexProvider = {
     if (process.env.CODEX_IGNORE_USER_CONFIG === "1") args.push("--ignore-user-config");
     if (model) args.push("-m", model);
     args.push(prompt);
+    await onInput(prompt);
     return runCodex({ cwd, args, onEvent });
   }
 };

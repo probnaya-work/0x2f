@@ -588,7 +588,7 @@ export function buildResult(model, state, cols, p, T) {
   text(`0x2F / ${model.workspace.label} / #${task?.idLabel ?? ""} · RUN ${review.run} · ${review.provider ?? "unknown"} · ${review.outcome ?? "unknown"}`);
   text("Saved provider report · use [ ] for other runs; Esc returns to task actions.");
   if (review.input) {
-    heading("EXACT SAVED RUN INPUT"); text(review.prompt || "Not recorded.");
+    heading("EXACT SAVED RUN INPUT"); text(review.inputTransport || "Historical saved prompt"); text(review.prompt || "Not recorded.");
   } else {
     heading("ORIGINAL REQUEST"); text(review.brief);
     const evidence = resultEvidence(review.result, review.events);

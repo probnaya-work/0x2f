@@ -184,11 +184,13 @@ export function createAcpProvider(manifest) {
       }
     },
 
-    async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {}, permission } = {}) {
+    async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {}, permission, onInput = async () => {} } = {}) {
+      const prompt = RESUME_PROMPTS[grant] ?? RESUME_PROMPTS.continue;
+      await onInput(prompt);
       const run = runAcp({
         manifest,
         cwd,
-        prompt: RESUME_PROMPTS[grant] ?? RESUME_PROMPTS.continue,
+        prompt,
         onEvent,
         permissions,
         decisionFile: permission?.decisionFile,

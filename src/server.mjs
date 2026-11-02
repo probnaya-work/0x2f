@@ -840,7 +840,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
       const cancelMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/cancel$/);
       if (req.method === "POST" && cancelMatch) {
         const body = await readJsonBody(req);
-        json(res, await actions.cancelWork(Number(cancelMatch[1]), { reason: body.reason }), 202);
+        json(res, await actions.cancelWork(Number(cancelMatch[1]), { reason: body.reason, executionId: body.executionId ?? null }), 202);
         return;
       }
       const closeMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/close$/);
