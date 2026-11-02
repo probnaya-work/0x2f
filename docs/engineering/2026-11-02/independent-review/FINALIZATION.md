@@ -93,9 +93,16 @@ callback-count regression failed30vs1; all32Swift tests/6suites then passed, as 
 Release and signed physical-iOS builds. The new exact signed Dev17 is installed,
 CodeDirectory98250452b55fbd35dc54bffd1d447dfa686e59bc, bundle manifest digest
 f1714b8e18a4679f08efcf51f666fb23ded08d1b750ea04ac9cbc79bfeb9329f.
-The earlier signed217403c artifact's physical observations remain historical;
-revised refusal/preview/fresh-code acceptance and approved selective revocation
-are not claimed complete until observed. See the updated Mobile report.
+On this exact revised artifact, the owner confirmed CODE EXPIRED, stable
+preview and CANCEL → CONNECTED. The approved selective Dev revocation produced
+Pairing no longer accepted — scan a new QR on the phone. A fresh QR from the
+same Core restored the same Dev device identity; the Core trust API verified
+the old certificate revoked and one newer active certificate. Other devices
+were unchanged, Revoke All was not used, and the production app was untouched.
+The owner's general works confirmation after re-pairing is not expanded into
+separate revised-build rotation/Home/Wi-Fi assertions. The earlier217403c
+normal-path/permission results keep their original scope. Physical in-session
+interruption/runtime-error recovery remains open; see the Mobile report.
 
 ## Subsequent integration and release order
 
