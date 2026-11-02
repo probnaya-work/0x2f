@@ -158,3 +158,26 @@ for (const shape of ['ignored', 'crlf', 'gitlink']) {
     if (shape === 'crlf') assert.equal(await fs.readFile(path.join(checkout, 'file'), 'utf8'), 'unfinished\r\n');
   });
 }
+
+test('archive restore retains raw unfinished bytes without reapplying a smudge filter', async t => {
+  const base = await root(t);
+  await git(base, ['init']);
+  await fs.writeFile(path.join(base, 'file.txt'), 'baseline\n');
+  await fs.writeFile(path.join(base, '.gitignore'), '.work/\n');
+  await fs.writeFile(path.join(base, '.gitattributes'), '*.txt filter=fixture\n');
+  await git(base, ['config', 'filter.fixture.clean', 'cat']);
+  await git(base, ['config', 'filter.fixture.smudge', "sed 's/^/SMUDGED:/'"]);
+  await git(base, ['add', '.']);
+  await git(base, ['-c', 'user.name=fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'baseline']);
+  const rt = createRuntime(base, { node: { id: 'local', async startExecution() { return null; } } });
+  const task = await rt.actions.createWork({ brief: 'raw archive restore fixture' });
+  await rt.store.updateTask({ ...task, pid: undefined, processGroupId: undefined, status: 'ready', runs: [{ ...task.runs[0], outcome: 'ready' }] });
+  await fs.writeFile(path.join(task.checkout.path, 'file.txt'), 'unfinished bytes\n');
+  await fs.writeFile(path.join(task.checkout.path, 'new.txt'), 'untracked bytes\n');
+  await rt.actions.cleanupWork(task.id);
+  await rt.actions.restoreWork(task.id);
+  assert.equal(await fs.readFile(path.join(task.checkout.path, 'file.txt'), 'utf8'), 'unfinished bytes\n');
+  assert.equal(await fs.readFile(path.join(task.checkout.path, 'new.txt'), 'utf8'), 'untracked bytes\n');
+  assert.match(await git(task.checkout.path, ['status', '--porcelain']), /\?\? new.txt/);
+  assert.match(await git(task.checkout.path, ['diff', '--binary']), /unfinished bytes/);
+});

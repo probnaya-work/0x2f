@@ -98,3 +98,10 @@ Fresh and native-resume input receipts are attempt-specific. Native-resume
 receipts name the exact provider message, rather than reusing the original fresh
 prompt or claiming delivery of newly recorded notes/rules. Older receipts cannot
 be upgraded retroactively. Tool receipt correlation is bound to run and attempt.
+
+Archive restoration uses a new `--no-checkout` worktree and raw Git blobs, so
+smudge/EOL filters cannot rewrite the retained unfinished bytes. The restored
+index starts at the saved commit; restored new files remain untracked and normal
+Git status/diff do not require the private evidence object database. Raw paths
+are validated and symlink parents are refused before materialization. The archive
+is retained if restoration fails.

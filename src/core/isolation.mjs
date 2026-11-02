@@ -126,3 +126,32 @@ export async function verifySnapshotBytes(base, artifactRoot, snapshot) {
     if (actual !== match[3]) throw new WorkError("Checkout bytes differ from the Git-visible archive (attributes, filters or concurrent edits). Nothing was removed; preserve the working copy explicitly.", 409);
   }
 }
+
+// Materialize an archived tree into a new --no-checkout worktree. Normal Git
+// checkout/read-tree -u applies smudge/EOL filters and can silently change the
+// bytes we verified before cleanup. cat-file reads the raw objects instead.
+export async function restoreSnapshotBytes(base, artifactRoot, snapshot) {
+  const env = await snapshotEnv(base, artifactRoot);
+  const entries = (await git(base, ['ls-tree', '-r', '-z', snapshot.tree], { env })).split('\0').filter(Boolean);
+  for (const entry of entries) {
+    const match = /^(\d+) (\w+) ([a-f0-9]+)\t([\s\S]*)$/.exec(entry);
+    if (!match || match[2] !== 'blob' || !['100644', '100755', '120000'].includes(match[1])) throw new WorkError('Archived tree contains unsupported objects; archive retained.', 409);
+    const parts = match[4].split('/');
+    if (parts.some(p => !p || p === '.' || p === '..' || ['.git', '.work'].includes(p.toLowerCase()))) throw new WorkError('Unsafe archived path; archive retained.', 409);
+    let parent = base;
+    for (const part of parts.slice(0, -1)) {
+      parent = path.join(parent, part);
+      await fs.mkdir(parent).catch(e => { if (e.code !== 'EEXIST') throw e; });
+      const stat = await fs.lstat(parent);
+      if (!stat.isDirectory() || stat.isSymbolicLink()) throw new WorkError('Archived path traverses a non-directory; archive retained.', 409);
+    }
+    const file = path.join(parent, parts.at(-1));
+    const bytes = await git(base, ['cat-file', 'blob', match[3]], { env, encoding: 'buffer' });
+    if (match[1] === '120000') await fs.symlink(bytes, file);
+    else await fs.writeFile(file, bytes, { flag: 'wx', mode: match[1] === '100755' ? 0o755 : 0o644 });
+  }
+  // Keep the real index rooted in the saved commit's public objects. New files
+  // stay untracked; normal status/diff never require the private object store.
+  await git(base, ['read-tree', 'HEAD']);
+  await verifySnapshotBytes(base, artifactRoot, snapshot);
+}

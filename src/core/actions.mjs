@@ -20,7 +20,7 @@
 
 import path from "node:path";
 import { withFileLock } from "./lock.mjs";
-import { prepareWorkspace, requireSharedSlot, git, captureTree, treeDiff, verifySnapshotBytes } from "./isolation.mjs";
+import { prepareWorkspace, requireSharedSlot, git, captureTree, treeDiff, verifySnapshotBytes, restoreSnapshotBytes } from "./isolation.mjs";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import { reserveExecution, executionAlive } from "./execution.mjs";
@@ -737,10 +737,8 @@ export function createActions(ctx) {
       if (!heads.startsWith(savedHead + " ")) throw new WorkError("Archived commit identity mismatch.", 409);
       await git(store.base, ["fetch", "--no-tags", "--no-write-fetch-head", bundlePath, "HEAD"]);
     }
-    await git(store.base, ["worktree", "add", "--detach", expected, savedHead]);
-    const common = (await git(expected, ["rev-parse", "--git-common-dir"])).trim();
-    await git(expected, ["read-tree", "--reset", "-u", task.checkout.snapshot.tree], { env: { ...process.env,
-      GIT_OBJECT_DIRECTORY: path.join(store.workDir(), "evidence", "objects"), GIT_ALTERNATE_OBJECT_DIRECTORIES: path.resolve(expected, common, "objects") } });
+    await git(store.base, ["worktree", "add", "--no-checkout", "--detach", expected, savedHead]);
+    await restoreSnapshotBytes(expected, path.join(store.workDir(), 'evidence'), task.checkout.snapshot);
     const updated = { ...task, checkout: { ...task.checkout, archivedAt: undefined, restoredAt: new Date().toISOString() } };
     await store.updateTask(updated);
     return updated;
