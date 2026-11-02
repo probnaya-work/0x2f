@@ -32,6 +32,8 @@ const EVENT_TYPES = [
   "task.created",
   "task.updated",
   "task.closed",
+  "run.cancel_requested",
+  "run.cancelled",
   "task.answered",
   "run.started",
   "progress",
@@ -50,6 +52,8 @@ const STATE_EVENTS = new Set([
   "task.created",
   "task.updated",
   "task.closed",
+  "run.cancel_requested",
+  "run.cancelled",
   "needs_user",
   "permission.resolved",
   "run.completed",
@@ -680,15 +684,30 @@ const reject = (id, decisionId) => {
   if (remoteBlocked()) return;
   act(() => post("/api/tasks/" + id + "/reject", { decisionId: decisionId ?? null }));
 };
-const accept = id => {
+const accept = (id, disposition = "accept") => {
   if (remoteBlocked()) return Promise.resolve(false);
   // Settles on success OR failure (act() flashes the error) so callers can
   // re-render — a settled action must never leave a disabled control behind.
   return act(async () => {
-    await post("/api/tasks/" + id + "/close");
+    await post("/api/tasks/" + id + "/close", { disposition });
     if (state.openId === id) state.openId = null;
   });
 };
+
+const cancelRun = id => {
+  if (remoteBlocked()) return Promise.resolve(false);
+  return act(() => post("/api/tasks/" + id + "/cancel")).then(ok => {
+    if (ok) flash("Cancellation requested. Wait for the worker receipt. Partial work stays; external actions are not rolled back.");
+    return ok;
+  });
+};
+function cancelButton(id) {
+  return actionButton("CANCEL RUN", "", "act-outline", e => {
+    e.stopPropagation();
+    e.currentTarget.disabled = true;
+    cancelRun(id).finally(() => render());
+  }, "cancel-run-" + id);
+}
 
 // SEND BACK reruns the task through the shared rerun action: the next run's
 // input is rebuilt from current Task state (answers, notes, prior results),
@@ -704,7 +723,7 @@ const sendBack = id => {
 // for work that cannot continue (a non-resumable provider, a wrong NEEDS
 // YOU, a finished run the user no longer wants).
 const close = async id => {
-  const closed = await accept(id);
+  const closed = await accept(id, "close");
   if (closed) flash("Task closed. Closing does not cancel the provider; an active run may keep running or wait for permission.");
   return closed;
 };
@@ -1426,6 +1445,10 @@ function renderCheckEvidence(row, detail) {
   const events = eventsForRun(state.eventsByTask.get(row.id) ?? [], detail?.runs?.at(-1)?.run ?? 1);
   const facts = resultEvidence(detail?.result, events);
   return el("div", { class: "check-evidence", style: { marginBottom: "16px", whiteSpace: "pre-wrap", overflowWrap: "anywhere" } }, [
+    detail?.runs?.at(-1)?.context ? el("div", { class: "m-dmeta", text: (() => {
+      const c = detail.runs.at(-1).context;
+      return `Context v${c.version} · project ${c.projectVersion?.slice(0, 12)} · ${c.characters}/${c.maxChars} characters · ${c.shortenedRuns ?? c.artifacts?.filter(a => a.delivery !== "full").length ?? 0} prior results shortened; full hashed artifacts stay on the host.`;
+    })() }) : null,
     el("div", { class: "run-sub-k", text: "PROVIDER-REPORTED CHECKS" }),
     el("div", { text: facts.verification }),
     el("div", { class: "m-dmeta", text: facts.receipt }),
@@ -1588,6 +1611,7 @@ function renderRow(row, accent) {
         el("span", { class: "detail-state", style: { color: row.stateColor }, text: row.stateLabel })
       ]),
       renderBrief(row),
+      row.running || (row.halted && state.tasks.find(t => t.id === row.id)?.blockedOn?.live) ? cancelButton(row.id) : null,
       renderTrack(row, accent),
       el("div", { class: "status-line" }, [
         el("span", { class: "status-phase", text: row.phaseLabel }),
@@ -3210,7 +3234,8 @@ function renderMobileActionBar(row, frozen) {
       rejectBtn.disabled = true;
       reject(row.id, row.permDecisionId);
     });
-    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [allowBtn, rejectBtn])]);
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [allowBtn, rejectBtn]),
+      el("div", { class: "m-abar-row" }, [cancelButton(row.id)])]);
   }
   if (row.halted && row.permType === "decision") {
     const value = (state.answers.get(row.id) ?? "").trim();
@@ -3242,7 +3267,7 @@ function renderMobileActionBar(row, frozen) {
   if (row.running) {
     const btn = el("button", { class: "m-abar-btn m-abar-single", style: { flex: "1" }, text: "ADD A CONSTRAINT" });
     btn.addEventListener("click", () => openCorrection(row.id));
-    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn])]);
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn, cancelButton(row.id)])]);
   }
   if (row.ready) {
     const acceptBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ACCEPT" });

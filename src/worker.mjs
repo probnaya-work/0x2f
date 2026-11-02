@@ -2,17 +2,19 @@
 // processes while a provider runs, so every publication merges fresh state
 // under the task lock and verifies this run's worker still owns it.
 import fs from "node:fs/promises";
+import { processIdentity } from "./core/execution.mjs";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome, beginResume } from "./core/lifecycle.mjs";
 import { workEvent } from "./core/events.mjs";
 import { currentRunNumber, updateRun } from "./core/runs.mjs";
 import { createProviderRegistry } from "./providers/index.mjs";
-import { snapshotWorktree, changedSince } from "./core/worktree.mjs";
+import { captureTree, saveChanges } from "./core/isolation.mjs";
 
 // node worker.mjs <base> <slug> <run> [resume <allow|reject|continue>]
 const [, , base, slug, runArg, mode, grant] = process.argv;
 const runNumber = Number(runArg) || 1;
+let executionId = null;
 if (!base || !slug) {
   console.error("worker requires <cwd> <slug> <run> [resume <allow|reject|continue>]");
   process.exit(1);
@@ -28,7 +30,8 @@ const permissionDecisionFile = path.join(dir, "permission.json");
 
 function ownsExecution(current) {
   return currentRunNumber(current) === runNumber &&
-    (current.pid == null || current.pid === process.pid);
+    (current.pid == null || current.pid === process.pid) &&
+    (!executionId || current.execution?.id === executionId);
 }
 
 function log(line) {
@@ -70,6 +73,25 @@ const task = await store.withTaskLock(slug, async () => {
     current = { ...current, pid: process.pid };
     changed = true;
   }
+  executionId = current.execution?.id ?? null;
+  const identity = await processIdentity(process.pid);
+  if (identity) {
+    current = { ...current, execution: { ...current.execution, process: identity } };
+    current = updateRun(current, runNumber, { executionId, process: identity, processGroupId: current.processGroupId });
+    changed = true;
+  }
+  const runDir = path.join(dir, "runs", String(runNumber));
+  const inputReceipt = await store.readJson(path.join(runDir, "input.json")).catch(() => null);
+  const contextReceipt = await store.readJson(path.join(runDir, "context.json")).catch(() => null);
+  if (inputReceipt || contextReceipt) {
+    current = updateRun(current, runNumber, {
+      input: inputReceipt,
+      context: contextReceipt ? { version: contextReceipt.version, projectVersion: contextReceipt.projectVersion,
+        characters: contextReceipt.characters, maxChars: contextReceipt.maxChars,
+        shortenedRuns: contextReceipt.artifacts.filter(a => a.delivery !== "full").length } : undefined
+    });
+    changed = true;
+  }
   // A stale worker must not erase a newer execution's decision channel.
   await fs.rm(permissionDecisionFile, { force: true });
   if (changed) await store.writeJson(metaPath, current);
@@ -83,11 +105,38 @@ if (!task) {
 let currentProvider = null;
 let runSessionId = null;
 let worktreeBefore = null;
+const executionCwd = task.checkout?.path ?? base;
+let changeReceipt = null;
 let finished = false;
-process.on("SIGTERM", () => {
-  try { currentProvider?.cancel?.(); } catch { /* best-effort */ }
-  process.exit(0);
-});
+let stopping = null;
+let cancelResolve;
+const cancelled = new Promise(resolve => { cancelResolve = resolve; });
+const partial = [];
+let partialSize = 0;
+function requestStop(request) {
+  if (finished || stopping) return;
+  stopping = request;
+  try { currentProvider?.cancel?.(); } catch { /* the group stop below remains authoritative */ }
+  // This process is the live detached group leader, never an old saved PID.
+  if (task.processGroupId === process.pid && process.platform !== "win32") {
+    try { process.kill(-process.pid, "SIGTERM"); } catch { /* already drained */ }
+  }
+  cancelResolve({ status: "failed", error: `${request.reason}. External actions may already have occurred; review before retrying.`,
+    failure: { kind: "cancelled" }, stopReason: "cancelled", result: partial.join("") });
+}
+process.on("SIGTERM", () => requestStop({ reason: "Worker received SIGTERM", at: new Date().toISOString() }));
+let pollingCancel = false;
+const cancelTimer = setInterval(async () => {
+  if (pollingCancel || finished || stopping || !executionId) return;
+  pollingCancel = true;
+  try {
+    const fresh = await store.readJson(metaPath);
+    if (ownsExecution(fresh) && fresh.cancelRequested?.executionId === executionId) requestStop(fresh.cancelRequested);
+  } catch { /* transient state read; retry without signalling anything */ }
+  finally { pollingCancel = false; }
+}, 100);
+cancelTimer.unref();
+
 
 // Providers may fire callbacks without awaiting them. One local queue keeps
 // their chronology, and the cross-process task lock protects the actual
@@ -119,13 +168,15 @@ function finalizeRun(current, outcome) {
     externalSessionId: current.execution?.externalSessionId,
     attempts: current.execution?.attempts ?? record.attempts ?? 1,
     error: outcome.status === "failed" ? current.error : undefined,
-    blockedOn: outcome.status === "needs_you" ? current.blockedOn : undefined
+    blockedOn: outcome.status === "needs_you" ? current.blockedOn : undefined,
+    stopReason: outcome.stopReason,
+    cancellation: stopping ?? undefined
   });
 }
 
 function onEvent(event) {
   return withState(() => store.withTaskLock(slug, async () => {
-    if (finished) return;
+    if (finished || stopping) return;
     const fresh = await store.readJson(metaPath);
     if (!ownsExecution(fresh)) return;
     switch (event.type) {
@@ -155,6 +206,7 @@ function onEvent(event) {
         break;
       case "progress":
         if (event.text) {
+          if (partialSize < 1_000_000) { const text = event.text.slice(0, 1_000_000 - partialSize); partial.push(text); partialSize += text.length; }
           await append(fresh, "progress", { text: event.text });
           log(event.text.replace(/\s+/g, " ").trim().slice(0, 160));
         }
@@ -214,9 +266,15 @@ function onEvent(event) {
 }
 
 async function observedChanges() {
-  if (!worktreeBefore) return [];
-  return (await changedSince(base, worktreeBefore))
-    .filter(p => p !== ".work" && !p.startsWith(".work/"));
+  try {
+    const after = await captureTree(executionCwd, path.join(store.workDir(), "evidence"));
+    changeReceipt = await saveChanges(store, task, runNumber, worktreeBefore, after);
+    return changeReceipt.files ?? [];
+  } catch (error) {
+    changeReceipt = { available: false, reason: `Change capture failed: ${error.message}` };
+    await store.writeJson(path.join(dir, "runs", String(runNumber), "changes.json"), changeReceipt);
+    return [];
+  }
 }
 
 async function finish(outcome, changed = []) {
@@ -231,6 +289,7 @@ async function finish(outcome, changed = []) {
       ...(current.execution ?? {}), externalSessionId: outcome.externalSessionId
     };
     current = finalizeRun(current, outcome);
+    current = updateRun(current, runNumber, { changes: changeReceipt });
     if (fresh.status === "done") {
       current.status = "done";
       delete current.blockedOn;
@@ -238,15 +297,21 @@ async function finish(outcome, changed = []) {
     // Results and state are one ownership-protected publication. A late
     // worker cannot replace the current result even if its run number changed
     // while the provider or git observation was awaiting I/O.
-    if (outcome.status === "ready" || outcome.status === "needs_you") {
+    if (outcome.status === "ready" || outcome.status === "needs_you" || typeof outcome.result === "string") {
       await store.writeText(resultPath, outcome.result ?? "");
       if (Array.isArray(current.runs)) {
         await store.writeText(path.join(dir, "runs", String(runNumber), "result.md"), outcome.result ?? "");
+        await store.writeText(path.join(dir, "runs", String(runNumber), "attempts", executionId ?? "legacy", "result.md"), outcome.result ?? "");
       }
     }
     for (const p of changed) {
       await append(current, "file.changed", { path: p, source: "worktree" });
       log(`observed change: ${p}`);
+    }
+    if (stopping) {
+      delete current.blockedOn;
+      await fs.rm(permissionDecisionFile, { force: true });
+      await append(current, "run.cancelled", { reason: stopping.reason, executionId });
     }
     await store.writeJson(metaPath, current);
     if (outcome.status === "failed") {
@@ -269,7 +334,7 @@ try {
   const provider = providers.getProvider(task.execution?.provider ?? providers.defaultProviderId);
   if (!provider) throw new Error(`No execution provider found for "${task.execution?.provider}".`);
   currentProvider = provider;
-  worktreeBefore = await snapshotWorktree(base);
+  worktreeBefore = task.runs?.find(r => r.run === runNumber)?.changes?.before ?? await captureTree(executionCwd, path.join(store.workDir(), "evidence"));
   let outcome;
   if (mode === "resume") {
     if (provider.capabilities?.supportsResume === false) {
@@ -280,23 +345,33 @@ try {
       if (ownsExecution(fresh)) await append(fresh, "task.updated", { status: fresh.status, grant });
     }));
     log(`resuming session ${task.execution?.externalSessionId ?? "?"} (${grant})`);
-    outcome = await provider.resume({
-      cwd: base, externalSessionId: task.execution?.externalSessionId, grant, onEvent,
+    outcome = await Promise.race([cancelled, stopping ? cancelled : provider.resume({
+      cwd: executionCwd, externalSessionId: task.execution?.externalSessionId, grant, onEvent,
       permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model
-    });
+    })]);
   } else {
     const prompt = (await store.exists(runPromptPath))
       ? await fs.readFile(runPromptPath, "utf8") : await fs.readFile(promptPath, "utf8");
     log(`launching ${provider.displayName} (${provider.id})`);
-    outcome = await provider.start({
-      cwd: base, prompt, onEvent, permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model
-    });
+    outcome = await Promise.race([cancelled, stopping ? cancelled : provider.start({
+      cwd: executionCwd, prompt, onEvent, permission: { decisionFile: permissionDecisionFile }, model: task.execution?.model
+    })]);
   }
   await stateChain;
   if (eventError) throw eventError;
   await finish(outcome, await observedChanges());
 } catch (error) {
   await stateChain;
-  await finish({ status: "failed", error: error instanceof Error ? error.message : String(error) });
+  await finish({ status: "failed", error: error instanceof Error ? error.message : String(error) }, await observedChanges());
   process.exitCode = 1;
+}
+
+clearInterval(cancelTimer);
+if (stopping) {
+  // Give normal children time to exit; then stop this still-owned group,
+  // including TERM-resistant descendants. Children which deliberately escape
+  // the group require OS containment and are not claimed to be reaped.
+  if (task.processGroupId === process.pid && process.platform !== "win32") {
+    setTimeout(() => { try { process.kill(-process.pid, "SIGKILL"); } catch { process.exit(0); } }, 500);
+  } else process.exit(0);
 }

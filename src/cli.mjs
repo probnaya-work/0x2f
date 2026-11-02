@@ -50,6 +50,13 @@ Commands:
   2f allow <id>     grant the permission a task is blocked on
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
+  2f changes <id> [--run <n>]   show immutable observed run patch
+  2f apply <id>      transfer isolated task changes (conflicts refuse)
+  2f restore <id>    restore an archived checkout before continuing
+  2f cleanup <id>    archive Git-visible checkout, then remove it
+  2f cancel <id>     stop the active run; preserves partial work, no rollback
+  2f accept <id>     explicitly accept a READY result
+  2f drop <id>       close without accepting the result
   2f close <id>      move to DONE; does not cancel the provider
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this execution host for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
@@ -78,7 +85,7 @@ Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 function parseFlags(args) {
   const rest = [];
   const flags = {};
-  const valueFlags = new Set(["provider", "relay", "client", "run", "port"]);
+  const valueFlags = new Set(["workspace-mode", "provider", "relay", "client", "run", "port"]);
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--") {
@@ -110,7 +117,7 @@ function parseFlags(args) {
 
 function parseNewArgs(args) {
   const { rest, flags } = parseFlags(args);
-  return { brief: rest.join(" ").trim(), provider: flags.provider };
+  return { brief: rest.join(" ").trim(), provider: flags.provider, workspaceMode: flags["workspace-mode"] };
 }
 
 async function status(base) {
@@ -282,7 +289,7 @@ async function main() {
       .filter(p => runtime.providers.available(p.id))
       .map(p => p.id);
     if (available.length) {
-      console.log(`Provider: ${available.join(", ")} detected and ready.`);
+      console.log(`Provider: ${available.join(", ")} executables detected; authorization is not checked.`);
     } else {
       console.log("No coding harness detected on PATH — install Claude Code (`claude`), Codex (`codex`),");
       console.log("DeepSeek Harness (`dsh`), or Gemini CLI (`gemini`), or add a manifest to .work/providers/.");
@@ -293,7 +300,7 @@ async function main() {
 
   if (command === "new") {
     await requireProject(base);
-    const { brief, provider } = parseNewArgs(args);
+    const { brief, provider, workspaceMode } = parseNewArgs(args);
     if (!brief) throw new Error('Usage: 2f new "Investigate ..." [--provider <id>]');
 
     const runtime = createRuntime(base);
@@ -309,7 +316,7 @@ async function main() {
       }
     }
 
-    const task = await runtime.actions.createWork({ brief, provider });
+    const task = await runtime.actions.createWork({ brief, provider, workspaceMode });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
     console.log(`Open: 2f open ${task.id}`);
@@ -415,6 +422,34 @@ async function main() {
     const task = await createRuntime(base).actions.noteWork(id, { note });
     console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
     console.log("Note recorded on the task — it will be included in the next run's context.");
+    return;
+  }
+
+  if (["changes", "apply", "cleanup", "restore"].includes(command)) {
+    await requireProject(base);
+    const { rest, flags } = parseFlags(args);
+    const id = Number(rest[0]);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`Usage: 2f ${command} <id>`);
+    const actions = createRuntime(base).actions;
+    if (command === "changes") {
+      const receipt = await actions.getRunChanges(id, flags.run);
+      console.log(receipt.available ? `${receipt.attribution}\n${receipt.patch || "No changes."}` : receipt.reason);
+    } else {
+      await actions[command === "apply" ? "applyWork" : command === "restore" ? "restoreWork" : "cleanupWork"](id);
+      console.log(command === "apply" ? "Saved task changes applied to the original workspace." : "Checkout archived privately before cleanup. Restore from the task's workspace.tar.");
+    }
+    return;
+  }
+
+  if (["cancel", "stop", "accept", "drop"].includes(command)) {
+    await requireProject(base);
+    const id = Number(args[0]);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`Usage: 2f ${command} <id>`);
+    const actions = createRuntime(base).actions;
+    const task = ["cancel", "stop"].includes(command)
+      ? await actions.cancelWork(id)
+      : await actions.closeWork(id, { disposition: command });
+    console.log(`#${task.id}: ${task.cancelRequested ? "Cancellation requested; wait for the worker receipt. Partial work stays; external actions are not rolled back." : task.disposition}`);
     return;
   }
 

@@ -313,7 +313,7 @@ export function stepArgument(input = {}) {
 // convenience projections of the same units (deduped paths; raw command
 // strings, one per invocation).
 export function toSteps(task, events = [], opts = {}) {
-  const base = opts.base ?? "";
+  const base = task.checkout?.path ?? opts.base ?? "";
   const origin = ms(events.find(e => e.at)?.at) ?? ms(task.createdAt) ?? Date.now();
   const steps = [];
   let activity = "";

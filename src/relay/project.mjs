@@ -152,6 +152,8 @@ export function projectRun(run, base) {
     completedAt: run.completedAt ?? null,
     durationMs: run.durationMs ?? null,
     attempts: run.attempts ?? 1,
+    stopReason: run.stopReason,
+    context: run.context ? { version: run.context.version, projectVersion: run.context.projectVersion, characters: run.context.characters, maxChars: run.context.maxChars, shortenedRuns: run.context.shortenedRuns } : undefined,
     error: trunc(run.error, TRUNC.error, base),
     // The AUTO routing label (why this task ran here) — the reason is a
     // short availability fact, not internal state.
@@ -173,7 +175,7 @@ export function projectResult(text, base) {
 // they read from disk; this decides whether it is shown.
 export function taskShowsResult(task) {
   if (!task || typeof task !== "object") return false;
-  return task.status === "ready" || (task.status === "done" && !task.error);
+  return task.status === "ready" || task.failure?.kind === "cancelled" || (task.status === "done" && !task.error);
 }
 
 // §01: only a recognized kind crosses the relay boundary — the same rule
@@ -204,6 +206,9 @@ export function projectTask(task, base, result) {
     brief: brief.text,
     ...(brief.truncated ? { briefTruncated: true } : {}),
     status: task.status ?? "working",
+    disposition: task.disposition,
+    cancelRequested: task.cancelRequested ? { at: task.cancelRequested.at, reason: trunc(task.cancelRequested.reason, TRUNC.error, base) } : undefined,
+    workspaceMode: task.checkout?.mode,
     provider: task.execution?.provider ?? null,
     model: task.execution?.model ?? null,
     createdAt: task.createdAt ?? null,

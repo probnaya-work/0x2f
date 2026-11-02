@@ -609,7 +609,7 @@ export function buildChanges(model, state, cols, p, T) {
   const planned = task.state === "needs" && task.halt?.kind === "permission";
   const kindWord = planned
     ? "PLANNED · NOT YET WRITTEN"
-    : "CURRENT WORKING TREE VS HEAD";
+    : state.diff?.some(f => f.scope) ? "SAVED RUN CHANGE EVIDENCE" : "CURRENT WORKING TREE VS HEAD";
 
   lines.push({
     cells: [
@@ -626,7 +626,7 @@ export function buildChanges(model, state, cols, p, T) {
   lines.push({ cells: [T(" " + "─".repeat(Math.max(1, cols - 2)), p.rule)] });
 
   if (!planned) {
-    for (const line of wrap("Current diff at viewing time, not an immutable patch of this run. Later edits may be included.", Math.max(12, cols - 4))) lines.push({ cells: [T(" " + line, p.dim)] });
+    for (const line of wrap(state.diff?.some(f => f.scope) ? "Saved Git-visible interval. Shared-workspace observations may include external edits; exact authorship is not established." : "Current diff at viewing time, not an immutable patch of this run. Later edits may be included.", Math.max(12, cols - 4))) lines.push({ cells: [T(" " + line, p.dim)] });
   }
   if (planned) {
     lines.push({ cells: [T("")] });
@@ -670,7 +670,7 @@ export function buildChanges(model, state, cols, p, T) {
       cells: [
         T(
           "  " + (withHunks
-            ? "the real diff of the working tree vs HEAD"
+            ? state.diff?.some(f => f.scope) ? "saved run patch · later workspace edits are excluded" : "the real diff of the working tree vs HEAD"
             : "no diff could be computed — git has no baseline for these files") +
             " · 0x2F does not stage or commit anything",
           p.ghost
@@ -810,7 +810,8 @@ const KEYS = [
   ["/", "search by title, brief or number"],
   ["↵", "the one action this task is waiting for (shown bottom-left)"],
   ["x", "the alternative — reject · save only · send back · drop"],
-  ["d", "changes — the real diff of the working tree, or the planned write"],
+  ["d", "changes — saved run patch where available; legacy current-tree diff otherwise"],
+  ["s", "cancel active execution · partial work stays; external effects are not rolled back"],
   ["r", "read full request/result/checks; [ ] selects run, i shows saved run input, j/k scrolls, g/G ends"],
   ["c", "note or correct — kept on the task, carried into every later run"],
   ["p", "point the next run at another provider"],
@@ -995,6 +996,7 @@ export function frame(model, state, opts = {}) {
     if (task) parts.push("r result");
     if (secondary) parts.push("x " + secondary.label.toLowerCase());
     if (task) parts.push("c note");
+    if (task?.state === "working") parts.push("s stop");
     if (task?.hasChanges) parts.push("d changes");
     parts.push("j/k move", "/ search", "tab " + FILTERS[state.filter].toLowerCase(), "n new", "? keys", "q detach");
     for (const part of parts) {

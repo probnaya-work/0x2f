@@ -44,7 +44,7 @@ export const BLOCKED_REASONS = ["permission", "decision", "question"];
 // `resume` means a permission grant was recorded but the provider could not
 // continue the session (a vendor resume limitation) — the run fails honestly
 // rather than pretending the granted work continued.
-export const FAILURE_KINDS = ["auth", "unavailable", "crashed", "blocked", "resume"];
+export const FAILURE_KINDS = ["auth", "unavailable", "crashed", "blocked", "resume", "cancelled"];
 
 // Work's shared prompt (project.mjs) asks every agent to end with a
 // `## Needs human decision` section. This parser is a Work convention — not a

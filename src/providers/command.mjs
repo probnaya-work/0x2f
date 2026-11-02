@@ -23,6 +23,7 @@ import { decisionSection } from "../core/lifecycle.mjs";
 import { substituteCommand } from "./manifests.mjs";
 
 export function createCommandProvider(manifest) {
+  let active = null;
   return {
     id: manifest.id,
     displayName: manifest.displayName,
@@ -44,8 +45,9 @@ export function createCommandProvider(manifest) {
 
     async start({ cwd, prompt, onEvent = () => {} }) {
       const argv = substituteCommand(manifest.command, { prompt, workspace: cwd });
-      return runCommand({ id: manifest.id, cwd, argv, onEvent });
-    }
+      return runCommand({ id: manifest.id, cwd, argv, onEvent, onChild: child => { active = child; } });
+    },
+    cancel() { active?.kill("SIGTERM"); }
     // resume() is deliberately absent: supportsResume is false, and the worker
     // + actions refuse to resume a provider that cannot continue a session.
   };
@@ -57,7 +59,7 @@ export function createCommandProvider(manifest) {
 // callers that import the provider module directly.)
 export { substituteCommand } from "./manifests.mjs";
 
-function runCommand({ id, cwd, argv, onEvent }) {
+function runCommand({ id, cwd, argv, onEvent, onChild }) {
   return new Promise(resolve => {
     let child;
     try {
@@ -73,6 +75,7 @@ function runCommand({ id, cwd, argv, onEvent }) {
       return;
     }
 
+    onChild?.(child);
     let stdout = "";
     let stderr = "";
     let settled = false;
@@ -87,6 +90,7 @@ function runCommand({ id, cwd, argv, onEvent }) {
 
     child.stdout.on("data", chunk => {
       stdout += chunk.toString();
+      onEvent({ type: "progress", text: chunk.toString() });
     });
     child.stderr.on("data", chunk => {
       stderr += chunk.toString();

@@ -94,6 +94,11 @@ export function createApp(runtime, opts = {}) {
     state = { ...state, busy: true };
     try {
       switch (intent.type) {
+        case "cancel": {
+          await actions.cancelWork(intent.id);
+          setFlash("cancellation requested · partial work stays; wait for the worker receipt", "warn");
+          break;
+        }
         case "review": {
           const task = await actions.getWork(intent.id);
           const run = await actions.getRun(intent.id, intent.run);
@@ -151,12 +156,12 @@ export function createApp(runtime, opts = {}) {
           break;
         }
         case "accept": {
-          await actions.closeWork(intent.id);
+          await actions.closeWork(intent.id, { disposition: "accept" });
           setFlash("accepted " + ref(intent.id) + " · task closed; no new execution started");
           break;
         }
         case "drop": {
-          await actions.closeWork(intent.id);
+          await actions.closeWork(intent.id, { disposition: "drop" });
           setFlash("dropped " + ref(intent.id) + " · kept in closed with its whole run history", "warn");
           break;
         }

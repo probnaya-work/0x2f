@@ -98,6 +98,16 @@ export async function serveRuntime({
   });
   agent.start();
 
+  let recovering = false;
+  const recoveryTimer = setInterval(async () => {
+    if (recovering) return;
+    recovering = true;
+    try { await recoverInterruptedRuns(base, { log }); }
+    catch (e) { error(`recovery sweep failed: ${e?.message ?? e}`); }
+    finally { recovering = false; }
+  }, 5000);
+  recoveryTimer.unref();
+
   // Graceful shutdown. Workers are detached (own session/process group): they
   // never receive this signal and keep running to completion. The runtime
   // only closes its own surfaces — the relay link, the HTTP server, the
@@ -110,6 +120,7 @@ export async function serveRuntime({
       process.exit(1);
     }
     shuttingDown = true;
+    clearInterval(recoveryTimer);
     info(`${signal} received — shutting down the runtime (detached workers keep running)`);
     (async () => {
       try {

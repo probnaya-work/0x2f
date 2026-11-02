@@ -11,6 +11,7 @@ import { createHash } from "node:crypto";
 import { defaultProviderId } from "../providers/index.mjs";
 import { WorkError } from "./errors.mjs";
 import { withFileLock } from "./lock.mjs";
+import { contextBudget, digest } from "./context.mjs";
 
 export const cwd = () => process.cwd();
 
@@ -234,6 +235,11 @@ export function createStore(base = process.cwd()) {
   // continuation prompt from current Task state). The task-level prompt.md —
   // the ORIGINAL task request — is never overwritten.
   async function writeRunPrompt(task, run, prompt) {
+    const maxChars = await contextBudget(base);
+    if (prompt.length > maxChars) throw new WorkError(`Input exceeds the ${maxChars}-character context budget. No execution started; original task text is preserved.`, 409);
+    await writeJson(path.join(taskDir(task.slug), "runs", String(run), "input.json"), {
+      version: 1, characters: prompt.length, bytes: Buffer.byteLength(prompt), maxChars, sha256: digest(prompt), transport: "fresh-session prompt"
+    });
     await writeText(
       path.join(taskDir(task.slug), "runs", String(run), "prompt.md"),
       prompt

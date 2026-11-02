@@ -24,6 +24,7 @@
 // task reruns normally (rerunWork only refuses while a task is "working").
 
 import path from "node:path";
+import { executionAlive } from "./core/execution.mjs";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome } from "./core/lifecycle.mjs";
 import { workEvent } from "./core/events.mjs";
@@ -148,7 +149,7 @@ export async function failInterruptedRun(
   return store.withTaskLock(task.slug, async () => {
     const fresh = await store.readJson(path.join(store.taskDir(task.slug), "task.json"));
     if (currentRunNumber(fresh) !== currentRunNumber(task) || fresh.pid !== task.pid) return null;
-    if (!hasInterruptedExecution(fresh) || pidAlive(fresh.pid, kill)) return null;
+    if (!hasInterruptedExecution(fresh) || await executionAlive(fresh, pid => pidAlive(pid, kill))) return null;
     return failLockedRun(store, fresh, { log });
   });
 }

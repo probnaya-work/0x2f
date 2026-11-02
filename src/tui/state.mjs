@@ -319,6 +319,8 @@ export function apply(state, key, ctx = {}) {
       if (secondary.input) return { state: { ...state, input: secondary.input, draft: "" }, intent: null };
       return { state, intent: secondary.intent };
     }
+    case "s":
+      return { state, intent: task && ["running", "working", "needs"].includes(task.state) ? { type: "cancel", id: task.id } : null };
     case "n":
       return { state: { ...state, mode: "composer" }, intent: null };
     case "t":

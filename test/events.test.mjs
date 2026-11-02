@@ -16,6 +16,9 @@ import {
 
 test("event model exposes exactly the normalized Work event types", () => {
   assert.deepEqual(EVENT_TYPES, [
+    "run.cancel_requested",
+    "run.cancelled",
+    "task.applied",
     "task.created",
     "task.updated",
     "task.closed",

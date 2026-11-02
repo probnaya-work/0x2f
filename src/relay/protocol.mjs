@@ -47,6 +47,7 @@ export const COMMAND_OPS = Object.freeze([
   "reject",
   "answer",
   "note",
+  "cancel",
   "close",
   "refine",
   "providers",
@@ -63,6 +64,7 @@ export const MUTATING_OPS = Object.freeze([
   "reject",
   "answer",
   "note",
+  "cancel",
   "close"
 ]);
 
