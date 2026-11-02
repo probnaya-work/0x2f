@@ -78,3 +78,12 @@ test("the timeout error is surfaced, not silently retried into a double action",
   await new Promise(r => setTimeout(r, 400)); // let any (wrong) retry fire
   assert.equal(attempts, 1, "a lost response is surfaced, never retried");
 });
+
+test('an offline mutating action fails immediately and is never replayed after reconnect', async t => {
+  const {client}=await makeClient(t,'http://127.0.0.1:1',100);
+  const original=globalThis.fetch;let attempts=0;
+  globalThis.fetch=async()=>{attempts++;return {ok:false,status:503,json:async()=>({error:'host offline'})};};
+  t.after(()=>{globalThis.fetch=original;});
+  await assert.rejects(()=>client.api('/api/tasks/1/cancel',{method:'POST'}),e=>e.status===503);
+  assert.equal(attempts,1);
+});

@@ -215,9 +215,14 @@ test("parser: a completed run maps to run.started + tool events + ready", async 
   assert.deepEqual(events[1], {
     type: "tool.started",
     name: "command_execution",
+    toolCallId: "item_0",
     input: { command: "/bin/zsh -lc 'echo TOOL_RAN_OK && pwd'" }
   });
-  assert.deepEqual(events[2], { type: "tool.completed", isError: false });
+  assert.equal(events[2].type, "tool.completed");
+  assert.equal(events[2].isError, false);
+  assert.equal(events[2].exitCode, 0);
+  assert.equal(events[2].toolCallId, "item_0");
+  assert.match(events[2].output, /TOOL_RAN_OK/);
   // The agent's final message is progress (and becomes the result).
   assert.deepEqual(events[3], { type: "progress", text: "Done: I ran the tool." });
   // NO file.changed was fabricated from command text.

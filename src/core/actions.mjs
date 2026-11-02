@@ -19,6 +19,11 @@
 //   }
 
 import path from "node:path";
+import { withFileLock } from "./lock.mjs";
+import { prepareWorkspace, requireSharedSlot, git, captureTree, treeDiff, verifySnapshotBytes, restoreSnapshotBytes } from "./isolation.mjs";
+import { createHash } from "node:crypto";
+import fs from "node:fs/promises";
+import { reserveExecution, executionAlive } from "./execution.mjs";
 import { closeTask, beginResume, applyOutcome } from "./lifecycle.mjs";
 import { WorkError } from "./errors.mjs";
 import { workEvent } from "./events.mjs";
@@ -111,6 +116,12 @@ export function createActions(ctx) {
     throw new WorkError(unavailableMessage(id, providers));
   }
 
+  function requireModelSupport(provider, model) {
+    if (model && !['codex','gemini'].includes(provider)) {
+      throw new WorkError(`Explicit model selection is not implemented for ${provider}. Configure its own model externally; 0x2F will not claim the requested model was used.`);
+    }
+  }
+
   // Resolve what the user asked for into an execution target.
   //
   //   requested undefined -> the configured routing default (AUTO when
@@ -178,7 +189,12 @@ export function createActions(ctx) {
       store.readTaskResult(task),
       store.readEvents(task.slug)
     ]);
-    return { ...task, runs: taskRuns(task, { events }), result };
+    const runs = taskRuns(task, { events });
+    if (runs.at(-1)?.checks?.length) {
+      const current = await getRun(id, runs.at(-1).run);
+      runs[runs.length - 1] = { ...runs.at(-1), checks: current.checks };
+    }
+    return { ...task, runs, result };
   }
 
   // getRun(id, run): Promise<{ ...runRecord, result }> — one run's factual
@@ -193,7 +209,17 @@ export function createActions(ctx) {
       throw new WorkError(`Task #${id} has no run ${runNumber}.`, 404);
     }
     const result = await store.readRunResult(task, record);
-    return { ...record, result };
+    const context = await store.readJson(path.join(store.taskDir(task.slug), "runs", String(record.run), "context.json")).catch(() => null);
+    const input = await store.readJson(path.join(store.taskDir(task.slug), "runs", String(record.run), "input.json")).catch(() => null);
+    const checks = [];
+    for (const receipt of record.checks ?? []) {
+      const dir = path.join(store.taskDir(task.slug), "runs", String(record.run), "attempts", record.executionId ?? task.execution?.id ?? "legacy", receipt.artifacts);
+      checks.push({ ...receipt, stdout: await store.readText(path.join(dir, "stdout.txt")), stderr: await store.readText(path.join(dir, "stderr.txt")) });
+    }
+    const deliveredInput = input?.artifact
+      ? await store.readText(path.join(store.taskDir(task.slug), 'runs', String(record.run), 'attempts', record.executionId ?? 'legacy', 'input.md'))
+      : input?.transport?.startsWith('native resume') ? 'Native resume input was not recorded.' : undefined;
+    return { ...record, checks, result, ...(context ? { context } : {}), ...(input ? { input } : {}), ...(deliveredInput !== undefined ? { deliveredInput } : {}) };
   }
 
   // createWork({ brief, provider?, model? }): create the task and start
@@ -208,7 +234,7 @@ export function createActions(ctx) {
   // no model call, so creating a task never depends on a provider being
   // authenticated. There is deliberately no Title + Description form: the
   // user writes the task, 0x2F names it.
-  async function createWork({ brief, provider, model } = {}) {
+  async function createWork({ brief, provider, model, workspaceMode } = {}) {
     requireWithin(brief, MAX_BRIEF, "Task brief");
     if (!brief || !brief.trim()) {
       throw new WorkError("Task brief is required.");
@@ -223,6 +249,7 @@ export function createActions(ctx) {
     // task's directory name.
     requireWithin(title, MAX_TITLE, "Task title");
     const target = resolveTarget(provider);
+    requireModelSupport(target.provider, model);
 
     // The agent receives the FULL brief, never the derived label.
     const prompt = await ctx.buildPrompt(clean);
@@ -253,7 +280,7 @@ export function createActions(ctx) {
     // persist it per run so every run's exact input is auditable and the
     // worker reads the per-run file uniformly.
     return store.withTaskLock(task.slug, async () => {
-      let current = await store.readJson(path.join(store.taskDir(task.slug), "task.json"));
+      let current = reserveExecution(await store.readJson(path.join(store.taskDir(task.slug), "task.json")));
       try {
         if (current.status === "done") {
           const error = "Task was closed before execution started.";
@@ -266,6 +293,12 @@ export function createActions(ctx) {
           await record(current, "task.created", { status: "done" });
           return current;
         }
+        if (node.id === "local") {
+          const checkout = await prepareWorkspace(store.base, current, workspaceMode);
+          current = { ...current, checkout };
+          await requireSharedSlot(store, current);
+        }
+        await store.updateTask(current);
         await store.writeRunPrompt(current, 1, prompt);
         const pid = await node.startExecution({ task: current });
         current = await store.updateTask(withWorkerPid(current, pid));
@@ -293,6 +326,7 @@ export function createActions(ctx) {
     requireWithin(provider, MAX_SELECTOR, "Provider id");
     requireWithin(model, MAX_SELECTOR, "Model id");
     const task = await store.findTask(id);
+    if (task.checkout?.archivedAt) throw new WorkError("Restore the archived checkout before continuing this task.", 409);
     const run = task.runs?.at(-1);
     if (task.status === "working" || task.blockedOn?.live ||
       (pidAlive(task.pid) && (run?.outcome === "working" || run?.blockedOn?.live))) {
@@ -301,9 +335,11 @@ export function createActions(ctx) {
       );
     }
     await requireExecutionExit(task, id);
+    await requireSharedSlot(store, task);
     // Without an explicit request, a rerun is a retry of the task's current
     // provider; `--provider auto` re-routes deterministically.
     const target = resolveTarget(provider ?? task.execution?.provider);
+    requireModelSupport(target.provider, model);
 
     // Materialize run history for legacy tasks BEFORE replacing execution:
     // the legacy run's provider would otherwise be lost when execution is
@@ -347,6 +383,7 @@ export function createActions(ctx) {
     delete current.failure;
     delete current.pid;
     delete current.processGroupId;
+    current = reserveExecution(current);
     await store.updateTask(current);
 
     // Build THIS run's input from current Task state — the original task
@@ -404,6 +441,7 @@ export function createActions(ctx) {
   async function resumeWork(id, grant, { decisionId, requireRemoteScope = false } = {}) {
     if (grant !== "allow" && grant !== "reject") throw new WorkError("Permission must be allow or reject.");
     const task = await store.findTask(id);
+    if (task.cancelRequested) throw new WorkError("Cancellation is pending; this execution cannot receive permission.", 409);
     if (task.status !== "needs_you") {
       throw new WorkError(
         `Task #${id} is ${task.status}, not needs_you — nothing to ${grant}.`
@@ -456,6 +494,10 @@ export function createActions(ctx) {
       );
     }
     await requireExecutionExit(task, id);
+    await requireSharedSlot(store, task);
+    if (task.execution?.id) {
+      await store.writeJson(path.join(store.taskDir(task.slug), 'runs', String(currentRunNumber(task)), 'attempts', task.execution.id, 'execution.json'), task.runs?.at(-1) ?? {});
+    }
     let current = beginResume(task, grant);
     current = updateRun(current, currentRunNumber(current), {
       outcome: "working", attempts: current.execution.attempts,
@@ -463,8 +505,15 @@ export function createActions(ctx) {
     });
     delete current.pid;
     delete current.processGroupId;
+    current = reserveExecution(current);
     await store.updateTask(current);
     try {
+      // Retire the previous attempt's input before launch. A registry/spawn
+      // failure must not leave the old fresh prompt labelled as this resume.
+      await store.writeJson(path.join(store.taskDir(task.slug), 'runs', String(currentRunNumber(current)), 'input.json'), {
+        version: 1, executionId: current.execution.id,
+        transport: 'native resume; message not recorded', characters: null, sha256: null
+      });
       const pid = await node.resumeExecution({ task: current, grant });
       // The worker's first read takes this same lock, after its PID is
       // persisted, so it can validate execution ownership before proceeding.
@@ -506,7 +555,7 @@ export function createActions(ctx) {
     }
     const clean = answer.trim();
     const now = new Date().toISOString();
-    const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
+    const notes = [...(task.context?.notes ?? []), { at: now, text: clean, kind: "answer" }];
     const updated = { ...task, context: { ...(task.context ?? {}), notes } };
     await store.updateTask(updated);
     await store.writeDecisionAnswer(task, {
@@ -532,7 +581,7 @@ export function createActions(ctx) {
     }
     const clean = note.trim();
     const now = new Date().toISOString();
-    const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
+    const notes = [...(task.context?.notes ?? []), { at: now, text: clean, kind: "constraint" }];
     const updated = { ...task, context: { ...(task.context ?? {}), notes } };
     await store.updateTask(updated);
     await record(task, "task.note", { note: clean });
@@ -553,7 +602,7 @@ export function createActions(ctx) {
     }
     const clean = correction.trim();
     const now = new Date().toISOString();
-    const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
+    const notes = [...(task.context?.notes ?? []), { at: now, text: clean, kind: "correction" }];
     const updated = { ...task, context: { ...(task.context ?? {}), notes } };
     await store.updateTask(updated);
     await record(task, "task.corrected", { correction: clean });
@@ -568,6 +617,8 @@ export function createActions(ctx) {
   // outside the workspace, or no git repository) is reported without hunks.
   async function getTaskDiff(id) {
     const task = await store.findTask(id);
+    const saved = await getRunChanges(id).catch(() => null);
+    if (saved?.available) return [{ path: "Saved run changes", kind: "hunks", hunks: saved.patch || "No Git-visible changes during this run.", scope: saved.attribution }];
     const events = await store.readEvents(task.slug);
     const files = [];
     for (const event of events) {
@@ -578,28 +629,162 @@ export function createActions(ctx) {
     return taskDiff({ base: store.base, files });
   }
 
-  // closeWork(id): user closes the task (any status -> done).
-  async function closeWork(id) {
+  async function cancelWork(id, { reason = "Stopped by user", executionId } = {}) {
+    requireWithin(reason, MAX_NOTE, "Cancellation reason");
     const task = await store.findTask(id);
-    const closed = closeTask(task);
+    // Interactive clients bind the gesture to the attempt they displayed.
+    // Bare CLI cancellation deliberately addresses the current attempt.
+    if (executionId !== undefined && executionId !== task.execution?.id) {
+      throw new WorkError("The execution changed. Refresh before cancelling this attempt.", 409);
+    }
+    const run = task.runs?.at(-1);
+    const active = task.status === "working" || task.blockedOn?.live ||
+      run?.outcome === "working" || run?.blockedOn?.live;
+    if (!active) throw new WorkError(`Task #${id} has no active execution to cancel.`, 409);
+    if (task.cancelRequested) return task;
+    if (!task.execution?.id) throw new WorkError("This legacy execution has no verified cancellation channel. Inspect it on its host.", 409);
+    if (!await executionAlive(task, pidAlive)) throw new WorkError("The worker is gone. Recover the interrupted run before retrying; no process was signalled.", 409);
+    await node.cancelExecution({ task });
+    const cancelRequested = { executionId: task.execution.id, run: currentRunNumber(task), at: new Date().toISOString(), reason: reason.trim() || "Stopped by user" };
+    const updated = { ...task, cancelRequested };
+    await store.updateTask(updated);
+    await record(task, "run.cancel_requested", cancelRequested);
+    return updated;
+  }
+
+  async function getRunChanges(id, runNumber) {
+    const task = await store.findTask(id);
+    const run = Number(runNumber ?? currentRunNumber(task));
+    if (!Number.isSafeInteger(run) || !task.runs?.some(r => r.run === run)) throw new WorkError("Unknown run.", 404);
+    const dir = path.join(store.taskDir(task.slug), "runs", String(run));
+    const receipt = await store.readJson(path.join(dir, "changes.json")).catch(() => ({ available: false, reason: "This run predates saved change evidence." }));
+    if (!receipt.available) return receipt;
+    const bytes = await fs.readFile(path.join(dir, "changes.patch"));
+    if (createHash("sha256").update(bytes).digest("hex") !== receipt.sha256) throw new WorkError("Saved change artifact failed its integrity check.", 409);
+    return { ...receipt, patch: bytes.toString("utf8") };
+  }
+
+  async function applyWork(id) {
+    let task = await store.findTask(id);
+    if (task.status === "working" || task.blockedOn?.live) throw new WorkError("Wait for or cancel the active execution before applying changes.", 409);
+    await requireExecutionExit(task, id);
+    if (task.checkout?.mode !== "isolated") throw new WorkError("This task already uses the shared workspace.", 409);
+    await requireSharedSlot(store, { ...task, checkout: { mode: "shared" } });
+    const run = task.runs.at(-1);
+    const changes = await getRunChanges(id, run.run);
+    if (!changes.available) throw new WorkError("No saved changes are available.", 409);
+    const initial = task.runs[0]?.changes?.before;
+    if (!initial) throw new WorkError("The task has no preserved workspace baseline.", 409);
+    const cumulative = await treeDiff(task.checkout.path, path.join(store.workDir(), "evidence"), initial, changes.after);
+    if (task.appliedTree === changes.after.tree) throw new WorkError("This saved result was already applied.", 409);
+    if (cumulative.patch) {
+      const artifact = path.join(store.taskDir(task.slug), "apply.patch");
+      await store.writeText(artifact, cumulative.patchBytes);
+      await git(store.base, ["apply", "--check", "--binary", artifact]);
+      await git(store.base, ["apply", "--binary", artifact]);
+    }
+    task = { ...task, appliedTree: changes.after.tree, appliedAt: new Date().toISOString() };
+    await store.updateTask(task);
+    await record(task, "task.applied", { run: run.run, sha256: cumulative.sha256 });
+    return task;
+  }
+
+  async function cleanupWork(id) {
+    const task = await store.findTask(id);
+    await requireExecutionExit(task, id);
+    if (task.status === "working" || task.blockedOn?.live) throw new WorkError("An active execution cannot be cleaned up.", 409);
+    const expected = path.join(store.base, ".work", "worktrees", task.slug);
+    if (task.checkout?.mode !== "isolated" || task.checkout.path !== expected) throw new WorkError("No owned isolated checkout to clean up.", 409);
+    // The byte snapshot is a working-tree snapshot, not a second copy of an
+    // intermediate staged version. Reserved .work data is excluded entirely,
+    // even when force-tracked. Neither may disappear behind a successful cleanup.
+    const staged = await git(expected, ['diff', '--no-ext-diff', '--no-textconv', '--cached', '--name-only', '-z']);
+    if (staged) throw new WorkError('Checkout has staged index state that this archive does not preserve. Commit or explicitly preserve it before cleanup. Nothing was removed.', 409);
+    try {
+      await fs.lstat(path.join(expected, '.work'));
+      throw new WorkError('Checkout contains reserved .work data excluded from its archive. Preserve it explicitly before cleanup. Nothing was removed.', 409);
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    const ignored = await git(expected, ["ls-files", "--others", "--ignored", "--exclude-standard", "-z"]);
+    if (ignored) throw new WorkError("Checkout contains ignored files that are not in its Git-visible archive. Preserve or remove them explicitly before cleanup.", 409);
+    const objects = path.join(store.workDir(), "evidence");
+    const snapshot = await captureTree(expected, objects);
+    await verifySnapshotBytes(expected, objects, snapshot);
+    // Archive complete Git-visible contents, including untracked/binary files
+    // and symlink targets as links, before removing any unfinished checkout.
+    const common = (await git(expected, ["rev-parse", "--git-common-dir"])).trim();
+    const archive = await git(expected, ["archive", "--format=tar", snapshot.tree], { encoding: "buffer", env: { ...process.env,
+      GIT_OBJECT_DIRECTORY: path.join(objects, "objects"), GIT_ALTERNATE_OBJECT_DIRECTORIES: path.resolve(expected, common, "objects") } });
+    const archivePath = path.join(store.taskDir(task.slug), "workspace.tar");
+    await fs.writeFile(archivePath, archive, { mode: 0o600 });
+    const finalSnapshot = await captureTree(expected, objects);
+    if (finalSnapshot.tree !== snapshot.tree) throw new WorkError("Checkout changed while archiving; nothing was removed. Retry after finishing external edits.", 409);
+    await verifySnapshotBytes(expected, objects, finalSnapshot);
+    const checkoutHead = (await git(expected, ["rev-parse", "HEAD"])).trim();
+    if (checkoutHead !== task.checkout.baseHead) {
+      const bundlePath = path.join(store.taskDir(task.slug), "workspace-commits.bundle");
+      await git(expected, ["bundle", "create", bundlePath, "HEAD", `^${task.checkout.baseHead}`]);
+      await fs.chmod(bundlePath, 0o600);
+    }
+    await git(store.base, ["worktree", "remove", "--force", expected]);
+    const updated = { ...task, checkout: { ...task.checkout, archivedAt: new Date().toISOString(), archive: "workspace.tar", archiveSha256: createHash("sha256").update(archive).digest("hex"), savedHead: checkoutHead, snapshot } };
+    await store.updateTask(updated);
+    return updated;
+  }
+
+  async function restoreWork(id) {
+    const task = await store.findTask(id);
+    if (!task.checkout?.archivedAt || !task.checkout.snapshot?.tree) throw new WorkError("No archived checkout to restore.", 409);
+    const expected = path.join(store.base, ".work", "worktrees", task.slug);
+    if (task.checkout.path !== expected) throw new WorkError("Checkout ownership mismatch.", 409);
+    const archive = await fs.readFile(path.join(store.taskDir(task.slug), "workspace.tar"));
+    if (createHash("sha256").update(archive).digest("hex") !== task.checkout.archiveSha256) throw new WorkError("Archive integrity check failed.", 409);
+    const savedHead = task.checkout.savedHead ?? task.checkout.baseHead;
+    if (savedHead !== task.checkout.baseHead) {
+      const bundlePath = path.join(store.taskDir(task.slug), "workspace-commits.bundle");
+      await git(store.base, ["bundle", "verify", bundlePath]);
+      const heads = await git(store.base, ["bundle", "list-heads", bundlePath, "HEAD"]);
+      if (!heads.startsWith(savedHead + " ")) throw new WorkError("Archived commit identity mismatch.", 409);
+      await git(store.base, ["fetch", "--no-tags", "--no-write-fetch-head", bundlePath, "HEAD"]);
+    }
+    await git(store.base, ["worktree", "add", "--no-checkout", "--detach", expected, savedHead]);
+    await restoreSnapshotBytes(expected, path.join(store.workDir(), 'evidence'), task.checkout.snapshot);
+    const updated = { ...task, checkout: { ...task.checkout, archivedAt: undefined, restoredAt: new Date().toISOString() } };
+    await store.updateTask(updated);
+    return updated;
+  }
+
+  // Closure records human disposition independently of execution outcome.
+  async function closeWork(id, { disposition = "close" } = {}) {
+    if (!["accept", "drop", "close"].includes(disposition)) throw new WorkError("Disposition must be accept, drop or close.");
+    const task = await store.findTask(id);
+    if (disposition === "accept" && task.status !== "ready") throw new WorkError("Only a READY result can be accepted.", 409);
+    const closed = { ...closeTask(task), disposition };
     await store.updateTask(closed);
-    await record(task, "task.closed", { status: closed.status });
+    await record(task, "task.closed", { status: closed.status, disposition });
     return closed;
   }
 
-  const lockedResume = lockedAction(resumeWork);
+  const admission = fn => (...args) => node.id === "local"
+    ? withFileLock(path.join(store.workDir(), "locks", "execution-admission"), () => fn(...args))
+    : fn(...args);
+  const lockedResume = admission(lockedAction(resumeWork));
   return {
     listWork,
     getWork,
     getRun,
     getTaskDiff,
-    createWork,
-    rerunWork: lockedAction(rerunWork),
+    createWork: admission(createWork),
+    getRunChanges,
+    applyWork: admission(lockedAction(applyWork)),
+    cleanupWork: admission(lockedAction(cleanupWork)),
+    restoreWork: admission(lockedAction(restoreWork)),
+    rerunWork: admission(lockedAction(rerunWork)),
     resumeWork: lockedResume,
     answerWork: lockedAction(answerWork),
     noteWork: lockedAction(noteWork),
     correctWork: lockedAction(correctWork),
     closeWork: lockedAction(closeWork),
+    cancelWork: lockedAction(cancelWork),
     allowWork: (id, options) => lockedResume(id, "allow", options),
     rejectWork: (id, options) => lockedResume(id, "reject", options)
   };

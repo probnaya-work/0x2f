@@ -140,7 +140,7 @@ export const codexProvider = {
     return runCodex({ cwd, args, onEvent });
   },
 
-  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {} }) {
+  async resume({ cwd, externalSessionId, grant = "continue", model, onEvent = () => {}, onInput = async () => {} }) {
     if (!externalSessionId) {
       throw new Error("No external session id — this task cannot be resumed.");
     }
@@ -151,6 +151,7 @@ export const codexProvider = {
     if (process.env.CODEX_IGNORE_USER_CONFIG === "1") args.push("--ignore-user-config");
     if (model) args.push("-m", model);
     args.push(prompt);
+    await onInput(prompt);
     return runCodex({ cwd, args, onEvent });
   }
 };
@@ -214,10 +215,12 @@ function consumeCodexItem(state, kind, item) {
     case "command_execution": {
       const command = typeof item.command === "string" ? item.command : "";
       if (kind === "item.started") {
-        onEvent({ type: "tool.started", name: "command_execution", input: { command } });
+        onEvent({ type: "tool.started", name: "command_execution", toolCallId: item.id, input: { command } });
       } else if (kind === "item.completed") {
         onEvent({
           type: "tool.completed",
+          toolCallId: item.id, command, output: item.aggregated_output,
+          exitCode: Number.isInteger(item.exit_code) ? item.exit_code : undefined,
           isError: item.exit_code !== 0 && item.exit_code !== null && item.exit_code !== undefined
         });
       }
@@ -274,6 +277,8 @@ function runCodex({ cwd, args, onEvent }) {
     let buffer = "";
     let stderr = "";
     const state = createCodexParser(onEvent);
+
+    onEvent({ type: "process.observed", pid: child.pid });
 
     child.stdout.on("data", chunk => {
       buffer += chunk.toString();

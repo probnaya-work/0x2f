@@ -313,7 +313,7 @@ export function stepArgument(input = {}) {
 // convenience projections of the same units (deduped paths; raw command
 // strings, one per invocation).
 export function toSteps(task, events = [], opts = {}) {
-  const base = opts.base ?? "";
+  const base = task.checkout?.path ?? opts.base ?? "";
   const origin = ms(events.find(e => e.at)?.at) ?? ms(task.createdAt) ?? Date.now();
   const steps = [];
   let activity = "";
@@ -336,12 +336,19 @@ export function toSteps(task, events = [], opts = {}) {
         }
         break;
 
+      case "tool.updated":
       case "tool.started": {
         const input = event.input ?? {};
         // Paths read as project paths, not as this machine's filesystem.
         const argument = relativePath(base, stepArgument(input));
         const isCommand = typeof input.command === "string";
+        if (event.toolCallId != null) {
+          const existing = steps.findIndex(s => s.toolCallId === event.toolCallId && s.executionId === event.executionId);
+          if (existing >= 0) steps.splice(existing, 1);
+        }
         steps.push({
+          toolCallId: event.toolCallId,
+          executionId: event.executionId,
           kind: isCommand ? "command" : "tool",
           verb: String(event.name ?? "step").toUpperCase(),
           arg: argument,

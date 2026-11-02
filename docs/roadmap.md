@@ -1,29 +1,30 @@
 # Scope and remaining work
 
-0.2.0 is the local task-runtime release. The same runtime can be operated
-on Linux as one persistent execution host with Mac/phone control. It includes
-runtime locking/recovery/retry/permission hardening, faithful result/input
-inspection, documented harness handoff, persistent additional Web themes and
-responsive activity traces. See the dated release verification for actual gates.
+Published npm **0.2.0** remains the baseline. No tag/package version was changed.
+The integration candidate now adds attempt-owned cancellation and recovery,
+isolated Git task checkouts and saved patches, bounded context receipts, richer
+ACP/native check evidence, opt-in project checks, private backup/restore, explicit
+pinned SSH host control and mobile authoring/next-run controls.
 
-Not available in 0.2.0:
+See the [engineering report](engineering/2026-11-02/REPORT.md),
+[limitation register](engineering/2026-11-02/LIMITATIONS.md),
+[contracts](engineering/2026-11-02/FOUNDATIONS.md) and
+[operations](engineering/2026-11-02/OPERATIONS.md) for implementation, evidence,
+access blockers and migration boundaries. These features require the integration
+source and are not advertised as a new registry release.
 
-- Automatic task migration, remote execution-node transport, load balancing,
-  fleet dashboard or automatic failover. One workspace/runtime on a Linux machine
-  executes locally on that machine.
-- A hosted relay service operated by this project, remote Internet access without
-  operator infrastructure, background push notifications or offline command queue.
-- Universal provider permissions/native resume. Cursor's live task handoff passed;
-  its native resume and interactive permissions were not exercised in that chain.
-- Independent automated acceptance of agent work. READY remains a review boundary.
-- Linux-native 057 application distribution, a remote task-history collector for
-  057, or exact agent attribution inferred from aggregate CPU. The existing Mac
-  057 Core observes Linux through MACHINE PULSE. Its separate shared/mobile
-  engineering candidates retain their own release and acceptance gates.
-- General Windows execution support or a new cancellation UI/command.
+The next release should consolidate this execution/isolation/context foundation
+and the already tested host/mobile controls after review and final installed-
+package/device gates. Keep READY a review boundary and independent checks opt-in.
+Retain the compact lifecycle and explicit human ACCEPT/DROP/CLOSE history.
 
-ThinkCentre hosting and 057 observation were previously agreed next stages. The
-current host work uses that existing architecture; it does not silently promote
-057's visual refinement, smooth-motion, thermal/battery, sleep/wake or long-soak
-acceptance to completed product capabilities. Physical-device results and
-remaining limits must stay distinct from Core-only or simulated checks.
+Still open: OS containment for deliberately escaped processes; universal live
+harness parity and safe tool-free REFINE beyond Claude; acknowledged live
+steering; task/files/history/credential migration; independent multi-device
+revocation; operated HTTPS/push infrastructure and closed-client delivery;
+physical cold reboot and long-run power/thermal/freshness qualification.
+
+057's remote metadata reader and generation claims are a separate observer
+candidate. Its Core/storage/Landscape remain independent of 0x2F. Actual SSH,
+persistence, rendering and battery acceptance have separate gates. The parallel
+FIELD material/motion work retains its own source and acceptance process.

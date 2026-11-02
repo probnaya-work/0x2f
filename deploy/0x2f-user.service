@@ -8,7 +8,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-Environment=0X2F_SUPERVISED=1
+Environment=WORK_SUPERVISED=1
 WorkingDirectory=<WORKSPACE>
 Environment=PATH=<BIN>:/usr/local/bin:/usr/bin:/bin
 ExecStart=<NODE> <PACKAGE>/src/server-entry.mjs <WORKSPACE> 4242

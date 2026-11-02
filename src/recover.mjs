@@ -24,13 +24,14 @@
 // task reruns normally (rerunWork only refuses while a task is "working").
 
 import path from "node:path";
+import { executionAlive } from "./core/execution.mjs";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome } from "./core/lifecycle.mjs";
 import { workEvent } from "./core/events.mjs";
 import { currentRunNumber, updateRun } from "./core/runs.mjs";
 
 export const INTERRUPTED_ERROR =
-  "Run was interrupted — the worker process is no longer alive (host restart or crash). Rerun the task to continue.";
+  "Run was interrupted — its worker is gone or its process generation changed (host restart or crash). External actions may already have occurred. Inspect saved evidence before explicitly retrying; nothing was replayed.";
 
 // Is a pid a live process? Signal 0 tests existence without delivering a
 // real signal. EPERM means the process exists but is owned by another user —
@@ -148,7 +149,7 @@ export async function failInterruptedRun(
   return store.withTaskLock(task.slug, async () => {
     const fresh = await store.readJson(path.join(store.taskDir(task.slug), "task.json"));
     if (currentRunNumber(fresh) !== currentRunNumber(task) || fresh.pid !== task.pid) return null;
-    if (!hasInterruptedExecution(fresh) || pidAlive(fresh.pid, kill)) return null;
+    if (!hasInterruptedExecution(fresh) || await executionAlive(fresh, pid => pidAlive(pid, kill))) return null;
     return failLockedRun(store, fresh, { log });
   });
 }

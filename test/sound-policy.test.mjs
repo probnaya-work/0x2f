@@ -179,7 +179,7 @@ test("reseed (reconnect) suppresses a transition the fresh state already shows",
   assert.equal(h.callbacks.length, 1);
 });
 
-test("normal execution makes no sound — and failed is tracked, not signalled", () => {
+test("normal execution stays quiet and FAILED emits a deduplicated stop alert", () => {
   const h = harness();
   h.policy.seed(seedTasks("working"));
   h.event("run.started", 1, { sessionId: "s" });
@@ -190,11 +190,11 @@ test("normal execution makes no sound — and failed is tracked, not signalled",
   h.event("run.failed", 1, { error: "boom" });
   h.event("task.updated", 1, { status: "failed" });
   h.advance(1000);
-  assert.deepEqual(h.callbacks, []);
+  assert.deepEqual(h.callbacks, [{ type: "failed", taskId: 1 }]);
   // ... but failed is tracked: a later ready is still a transition.
   h.event("task.updated", 1, { status: "ready" });
   h.advance(1000);
-  assert.deepEqual(h.callbacks, [{ type: "ready", taskId: 1 }]);
+  assert.deepEqual(h.callbacks, [{ type: "failed", taskId: 1 }, { type: "ready", taskId: 1 }]);
 });
 
 test("task.closed and task.created are silent", () => {

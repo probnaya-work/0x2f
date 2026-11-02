@@ -482,7 +482,7 @@ test("DOGFOODING: Claude investigates, user constrains, Codex-class rerun contin
             const events = await runtime.store.readEvents(persisted.slug);
             assert.deepEqual(
               eventsForRun(events, 2).map(e => e.type),
-              ["run.started", "run.completed"]
+              ["run.started", "process.observed", "run.completed"]
             );
 
             // The second provider received the rebuilt Task context: original

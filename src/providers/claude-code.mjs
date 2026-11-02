@@ -137,7 +137,7 @@ export const claudeCodeProvider = {
     return runClaude({ cwd, args, onEvent });
   },
 
-  async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {} }) {
+  async resume({ cwd, externalSessionId, grant = "continue", onEvent = () => {}, onInput = async () => {} }) {
     const prompt =
       grant === "allow"
         ? ALLOW_PROMPT
@@ -156,6 +156,7 @@ export const claudeCodeProvider = {
       args.push("--permission-mode", "acceptEdits");
     }
     args.push(prompt);
+    await onInput(prompt);
     return runClaude({ cwd, args, onEvent, resuming: true });
   }
 };
@@ -208,6 +209,8 @@ function runClaude({ cwd, args, onEvent, resuming = false }) {
     let sessionId = null;
     let resultEvent = null;
     let sawEvent = false;
+
+    onEvent({ type: "process.observed", pid: child.pid });
 
     child.stdout.on("data", chunk => {
       buffer += chunk.toString();
@@ -268,7 +271,7 @@ function runClaude({ cwd, args, onEvent, resuming = false }) {
       } else if (event.type === "assistant") {
         for (const block of event.message?.content ?? []) {
           if (block.type === "tool_use") {
-            onEvent({ type: "tool.started", name: block.name, input: block.input });
+            onEvent({ type: "tool.started", name: block.name, toolCallId: block.id, input: block.input });
             if (MUTATING.has(block.name) && typeof block.input?.file_path === "string") {
               onEvent({ type: "file.changed", path: block.input.file_path });
             }
@@ -280,7 +283,8 @@ function runClaude({ cwd, args, onEvent, resuming = false }) {
         for (const block of event.message?.content ?? []) {
           if (block.type === "tool_result") {
             onEvent({
-              type: "tool.completed",
+              type: "tool.completed", toolCallId: block.tool_use_id,
+              output: typeof block.content === "string" ? block.content : undefined,
               isError: block.is_error === true
             });
           }

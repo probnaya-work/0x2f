@@ -123,11 +123,17 @@ function rawHello(url, frame) {
 // tailer feeding the bus, and a PAIRED phone speaking the E2E protocol.
 async function makeHarness(t) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let agent, tailer, handle;
+  t.after(async () => {
+    // Stop reconnecting/writing producers before closing their server or deleting state.
+    await agent?.stop();
+    tailer?.stop();
+    await handle?.close();
+    await fs.rm(base, { recursive: true, force: true });
+  });
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -146,17 +152,13 @@ async function makeHarness(t) {
 
   const node = fakeNode();
   const runtime = createRuntime(base, { node });
-  const tailer = createTailer({
+  tailer = createTailer({
     interval: 15,
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
   tailer.start();
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
   agent.start();
   await waitFor(
     () => handle.state.devices.get(deviceId)?.online === true,
@@ -172,6 +174,24 @@ async function makeHarness(t) {
 }
 
 // --- hello-level auth (unchanged) -------------------------------------------
+
+test("encrypted cancellation binds the displayed attempt and refuses stale or missing nonces", async t => {
+  const { runtime, phone } = await makeHarness(t);
+  const task = await runtime.actions.createWork({ brief: "Encrypted cancellation fixture" });
+  await runtime.store.updateTask({ ...task, pid: process.pid });
+  const visible = (await phone.api('/api/tasks')).find(t => t.id === task.id);
+  assert.equal(visible.executionId, task.execution.id);
+  const cancel = body => phone.command("cancel", { taskId: task.id, body });
+  await assert.rejects(() => cancel({}), e => e.status === 409);
+  await assert.rejects(() => cancel({ executionId: 'stale-attempt' }), e => e.status === 409);
+  await cancel({ executionId: visible.executionId });
+  await cancel({ executionId: visible.executionId });
+  assert.equal((await runtime.store.readEvents(task.slug)).filter(e => e.type === 'run.cancel_requested').length, 1);
+  const current = await runtime.store.findTask(task.id);
+  await runtime.store.updateTask({ ...current, execution: { ...current.execution, id: 'next-attempt' }, cancelRequested: undefined });
+  await assert.rejects(() => cancel({ executionId: visible.executionId }), e => e.status === 409);
+  assert.equal((await runtime.store.findTask(task.id)).cancelRequested, undefined);
+});
 
 test("the Mac authenticates outbound; unpaired and mismatched hellos are rejected", async t => {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-auth-"));

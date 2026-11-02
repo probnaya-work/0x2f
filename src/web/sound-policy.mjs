@@ -56,6 +56,7 @@ export function createSoundPolicy(opts = {}) {
       return event.status;
     }
     if (event.type === "run.completed" && event.status === "ready") return "ready";
+    if (event.type === "run.failed") return "failed";
     if (event.type === "needs_user") return "needs_you";
     return null;
   }
@@ -76,7 +77,7 @@ export function createSoundPolicy(opts = {}) {
     if (status === null) return null;
     if (statuses.get(id) === status) return null; // already there — dedupe
     statuses.set(id, status);
-    if (status !== "ready" && status !== "needs_you") return null;
+    if (status !== "ready" && status !== "needs_you" && status !== "failed") return null;
     return { type: status, taskId: id };
   }
 
@@ -89,8 +90,8 @@ export function createSoundPolicy(opts = {}) {
       // Absorb into the current window. needs_you is the priority gesture —
       // it also becomes the intent's task, so a notification points at the
       // task that actually needs the human.
-      if (transition.type === "needs_you") {
-        pending.intent.type = "needs_you";
+      if (({ ready: 0, failed: 1, needs_you: 2 }[transition.type] ?? 0) > ({ ready: 0, failed: 1, needs_you: 2 }[pending.intent.type] ?? 0)) {
+        pending.intent.type = transition.type;
         pending.intent.taskId = transition.taskId;
       }
       return;

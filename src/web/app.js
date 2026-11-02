@@ -32,10 +32,14 @@ const EVENT_TYPES = [
   "task.created",
   "task.updated",
   "task.closed",
+  "run.cancel_requested",
+  "run.cancelled",
   "task.answered",
   "run.started",
   "progress",
   "tool.started",
+  "tool.updated",
+  "tool.completed",
   "file.changed",
   "needs_user",
   "permission.resolved",
@@ -50,6 +54,8 @@ const STATE_EVENTS = new Set([
   "task.created",
   "task.updated",
   "task.closed",
+  "run.cancel_requested",
+  "run.cancelled",
   "needs_user",
   "permission.resolved",
   "run.completed",
@@ -419,7 +425,7 @@ function pageHasAttention() {
 
 function handleIntent(intent) {
   const watching = pageHasAttention();
-  if (intent.type === "needs_you") {
+  if (intent.type === "needs_you" || intent.type === "failed") {
     if (state.soundOn && !watching) slash.needsYou();
     pulse("needs_you");
     if (state.notifyOn && document.hidden) notifyNeedsYou(intent);
@@ -445,14 +451,14 @@ function pulse(type) {
 function notifyNeedsYou(intent) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   const task = state.tasks.find(t => t.id === intent.taskId);
-  const reason =
+  const reason = intent.type === "failed" ? "Run failed — review the saved error and partial work" :
     task?.blockedOn?.type === "permission"
       ? "Permission required"
       : task?.blockedOn?.type === "decision"
         ? "Decision needed"
         : "Needs you";
   try {
-    const notification = new Notification("0x2F / needs you", {
+    const notification = new Notification(intent.type === "failed" ? "0x2F / run failed" : "0x2F / needs you", {
       body: task ? `${task.title} — ${reason}` : reason,
       tag: "0x2f-needs-you"
     });
@@ -680,22 +686,43 @@ const reject = (id, decisionId) => {
   if (remoteBlocked()) return;
   act(() => post("/api/tasks/" + id + "/reject", { decisionId: decisionId ?? null }));
 };
-const accept = id => {
+const accept = (id, disposition = "accept") => {
   if (remoteBlocked()) return Promise.resolve(false);
   // Settles on success OR failure (act() flashes the error) so callers can
   // re-render — a settled action must never leave a disabled control behind.
   return act(async () => {
-    await post("/api/tasks/" + id + "/close");
+    await post("/api/tasks/" + id + "/close", { disposition });
     if (state.openId === id) state.openId = null;
   });
 };
 
+const cancelRun = (id, executionId) => {
+  if (remoteBlocked()) return Promise.resolve(false);
+  return act(() => post("/api/tasks/" + id + "/cancel", { executionId })).then(ok => {
+    if (ok) flash("Cancellation requested. Wait for the worker receipt. Partial work stays; external actions are not rolled back.");
+    return ok;
+  });
+};
+function cancelButton(id) {
+  const task = state.tasks.find(t => t.id === id);
+  const pending = task?.cancelRequested;
+  const executionId = task?.execution?.id ?? task?.executionId ?? null;
+  const button = actionButton(pending ? "CANCELLING…" : "CANCEL RUN", "", "act-outline", e => {
+    e.stopPropagation();
+    e.currentTarget.disabled = true;
+    cancelRun(id, executionId).finally(() => render());
+  }, "cancel-run-" + id);
+  button.disabled = Boolean(pending);
+  return button;
+}
+
 // SEND BACK reruns the task through the shared rerun action: the next run's
 // input is rebuilt from current Task state (answers, notes, prior results),
 // so it is the "continue with my correction" gesture of the control loop.
+const nextProviders = new Map();
 const sendBack = id => {
   if (remoteBlocked()) return Promise.resolve(false);
-  return act(() => post("/api/tasks/" + id + "/rerun"));
+  return act(() => post("/api/tasks/" + id + "/rerun", nextProviders.has(id) ? { provider: nextProviders.get(id) } : {}));
 };
 
 // CLOSE tells 0x2F this Work is no longer active — the same closeWork action
@@ -704,7 +731,7 @@ const sendBack = id => {
 // for work that cannot continue (a non-resumable provider, a wrong NEEDS
 // YOU, a finished run the user no longer wants).
 const close = async id => {
-  const closed = await accept(id);
+  const closed = await accept(id, "close");
   if (closed) flash("Task closed. Closing does not cancel the provider; an active run may keep running or wait for permission.");
   return closed;
 };
@@ -1426,9 +1453,19 @@ function renderCheckEvidence(row, detail) {
   const events = eventsForRun(state.eventsByTask.get(row.id) ?? [], detail?.runs?.at(-1)?.run ?? 1);
   const facts = resultEvidence(detail?.result, events);
   return el("div", { class: "check-evidence", style: { marginBottom: "16px", whiteSpace: "pre-wrap", overflowWrap: "anywhere" } }, [
+    detail?.runs?.at(-1)?.context ? el("div", { class: "m-dmeta", text: (() => {
+      const c = detail.runs.at(-1).context;
+      return `Context v${c.version} · project ${c.projectVersion?.slice(0, 12)} · ${c.characters}/${c.maxChars} characters · ${c.shortenedRuns ?? c.artifacts?.filter(a => a.delivery !== "full").length ?? 0} prior results shortened; full hashed artifacts stay on the host.`;
+    })() }) : null,
     el("div", { class: "run-sub-k", text: "PROVIDER-REPORTED CHECKS" }),
     el("div", { text: facts.verification }),
     el("div", { class: "m-dmeta", text: facts.receipt }),
+    ...(detail?.runs?.at(-1)?.checks ?? []).map(r => el("details", {}, [
+      el("summary", { text: `PROJECT CHECK ${r.id} · ${r.status} · exit ${r.exitCode ?? "unknown"}` }),
+      el("pre", { style: { whiteSpace: "pre-wrap", overflowWrap: "anywhere" }, text: `${r.argv?.join(" ") ?? ""}\n${r.stdout ?? "Output retained on the host."}\n${r.stderr ?? ""}\nstdout SHA256 ${r.stdoutSha256 ?? "unknown"}` })
+    ])),
+    ...facts.receipts.map(r => el("details", {}, [el("summary", { text: `${r.command ?? "Tool output"} · exit ${r.exitCode ?? "unknown"}` }),
+      el("pre", { style: { whiteSpace: "pre-wrap", overflowWrap: "anywhere" }, text: r.output ?? "Output not retained on this surface." })])),
     el("div", { class: "m-dmeta", text: facts.commands.length ? `${facts.commands.length} observed command invocation(s) — success is not inferred; inspect COMMANDS.` : "Command invocation evidence: not recorded." })
   ]);
 }
@@ -1588,6 +1625,8 @@ function renderRow(row, accent) {
         el("span", { class: "detail-state", style: { color: row.stateColor }, text: row.stateLabel })
       ]),
       renderBrief(row),
+      detail?.checkout?.mode === "isolated" ? el("div", { class: "m-dmeta", text: detail.appliedTree ? "Saved isolated result applied to the original workspace." : "Result lives in an isolated checkout. Review the saved patch; use 2f apply on its host to transfer changes." }) : null,
+      row.running || state.tasks.find(t => t.id === row.id)?.runs?.at(-1)?.blockedOn?.live || (row.done && state.tasks.find(t => t.id === row.id)?.runs?.at(-1)?.outcome === "working") ? cancelButton(row.id) : null,
       renderTrack(row, accent),
       el("div", { class: "status-line" }, [
         el("span", { class: "status-phase", text: row.phaseLabel }),
@@ -1770,6 +1809,7 @@ let refineAbort = null;
 // The composer is built ONCE and kept across renders: re-creating it would
 // reset the caret and drop a half-typed task every time an event lands.
 function buildComposer() {
+  let creating = false;
   // A textarea, not a single-line input: BRIEF produces a longer, structured
   // brief and the user must be able to review/edit it in place before START.
   // A single-line note still submits on Enter; a multi-line brief only
@@ -1794,6 +1834,11 @@ function buildComposer() {
     "aria-label": "execution provider",
     title: "execution provider"
   });
+  const workspaceSelect = el("select", { class: "composer-provider", "aria-label": "workspace mode", title: "Execution checkout" }, [
+    el("option", { value: "auto", text: "AUTO CHECKOUT" }),
+    el("option", { value: "isolated", text: "ISOLATED · COMMITTED HEAD" }),
+    el("option", { value: "shared", text: "SHARED · INCLUDES DIRTY FILES" })
+  ]);
   providerSelect = select;
   populateProviderSelect();
 
@@ -1879,7 +1924,7 @@ function buildComposer() {
     revertButton.style.display = revised && !refining && !narrow ? "" : "none";
     refineLabel.textContent = refineError ? "RETRY" : "BRIEF";
     if (refineButton) refineButton.disabled = refining;
-    if (startButton) startButton.disabled = refining;
+    if (startButton) startButton.disabled = refining || creating;
 
     input.style.fontSize = narrow ? "16px" : multiline ? "15px" : "18px";
     input.style.color = refining ? "#7d8892" : "#f2f5f7";
@@ -1902,7 +1947,7 @@ function buildComposer() {
   // brief if BRIEF ran, the rough note otherwise. This is the only path that
   // creates a task; BRIEF never does.
   async function submit() {
-    if (refining) return;
+    if (refining || creating) return;
     if (remoteBlocked()) return;
     // The composer's whole text is the task: a full engineering brief, not a
     // title. 0x2F derives the short label a ledger row shows (core/title.mjs)
@@ -1922,24 +1967,27 @@ function buildComposer() {
         return;
       }
     }
-    input.value = "";
-    refineOriginal = null;
-    dirtySinceRefine = false;
-    refineError = null;
-    autosize();
-    syncComposer();
+    creating = true;
+    startButton.disabled = true;
     try {
       const task = await api("/api/tasks", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ brief, ...(provider ? { provider } : {}) })
+        body: JSON.stringify({ brief, workspaceMode: workspaceSelect.value, ...(provider ? { provider } : {}) })
       });
       state.openId = task.id;
       state.selectedId = task.id;
+      input.value = "";
+      refineOriginal = null;
+      dirtySinceRefine = false;
+      refineError = null;
+      autosize();
+      syncComposer();
+      if (isMobileWidth()) { mobile.showComposer = false; openMobileDetail(task.id); }
     } catch (error) {
       flash(error.message);
       return;
-    }
+    } finally { creating = false; syncComposer(); }
     await reloadTasks();
   }
 
@@ -2086,6 +2134,7 @@ function buildComposer() {
         el("span", { class: "composer-k", text: "SUBMIT" }),
         composerCaret,
         select,
+        workspaceSelect,
         input
       ]),
       el("div", { class: "composer-acts" }, [
@@ -2414,7 +2463,7 @@ function onKeyDown(event) {
     if (row?.ready || row?.failed) sendBack(row.id);
   } else if (event.key === "x" || event.key === "X") {
     // CLOSE: remove the Work from active attention — never a provider call.
-    if (row?.halted || row?.ready || row?.failed) accept(row.id);
+    if (row?.halted || row?.ready || row?.failed) close(row.id);
   }
 }
 
@@ -2526,6 +2575,7 @@ const mobile = {
   closing: false, // Task Detail is mid slide-out (see closeMobileDetail)
   correctionId: null, // task id whose CORRECTION / ADD A CONSTRAINT sheet is open
   offlineSince: null, // Date.now() captured the moment the Mac went unreachable
+  showComposer: false,
   resultExpanded: new Set() // task ids whose READY result is shown in full
 };
 
@@ -2614,11 +2664,12 @@ async function submitCorrection(id, { rerun } = {}) {
   if (remoteBlocked()) return;
   const note = (noteInputs.get(id) ?? "").trim();
   if (!note) return;
+  const correction = ["ready", "failed"].includes(state.tasks.find(t => t.id === id)?.status);
   try {
-    await api("/api/tasks/" + id + "/note", {
+    await api("/api/tasks/" + id + (correction ? "/correct" : "/note"), {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ note })
+      body: JSON.stringify(correction ? { correction: note } : { note })
     });
     noteInputs.delete(id);
   } catch (error) {
@@ -2679,6 +2730,9 @@ function renderMobileOverviewToolbar(ledger, frozen) {
   if (c.ready) items.push(el("span", { class: "m-count", text: "READY " + c.ready }));
   if (c.failed) items.push(el("span", { class: "m-count", text: "FAILED " + c.failed }));
   const children = [...items];
+  children.push(el("button", { type: "button", class: "m-back", disabled: frozen || undefined,
+    "data-focus-key": "new-mobile-task", text: mobile.showComposer ? "HIDE DRAFT" : "NEW TASK",
+    onClick: () => { mobile.showComposer = !mobile.showComposer; render(); if (mobile.showComposer) composerInput?.focus(); } }));
   if (frozen) {
     children.push(el("span", { class: "m-toolbar-fill" }));
     children.push(el("span", { class: "m-toolbar-asof", text: "AS OF " + hhmm(mobile.offlineSince ?? Date.now()) }));
@@ -3066,6 +3120,16 @@ function renderMobileDecisionContent(row) {
 // doing or what it produced, then the operational detail on demand. Each
 // piece gates itself to null when the status does not carry it — the same
 // §10 discipline the desktop ledger already follows.
+function renderNextHarness(row) {
+  if (row.running || row.halted) return null;
+  const current = state.tasks.find(t => t.id === row.id);
+  const select = el("select", { "aria-label": "Harness for next run", class: "composer-provider", "data-focus-key": "next-harness-" + row.id },
+    state.providers.map(p => el("option", { value: p.id, text: p.displayName ?? p.id, disabled: p.available ? undefined : true })));
+  select.value = nextProviders.get(row.id) ?? current?.execution?.provider ?? current?.provider ?? "";
+  select.addEventListener("change", () => nextProviders.set(row.id, select.value));
+  return el("div", { class: "m-dsection" }, [el("label", { text: "NEXT RUN HARNESS · saved notes reach the next run" }), select]);
+}
+
 function renderMobileDetailContent(row, detail, accent, frozen) {
   row = mobilePermissionRow(row);
   const parts = [];
@@ -3083,6 +3147,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
   // desktop detail uses, and the reason a long brief is never lost on the
   // phone (the relay carries it in full; see src/relay/project.mjs).
   parts.push(renderBrief(row));
+  if ((detail?.checkout?.mode ?? detail?.workspaceMode) === "isolated") parts.push(el("div", { class: "m-dlimit", text: "Result lives in an isolated checkout on this host. Review 2f changes before 2f apply transfers it to the original workspace." }));
 
   if (row.trace) {
     parts.push(el("div", { class: "m-dtrace-wrap" }, [renderTrack(row, accent)]));
@@ -3192,6 +3257,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
     parts.push(el("div", { class: "m-dsection first" }, [el("div", { class: "m-dsection-k strong", text: "RESULT" }), renderMobileResult(row, detail)]));
   }
 
+  parts.push(renderNextHarness(row));
   return parts.filter(Boolean);
 }
 
@@ -3199,6 +3265,9 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
 // Reading scrolls; deciding never does.
 function renderMobileActionBar(row, frozen) {
   row = mobilePermissionRow(row);
+  const raw = state.tasks.find(t => t.id === row.id);
+  if (row.done && (raw?.runs?.at(-1)?.outcome === "working" || raw?.runs?.at(-1)?.blockedOn?.live))
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-hint", text: "Task closed; execution remains active." }), cancelButton(row.id)]);
   if (row.halted && row.permType !== "decision") {
     const allowBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ALLOW", disabled: !row.permAllowable ? true : undefined });
     allowBtn.addEventListener("click", () => {
@@ -3210,7 +3279,8 @@ function renderMobileActionBar(row, frozen) {
       rejectBtn.disabled = true;
       reject(row.id, row.permDecisionId);
     });
-    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [allowBtn, rejectBtn])]);
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [allowBtn, rejectBtn]),
+      el("div", { class: "m-abar-row" }, [cancelButton(row.id)])]);
   }
   if (row.halted && row.permType === "decision") {
     const value = (state.answers.get(row.id) ?? "").trim();
@@ -3242,7 +3312,7 @@ function renderMobileActionBar(row, frozen) {
   if (row.running) {
     const btn = el("button", { class: "m-abar-btn m-abar-single", style: { flex: "1" }, text: "ADD A CONSTRAINT" });
     btn.addEventListener("click", () => openCorrection(row.id));
-    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn])]);
+    return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn, cancelButton(row.id)])]);
   }
   if (row.ready) {
     const acceptBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ACCEPT" });
@@ -3405,7 +3475,17 @@ function renderMobile() {
   // The Overview stays mounted underneath a pushed Task Detail — "the list
   // holds still underneath" — Task Detail is simply layered over it via
   // position:absolute (see .m-detail).
-  const overview = el("div", { class: "m-scroll" }, [renderMobileOverview(ledger, frozen)]);
+  if (!composerNode) composerNode = buildComposer();
+  if (mobile.showComposer) {
+    syncComposerFn?.();
+    for (const control of composerNode.querySelectorAll("button, select, textarea")) control.disabled = frozen;
+  }
+  const overview = el("div", { class: "m-scroll" }, [
+    mobile.showComposer ? el("div", { class: "m-new-work" }, [
+      el("div", { class: "m-dmeta", text: `${state.workspace?.label ?? "Paired workspace"} · ${state.node ?? "paired execution host"}. This host owns the files and task history.` }), composerNode
+    ]) : null,
+    renderMobileOverview(ledger, frozen)
+  ].filter(Boolean));
   const overviewToolbar = renderMobileOverviewToolbar(ledger, frozen);
   const detail = mobile.detailId !== null ? renderMobileDetail(ledger, COLORS.accent, frozen) : null;
   const bar = renderMobileBar(frozen);

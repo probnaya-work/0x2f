@@ -685,3 +685,18 @@
     .decision-answer, .note-input { font-size: 16px; } /* ≥16px: no iOS zoom, kept for any desktop node briefly in the DOM during a resize */
     .flash { bottom: 90px; left: 12px; right: 12px; transform: none; text-align: center; }
   }
+
+/* Phone authoring uses the same persistent composer and actions. */
+@media (max-width: 640px) {
+  .mobile .m-new-work { padding: 16px 14px; border-bottom: 1px solid var(--rule); }
+  .mobile .composer { display: block; }
+  .mobile .composer-inner { padding: 12px 0; }
+  .mobile .composer-row { flex-wrap: wrap; gap: 10px; }
+  .mobile .composer-row textarea { flex: 1 0 100%; min-height: 100px; font-size: 16px; }
+  .mobile .composer-row select { max-width: 100%; min-height: 44px; font-size: 12px; }
+  .mobile .composer-acts { flex-wrap: wrap; }
+  .mobile .composer-hint-group { flex-basis: 100%; }
+  .mobile .legend { display: none; }
+  .mobile .m-dsection select { display: block; width: 100%; min-height: 44px; margin-top: 8px; }
+  .mobile .m-abar .act { min-height: 48px; flex: 1; justify-content: center; }
+}

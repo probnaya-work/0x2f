@@ -152,6 +152,14 @@ export function projectRun(run, base) {
     completedAt: run.completedAt ?? null,
     durationMs: run.durationMs ?? null,
     attempts: run.attempts ?? 1,
+    executionId: run.executionId,
+    stopReason: run.stopReason,
+    checks: Array.isArray(run.checks) ? run.checks.map(r => ({
+      id: r.id, status: r.status, exitCode: Number.isInteger(r.exitCode) ? r.exitCode : null,
+      durationMs: r.durationMs, stdoutSha256: r.stdoutSha256, stderrSha256: r.stderrSha256,
+      outputAvailable: true
+    })) : undefined,
+    context: run.context ? { version: run.context.version, projectVersion: run.context.projectVersion, characters: run.context.characters, maxChars: run.context.maxChars, shortenedRuns: run.context.shortenedRuns } : undefined,
     error: trunc(run.error, TRUNC.error, base),
     // The AUTO routing label (why this task ran here) — the reason is a
     // short availability fact, not internal state.
@@ -173,7 +181,7 @@ export function projectResult(text, base) {
 // they read from disk; this decides whether it is shown.
 export function taskShowsResult(task) {
   if (!task || typeof task !== "object") return false;
-  return task.status === "ready" || (task.status === "done" && !task.error);
+  return task.status === "ready" || task.failure?.kind === "cancelled" || (task.status === "done" && !task.error);
 }
 
 // §01: only a recognized kind crosses the relay boundary — the same rule
@@ -204,6 +212,11 @@ export function projectTask(task, base, result) {
     brief: brief.text,
     ...(brief.truncated ? { briefTruncated: true } : {}),
     status: task.status ?? "working",
+    disposition: task.disposition,
+    // An occurrence precondition, not authority or a process identifier.
+    executionId: task.execution?.id,
+    cancelRequested: task.cancelRequested ? { at: task.cancelRequested.at, reason: trunc(task.cancelRequested.reason, TRUNC.error, base) } : undefined,
+    workspaceMode: task.checkout?.mode,
     provider: task.execution?.provider ?? null,
     model: task.execution?.model ?? null,
     createdAt: task.createdAt ?? null,
@@ -242,7 +255,8 @@ export function projectEvent(event, base) {
     type: event.type,
     taskId: event.taskId,
     at: event.at,
-    ...(typeof event.run === "number" ? { run: event.run } : {})
+    ...(typeof event.run === "number" ? { run: event.run } : {}),
+    ...(typeof event.executionId === "string" ? { executionId: event.executionId } : {})
   };
   switch (event.type) {
     case "run.started":
@@ -250,10 +264,11 @@ export function projectEvent(event, base) {
       return common;
     case "progress":
       return { ...common, text: trunc(event.text, TRUNC.text, base) };
+    case "tool.updated":
     case "tool.started":
-      return { ...common, name: event.name ?? null, input: projectToolInput(event.input, base) };
+      return { ...common, toolCallId: event.toolCallId, name: event.name ?? null, input: projectToolInput(event.input, base) };
     case "tool.completed":
-      return { ...common, isError: event.isError === true };
+      return { ...common, toolCallId: event.toolCallId, isError: event.isError === true, exitCode: Number.isInteger(event.exitCode) ? event.exitCode : undefined, outputAvailable: typeof event.output === "string" };
     case "file.changed":
       return { ...common, path: relPath(base, event.path) };
     case "needs_user":

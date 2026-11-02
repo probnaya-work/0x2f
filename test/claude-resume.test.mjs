@@ -20,6 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { createRuntime } from "../src/runtime.mjs";
 
 const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
@@ -124,6 +125,11 @@ test("permission -> allow -> successful resume: the SAME session continues and t
   assert.ok(args.includes("--resume"));
   assert.equal(args[args.indexOf("--resume") + 1], "sess-uuid-1");
   assert.ok(args.includes("--permission-mode"));
+  const run = await createRuntime(base).actions.getRun(1, 1);
+  assert.equal(run.input.transport, 'native resume message');
+  assert.equal(run.deliveredInput, args.at(-1));
+  assert.equal(run.input.executionId, done.execution.id);
+  assert.doesNotMatch(run.deliveredInput, /PROJECT CONTEXT/);
 });
 
 test("permission -> allow -> failed resume: the run FAILS honestly (kind resume), never pretends the grant continued", async t => {

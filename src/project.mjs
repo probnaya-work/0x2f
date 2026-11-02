@@ -5,6 +5,7 @@
 // a prompt is Work content, not Claude content.
 
 import fs from "node:fs/promises";
+import { compileContinuation } from "./core/context.mjs";
 import path from "node:path";
 import { exists, readText, writeText } from "./core/store.mjs";
 
@@ -225,91 +226,6 @@ export function sectionOf(text, heading) {
   return (next >= 0 ? tail.slice(0, next) : tail).trim();
 }
 
-function userInputSection(notes) {
-  const lines = notes.map(
-    n => `- ${n.at}: ${n.text.replace(/\s+/g, " ").trim()}`
-  );
-  return (
-    `### User input on this task\n\n` +
-    `The statements below are the user's constraints and corrections. Treat ` +
-    `them as binding on this run, alongside the original task.\n\n` +
-    lines.join("\n")
-  );
-}
-
-// One prior run's context block: meta, result, verification, changed files.
-// Uses only persisted data (run records, runs/<n>/result.md, normalized
-// file.changed events) — never a transcript.
-function priorRunBlock(record, result, changedFiles) {
-  const out = [
-    `#### Run ${record.run} — ${record.provider} · ${record.outcome ?? "?"}`
-  ];
-  const bits = [];
-  if (record.startedAt) bits.push(`started ${record.startedAt}`);
-  if (record.completedAt) bits.push(`completed ${record.completedAt}`);
-  if (bits.length) out.push(bits.join(" · "));
-  if (record.error) out.push(`Error: ${record.error}`);
-
-  out.push("");
-  out.push("Result:");
-  out.push(result.trim() || "—");
-  out.push("");
-  out.push("Verification:");
-  out.push(sectionOf(result, "Verification") || "—");
-  if (changedFiles.length) {
-    out.push("");
-    out.push("Files changed:");
-    for (const f of changedFiles) out.push(`- ${f}`);
-  }
-  return out.join("\n");
-}
-
-async function priorRunsSection(task, store, excludeRun) {
-  const runs = Array.isArray(task.runs) ? task.runs : [];
-  const prior = runs.filter(r => r.run !== excludeRun);
-  if (!prior.length) return null;
-
-  const events = await store.readEvents(task.slug);
-  const blocks = [];
-  for (const record of prior) {
-    const result = await store.readRunResult(task, record);
-    const changedFiles = events
-      .filter(e => e.type === "file.changed" && e.run === record.run && e.path)
-      .map(e => e.path);
-    blocks.push(priorRunBlock(record, result, changedFiles));
-  }
-  return `### Previous runs\n\n${blocks.join("\n\n")}`;
-}
-
-// Build the input for a NEW run from current Task state. `originalPrompt` is
-// the task-level prompt.md (the original request); when absent (legacy tasks
-// created before prompt files) the task title stands in for it.
-export async function buildRunPrompt({ task, base = process.cwd(), originalPrompt, store }) {
-  // The persistent intent: task-level prompt.md (the original request). A
-  // task without a prompt file falls back to the brief the user wrote —
-  // and, for a task created before `brief` existed, to its title (which was
-  // the full text back then).
-  let original = (originalPrompt ?? "").trim();
-  if (!original) {
-    original = (
-      await readText(path.join(base, ".work", "tasks", task.slug, "prompt.md"), "")
-    ).trim();
-  }
-  if (!original) original = (task.brief ?? task.title ?? "").trim();
-
-  const sections = [];
-  const notes = Array.isArray(task.context?.notes) ? task.context.notes : [];
-  if (notes.length) sections.push(userInputSection(notes));
-  const prior = await priorRunsSection(task, store, task.runs?.at(-1)?.run);
-  if (prior) sections.push(prior);
-
-  if (!sections.length) return original; // first run — nothing accumulated yet
-  return (
-    original +
-    "\n\n---\n\n" +
-    `## Task state for this run\n\n` +
-    `You are continuing an existing task. The original task prompt is above; ` +
-    `the Task state that has accumulated since it was written follows.\n\n` +
-    sections.join("\n\n")
-  );
+export async function buildRunPrompt(options) {
+  return compileContinuation({ ...options, base: options.base ?? process.cwd() });
 }

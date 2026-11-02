@@ -32,7 +32,7 @@ export const PROTOCOL_VERSION = 2;
 
 // The 0x2f API surface version the agent implements. Bumped whenever the
 // command op set or ack shapes change.
-export const API_VERSION = "0.7";
+export const API_VERSION = "0.8";
 
 // Ops map 1:1 onto the local HTTP API, plus "snapshot" (the phone's initial
 // remote state pull — the redacted projection of tasks + recent events +
@@ -47,6 +47,8 @@ export const COMMAND_OPS = Object.freeze([
   "reject",
   "answer",
   "note",
+  "correct",
+  "cancel",
   "close",
   "refine",
   "providers",
@@ -63,6 +65,8 @@ export const MUTATING_OPS = Object.freeze([
   "reject",
   "answer",
   "note",
+  "correct",
+  "cancel",
   "close"
 ]);
 

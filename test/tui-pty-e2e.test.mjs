@@ -133,7 +133,7 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     await session.waitForText(/src\/app\.ts/, { label: "the reported file change in the trace" });
     // The run REALLY modified the workspace file (the diff later is real).
     assert.match(
-      await fs.readFile(path.join(base, "src", "app.ts"), "utf8"),
+      await fs.readFile(path.join(task.checkout.path, "src", "app.ts"), "utf8"),
       /retry with backoff/,
       "the agent actually edited the working tree"
     );
@@ -174,14 +174,15 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     // 7. CHANGES — the REAL diff of the working tree vs HEAD.
     session.press("d");
     await session.waitForText(/CHANGES/, { label: "the changes view" });
-    await session.waitForText(/CURRENT WORKING TREE VS HEAD/, {
+    await session.waitForText(/SAVED RUN CHANGE EVIDENCE/, {
       label: "the changes header"
     });
-    await session.waitForText(/the real diff of the working tree vs HEAD/, {
+    await session.waitForText(/saved run patch/, {
       label: "loaded hunks"
     });
     await session.waitForText(/retry with backoff/, { label: "the added hunk line" });
-    const diff = await git(["diff", "HEAD", "--", "src/app.ts"], base);
+    const diff = await git(["diff", "HEAD", "--", "src/app.ts"], task.checkout.path);
+    assert.equal(await fs.readFile(path.join(base, "src", "app.ts"), "utf8"), "const app = {};\n", "isolated execution preserves the original checkout");
     assert.match(diff.stdout, /\+.*retry with backoff/, "the working tree really differs from HEAD");
     const events = await storeOf(base).readEvents(task.slug);
     assert.ok(

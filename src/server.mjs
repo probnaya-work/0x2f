@@ -84,6 +84,7 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { hostIdentity } from "./hosts.mjs";
 import crypto from "node:crypto";
 import net from "node:net";
 import { URL } from "node:url";
@@ -635,7 +636,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           ok: true,
           mode: "local",
           base: store.base,
-          ...((process.env["0X2F_SUPERVISED"] === "1" || process.env.INVOCATION_ID)
+          ...((process.env.WORK_SUPERVISED === "1" || process.env["0X2F_SUPERVISED"] === "1" || process.env.INVOCATION_ID)
             ? { supervised: true } : {}),
           ...(lanRelay ? { lan: true } : {})
         });
@@ -652,6 +653,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           mode: "local",
           mac: "online",
           base: store.base,
+          host: await hostIdentity(),
           workspace: deriveWorkspace(store.base),
           node: localNodeLabel()
         });
@@ -723,6 +725,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         const body = await readJsonBody(req);
         const task = await actions.createWork({
           brief: body.brief,
+          workspaceMode: body.workspaceMode,
           provider: body.provider,
           model: body.model
         });
@@ -824,9 +827,26 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         return;
       }
 
+      const changesMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/runs\/(\d+)\/changes$/);
+      if (req.method === "GET" && changesMatch) {
+        json(res, await actions.getRunChanges(Number(changesMatch[1]), Number(changesMatch[2])));
+        return;
+      }
+      const workspaceAction = url.pathname.match(/^\/api\/tasks\/(\d+)\/(apply|cleanup)$/);
+      if (req.method === "POST" && workspaceAction) {
+        json(res, await actions[workspaceAction[2] === "apply" ? "applyWork" : "cleanupWork"](Number(workspaceAction[1])));
+        return;
+      }
+      const cancelMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/cancel$/);
+      if (req.method === "POST" && cancelMatch) {
+        const body = await readJsonBody(req);
+        json(res, await actions.cancelWork(Number(cancelMatch[1]), { reason: body.reason, executionId: body.executionId ?? null }), 202);
+        return;
+      }
       const closeMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/close$/);
       if (req.method === "POST" && closeMatch) {
-        json(res, await actions.closeWork(Number(closeMatch[1])));
+        const body = await readJsonBody(req);
+        json(res, await actions.closeWork(Number(closeMatch[1]), { disposition: body.disposition }));
         return;
       }
 

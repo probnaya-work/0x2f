@@ -198,7 +198,7 @@ export function projectTask(task, events, opts = {}) {
   const trace = toSteps(
     { ...task, createdAt: current?.startedAt ?? task.createdAt },
     eventsForRun(events, run),
-    { base }
+    { base: task.checkout?.path ?? base }
   );
   // The run record precedes worker events, sometimes by several seconds.
   // Use its clock even when this run has not emitted anything yet; legacy
@@ -239,6 +239,7 @@ export function projectTask(task, events, opts = {}) {
     status: task.status,
     state,
     provider: task.execution?.provider ?? null,
+    executionId: task.execution?.id,
     providerSig: provider.sig,
     providerName: provider.name,
     coarse: fidelity(task.execution?.provider, providers) === "coarse",

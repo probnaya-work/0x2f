@@ -615,6 +615,7 @@ export function createRelayAgent({
             201,
             await runtime.actions.createWork({
               brief: body?.brief,
+              workspaceMode: body?.workspaceMode,
               provider: body?.provider,
               model: body?.model
             })
@@ -633,10 +634,14 @@ export function createRelayAgent({
           return ok(202, await runtime.actions.rejectWork(taskId, { decisionId: body?.decisionId ?? null }));
         case "answer":
           return ok(202, await runtime.actions.answerWork(taskId, { answer: body?.answer }));
+        case "correct":
+          return ok(202, await runtime.actions.correctWork(taskId, { correction: body?.correction }));
         case "note":
           return ok(202, await runtime.actions.noteWork(taskId, { note: body?.note }));
+        case "cancel":
+          return ok(202, await runtime.actions.cancelWork(taskId, { reason: body?.reason, executionId: body?.executionId ?? null }));
         case "close":
-          return ok(200, await runtime.actions.closeWork(taskId));
+          return ok(200, await runtime.actions.closeWork(taskId, { disposition: body?.disposition }));
         case "refine":
           return ok(200, await runtime.refine.refineTaskPrompt(body?.text ?? ""));
         case "providers":

@@ -19,6 +19,9 @@
 // open) reach every connected client too.
 
 export const EVENT_TYPES = Object.freeze([
+  "run.cancel_requested",
+  "run.cancelled",
+  "task.applied",
   "task.created",
   "task.updated",
   "task.closed",
@@ -28,6 +31,10 @@ export const EVENT_TYPES = Object.freeze([
   "run.started",
   "progress",
   "tool.started",
+  "tool.updated",
+  "tool.completed",
+  "integration.observed",
+  "process.observed",
   "file.changed",
   "needs_user",
   "permission.resolved",

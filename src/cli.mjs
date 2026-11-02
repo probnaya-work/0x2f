@@ -5,6 +5,8 @@
 // calls (core/actions.mjs). It contains no lifecycle, provider, or session
 // logic of its own; `2f allow` and `2f reject` are thin wrappers over
 // actions.allowWork / actions.rejectWork.
+import { backupWorkspace, restoreBackup } from "./backup.mjs";
+import { loadHosts, runOnHost, hostIdentity } from "./hosts.mjs";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import readline from "node:readline/promises";
@@ -39,6 +41,11 @@ function help() {
 
 Commands:
   2f                list today's tasks
+  2f backup <new-directory>   private quiescent workspace backup (includes secrets)
+  2f restore-backup <backup> <new-directory>   restore with remote access disabled
+  2f hosts          list explicit host/workspace profiles
+  2f on <host> ...   run the actual CLI on a pinned SSH host (local stays local)
+  2f host-identity   print this host identity for explicit pinning
   2f version        print the installed 0x2F version
   2f init
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
@@ -50,6 +57,13 @@ Commands:
   2f allow <id>     grant the permission a task is blocked on
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
+  2f changes <id> [--run <n>]   show immutable observed run patch
+  2f apply <id>      transfer isolated task changes (conflicts refuse)
+  2f restore <id>    restore an archived checkout before continuing
+  2f cleanup <id>    archive Git-visible checkout, then remove it
+  2f cancel <id>     stop the active run; preserves partial work, no rollback
+  2f accept <id>     explicitly accept a READY result
+  2f drop <id>       close without accepting the result
   2f close <id>      move to DONE; does not cancel the provider
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this execution host for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
@@ -78,7 +92,7 @@ Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 function parseFlags(args) {
   const rest = [];
   const flags = {};
-  const valueFlags = new Set(["provider", "relay", "client", "run", "port"]);
+  const valueFlags = new Set(["workspace-mode", "provider", "relay", "client", "run", "port"]);
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--") {
@@ -110,7 +124,7 @@ function parseFlags(args) {
 
 function parseNewArgs(args) {
   const { rest, flags } = parseFlags(args);
-  return { brief: rest.join(" ").trim(), provider: flags.provider };
+  return { brief: rest.join(" ").trim(), provider: flags.provider, workspaceMode: flags["workspace-mode"] };
 }
 
 async function status(base) {
@@ -243,9 +257,31 @@ async function openRun(id, runNumber, base) {
   }
 }
 
-async function main() {
-  const [command, ...args] = process.argv.slice(2);
+async function main(argv = process.argv.slice(2)) {
+  const [command, ...args] = argv;
   const base = process.cwd();
+
+  if (command === "backup") {
+    if (args.length !== 1) throw new Error("Usage: 2f backup <new-directory>");
+    console.log(JSON.stringify(await backupWorkspace(base,args[0]))); return;
+  }
+  if (command === "restore-backup") {
+    if (args.length !== 2) throw new Error("Usage: 2f restore-backup <backup-directory> <new-directory>");
+    console.log(JSON.stringify(await restoreBackup(args[0],args[1]))); return;
+  }
+  if (command === "hosts") {
+    console.log(`local · ${(await hostIdentity()).label}`);
+    for (const h of await loadHosts(base)) console.log(`${h.id} · pinned ${h.machineId.slice(0,12)} · ${h.workspace} · 2f on ${h.id} status`);
+    return;
+  }
+  if (command === "host-identity") { console.log(JSON.stringify(await hostIdentity())); return; }
+  if (command === "on") {
+    if (!args[0]) throw new Error("Usage: 2f on <host-id|local> <command> [args]");
+    if (args[0] === "local") return main(args.slice(1));
+    const result = await runOnHost(base, args[0], args.slice(1));
+    process.exitCode = result.code;
+    return;
+  }
 
   if (!command || command === "status") {
     await status(base);
@@ -282,7 +318,7 @@ async function main() {
       .filter(p => runtime.providers.available(p.id))
       .map(p => p.id);
     if (available.length) {
-      console.log(`Provider: ${available.join(", ")} detected and ready.`);
+      console.log(`Provider: ${available.join(", ")} executables detected; authorization is not checked.`);
     } else {
       console.log("No coding harness detected on PATH — install Claude Code (`claude`), Codex (`codex`),");
       console.log("DeepSeek Harness (`dsh`), or Gemini CLI (`gemini`), or add a manifest to .work/providers/.");
@@ -293,7 +329,7 @@ async function main() {
 
   if (command === "new") {
     await requireProject(base);
-    const { brief, provider } = parseNewArgs(args);
+    const { brief, provider, workspaceMode } = parseNewArgs(args);
     if (!brief) throw new Error('Usage: 2f new "Investigate ..." [--provider <id>]');
 
     const runtime = createRuntime(base);
@@ -309,7 +345,7 @@ async function main() {
       }
     }
 
-    const task = await runtime.actions.createWork({ brief, provider });
+    const task = await runtime.actions.createWork({ brief, provider, workspaceMode });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
     console.log(`Open: 2f open ${task.id}`);
@@ -415,6 +451,34 @@ async function main() {
     const task = await createRuntime(base).actions.noteWork(id, { note });
     console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
     console.log("Note recorded on the task — it will be included in the next run's context.");
+    return;
+  }
+
+  if (["changes", "apply", "cleanup", "restore"].includes(command)) {
+    await requireProject(base);
+    const { rest, flags } = parseFlags(args);
+    const id = Number(rest[0]);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`Usage: 2f ${command} <id>`);
+    const actions = createRuntime(base).actions;
+    if (command === "changes") {
+      const receipt = await actions.getRunChanges(id, flags.run);
+      console.log(receipt.available ? `${receipt.attribution}\n${receipt.patch || "No changes."}` : receipt.reason);
+    } else {
+      await actions[command === "apply" ? "applyWork" : command === "restore" ? "restoreWork" : "cleanupWork"](id);
+      console.log(command === "apply" ? "Saved task changes applied to the original workspace." : "Checkout archived privately before cleanup. Restore from the task's workspace.tar.");
+    }
+    return;
+  }
+
+  if (["cancel", "stop", "accept", "drop"].includes(command)) {
+    await requireProject(base);
+    const id = Number(args[0]);
+    if (!Number.isSafeInteger(id) || id <= 0) throw new Error(`Usage: 2f ${command} <id>`);
+    const actions = createRuntime(base).actions;
+    const task = ["cancel", "stop"].includes(command)
+      ? await actions.cancelWork(id)
+      : await actions.closeWork(id, { disposition: command });
+    console.log(`#${task.id}: ${task.cancelRequested ? "Cancellation requested; wait for the worker receipt. Partial work stays; external actions are not rolled back." : task.disposition}`);
     return;
   }
 

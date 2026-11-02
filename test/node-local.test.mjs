@@ -183,16 +183,11 @@ test("resolveWorkspace maps the logical 'local' workspace to the local path", ()
   assert.throws(() => node.resolveWorkspace("mini-pc"), /cannot resolve workspace "mini-pc"/);
 });
 
-test("cancelExecution is a best-effort stop of the recorded pid", async () => {
-  const killed = [];
-  const node = createLocalNode({
-    workspace: "/tmp/proj",
-    kill: pid => killed.push(pid)
-  });
-  await node.cancelExecution({ task: { slug: "003-x", pid: 77 } });
-  assert.deepEqual(killed, [77]);
-  await node.cancelExecution({ task: { slug: "003-x" } }); // no pid — no-op
-  assert.deepEqual(killed, [77]);
+test("cancelExecution refuses legacy PID-only records and never signals a saved PID", async () => {
+  const node = createLocalNode({ workspace: "/tmp/proj" });
+  await assert.rejects(() => node.cancelExecution({ task: { pid: process.pid } }), /no verified cancellation channel/);
+  assert.deepEqual(await node.cancelExecution({ task: { pid: process.pid, execution: { id: "attempt-1" } } }),
+    { requested: true, executionId: "attempt-1" });
 });
 
 test("the node is a swappable seam: the same contract a remote node would implement", async () => {

@@ -30,7 +30,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { currentRunNumber } from "../core/runs.mjs";
 
-export function createLocalNode({ workspace, spawn = defaultSpawn, kill = process.kill } = {}) {
+export function createLocalNode({ workspace, spawn = defaultSpawn } = {}) {
   if (!workspace) throw new Error("createLocalNode requires a workspace path.");
 
   function resolveWorkspace(workspaceId) {
@@ -95,11 +95,11 @@ export function createLocalNode({ workspace, spawn = defaultSpawn, kill = proces
       });
     },
 
-    // Best-effort stop of the detached worker process. v0.3 does not expose
-    // cancellation in the CLI/API; the method exists so the node contract is
-    // complete and a future surface can use it.
+    // A PID is never authority to signal. The action persists an attempt-bound
+    // request; only the live worker can acknowledge it and stop its own group.
     async cancelExecution({ task }) {
-      if (task.pid) kill(task.pid);
+      if (!task.execution?.id) throw new Error("This legacy execution has no verified cancellation channel. Inspect it on its host.");
+      return { requested: true, executionId: task.execution.id };
     }
   };
 }

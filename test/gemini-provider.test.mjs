@@ -263,6 +263,7 @@ test("parser: a completed run maps to run.started + tool events + file.changed +
   assert.deepEqual(tools[0], {
     type: "tool.started",
     name: "ReadFile",
+    toolCallId: "t1",
     input: { file_path: "src/core/router.mjs" }
   });
   // An Edit mutates the file — file.changed is emitted, like the Claude
@@ -270,6 +271,7 @@ test("parser: a completed run maps to run.started + tool events + file.changed +
   assert.deepEqual(tools[1], {
     type: "tool.started",
     name: "Edit",
+    toolCallId: "t2",
     input: {
       file_path: "src/core/router.mjs",
       old_string: "const A = 1",
@@ -281,6 +283,7 @@ test("parser: a completed run maps to run.started + tool events + file.changed +
   assert.deepEqual(tools[2], {
     type: "tool.started",
     name: "run_shell_command",
+    toolCallId: "t3",
     input: { command: "npm test", dir_path: "." }
   });
   assert.equal(events.filter(e => e.type === "tool.completed").length, 3);
