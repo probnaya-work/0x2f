@@ -1,7 +1,7 @@
 # Независимый review и квалификация — 2 ноября 2026
 
 Focused follow-up: [FINALIZATION.md](FINALIZATION.md). The latest Linux retry is
-BLOCKED on Thinkbox network access; Mobile software preview is now removed and
+BLOCKED on external free quota after Thinkbox network access returned; Mobile software preview is now removed and
 new signed physical normal-path checks passed. Remaining Mobile fault gates
 are explicit in its updated report. The original package qualification below
 remains historical evidence for the same unchanged canonical bytes.

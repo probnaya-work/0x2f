@@ -5,29 +5,49 @@ were checked against GitHub before edits; no newer work was overwritten.
 
 ## Canonical Linux AI gate
 
-**BLOCKED at network access**, not newly assessed as quota failure. The existing
-Thinkbox/Lenovo target bogart@192.168.1.80 did not answer bounded SSH/ICMP probes;
-the owner reproduced `No route to host` from their Mac Terminal. The owner uses
-this machine headlessly over SSH. The literal thinkbox alias and saved hostname
-thinkcenter.local did not resolve. No host keys, firewall, network settings,
-provider credentials or production service were changed.
-
-The unmodified canonical tarball SHA-256 remains:
+**BLOCKED by external free quota** after ThinkCentre returned to the network.
+The initial network failure is resolved: hostname thinkcenter, Linux, production
+0x2f-host.service active. The stored tarball SHA256 was rechecked and all83 files
+in the installed Lenovo qualification package matched it byte for byte:
 `4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626`.
-All 83 packaged files in the existing Mac qualification prefix match it byte for
-byte. Product src/package/README/LICENSE remain identical to implementation
-839e980dd20db3ea058ef4abc707ceeb322a0e93. No registry replacement was installed.
-Previous final Linux results in REPORT.md remain historical evidence: the first
-real OpenCode run/check passed, continuation hit free quota. A fresh bounded
-whole-loop retry is prepared from installed-live.mjs, with only a unique unit
-name and isolated test port changed. It has not been sent or executed while the
-host is unreachable. Its CLI remains ABS_PACKAGE ABS_NEW_PRIVATE_ROOT linux.
+The existing Mac prefix also matches. No registry0.2.0 replacement was installed;
+product bytes remain implementation839e980dd20db3ea058ef4abc707ceeb322a0e93.
+A pack after report-only updates remained identical.
 
-To close the gate, restore SSH to the same trusted Thinkbox (current reachable
-IP/hostname), recheck installed package bytes and existing OpenCode auth, then
-run that controller once. Do not replace success with the deterministic fixture,
-transfer credentials, create accounts or enable a paid provider. If free quota
-still refuses, report that exact outcome and stop repeated attempts.
+Two bounded, distinct real attempts were retained, with no further retries:
+
+1. Existing OpenCode2.2.5 ACP/default model, requested opencode/big-pickle
+   (read from this exact session's model metadata); session/execution IDs stay
+   in private evidence.
+   First AI run failed with `Free usage limit reached`.
+2. The already available catalog exposed explicitly named free models. One
+   alternative used the stock installed command provider and per-run
+   `opencode run --model opencode/deepseek-v4.1-flash-free --auto`, with a private
+   provider manifest. This also failed on the first run with the same free-quota
+   error. Its execution ID stays in private evidence. The command transport
+   did not provide an external OpenCode session receipt; it remains unknown.
+   The argv records the requested model, not a model acknowledgement.
+
+Both used existing unauthenticated free access (`No authenticated integrations`),
+Node26.13.0, the unchanged installed tarball, new private workspaces and unique
+transient units/loopback ports. No account, credential transfer, paid provider
+or global model setting was added. No other supported harness binary was found
+on the explicit qualification PATH.
+
+Both runs saved the real input receipt/hash and remained FAILED with zero
+configured checks; no acceptance or successful AI continuation is claimed.
+The input SHA was b1a41e0ec795d5beea01dad8a20a40c4c026a52b3522d795a29bfcccc7cc94d8.
+Note-during-work and disconnected-launcher/runtime-restart worker preservation
+passed before the provider failures. The controllers then stopped their own
+units, leaving production active. The prior deterministic restore success stays
+historical and does not replace this missing full AI loop.
+
+To close the gate, restore available free quota or provide an existing permitted
+Linux harness, then rerun the complete two-AI-run/check/backup/restore controller
+on the same hash. A paid route still requires separate permission. Do not repeat
+calls against the same quota failure. Private logs, inputs and receipts were
+retained outside Git; the controllers are based on installed-live.mjs and keep
+its ABS_PACKAGE ABS_NEW_PRIVATE_ROOT linux interface.
 
 ## Mobile correction and qualification
 
