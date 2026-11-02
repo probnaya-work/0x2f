@@ -57,7 +57,7 @@ export function fmtRunDuration(durationMs) {
 // metadata; availability is a cheap, deterministic executable resolution.
 export function renderProviders(providers, registry) {
   const out = [
-    "PROVIDER".padEnd(20) + "INTEGRATION".padEnd(14) + "AVAILABLE",
+    "PROVIDER".padEnd(20) + "INTEGRATION".padEnd(14) + "AVAILABLE (executable)",
     ""
   ];
   for (const provider of providers) {
@@ -68,6 +68,7 @@ export function renderProviders(providers, registry) {
         available
     );
   }
+  out.push("", "Executable discovery does not verify authorization. Check sign-in on this host; a real run verifies access.");
   return out.join("\n");
 }
 

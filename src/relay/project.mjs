@@ -153,6 +153,11 @@ export function projectRun(run, base) {
     durationMs: run.durationMs ?? null,
     attempts: run.attempts ?? 1,
     stopReason: run.stopReason,
+    checks: Array.isArray(run.checks) ? run.checks.map(r => ({
+      id: r.id, status: r.status, exitCode: Number.isInteger(r.exitCode) ? r.exitCode : null,
+      durationMs: r.durationMs, stdoutSha256: r.stdoutSha256, stderrSha256: r.stderrSha256,
+      outputAvailable: true
+    })) : undefined,
     context: run.context ? { version: run.context.version, projectVersion: run.context.projectVersion, characters: run.context.characters, maxChars: run.context.maxChars, shortenedRuns: run.context.shortenedRuns } : undefined,
     error: trunc(run.error, TRUNC.error, base),
     // The AUTO routing label (why this task ran here) — the reason is a
@@ -255,10 +260,11 @@ export function projectEvent(event, base) {
       return common;
     case "progress":
       return { ...common, text: trunc(event.text, TRUNC.text, base) };
+    case "tool.updated":
     case "tool.started":
-      return { ...common, name: event.name ?? null, input: projectToolInput(event.input, base) };
+      return { ...common, toolCallId: event.toolCallId, name: event.name ?? null, input: projectToolInput(event.input, base) };
     case "tool.completed":
-      return { ...common, isError: event.isError === true };
+      return { ...common, toolCallId: event.toolCallId, isError: event.isError === true, exitCode: Number.isInteger(event.exitCode) ? event.exitCode : undefined, outputAvailable: typeof event.output === "string" };
     case "file.changed":
       return { ...common, path: relPath(base, event.path) };
     case "needs_user":

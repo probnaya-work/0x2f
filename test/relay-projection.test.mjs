@@ -289,3 +289,10 @@ test("relPath: out-of-workspace paths flatten to the basename — never an absol
   assert.equal(relPath("/w", "../outside/y.txt"), "y.txt");
   assert.equal(relPath("/w", "../outside/x/y.txt"), "y.txt");
 });
+
+test('project checks expose actual status, exit and output hashes without raw output, argv or environment', () => {
+ const task={id:1,status:'ready',runs:[{run:1,checks:[{id:'contract',status:'failed',exitCode:7,stdoutSha256:'a'.repeat(64),stderrSha256:'b'.repeat(64),stdout:'private output',stderr:'private error',argv:['secret arg'],environment:{TOKEN:'secret'}}]}]};
+ const view=projectTask(task,'/private/workspace');
+ assert.equal(view.runs[0].checks[0].exitCode,7);assert.equal(view.runs[0].checks[0].stdoutSha256,'a'.repeat(64));
+ assert.doesNotMatch(JSON.stringify(view),/private output|private error|secret arg|TOKEN/);
+});
