@@ -4,7 +4,7 @@
 
 | PR | Verdict | Основание / точное условие |
 | --- | --- | --- |
-| [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **CONDITIONAL GO — merge пока удержать** | Исправления и окончательные package contracts прошли. Последний tarball не установлен на Lenovo: SSH timeout и automatic approval block передачи payload. На предыдущем tarball OpenCode отказал с `Free usage limit reached`. Нужны final Linux install/contracts и успешный внешний AI loop тем же hash. |
+| [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **CONDITIONAL GO — merge пока удержать** | Исправления и окончательные package contracts прошли. Final Mac/Linux install и contracts прошли. Первый реальный Linux OpenCode run/check прошёл; второй run отказал с `Free usage limit reached`. Условие: успешный полный Linux AI continuation → checks → restore тем же hash. |
 | [057 #1](https://github.com/probnaya-work/057/pull/1) | **GO в заявленную engineering base** | Исправлены persistence/time-window defects; проверены реальные process-generation links, SQLite reopen и отдельный новый Core: source failure/reconnect сохраняет историю. Reader остаётся opt-in. |
 | [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **NO-GO для merge текущего implementation с целью promotion** | Software preview с CoreImage/UIImageView попадает и в Release. Удалить диагностический preview, вернуть обычный AVFoundation path и выполнить физические gates точного signed build. Документальный диагноз сохраняется. |
 | [Site #2](https://github.com/probnaya-work/0x2f-site/pull/2) | **GO** | Registry 0.2.0 отделён от unreleased source; ограничения, ссылки и desktop/narrow navigation проверены. Deployment не выполнялся. |
@@ -54,13 +54,13 @@ Canonical `0x2f-0.2.0.tgz`, SHA-256:
 4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626
 ```
 
-Этот exact tarball установлен offline в новый Mac prefix. Final Linux installation заблокирована;
-предыдущий Linux prefix сохранён как historical evidence. Production prefixes не
+Этот exact tarball установлен offline в новые Mac/Linux prefixes; hashes на обоих хостах совпали.
+Предыдущие prefixes сохранены только как historical evidence. Production prefixes не
 заменялись. Версия 0.2.0 оставлена как candidate identity convention; registry/tag не менялись.
 Последующие изменения — тест/отчёты; product `src`, package manifest, README и LICENSE совпадают
-с checkpoint. Повторный pack должен дать тот же hash.
+с checkpoint. Повторный pack после doc-only commit дал тот же hash.
 
-Фактически установленные dependencies на final Mac и предыдущем Linux candidate: ws **8.22.1**, @noble/ciphers **1.3.0**,
+Фактически установленные dependencies на final Mac/Linux prefixes: ws **8.22.1**, @noble/ciphers **1.3.0**,
 @noble/hashes **1.8.0**. Это проверенные установки; caret ranges не являются обещанием, что
 любая будущая установка разрешит те же dependency versions.
 
@@ -73,11 +73,11 @@ Canonical `0x2f-0.2.0.tgz`, SHA-256:
 | Проверка | Результат |
 | --- | --- |
 | Mac syntax + полный source gate | **821 pass / 0 fail**, Node 26.11.1 |
-| Final Linux syntax/source gate | **Не выполнен: Lenovo SSH timeout / transfer approval block**; прежний b94…: 807 pass / 10 skips |
-| Installed critical contracts: cancel/recovery/isolation/context/checks/backup/ownership | **69/69 на final Mac**; final Linux blocked (прежний b94…: 65/65) |
-| Installed encrypted relay/crypto/replay/scope/permissions/offline/teardown | **83/83 на final Mac**, включая stale/missing CANCEL nonce; final Linux blocked (прежний b94…: 83/83) |
+| Linux syntax + полный source gate | **811 pass / 10 explicit skips / 0 fail**, Node 26.13.0 |
+| Installed critical contracts: cancel/recovery/isolation/context/checks/backup/ownership | **69/69 на Mac; 69/69 на Linux** |
+| Installed encrypted relay/crypto/replay/scope/permissions/offline/teardown | **83/83 на Mac; 83/83 на Linux**, включая stale/missing CANCEL nonce |
 | Actual HTTP cancellation boundary | stale/missing nonce 409; duplicate idempotent; old attempt cannot retarget next attempt; numeric PID signals отсутствуют |
-| Pinned SSH boundary | final installed critical fixture passed; actual Lenovo connection на прежнем b94…: correct pin exit 0, wrong pin refused before CLI import. Final remote retest blocked |
+| Pinned SSH boundary | actual final execution connection: correct pin status exit 0; wrong pin refused before CLI import |
 | Installed TUI, реальный PTY | full result/checks, exact saved input, immutable changes; обе темы; 120×40 и 80×24 |
 | Installed Web/mobile | desktop CSS width 1163 и narrow width 354; обе темы; check receipt/provider claim раздельно; draft сохраняется при dirty refusal; SAVE ONLY не добавляет run |
 | CLI dispositions | explicit ACCEPT и DROP записаны раздельно; отдельный cancelled task остался FAILED; CLOSE/worker ownership проверены реальными subprocess fixtures |
@@ -112,33 +112,38 @@ Native resume хранит своё сообщение, не приписыва�
 отказ до запуска показывает unknown input. Positive native argv fidelity проверена fixture,
 а новая живая parity по каждому harness не заявляется.
 
-### Lenovo: historical runtime evidence; final gate открыт
+### Lenovo: final runtime проверен; AI continuation gate открыт
 
-Следующие результаты относятся к предыдущему tarball **b94aecc7…**, implementation `7dee653…`.
-Они не перенесены на окончательный **4aa0dd54…**. OpenCode **2.2.5** реально запущен предыдущим установленным пакетом. Управляющий SSH launcher был
-отключён; отдельный runtime MainPID сменился, worker сохранился. Затем provider вернул
-**Free usage limit reached**. Task/run остались FAILED, READY/check-success не выдуманы.
-Других установленных авторизованных harnesses на хосте не найдено; `opencode auth list`
-сообщил No authenticated integrations. Платный provider, новый login или перенос credential
-не инициировались.
+OpenCode **2.2.5** реально запущен final installed package. Управляющий SSH launcher был
+отключён; отдельный runtime MainPID сменился, worker сохранился. Первый реальный run достиг
+READY, создал utility files и прошёл independent configured check (11 assertions, exit 0).
+Первый input SHA: `b1a41e0ec795d5beea01dad8a20a40c4c026a52b3522d795a29bfcccc7cc94d8`;
+patch SHA: `c76cac2adf751e1c4cc2d54742df3fc413482f7b8216f5f6c79e105f0b7e8234`.
+Note был сохранён во время работы. **Второй run** отказал с **Free usage limit reached**;
+он остался FAILED, continuation/check-success не выдуманы. Других установленных
+авторизованных harnesses ранее не найдено; `opencode auth list` сообщил No authenticated
+integrations. Платный provider, новый login или перенос credential не инициировались.
 
-На том же предыдущем tarball оставшийся end-to-end runtime путь отдельно выполнен с **deterministic real-process fixture**
-без LLM: два run одной Task, note, смена current rules, disconnected launcher, runtime restart,
-реальные utility files, independent configured check exit 0, quiescent backup и restore в новый
-каталог. Два исторических run/check output сохранены; restored execution authority и hosts
-отключены; ни одного автоматического исполнения; source task JSON byte-identical. Independent
-assertions из восстановленного checkout реально прошли. Production `0x2f-host.service` active.
+Полный end-to-end runtime путь отдельно выполнен тем же final package с **deterministic
+real-process fixture** без LLM: два run одной Task, note, смена current rules, disconnected
+launcher, runtime restart, реальные utility files, independent configured checks exit 0,
+quiescent backup и restore в новый каталог. Два исторических run/check output сохранены;
+restored execution authority и hosts отключены; ни одного автоматического исполнения;
+source task JSON byte-identical. Independent assertions из восстановленного checkout
+реально прошли. Production `0x2f-host.service` active, qualification units inactive.
 Этот результат квалифицирует runtime/restore, но **не заменяет успешный внешний AI harness gate**.
 
-После последнего cleanup guard final доставка на существующий trusted Lenovo была дважды
-отклонена automatic approval review (требуется отдельное подтверждение конкретных package/source/controllers
-и destination); запрос пользователю сохранён. Независимые read-only SSH probes также дали timeout.
-Credentials/telemetry не передавались; этот блок не обойдён.
+Перед final доставкой были SSH timeout и два automatic approval refusals. После явного
+ответа пользователя «Разрешаю передачу и Linux-проверку» хост вернулся в сеть, approved
+payload был передан, и final gates выше выполнены. Первый controller отказал до AI launch
+из-за сохранённого имени старого transient unit; отдельный controller с уникальным review
+unit name завершил реальный сценарий до provider-quota failure. Эти setup failures сохранены.
 
-Условие для merge #5: установить final canonical hash в новый Linux prefix, повторить source и
-69 critical + 83 remote contracts, actual SSH pin positive/negative, затем повторить `installed-live.mjs <installed-package> <new-private-root> linux`
+Условие для merge #5: повторить `installed-live.mjs <installed-package> <new-private-root> linux`
 на том же hash после восстановления доступной квоты/существующего разрешённого harness.
-Нельзя закрывать условие старым успешным tarball или менять model/provider на платный без разрешения.
+Использовать свободное qualification unit name. Два успешных AI run, checks, quiescent backup,
+restore и independent restored assertions должны завершиться целиком. Старый успешный tarball
+или deterministic fixture условие не закрывают. Переход на платный provider требует разрешения.
 
 ## Compatibility и rollback
 
@@ -169,10 +174,11 @@ Credentials/telemetry не передавались; этот блок не об
 
 057: source checkpoint `afda81c1e1408a8dc878422bade3a005108455df`; typecheck/build passed,
 **523 deterministic pass / 26 explicit skips**. Финальные SSH metadata и independent MACHINE PULSE
-с предыдущим 0x2F package b94… дали **175 OS processes / 2 generation links**; **361 envelopes**,
-zero duplicate inserts, две связи и Landscape mass пережили SQLite reopen. Это явный OS-process
-fixture, не успешный AI run. Новый отдельный Core/store прошёл observing → failed → observing;
-**74 remote events** сохранились при отказе и reconnect, completion/idle не выводились из потери source.
+с final 0x2F package дали **182 OS processes / 3 generation links**; **400 envelopes**,
+zero duplicate inserts, три связи и Landscape mass пережили SQLite reopen. Добавленный
+identity worker — явный OS-process fixture без модели; один AI success не выдаётся за полный loop.
+Отдельный candidate Core/private store прошёл observing → failed → observing: **107 remote events**
+сохранились во время отказа, **109** после reconnect; completion/idle не выводились из потери source.
 Подробности: [отдельный 057 review](https://github.com/probnaya-work/057/blob/integration/execution-observation-20261102/docs/INDEPENDENT-REVIEW-20261102.md).
 
 Mobile: implementation `ff5e011d4aaeb87c79f91cca4f1e5608ad938943`; **30 Swift tests / 5 suites**,
@@ -191,7 +197,7 @@ UNRELEASED boundary и section navigation проверены на local preview 
 полная живая permission/resume/cancel parity всех harnesses, independent phone registrations,
 closed-client push, новый Internet TLS deployment, cold reboot/production rollback,
 длительные RSS/storage/pixel/battery/thermal gates. Эти границы не маскируют точные два merge blockers
-выше: final Linux install/regression/AI gates для #5 и scanner production-preview/physical gates для Mobile #1.
+выше: final Linux AI continuation gate для #5 и scanner production-preview/physical gates для Mobile #1.
 
 ## Evidence и состояние доставки
 
