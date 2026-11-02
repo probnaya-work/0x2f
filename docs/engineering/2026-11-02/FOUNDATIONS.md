@@ -105,3 +105,8 @@ index starts at the saved commit; restored new files remain untracked and normal
 Git status/diff do not require the private evidence object database. Raw paths
 are validated and symlink parents are refused before materialization. The archive
 is retained if restoration fails.
+
+Cleanup also refuses staged index changes and any task-checkout `.work` entry,
+including force-tracked reserved files. A working-tree byte snapshot does not
+preserve an intermediate staged version or excluded control data; commit or
+explicitly preserve those bytes before cleanup. Refusal removes nothing.

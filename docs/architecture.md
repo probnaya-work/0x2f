@@ -508,8 +508,9 @@ not a check-success assertion. The TUI's `r` reader loads `getRun`, the full
 original brief and exact saved run input, with run selection and scrolling.
 It stays bound to its task across ledger reordering. Provider Verification
 prose is attributed as a claim; a command event alone is not a successful
-check receipt. CHANGES remains a current HEAD-relative diff, not a per-run
-snapshot. Notes still apply only to future runs.
+check receipt. In the published baseline CHANGES is a current HEAD-relative diff. The engineering
+candidate uses hashed immutable run patches; old tasks without saved evidence
+retain an explicitly labelled current-diff fallback. Notes still apply only to future runs.
 
 Remote permission projection carries `scopeIncomplete` and a bounded notice.
 `core/permission-scope.mjs` checks recorded parameters against what the

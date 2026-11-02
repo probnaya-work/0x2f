@@ -695,6 +695,15 @@ export function createActions(ctx) {
     if (task.status === "working" || task.blockedOn?.live) throw new WorkError("An active execution cannot be cleaned up.", 409);
     const expected = path.join(store.base, ".work", "worktrees", task.slug);
     if (task.checkout?.mode !== "isolated" || task.checkout.path !== expected) throw new WorkError("No owned isolated checkout to clean up.", 409);
+    // The byte snapshot is a working-tree snapshot, not a second copy of an
+    // intermediate staged version. Reserved .work data is excluded entirely,
+    // even when force-tracked. Neither may disappear behind a successful cleanup.
+    const staged = await git(expected, ['diff', '--no-ext-diff', '--no-textconv', '--cached', '--name-only', '-z']);
+    if (staged) throw new WorkError('Checkout has staged index state that this archive does not preserve. Commit or explicitly preserve it before cleanup. Nothing was removed.', 409);
+    try {
+      await fs.lstat(path.join(expected, '.work'));
+      throw new WorkError('Checkout contains reserved .work data excluded from its archive. Preserve it explicitly before cleanup. Nothing was removed.', 409);
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
     const ignored = await git(expected, ["ls-files", "--others", "--ignored", "--exclude-standard", "-z"]);
     if (ignored) throw new WorkError("Checkout contains ignored files that are not in its Git-visible archive. Preserve or remove them explicitly before cleanup.", 409);
     const objects = path.join(store.workDir(), "evidence");

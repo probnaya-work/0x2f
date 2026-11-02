@@ -181,3 +181,28 @@ test('archive restore retains raw unfinished bytes without reapplying a smudge f
   assert.match(await git(task.checkout.path, ['status', '--porcelain']), /\?\? new.txt/);
   assert.match(await git(task.checkout.path, ['diff', '--binary']), /unfinished bytes/);
 });
+
+for (const kind of ['staged index', 'reserved .work']) {
+  test(`cleanup refuses unarchived ${kind} state before deleting any checkout bytes`, async t => {
+    const base = await root(t);
+    await git(base, ['init']);
+    await fs.writeFile(path.join(base, 'file'), 'baseline\n');
+    await fs.writeFile(path.join(base, '.gitignore'), '.work/\n');
+    await git(base, ['add', '.']);
+    await git(base, ['-c', 'user.name=fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'baseline']);
+    const rt = createRuntime(base, { node: { id: 'local', async startExecution() { return null; } } });
+    const task = await rt.actions.createWork({ brief: 'unsupported state preservation' });
+    await rt.store.updateTask({ ...task, pid: undefined, processGroupId: undefined, status: 'ready', runs: [{ ...task.runs[0], outcome: 'ready' }] });
+    const file = path.join(task.checkout.path, kind === 'staged index' ? 'file' : '.work/notes');
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, 'intermediate staged or committed bytes\n');
+    await git(task.checkout.path, ['add', '-f', '--', kind === 'staged index' ? 'file' : '.work/notes']);
+    if (kind === 'reserved .work') await git(task.checkout.path, ['-c', 'user.name=fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-m', 'tracked reserved data']);
+    await fs.writeFile(file, 'unfinished working bytes must survive\n');
+    const index = await git(task.checkout.path, ['ls-files', '--stage', '-z']);
+    await assert.rejects(() => rt.actions.cleanupWork(task.id), /staged index|reserved .work/);
+    assert.equal(await fs.readFile(file, 'utf8'), 'unfinished working bytes must survive\n');
+    assert.equal(await git(task.checkout.path, ['ls-files', '--stage', '-z']), index);
+    assert.equal((await rt.store.findTask(task.id)).checkout.archivedAt, undefined);
+  });
+}
