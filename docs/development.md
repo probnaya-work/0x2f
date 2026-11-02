@@ -63,7 +63,7 @@ src/
     sound-policy.mjs  when 0x2F may make a sound (pure, testable)
     sound.mjs         the slash — Web Audio, no assets
 relay/                 the standalone relay service (see relay/README.md)
-examples/providers/    verified manifests (Cursor, OpenCode, command; removed:
+examples/providers/    vendor-documented manifests (Cursor, OpenCode, command; removed:
                        Codex and Gemini CLI are now built-in native providers)
 test/                  node --test suite
 ```
@@ -72,7 +72,7 @@ test/                  node --test suite
 
 ```bash
 npm install          # installs ws, @noble/ciphers, and @noble/hashes
-npm test             # the full suite (node --test, 300+ tests)
+npm test             # the full suite (node --test, including real PTY regression)
 npm run check        # syntax-check every source and test file (node --check)
 npm start            # run the CLI: node src/cli.mjs
 ```
@@ -229,7 +229,7 @@ produces the full PASS/findings report — an AI reviewer is strictly optional.
   "id": "cursor",
   "displayName": "Cursor",
   "transport": "acp",                 // or "command"
-  "command": ["cursor", "--acp"]      // argv array, never a shell string
+  "command": ["agent", "acp"]      // argv array, never a shell string
 }
 ```
 
@@ -262,3 +262,18 @@ and [`relay/README.md`](../relay/README.md) for deployment.
 The [task continuity example](task-continuity.md) records the completed
 Codex → OpenCode dogfood. The [managed execution decision](decisions/managed-execution.md)
 explains which experimental work is deliberately excluded from the main line.
+
+## Web appearance
+
+The Web and phone surfaces offer Light / Dark / System in SETTINGS. System is
+initially selected and follows `prefers-color-scheme`; explicit preferences are
+saved under `0x2f.theme` on the client origin. If browser storage is unavailable,
+the preference works for the session. The pairing page shares the preference.
+
+`src/web/theme.js` is a classic parser-blocking script in both HTML heads,
+before stylesheets. Keep that ordering and the local/static asset routes in
+sync: it resolves the theme before the first paint without weakening CSP.
+`theme.css` keeps the original light surface colours and defines a graphite
+dark palette. The pure ledger's presentation values become CSS variables at
+the DOM boundary, so switching appearance does not reload tasks or discard
+input. The TUI continues to use its existing default and `--light` option.

@@ -4,9 +4,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 const VERSION = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8")
 ).version;

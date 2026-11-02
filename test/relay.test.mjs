@@ -305,7 +305,7 @@ test("ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions", 
     status: "needs_you",
     reason: "permission",
     externalSessionId: "sess-1",
-    blockedOn: { type: "permission", tool: "Edit", file: "src/a.ts" }
+    blockedOn: { type: "permission", tool: "Edit", file: "src/a.ts", plannedChange: "Replace old with new" }
   });
   blocked.execution = { ...(blocked.execution ?? {}), externalSessionId: "sess-1" };
   await runtime.store.writeJson(
@@ -322,7 +322,8 @@ test("ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions", 
     method: "POST",
     body: { note: "keep it small" }
   });
-  assert.equal(noted.context.notes.at(-1).text, "keep it small");
+  assert.equal((await runtime.store.findTask(task.id)).context.notes.at(-1).text, "keep it small");
+  assert.equal(noted.execution, undefined, "mutation acknowledgements use the same remote projection");
   assert.equal(node.calls.at(-1)[0], "resume"); // no new execution from the note
 
   // ACCEPT (close) moves the task to done.
@@ -335,7 +336,7 @@ test("remote permission commands refuse stale or missing displayed occurrence ID
   const { runtime, phone } = await makeHarness(t);
   for (const action of ["allow", "reject"]) {
     const task = await runtime.actions.createWork({ brief: "Synthetic remote permission" });
-    const old = { type: "permission", live: true, tool: "Edit", requestId: 100, decisionId: "shown-" + action };
+    const old = { type: "permission", live: true, tool: "Edit", file: "src/a.ts", plannedChange: "Replace old with new", requestId: 100, decisionId: "shown-" + action };
     await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: old });
     const shown = (await phone.snapshot()).tasks.find(t => t.id === task.id);
     assert.equal(shown.blockedOn.decisionId, old.decisionId);
@@ -363,6 +364,36 @@ test("a duplicate requestId returns the cached acknowledgement and never execute
   assert.equal(node.calls.length, 1, "the action ran exactly once");
 });
 
+test("encrypted remote ALLOW cannot bypass insufficient scope, even with a fresh occurrence", async t => {
+  const {runtime,phone}=await makeHarness(t);
+  const task=await runtime.actions.createWork({brief:"Permission scope"});
+  const blockedOn={type:"permission",live:true,tool:"Edit",file:"/outside/one/deploy.sh",description:"Edit deployment",requestId:100,decisionId:"scope-occurrence"};
+  await runtime.store.updateTask({...task,pid:process.pid,status:"needs_you",blockedOn});
+  const shown=(await phone.snapshot()).tasks.find(t=>t.id===task.id).blockedOn;
+  assert.equal(shown.canAllow,false);assert.equal(shown.scopeIncomplete,true);assert.equal(shown.raw,undefined);
+  await assert.rejects(phone.api(`/api/tasks/${task.id}/allow`,{method:"POST",body:{decisionId:shown.decisionId,requireRemoteScope:false}}),/scope is incomplete/);
+  await assert.rejects(fs.access(path.join(runtime.store.taskDir(task.slug),"permission.json")),{code:"ENOENT"});
+  assert.equal((await runtime.store.findTask(task.id)).status,"needs_you");
+  // Reject remains meaningful without broadening permission.
+  await phone.api(`/api/tasks/${task.id}/reject`,{method:"POST",body:{decisionId:shown.decisionId}});
+  assert.equal((await runtime.store.readJson(path.join(runtime.store.taskDir(task.slug),"permission.json"))).grant,"reject");
+});
+
+test("encrypted mutation acknowledgements and their retries never export hidden permission input", async t => {
+  const {runtime,phone}=await makeHarness(t);
+  const task=await runtime.actions.createWork({brief:"Private permission parameters"});
+  await runtime.store.updateTask({...task,status:"needs_you",blockedOn:{type:"permission",tool:"Write",file:"src/a.ts",plannedChange:"file: src/a.ts",raw:{tool_input:{file_path:"src/a.ts",content:"PRIVATE_SCOPE_SENTINEL"}}}});
+  const requestId="note-projection-retry";
+  const request={taskId:task.id,body:{note:"Preserve the scope"}};
+  const first=await phone.command("note",request,{requestId});
+  const second=await phone.command("note",request,{requestId});
+  assert.deepEqual(second,first);
+  assert.equal(first.blockedOn.raw,undefined);assert.equal(first.execution,undefined);
+  assert.equal(first.blockedOn.canAllow,false);
+  assert.doesNotMatch(JSON.stringify(first),/PRIVATE_SCOPE_SENTINEL/);
+  assert.equal((await runtime.store.findTask(task.id)).context.notes.length,1);
+});
+
 test("the Mac is offline: status reports offline and commands answer 503 — never queued", async t => {
   const { agent, phone } = await makeHarness(t);
   agent.stop();
@@ -385,7 +416,6 @@ test("a relay restart loses no session and keeps the phone paired", async t => {
   const handle2 = await relay2.start();
   t.after(() => handle2.close());
   try {
-    await waitFor(() => agent.status().state === "online", "agent to reconnect to the restarted relay");
     const phone2 = createPhoneClient({
       relayUrl: handle2.url,
       session: phone.session,
@@ -393,6 +423,9 @@ test("a relay restart loses no session and keeps the phone paired", async t => {
       deviceId: phone.deviceId,
       key: phone.key
     });
+    // The old socket's close event can lag relay shutdown. A stale local
+    // 'online' flag does not prove that the NEW relay has observed a hello.
+    await waitFor(async () => agent.status().state === "online" && (await phone2.status()).mac === "online", "the restarted relay to observe the agent reconnect");
     const status = await phone2.status();
     assert.equal(status.mac, "online");
     const snap = await phone2.snapshot();

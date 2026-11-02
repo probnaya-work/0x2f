@@ -1,0 +1,8 @@
+{
+  "canonicalSha256": "eb4d9dd9fc43873ca66906b9d06827459192d94b4e75f65636d7ff37563a1fba",
+  "linuxIndependentSha256": "6c1e28ac1f94d43fd3ad20c85f81de59c29ec8466d6da4587f5f8f51fda5f0c5",
+  "uncompressedTarEqual": true,
+  "uncompressedTarSha256": "02280fc1fef85479a50a9519224d17a8ba08bd4a6297dcdb201cd77f50f2a441",
+  "shippedRuntimeSourceCommit": "b910c91ffc47bec435062c5a127ffe065ea4a92b",
+  "readme": "Current Dark interface captures and release copy"
+}

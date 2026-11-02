@@ -1,0 +1,203 @@
+/* Shared Web / pairing palette. Light retains the original workstation colours.
+   The parser-blocking theme.js selects the palette before any stylesheet paints. */
+:root {
+  color-scheme: light;
+  --canvas: #e4e8ec;
+  --paper: #f6f8fa;
+  --input: #fff;
+  --ink: #2f2f2f;
+  --soft: #37424c;
+  --muted: #5c6771;
+  --subtle: #8f9aa4;
+  --marker: #79838c;
+  --rule: #dbe2e7;
+  --edge: #ccd4da;
+  --unobserved: #c6cfd6;
+  --accent: #2f5fa8;
+  --fail: #b8532a;
+  --selection: #cddcf5;
+  --attention: #e9eefb;
+  --halt: #e5ecf9;
+  --hover: #edf1f5;
+  --selected: #eef2f6;
+  --code: #e9edf1;
+  --pre: #eef1f4;
+  --input-edge: #c6d3ea;
+  --quiet-edge: #98a5af;
+  --failure-paper: #f0eeec;
+  --failure-edge: #ddd2ca;
+  --failure-label: #8a7d74;
+  --frozen: #f0f0ee;
+  --frozen-fill: #b3bcc4;
+  --live-track: #3d454c;
+  --on-solid: #f6f8fa;
+  --on-accent: #f6f8fa;
+  --on-danger: #f6f8fa;
+  --focus: #2f5fa8;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #12181d;
+  --paper: #1c242b;
+  --input: #161c21;
+  --ink: #e2e8ee;
+  --soft: #c3cdd6;
+  --muted: #a7b4bf;
+  --subtle: #9dabb7;
+  --marker: #9dabb7;
+  --rule: #394650;
+  --edge: #45525d;
+  --unobserved: #586772;
+  --accent: #8fb2ee;
+  --fail: #e79274;
+  --selection: #395475;
+  --attention: #293b52;
+  --halt: #25364b;
+  --hover: #25313a;
+  --selected: #2c3a46;
+  --code: #28343e;
+  --pre: #161e25;
+  --input-edge: #647c99;
+  --quiet-edge: #71818e;
+  --failure-paper: #332a26;
+  --failure-edge: #776154;
+  --failure-label: #c0a99a;
+  --frozen: #282d31;
+  --frozen-fill: #71818e;
+  --live-track: #c3cdd6;
+  --on-solid: #161c21;
+  --on-accent: #161c21;
+  --on-danger: #211711;
+  --focus: #a7caff;
+  --attention-rule: #647c99;
+  --overlay: rgba(18,24,29,.72);
+}
+/* Appearance controls: one compact entry point, three explicit choices. */
+.theme-control { display: flex; width: 100%; gap: 0; }
+.theme-option {
+  flex: 1; min-width: 0; min-height: 38px; border: 1px solid var(--quiet-edge);
+  border-right-width: 0; padding: 9px 12px; border-radius: 0;
+  background: var(--input); color: var(--ink); cursor: pointer;
+  font: 12px "IBM Plex Mono", ui-monospace, monospace; line-height: 1.3;
+}
+.theme-option:last-child { border-right-width: 1px; }
+.theme-option:hover { background: var(--hover); }
+.theme-option[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--on-solid); font-weight: 600; }
+.appearance-settings { position: relative; flex: none; z-index: 10; }
+.appearance-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 36px; padding: 8px 10px; border: 1px solid #79838c;
+  color: #dde4e9; font: 10px "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .12em; cursor: pointer; list-style: none; white-space: nowrap;
+}
+.appearance-toggle::-webkit-details-marker { display: none; }
+.appearance-toggle:hover, .appearance-settings[open] > .appearance-toggle { background: #39434b; }
+.appearance-toggle-mark { color: #a8b3bc; font-size: 14px; line-height: 1; }
+.appearance-settings[open] .appearance-toggle-mark { transform: rotate(45deg); }
+.appearance-panel {
+  position: absolute; top: calc(100% + 10px); right: 0; width: 292px;
+  max-width: calc(100vw - 28px); padding: 18px;
+  background: var(--paper); border: 1px solid var(--edge); color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0,0,0,.2); text-align: left; letter-spacing: normal;
+}
+.appearance-k { margin-bottom: 10px; font: 10px "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .16em; color: var(--muted); }
+.appearance-hint { margin: 10px 0 18px; font-size: 11px; line-height: 1.6; color: var(--muted); }
+.appearance-alerts { display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid var(--rule); }
+.appearance-panel .setting { flex: 1; min-height: 36px; padding: 8px; border-color: var(--quiet-edge); background: var(--input); color: var(--soft); letter-spacing: .08em; }
+.appearance-panel .setting:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.appearance-panel .setting:disabled { opacity: .55; }
+.appearance-host { margin-top: 16px; font-size: 10px; line-height: 1.6; color: var(--muted); overflow-wrap: anywhere; }
+.pair-appearance { padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--rule); }
+.pair-input { color: var(--ink); }
+.pair-card { width: calc(100% - 28px); }
+/* Focus remains visible on the controls that reset the browser outline. */
+:focus-visible { outline: 2px solid var(--focus) !important; outline-offset: 3px; }
+.chrome, .composer, .m-bar { --focus: #a7caff; }
+.appearance-panel { --focus: var(--accent); }
+.act-primary, .act-outline:hover, .m-abar-primary, .m-abar-secondary:active,
+.m-btn-primary, .m-btn-secondary:active, .pair-btn { color: var(--on-solid); }
+.act-primary:hover, .m-abar-primary:active, .m-btn-primary:active { color: var(--on-accent); }
+.flash, .mac-offline-bar, .m-offline-bar { color: var(--on-danger); }
+:root[data-theme="dark"] .act:disabled, :root[data-theme="dark"] .m-abar-btn:disabled,
+:root[data-theme="dark"] .m-btn:disabled, :root[data-theme="dark"] .pair-btn:disabled { opacity: .6; }
+:root[data-theme="dark"] .act-primary:disabled { background: var(--ink); color: var(--on-solid); }
+:root[data-theme="dark"] .act-outline:disabled { background: transparent; color: var(--ink); }
+.run-row { color: var(--ink); }
+.result > *, .band-right, .run-panel { min-width: 0; }
+/* Keep the workstation's graphite chrome. Identity, counts and settings each
+   have one place; the machine is a secondary line rather than another column. */
+.chrome { position: relative; z-index: 6; }
+.chrome-inner { height: 72px; gap: 24px; padding: 0 24px; align-items: center; }
+.brand { min-width: 0; flex: 1; gap: 12px; }
+.brand-mark, .brand-slash { flex: none; }
+.workspace-identity { flex: 1; min-width: 0; }
+.workspace-heading { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.brand-workspace { flex: 0 1 auto; min-width: 0; max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-scope { flex: none; font-size: 9px; letter-spacing: .14em; }
+.workspace-runtime { display: flex; align-items: center; gap: 7px; margin-top: 7px; min-width: 0; }
+.runtime-host { font-size: 10px; color: #a8b3bc; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.runtime-dot { width: 5px; height: 5px; flex: none; }
+.counters { flex: none; --accent: #8fb2ee; }
+.counter, .counter:last-child { min-width: 90px; padding: 0 16px; min-height: 44px; }
+.counter-k { margin-top: 6px; font-size: 9px; letter-spacing: .12em; }
+.legend-label, .legend-adapter, .composer-meta,
+.composer-hint:not(.armed):not(.refining):not(.error), .composer-hint.workspace { color: #9aa6b0; }
+/* Add breathing room to the verification receipt in either surface. */
+.check-evidence { padding: 0 0 16px; border-bottom: 1px solid var(--rule); }
+.check-evidence .run-sub-k { margin-top: 0; margin-bottom: 8px; }
+.check-evidence .m-dmeta { margin-top: 8px; font-size: 11px; line-height: 1.6; color: var(--muted); }
+@media (min-width: 641px) and (max-width: 1179px) {
+  .chrome-inner { gap: 16px; padding: 0 18px; }
+  .counter.clock { display: none; }
+}
+@media (min-width: 641px) and (max-width: 899px) {
+  .counter, .counter:last-child { min-width: 76px; padding: 0 10px; }
+  .counter-k { letter-spacing: .06em; }
+}
+@media (max-width: 640px) {
+  .m-bar { position: relative; z-index: 4; }
+  .m-bar-inner { height: auto; min-height: 80px; padding: 14px; align-items: flex-start; gap: 12px; }
+  .m-identity { flex: 1; min-width: 0; }
+  .m-identity-title { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+  .m-mark, .m-slash { flex: none; }
+  .m-workspace { min-width: 0; white-space: normal; overflow: visible; overflow-wrap: anywhere; line-height: 1.35; }
+  .m-identity-runtime { display: flex; align-items: center; gap: 7px; margin-top: 8px; min-width: 0; }
+  .m-host, .m-host.dim { flex: 0 1 auto; min-width: 0; color: #a8b3bc; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .m-bar .appearance-toggle { min-height: 44px; }
+  .appearance-panel { top: calc(100% + 8px); }
+  .appearance-panel .setting, .theme-option { min-height: 44px; }
+  .m-toolbar { align-items: center; gap: 10px; min-height: 58px; }
+  .m-toolbar .appearance-toggle { color: var(--soft); border-color: var(--quiet-edge); min-height: 44px; }
+  .m-toolbar .appearance-toggle:hover, .m-toolbar .appearance-settings[open] > .appearance-toggle { background: var(--hover); }
+  .m-toolbar .appearance-toggle-mark { color: var(--muted); }
+  .m-back, .m-sheet-cancel, button.m-disclosure { border: 0; background: none; font-family: inherit; text-align: left; }
+  .m-back { padding: 4px 0; font-size: 10px; letter-spacing: .1em; white-space: nowrap; }
+  .m-back-badge { font-size: 9px; letter-spacing: .06em; cursor: default; }
+  button.m-row-tap, button.m-ask-line { width: 100%; border-top: 0; border-left: 0; border-right: 0; border-radius: 0; text-align: left; font-family: inherit; color: var(--ink); }
+  button.m-row-tap { background: none; }
+  button.m-row-tap:focus-visible, button.m-ask-line:focus-visible { outline-offset: -3px; }
+  button.m-disclosure { padding: 0; width: 100%; }
+  .m-sheet-cancel { padding: 0; }
+}
+/* Trace geometry comes from ledger.mjs, including its terminal marker. */
+.trace-tail-note { margin-top: 8px; font-size: 10px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+.trace-truncated::after { content: "⋯"; position: absolute; left: -11px; bottom: -2px; color: var(--muted); font-size: 10px; }
+.track-wrap.trace-truncated::after { top: 24px; bottom: auto; }
+.track-head, .track-halt { box-shadow: 0 0 9px color-mix(in srgb, var(--accent) 28%, transparent); }
+.appearance-panel { max-height: calc(100dvh - 100px); overflow-y: auto; }
+/* Hint pairs and count labels wrap as units instead of being cut by chrome. */
+.legend-inner { height: auto; min-height: 30px; padding-top: 8px; padding-bottom: 8px; flex-wrap: wrap; row-gap: 8px; overflow: visible; }
+.legend-pair { flex: none; }
+.legend-adapter { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.status-arg { min-width: 0; }
+.status-node { max-width: 32%; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .m-toolbar { flex-wrap: wrap; row-gap: 8px; } }
+/* Workspace names can take a second line; they are the identity, not expendable chrome. */
+.chrome-inner { height: auto; min-height: 72px; padding-top: 12px; padding-bottom: 12px; }
+.brand-workspace { white-space: normal; overflow: visible; overflow-wrap: anywhere; text-overflow: clip; line-height: 1.3; }
+/* Unreported ground is a quiet axis, never additional event marks. */
+.track-wrap { min-width: 0; max-width: 100%; }
+.compact-mini::before, .m-row-trace::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--rule); pointer-events: none; }
+.trace-mark { z-index: 1; }
+textarea::placeholder { color: var(--muted); opacity: 1; }
+.composer textarea::placeholder { color: #9aa6b0; }

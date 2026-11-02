@@ -167,14 +167,14 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     assert.match(task.runs[0].externalSessionId, /^sess-journey-/);
     assert.match(await storeOf(base).readTaskResult(task), /Added retry-with-backoff/);
     await session.waitForText(/READY/, { label: "the READY group" });
-    await session.waitForText(/complete · awaiting you/, { label: "the ready detail" });
+    await session.waitForText(/result available · review/, { label: "the ready detail" });
     await session.waitForText(/ACCEPT/, { label: "the pinned ACCEPT" });
     await session.waitForText(/SEND BACK/, { label: "the alternative" });
 
     // 7. CHANGES — the REAL diff of the working tree vs HEAD.
     session.press("d");
     await session.waitForText(/CHANGES/, { label: "the changes view" });
-    await session.waitForText(/IN THE WORKING TREE · NOTHING COMMITTED/, {
+    await session.waitForText(/CURRENT WORKING TREE VS HEAD/, {
       label: "the changes header"
     });
     await session.waitForText(/the real diff of the working tree vs HEAD/, {
@@ -189,7 +189,7 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
       "a file.changed event was recorded"
     );
     session.press("escape");
-    await session.waitForText(/complete · awaiting you/, { label: "back to the work frame" });
+    await session.waitForText(/result available · review/, { label: "back to the work frame" });
 
     // 8. SEND BACK — x opens the correction input; the correction is kept on
     // the TASK and the next run is rebuilt from it.
@@ -247,7 +247,7 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     assert.ok(run3Prompt.includes(markers.answer), "run 03's prompt carries the answer");
 
     // 11. READY again, 12. ACCEPT — the task closes through the shared action.
-    await session.waitForText(/complete · awaiting you/, { label: "run 3 ready" });
+    await session.waitForText(/result available · review/, { label: "run 3 ready" });
     session.press("enter");
     await session.waitForText(/accepted #001/, { label: "the accept flash" });
     task = await waitForTask(base, 1, "done", { tolerate: ["ready"] });
@@ -323,7 +323,7 @@ test("RETRY: a normalized provider-auth failure shows the auth band; p switches 
     assert.equal(task.runs[1].provider, "charlie", "run 02 went to charlie");
     assert.equal(task.runs[1].outcome, "ready");
 
-    await session.waitForText(/complete · awaiting you/, { label: "ready again" });
+    await session.waitForText(/result available · review/, { label: "ready again" });
     session.press("enter"); // ACCEPT
     task = await waitForTask(base, 1, "done", { tolerate: ["ready"] });
     assert.equal(task.status, "done");

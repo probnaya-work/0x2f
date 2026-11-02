@@ -1,0 +1,5 @@
+{"phase": "before-restart", "taskId": 1, "status": "working", "runs": 2, "pid": 684743, "run2HasNote": true, "run2HasPriorResult": true, "promptSha256": "297b3d6eead05f38ef01b1204e992f41f693be89d84996f11aa8084e07782176"}
+worker cgroup 0::/user.slice/user-1000.slice/user@1000.service/app.slice/0x2f-host.service
+ActiveState=active
+MainPID=685965
+{"phase": "after-restart", "taskId": 1, "status": "working", "runs": 2, "pid": 684743, "workerAlive": true}

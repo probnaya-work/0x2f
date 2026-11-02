@@ -49,7 +49,7 @@ import { validateRelayUrl } from "./pair.mjs";
 import { WorkError } from "../core/errors.mjs";
 import { writeJson } from "../core/store.mjs";
 import { deriveKeyRaw, importKey, encrypt, decrypt } from "../web/e2e.mjs";
-import { projectSnapshot, projectEvent, projectTask, projectRun, projectResult } from "./project.mjs";
+import { projectSnapshot, projectEvent, projectTask, projectRun, projectResult, projectAck } from "./project.mjs";
 
 const HELLO_TIMEOUT_MS = 10000;
 const PING_INTERVAL_MS = 30000;
@@ -106,7 +106,11 @@ export function createRelayAgent({
   let sessionKey = null; // CryptoKey derived from code + token (AES-GCM)
   let ackCache = null; // Map requestId -> { ack, at } (persisted)
   let ackSaveTimer = null;
+  let ackSaveChain = Promise.resolve();
+  let ackLoad = Promise.resolve();
   let commandChain = Promise.resolve();
+  const pendingFrames = new Set();
+  let stopPromise = null;
 
   // --- ack cache (replay protection that survives restart) ------------------
 
@@ -127,7 +131,12 @@ export function createRelayAgent({
     }
   }
 
-  async function saveAckCache() {
+  function saveAckCache() {
+    ackSaveChain = ackSaveChain.then(persistAckCache);
+    return ackSaveChain;
+  }
+
+  async function persistAckCache() {
     try {
       const obj = Object.fromEntries([...ackCache.entries()].map(([id, e]) => [id, e]));
       await fs.mkdir(path.dirname(ackCachePath()), { recursive: true });
@@ -142,7 +151,7 @@ export function createRelayAgent({
   }
 
   function scheduleAckSave() {
-    if (ackSaveTimer) return;
+    if (stopped || ackSaveTimer) return;
     ackSaveTimer = setTimeout(() => {
       ackSaveTimer = null;
       saveAckCache();
@@ -297,7 +306,7 @@ export function createRelayAgent({
     });
 
     sock.on("message", (data, isBinary) => {
-      if (isBinary) return;
+      if (stopped || isBinary) return;
       const text = data.toString();
       const frame = parseFrame(text);
       if (frame) {
@@ -322,7 +331,15 @@ export function createRelayAgent({
       }
       const relayFrame = parseRelayFrame(text);
       if (relayFrame) {
-        onRelayFrame(relayFrame);
+        const processing = onRelayFrame(relayFrame);
+        pendingFrames.add(processing);
+        processing.then(
+          () => pendingFrames.delete(processing),
+          err => {
+            pendingFrames.delete(processing);
+            error(`relay: could not process an envelope: ${err.message}`);
+          }
+        );
         return;
       }
       warn("relay: dropped malformed frame");
@@ -404,7 +421,7 @@ export function createRelayAgent({
       from: frame.from,
       requestId: frame.requestId
     });
-    if (!plaintext || typeof plaintext !== "object") {
+    if (stopped || !plaintext || typeof plaintext !== "object") {
       // Wrong key, tampered payload, or a mismatched from/requestId — the
       // relay cannot produce a valid envelope, so this is dropped.
       return;
@@ -488,7 +505,7 @@ export function createRelayAgent({
     if (cached) {
       // Duplicate delivery (retry, double tap, reconnect) — the action already
       // ran; answer with the stored acknowledgement, never execute again.
-      sendEnvelope({ cmd: "ack", ...cached.ack }, requestId);
+      sendEnvelope({ cmd: "ack", ...projectAck(cached.ack, runtime.store.base) }, requestId);
       return;
     }
     if (typeof ts !== "number" || Math.abs(now() - ts) > TS_WINDOW_MS) {
@@ -502,7 +519,7 @@ export function createRelayAgent({
     }
     commandChain = commandChain
       .then(async () => {
-        const result = await runCommand({ op, taskId, body });
+        const result = projectAck(await runCommand({ op, taskId, body }), runtime.store.base);
         rememberAck(requestId, result);
         await sendEnvelope({ cmd: "ack", ...result }, requestId);
       })
@@ -611,7 +628,7 @@ export function createRelayAgent({
             })
           );
         case "allow":
-          return ok(202, await runtime.actions.allowWork(taskId, { decisionId: body?.decisionId ?? null }));
+          return ok(202, await runtime.actions.allowWork(taskId, { decisionId: body?.decisionId ?? null, requireRemoteScope: true }));
         case "reject":
           return ok(202, await runtime.actions.rejectWork(taskId, { decisionId: body?.decisionId ?? null }));
         case "answer":
@@ -708,7 +725,7 @@ export function createRelayAgent({
 
   function start() {
     if (stopped) return agent;
-    loadAckCache().then(cache => {
+    ackLoad = loadAckCache().then(cache => {
       ackCache = cache;
     });
     unsubscribe = runtime.events.on(onBusEvent);
@@ -736,7 +753,7 @@ export function createRelayAgent({
   }
 
   function stop() {
-    if (stopped) return;
+    if (stopPromise) return stopPromise;
     stopped = true;
     clearInterval(configTimer);
     clearInterval(keepaliveTimer);
@@ -746,16 +763,30 @@ export function createRelayAgent({
       ackSaveTimer = null;
     }
     if (unsubscribe) unsubscribe();
-    if (ws) {
+    const socket = ws;
+    const disconnected = !socket || socket.readyState === WebSocket.CLOSED
+      ? Promise.resolve()
+      : new Promise(resolve => socket.once("close", resolve));
+    if (socket) {
       try {
-        ws.close();
+        socket.close();
       } catch {
         /* already closing */
       }
       ws = null;
     }
     state = "idle";
-    if (ackCache) saveAckCache();
+    // Callers removing a workspace or restarting an agent must be able to
+    // await every accepted command/pairing write and the final replay cache.
+    // Keep the immediate timer/subscription shutdown for existing callers.
+    stopPromise = (async () => {
+      await Promise.allSettled([...pendingFrames]);
+      await commandChain;
+      await ackLoad;
+      if (ackCache) await saveAckCache();
+      await disconnected;
+    })();
+    return stopPromise;
   }
 
   function status() {

@@ -135,9 +135,9 @@ export async function createRemoteClient(state, opts = {}) {
         }
         const frame = await res.json();
         const ack = await decrypt(key, frame, { from: state.deviceId, requestId });
-        if (!ack) throw new Error("Could not verify the Mac's response.");
+        if (!ack) throw new Error("Could not verify the execution host's response.");
         if (ack.ok === false) {
-          const err = new Error(ack.error ?? "Mac action failed");
+          const err = new Error(ack.error ?? "Execution host action failed");
           err.status = ack.status ?? 500;
           throw err;
         }
@@ -149,7 +149,7 @@ export async function createRemoteClient(state, opts = {}) {
           // may already have executed the action).
           throw Object.assign(
             new Error(
-              "The Mac did not respond in time — the action may or may not have run. The task state has been refreshed."
+              "The execution host did not respond in time — the action may or may not have run. The task state has been refreshed."
             ),
             { status: 504 }
           );

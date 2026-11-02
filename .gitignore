@@ -26,3 +26,8 @@ dist/
 *.swp
 .idea/
 .vscode/
+
+# Raw qualification state stays local; retain reviewed aggregate release evidence.
+docs/implementation/**/evidence/
+docs/qualification/**/evidence/
+docs/research/**/evidence/

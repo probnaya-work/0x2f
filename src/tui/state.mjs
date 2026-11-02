@@ -32,6 +32,7 @@ export function initialState(opts = {}) {
     // null until the view is opened, so entering `d` never blocks the frame
     // on a git walk.
     diff: null,
+    review: null,
     composer: { text: "", original: null, provider: opts.provider ?? null },
     busy: false
   };
@@ -122,7 +123,7 @@ export const INPUT_LABELS = {
 export const INPUT_NOTES = {
   answer: "recorded on the task · the next run continues with it",
   "answer-save": "recorded on the task · the task stays NEEDS YOU",
-  note: "recorded on the task · every later run carries it",
+  note: "saved for the next run · the current run does not receive it",
   sendback: "recorded on the task · the next run is rebuilt with it"
 };
 
@@ -197,6 +198,29 @@ export function apply(state, key, ctx = {}) {
   if (state.mode === "composer") return composerKey(state, key, ctx);
 
   if (state.mode === "quit") return { state, intent: { type: "quit" } };
+
+  if (state.mode === "result") {
+    const review = state.review;
+    const reviewTask = ctx.tasks.find(t => t.id === review?.taskId) ?? task;
+    if (key.name === "escape" || (key.name === "char" && key.ch === "r")) {
+      const index = list.findIndex(t => t.id === reviewTask?.id);
+      return { state: { ...state, mode: "work", dscroll: 0,
+        ...(index >= 0 ? {sel:index} : {filter:0,search:"",sel:Math.max(0,ctx.tasks.findIndex(t=>t.id===reviewTask?.id))}) }, intent: null };
+    }
+    if (key.name === "down" || (key.name === "char" && key.ch === "j")) return { state: { ...state, dscroll: state.dscroll + 1 }, intent: null };
+    if (key.name === "up" || (key.name === "char" && key.ch === "k")) return { state: { ...state, dscroll: Math.max(0, state.dscroll - 1) }, intent: null };
+    if (key.name === "char" && key.ch === "g") return { state: { ...state, dscroll: 0 }, intent: null };
+    if (key.name === "char" && key.ch === "G") return { state: { ...state, dscroll: Number.MAX_SAFE_INTEGER }, intent: null };
+    if (key.name === "char" && key.ch === "i" && review) return { state: { ...state, dscroll: 0, review: { ...review, input: !review.input } }, intent: null };
+    if (key.name === "char" && ["[", "]"].includes(key.ch) && reviewTask && review) {
+      const runs = reviewTask.runs.map(r => r.run);
+      const index = runs.indexOf(review.run);
+      const run = runs[Math.max(0, Math.min(runs.length - 1, index + (key.ch === "[" ? -1 : 1)))];
+      return { state: { ...state, dscroll: 0 }, intent: { type: "review", id: reviewTask.id, run } };
+    }
+    // Enter deliberately does not accept from a historical result/input view.
+    return none;
+  }
 
   if (state.mode === "diff") {
     if (key.name === "char" && key.ch === "j") return { state: { ...state, dscroll: state.dscroll + 1 }, intent: null };
@@ -287,6 +311,8 @@ export function apply(state, key, ctx = {}) {
     }
     case "c":
       return task ? { state: { ...state, input: "note", draft: "" }, intent: null } : none;
+    case "r":
+      return task ? { state: { ...state, mode: "result", dscroll: 0, review: null }, intent: { type: "review", id: task.id, run: task.run } } : none;
     case "x": {
       const secondary = secondaryAction(task);
       if (!secondary) return none;

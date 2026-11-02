@@ -48,15 +48,20 @@ what the agent is doing, surfaces decisions when human attention is required,
 and lets you intervene — without treating every agent session as a separate
 piece of work.
 
+**0.2.0** adds faithful task review, persistent Linux hosting and additional Web themes.
+[Quickstart](docs/quickstart.md) · [Commands and troubleshooting](docs/usage.md) ·
+[Observed harness compatibility](docs/harness-compatibility.md) ·
+[Release scope and verification](docs/releases/0.2.0.md) · [Roadmap](docs/roadmap.md).
+Supported execution hosts are macOS and Linux/POSIX with Node.js ≥20; the
+current release is checked on macOS arm64 and Lenovo/Linux x86_64. Windows
+execution and an operated remote execution service are not qualified.
+
 ## Why it exists
 
-A coding harness gives you an agent session: you start one, watch it, and
-either accept its output or start another session that has forgotten
-everything. 0x2F inverts that. The **task** is the object — a description of
-engineering work that persists in the repository. Agent sessions are
-disposable execution underneath it. A task can be run again through a
-different harness, corrected with notes, and continued with prior results in
-context — because the task, not the session, is what 0x2F keeps.
+Coding harnesses have their own session history and resume capabilities. 0x2F
+keeps a separate task record across those harnesses: the original request,
+constraints, decisions, run inputs and saved results. Continue the same work
+through another supported harness without manually assembling the handoff.
 
 ## Install
 
@@ -71,7 +76,7 @@ small package with WebSocket and cryptography dependencies, no build step,
 no accounts, no daemon.
 
 ```bash
-npm install -g 0x2f        # the `2f` command lands on your PATH
+npm install -g 0x2f@0.2.0  # the `2f` command lands on your PATH
 ```
 
 `npx --yes 0x2f ...` works for a one-off, but install globally for regular
@@ -210,7 +215,10 @@ processes survive, rerun refuses until that previous process group exits.
 ## One task, many runs
 
 
-<img width="920" height="506" alt="Screenshot 2026-08-29 at 14 00 41" src="https://github.com/user-attachments/assets/10a1dc37-7439-4d75-a024-d68e35a62275" />
+<img width="1120" alt="0x2F 0.2.0 Web interface in Dark, with a filled activity trace and visible live marker" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/web-dark.png" />
+
+Current Dark interface with demonstration data. The filled marks show reported
+activity; they are not an invented completion percentage.
 
 Every execution is recorded as a **run** under the task, so the same task can
 be run again — through a different harness, for comparison:
@@ -243,7 +251,9 @@ part of the next run's context, with no manual copying. The original
 selected task in full on the right, and — pinned to the bottom of the detail
 pane — the one action that task is waiting for.
 
-<img width="920" alt="Screenshot 2026-08-29 at 14 26 01" src="https://github.com/user-attachments/assets/3e87a04e-a233-49e8-8516-fcd8e66e194c" />
+<img width="960" alt="Current dark 0x2F TUI: READY result, original request and task controls" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/tui-dark.svg" />
+
+Captured from the real TUI on a PTY with deterministic demonstration providers.
 
 ```bash
 2f tui                     # or: 2f tui --light
@@ -266,6 +276,7 @@ The keymap is the surface's own, not a file manager's:
 | `↵` | the one action this task is waiting for (shown bottom-left) |
 | `x` | the alternative — reject · save only · send back · drop |
 | `d` | changes — the real diff of the working tree, or the planned write |
+| `r` | read the full request, saved result and reported checks; `[` / `]` selects a run, `i` reads its saved input, `j` / `k` scrolls, `g` / `G` jumps to either end, `esc` returns |
 | `c` | note or correct — kept on the task, carried into every later run |
 | `p` | point the next run at another provider |
 | `t` | expand the trace of the current run |
@@ -276,6 +287,19 @@ The keymap is the surface's own, not a file manager's:
 ANSWER & CONTINUE, on a READY task it ACCEPTS, on a FAILED one it RETRIES. The
 alternative under `x` is the other half of the same pair. Both go through the
 shared actions, so the TUI can never allow something the CLI would refuse.
+
+READY means a result is available for review. `r` reads the provider's saved
+Evidence/Verification and their limitations, including investigations with no
+file changes. Provider-reported checks and observed command invocations are
+distinct from a separately recorded successful check receipt. `d` shows the
+current working-tree diff at viewing time; later edits may be included.
+
+Notes are saved for the next run; they do not steer an already-running worker.
+On a phone, shortened commands, hidden edit parameters and ambiguous targets
+may require review on the computer. Incomplete remote scope disables ALLOW
+and the host also refuses that grant; REJECT and local inspection remain
+available. A completed worker's short-lived descendants get a bounded drain
+interval before retry; a still-existing execution group continues to block it.
 
 ## Desktop + mobile
 
@@ -298,7 +322,10 @@ a different port.
 Control 0x2F from your phone on the **same Wi-Fi** — the Mac keeps running
 the work; the phone is a compact control surface:
 
-<img width="310" height="552" alt="Screenshot 2026-08-29 at 14 01 06" src="https://github.com/user-attachments/assets/fb6311de-c662-4a4d-9097-d4cee465f826" />
+<img width="354" alt="0x2F mobile Dark interface with a complete filled activity lane and constraint action" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/mobile-dark.png" />
+
+Responsive browser capture with demonstration data; this image is not the
+separate physical-iPhone qualification.
 
 
 ```bash
@@ -405,8 +432,11 @@ ACP manifests may set `"permissions"`: `"interactive"` (default — a permission
 request pauses the run and asks you), `"deny"`, or `"approve"` (headless
 auto-resolution). Command manifests must pass the task through the `{prompt}`
 placeholder. Commands are spawned as argv arrays, never through a shell.
-Verified example manifests live in [`examples/providers/`](https://github.com/probnaya-work/0x2f/blob/main/examples/providers/README.md);
+Vendor-documented example manifests live in [`examples/providers/`](https://github.com/probnaya-work/0x2f/blob/main/examples/providers/README.md);
 `2f providers` lists every provider with its integration type and availability.
+Availability is separate from authenticated execution and scenario qualification;
+see the [observed compatibility matrix](docs/harness-compatibility.md), including
+the real Codex → Cursor → Codex task handoff and separately retained setup preflights.
 
 By default `2f new` uses the configured routing default. When it is `auto`,
 0x2F picks the harness deterministically: available providers first, then the
@@ -484,9 +514,9 @@ control layer, not remote execution.
 
 ## Current limitations
 
-- **Execution is local-only.** There is no remote/mini-PC node yet. Remote
+- **Execution is local-only.** There is no remote execution-node transport. [One persistent Linux host](docs/host-setup.md) runs the existing runtime locally; Mac and phone control it. Remote
   control is an outbound control layer, not remote execution.
-- **Remote control is v1.** No push notifications (the phone works while the
+- **Remote control has limits.** No push notifications (the phone works while the
   app is open), no offline command queue by design; one phone at a time per
   Mac (re-pairing revokes the previous phone's session).
 - **AUTO is deterministic policy routing**, not semantic selection — and there
@@ -497,13 +527,19 @@ control layer, not remote execution.
 - **No evaluation.** Run history is for inspection — no scores, no winners,
   no recommendations.
 
+057 has an external, read-only adapter for `.work/tasks` and an opt-in
+MACHINE PULSE SSH source for aggregate Linux activity. Its signed Display
+consumes the same Core Landscape; see the [host setup](docs/host-setup.md) and
+release evidence for observed device behavior and limits.
+See the [roadmap and actual hosting status](docs/roadmap.md).
+
 ## Development
 
 Install the dependencies once; there is no build step:
 
 ```bash
 npm install       # ws, @noble/ciphers, @noble/hashes
-npm test          # the test suite (node --test, 300+ tests)
+npm test          # the test suite (node --test, including real PTY regression)
 npm run check     # syntax-check every source and test file
 npm start         # run the CLI: node src/cli.mjs
 ```

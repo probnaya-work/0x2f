@@ -1,0 +1,91 @@
+{
+  "protocol": "057.machine-pulse/qualification-v1",
+  "recordedAt": "2026-11-02T00:20:30.577Z",
+  "durationMs": 187922.903583,
+  "periodMs": 2000,
+  "rawCounterActivityChecks": 74,
+  "unexpectedFailures": [],
+  "cleanup": {
+    "shutdownMs": 2.1755410000041593,
+    "collectorRunning": false,
+    "activeRequests": 0,
+    "instanceRecordRemoved": true,
+    "temporaryStoreRemoved": true
+  },
+  "phases": {
+    "baseline": {
+      "prominence": {
+        "min": 0,
+        "mean": 0.03634915865945243,
+        "max": 0.04905968928863451,
+        "count": 9
+      }
+    },
+    "one-cpu-workload": {
+      "prominence": {
+        "min": 0.03134556574923547,
+        "mean": 0.1589809640431288,
+        "max": 0.20778072502210435,
+        "count": 9
+      }
+    },
+    "low-recovery": {
+      "prominence": {
+        "min": 0.031150159744408944,
+        "mean": 0.08021285075023551,
+        "max": 0.17696811971372803,
+        "count": 7
+      }
+    },
+    "all-cpu-workload": {
+      "prominence": {
+        "min": 0.04780876494023904,
+        "mean": 0.8381048118523623,
+        "max": 1,
+        "count": 11
+      }
+    },
+    "high-recovery": {
+      "prominence": {
+        "min": 0.029668411867364748,
+        "mean": 0.05414944676811154,
+        "max": 0.08564814814814815,
+        "count": 9
+      }
+    },
+    "local-ssh-abort": {
+      "prominence": {
+        "min": 0,
+        "mean": 0.015749882762310593,
+        "max": 0.06611570247933884,
+        "count": 7
+      }
+    },
+    "reconnect": {
+      "prominence": {
+        "min": 0,
+        "mean": 0.06369250310637001,
+        "max": 0.2644151565074135,
+        "count": 7
+      }
+    },
+    "stopped-expiry": {
+      "prominence": {
+        "min": 0,
+        "mean": 0.030292294065544734,
+        "max": 0.050487156775907885,
+        "count": 5
+      }
+    },
+    "unattended": {
+      "prominence": {
+        "min": 0,
+        "mean": 0.057289840648590024,
+        "max": 0.14588859416445624,
+        "count": 31
+      }
+    }
+  },
+  "gpuVerified": false,
+  "physicalPhoneEvidence": "Separate real iPhone observation; raw captures remain private."
+}

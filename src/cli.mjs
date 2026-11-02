@@ -23,6 +23,7 @@ import { launchUi } from "./ui.mjs";
 import { runTui } from "./tui/index.mjs";
 import { pairDevice, pairOff } from "./relay/pair.mjs";
 import { formatCode } from "./web/e2e.mjs";
+import { eventsForRun, toSteps } from "./web/ledger.mjs";
 import { unavailableMessage } from "./providers/index.mjs";
 
 // The installed package version — `2f version` / `2f --version` / `2f -v`.
@@ -50,7 +51,7 @@ Commands:
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
   2f close <id>      move to DONE; does not cancel the provider
-  2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
+  2f pair [--relay <url>] [--client <url>] [--lan]   pair this execution host for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
                           pair through a hosted relay instead; --lan forces LAN;
@@ -126,7 +127,6 @@ function relativeFile(base, file) {
 async function openTask(id, base) {
   const runtime = createRuntime(base);
   const detail = await runtime.actions.getWork(id);
-  const log = await runtime.store.readTaskLog(detail);
 
   console.log(`#${String(detail.id).padStart(3, "0")} ${detail.title}\n`);
 
@@ -150,7 +150,7 @@ async function openTask(id, base) {
         console.log("  (some options cannot be mapped to ALLOW/REJECT — inspect above)");
       }
     } else {
-      console.log(`Agent wants to modify:\n  ${relativeFile(base, blocked.file) ?? "?"}\n`);
+      console.log(`Requested operation: ${blocked.tool ?? "not recorded"}\nTarget: ${relativeFile(base, blocked.file) ?? "not recorded"}\n`);
       if (blocked.plannedChange) {
         console.log(`Planned change:\n  ${blocked.plannedChange}\n`);
       }
@@ -188,15 +188,21 @@ async function openTask(id, base) {
   // run); this is inspection, never evaluation.
   console.log(renderRuns(detail.runs ?? []));
 
-  if (detail.result.trim()) {
-    console.log(detail.result.trim());
-  } else if (detail.error) {
-    console.log(detail.error);
+  // The task-level result survives reruns. Read the saved current run's
+  // result instead, just as explicit run inspection does (including legacy).
+  const result = await runtime.store.readRunResult(detail, currentRun);
+  if (result.trim()) {
+    console.log(result.trim());
   } else {
-    console.log("No final result yet.");
-    if (log.trim()) {
-      console.log("\n--- run.log ---\n");
-      console.log(log.trim());
+    console.log("No written result for this run.");
+    if (currentRun.error) {
+      console.log(currentRun.error);
+    } else {
+      const events = eventsForRun(await runtime.store.readEvents(detail.slug), currentRun.run);
+      const trace = toSteps(detail, events, { base });
+      const step = trace.steps.at(-1);
+      const activity = trace.activity || (step && `${step.verb} ${step.arg}`.trim());
+      console.log(activity ? `\nProgress: ${activity}` : "\nNo activity reported for this run yet.");
     }
   }
 }

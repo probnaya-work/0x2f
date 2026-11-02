@@ -25,6 +25,7 @@ import {
   INPUT_NOTES
 } from "./state.mjs";
 import { fmtDuration } from "../web/ledger.mjs";
+import { resultEvidence } from "../web/result-evidence.mjs";
 
 // --- text helpers -------------------------------------------------------------
 
@@ -100,13 +101,17 @@ export function shortPath(value, n) {
 export function wrap(value, n) {
   const width = Math.max(8, n | 0);
   const out = [];
-  for (const paragraph of String(value ?? "").split("\n")) {
+  for (const paragraph of String(value ?? "").replace(ANSI_RE, "").replace(CONTROL_RE, "").split("\n")) {
     if (!paragraph.trim()) {
       out.push("");
       continue;
     }
     let line = "";
-    for (const word of paragraph.split(/\s+/).filter(Boolean)) {
+    for (let word of paragraph.split(/\s+/).filter(Boolean)) {
+      if (word.length > width) {
+        if (line) { out.push(line); line = ""; }
+        while (word.length > width) { out.push(word.slice(0, width)); word = word.slice(width); }
+      }
       if (!line.length) line = word;
       else if ((line + " " + word).length <= width) line += " " + word;
       else {
@@ -337,7 +342,7 @@ export function buildRight(model, state, w, p, T) {
       task.state === "needs" ? "halted on you"
         : task.state === "working" ? "executing"
           : task.state === "failed" ? "stopped"
-            : task.state === "ready" ? "complete · awaiting you"
+            : task.state === "ready" ? "result available · review"
               : "closed",
       task.state === "needs" ? p.accent : task.state === "failed" ? p.bad : p.dim
     )
@@ -345,6 +350,10 @@ export function buildRight(model, state, w, p, T) {
   // Which machine ran it. One task can outlive the terminal it was started
   // from, and a run's node is persisted per run, never assumed.
   field("ON", [T(model.node + " · " + model.workspace.label, p.ghost)]);
+  if (["ready", "done", "failed"].includes(task.state)) {
+    lines.push({ cells: [T("")] });
+    field("REVIEW", [T("r  full request · written result · checks · history", p.accent)]);
+  }
 
   if (task.history.length) {
     lines.push({ cells: [T("")] });
@@ -520,7 +529,7 @@ function stateBlock(task, w, p, T) {
     lines.push({
       cells: [
         T(" READY", p.ok, 600),
-        T("   nothing committed · the changes are in the working tree", p.dim)
+        T("   result available for review · r reads it", p.dim)
       ]
     });
     if (task.files.length) {
@@ -567,6 +576,32 @@ function stateBlock(task, w, p, T) {
 // view draws the actual difference, never a provider summary. A file with
 // no git baseline (untracked, or the workspace is not a repository) is
 // listed by path alone, and the view says no diff could be computed.
+export function buildResult(model, state, cols, p, T) {
+  const review = state.review;
+  const task = model.tasks.find(t => t.id === review?.taskId) ?? selected(model.tasks, state);
+  if (!review) return [{ cells: [T(" Loading saved run…", p.dim)] }];
+  const lines = [];
+  const text = value => {
+    for (const line of wrap(value, Math.max(12, cols - 4))) lines.push({ cells: [T(" " + line, p.fg)] });
+  };
+  const heading = value => { lines.push({ cells: [T("")] }); lines.push({ cells: [T(" " + value, p.accent, 600)] }); };
+  text(`0x2F / ${model.workspace.label} / #${task?.idLabel ?? ""} · RUN ${review.run} · ${review.provider ?? "unknown"} · ${review.outcome ?? "unknown"}`);
+  text("Saved provider report · use [ ] for other runs; Esc returns to task actions.");
+  if (review.input) {
+    heading("EXACT SAVED RUN INPUT"); text(review.prompt || "Not recorded.");
+  } else {
+    heading("ORIGINAL REQUEST"); text(review.brief);
+    const evidence = resultEvidence(review.result, review.events);
+    heading("PROVIDER-REPORTED CHECKS"); text(evidence.verification);
+    text(evidence.receipt);
+    heading("WRITTEN RESULT · PROVIDER REPORT"); text(review.result || review.error || "Not recorded.");
+    heading("OBSERVED COMMAND INVOCATIONS · success is not inferred");
+    text(evidence.commands.join("\n") || "Not recorded.");
+    heading("SOURCE MATERIAL"); text("i reads the exact input saved for this run. The written result above includes the provider's Evidence and Verification sections unchanged.");
+  }
+  return lines;
+}
+
 export function buildChanges(model, state, cols, p, T) {
   const task = selected(model.tasks, state);
   if (!task) return [{ cells: [T(" no task selected", p.ghost)] }];
@@ -574,9 +609,7 @@ export function buildChanges(model, state, cols, p, T) {
   const planned = task.state === "needs" && task.halt?.kind === "permission";
   const kindWord = planned
     ? "PLANNED · NOT YET WRITTEN"
-    : task.state === "done"
-      ? "ACCEPTED"
-      : "IN THE WORKING TREE · NOTHING COMMITTED";
+    : "CURRENT WORKING TREE VS HEAD";
 
   lines.push({
     cells: [
@@ -592,6 +625,9 @@ export function buildChanges(model, state, cols, p, T) {
   });
   lines.push({ cells: [T(" " + "─".repeat(Math.max(1, cols - 2)), p.rule)] });
 
+  if (!planned) {
+    for (const line of wrap("Current diff at viewing time, not an immutable patch of this run. Later edits may be included.", Math.max(12, cols - 4))) lines.push({ cells: [T(" " + line, p.dim)] });
+  }
   if (planned) {
     lines.push({ cells: [T("")] });
     lines.push({
@@ -608,7 +644,7 @@ export function buildChanges(model, state, cols, p, T) {
     }
     lines.push({ cells: [T("")] });
     lines.push({
-      cells: [T("  the file has not been written — allow the request and the run writes it", p.ghost)]
+      cells: [T("  requested operation · ALLOW continues this run with the permission", p.ghost)]
     });
   } else if (state.diff && state.diff.length) {
     // The real change set, already loaded by the app (actions.getTaskDiff).
@@ -775,6 +811,7 @@ const KEYS = [
   ["↵", "the one action this task is waiting for (shown bottom-left)"],
   ["x", "the alternative — reject · save only · send back · drop"],
   ["d", "changes — the real diff of the working tree, or the planned write"],
+  ["r", "read full request/result/checks; [ ] selects run, i shows saved run input, j/k scrolls, g/G ends"],
   ["c", "note or correct — kept on the task, carried into every later run"],
   ["p", "point the next run at another provider"],
   ["t", "expand the trace of the current run"],
@@ -867,6 +904,12 @@ export function frame(model, state, opts = {}) {
     hint = "any key   back";
   } else if (state.mode === "composer") {
     lines = buildComposer(model, state, cols, p, T).slice(0, avail);
+  } else if (state.mode === "result") {
+    const all = buildResult(model, state, cols, p, T);
+    const max = Math.max(0, all.length - avail);
+    const off = Math.min(state.dscroll, max);
+    lines = all.slice(off, off + avail);
+    hint = "j/k scroll   g/G ends   [ ] run   i input/result   esc back" + (max ? "   " + Math.min(all.length, off + avail) + "/" + all.length : "");
   } else if (state.mode === "diff") {
     const all = buildChanges(model, state, cols, p, T);
     const max = Math.max(0, all.length - avail);
@@ -949,6 +992,7 @@ export function frame(model, state, opts = {}) {
     const secondary = secondaryAction(task);
     const parts = [];
     if (primary) parts.push("↵ " + primary.label.toLowerCase());
+    if (task) parts.push("r result");
     if (secondary) parts.push("x " + secondary.label.toLowerCase());
     if (task) parts.push("c note");
     if (task?.hasChanges) parts.push("d changes");

@@ -1,0 +1,14 @@
+{
+  "dark": {
+    "endVisibleInReader": true,
+    "diff": true,
+    "width": 354,
+    "scrollWidth": 354
+  },
+  "light": {
+    "endVisibleInReader": true,
+    "scrollWidth": 354,
+    "theme": "light",
+    "width": 354
+  }
+}

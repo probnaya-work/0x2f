@@ -690,3 +690,25 @@ test("the LAN phone flow works with the pure-JS crypto fallback (no WebCrypto su
   const snap2 = await phone.snapshot();
   assert.ok(snap2.tasks.some(task => task.id === created.id));
 });
+
+for (const returns of [true, false]) {
+  test(`LAN pairing leaves supervised restart ownership with the service manager (${returns ? "returns" : "timeout"})`, async t => {
+    const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-lan-supervised-"));
+    t.after(() => fs.rm(base, { recursive: true, force: true }));
+    let starts = 0, signals = 0;
+    const invoke = () => pairDevice({
+      base, lan: true, waitMs: 60, pollMs: 5,
+      networkInterfaces: () => ({ lan: [{ family: "IPv4", internal: false, address: "192.168.1.163" }] }),
+      ensure: async () => { starts++; return { status: "reused" }; },
+      killImpl: async () => { signals++; },
+      fetchImpl: async url => ({ ok: true, json: async () => url.endsWith("/api/health")
+        ? { ok: true, mode: "local", base, supervised: true, lan: signals > 0 && returns }
+        : { registered: true } }),
+      log: quiet
+    });
+    if (returns) assert.equal((await invoke()).registered, true);
+    else await assert.rejects(invoke, /supervised.*did not return.*no detached replacement/i);
+    assert.equal(starts, 1, "pair must never spawn a replacement behind the supervisor");
+    assert.equal(signals, 1, "signal only the owned runtime once");
+  });
+}

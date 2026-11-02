@@ -34,11 +34,14 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+Environment=0X2F_SUPERVISED=1
 User=<USER>
 WorkingDirectory=/srv/<REPO>
 ExecStart=/usr/bin/env node /usr/local/lib/node_modules/0x2f/src/server-entry.mjs /srv/<REPO> 4242
 Restart=always
 RestartSec=2
+# Detached runs intentionally survive a runtime restart; CLOSE is not cancellation.
+KillMode=process
 UMask=0077
 NoNewPrivileges=true
 

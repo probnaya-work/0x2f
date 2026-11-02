@@ -1,0 +1,25 @@
+# Per-user always-on runtime. Replace <NODE>, <PACKAGE>, <WORKSPACE>, <BIN>.
+# Absolute paths are required. Enable lingering for this user with the host owner.
+# Keep credentials in that same user's supported harness login store.
+[Unit]
+Description=0x2F workspace runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=0X2F_SUPERVISED=1
+WorkingDirectory=<WORKSPACE>
+Environment=PATH=<BIN>:/usr/local/bin:/usr/bin:/bin
+ExecStart=<NODE> <PACKAGE>/src/server-entry.mjs <WORKSPACE> 4242
+Restart=always
+RestartSec=2
+# The foreground server may restart while a detached worker completes its run.
+KillMode=process
+UMask=0077
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

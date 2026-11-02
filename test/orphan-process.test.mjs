@@ -235,3 +235,29 @@ for (const event of [
   assert.equal(resumed.execution.attempts, 2);
   assert.equal(resumed.processGroupId, resumed.pid);
 });
+
+test("retry waits for a short-lived descendant after the terminal worker itself has exited", {
+  skip: process.platform === "win32" ? "POSIX process-group qualification" : false
+}, async t => {
+  const base=await fs.mkdtemp(path.join(os.tmpdir(),"work-descendant-drain-"));
+  const leaderFile=path.join(base,"leader.mjs"), childFile=path.join(base,"child.mjs");
+  await fs.writeFile(childFile,'setTimeout(() => process.exit(0), 650);');
+  await fs.writeFile(leaderFile,`import {spawn} from 'node:child_process';
+const child=spawn(process.execPath,[${JSON.stringify(childFile)}],{stdio:'ignore'});
+child.once('spawn',()=>setTimeout(()=>process.exit(0),50));`);
+  let launches=0, group;
+  t.after(async()=>{await waitFor(()=>!processGroupAlive(group),"owned fixture's natural exit");await fs.rm(base,{recursive:true,force:true});});
+  const runtime=createRuntime(base,{providers:[{id:"descendant-fixture",displayName:"Owned descendant fixture",integrationType:"command",command:[process.execPath],capabilities:{},async start(){throw new Error("The injected node owns execution");}}],node:{id:"local",async startExecution(){
+    if(++launches>1) return null;
+    const child=spawn(process.execPath,[leaderFile],{detached:true,stdio:"ignore"});
+    await new Promise((resolve,reject)=>{child.once("spawn",resolve);child.once("error",reject);});
+    group=child.pid;child.unref();return child.pid;
+  }}});
+  const task=await runtime.actions.createWork({brief:"Terminal descendant drain",provider:"descendant-fixture"});
+  await waitFor(()=>!pidAlive(task.pid),"leader exit");
+  assert.equal(processGroupAlive(group),true,"the descendant still owns execution");
+  await runtime.store.updateTask({...task,status:"failed",runs:task.runs.map(r=>({...r,outcome:"failed"}))});
+  const next=await runtime.actions.rerunWork(task.id);
+  assert.equal(processGroupAlive(group),false);
+  assert.equal(launches,2);assert.equal(next.runs.length,2);
+});

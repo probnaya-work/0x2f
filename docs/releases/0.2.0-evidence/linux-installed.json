@@ -1,0 +1,56 @@
+{
+  "node": "v26.13.0",
+  "inheritedCredentials": false,
+  "offline": true,
+  "results": [
+    {
+      "label": "final-check",
+      "start": "2026-11-02T01:31:19.453Z",
+      "end": "2026-11-02T01:31:24.119Z",
+      "code": 0
+    },
+    {
+      "label": "isolated-regression",
+      "start": "2026-11-02T01:31:24.119Z",
+      "end": "2026-11-02T01:32:03.852Z",
+      "code": 0
+    },
+    {
+      "label": "pack",
+      "start": "2026-11-02T01:32:03.852Z",
+      "end": "2026-11-02T01:32:04.232Z",
+      "code": 0
+    },
+    {
+      "label": "install-tarball",
+      "start": "2026-11-02T01:32:04.233Z",
+      "end": "2026-11-02T01:32:04.645Z",
+      "code": 0
+    },
+    {
+      "label": "installed-version",
+      "start": "2026-11-02T01:32:04.646Z",
+      "end": "2026-11-02T01:32:04.715Z",
+      "code": 0
+    },
+    {
+      "label": "installed-pty",
+      "start": "2026-11-02T01:32:04.726Z",
+      "end": "2026-11-02T01:32:16.541Z",
+      "code": 0
+    }
+  ],
+  "platform": "linux",
+  "npm": "/home/bogart/.local/share/0x2f/runtime/lib/node_modules/npm/bin/npm-cli.js",
+  "version": "0.2.0",
+  "sourceFilesMatched": 74,
+  "tarball": "0x2f-0.2.0.tgz",
+  "sha256": "6c1e28ac1f94d43fd3ad20c85f81de59c29ec8466d6da4587f5f8f51fda5f0c5",
+  "status": "passed",
+  "regressionSummary": {
+    "total": 783,
+    "passed": 773,
+    "failed": 0,
+    "skipped": 10
+  }
+}

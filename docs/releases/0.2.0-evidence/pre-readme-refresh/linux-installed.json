@@ -1,0 +1,56 @@
+{
+  "node": "v26.13.0",
+  "inheritedCredentials": false,
+  "offline": true,
+  "results": [
+    {
+      "label": "final-check",
+      "start": "2026-11-02T01:09:19.712Z",
+      "end": "2026-11-02T01:09:24.342Z",
+      "code": 0
+    },
+    {
+      "label": "isolated-regression",
+      "start": "2026-11-02T01:09:24.342Z",
+      "end": "2026-11-02T01:10:03.975Z",
+      "code": 0
+    },
+    {
+      "label": "pack",
+      "start": "2026-11-02T01:10:03.975Z",
+      "end": "2026-11-02T01:10:04.373Z",
+      "code": 0
+    },
+    {
+      "label": "install-tarball",
+      "start": "2026-11-02T01:10:04.373Z",
+      "end": "2026-11-02T01:10:04.800Z",
+      "code": 0
+    },
+    {
+      "label": "installed-version",
+      "start": "2026-11-02T01:10:04.800Z",
+      "end": "2026-11-02T01:10:04.874Z",
+      "code": 0
+    },
+    {
+      "label": "installed-pty",
+      "start": "2026-11-02T01:10:04.884Z",
+      "end": "2026-11-02T01:10:16.708Z",
+      "code": 0
+    }
+  ],
+  "platform": "linux",
+  "npm": "<host-home>/.local/share/0x2f/runtime/lib/node_modules/npm/bin/npm-cli.js",
+  "version": "0.2.0",
+  "sourceFilesMatched": 74,
+  "tarball": "0x2f-0.2.0.tgz",
+  "sha256": "391980a2215fc782723cef4112b48ecfc9e6cd73d3bd49d9a996e281e55391ba",
+  "status": "passed",
+  "regressionSummary": [
+    "\u2139 tests 783",
+    "\u2139 pass 773",
+    "\u2139 fail 0",
+    "\u2139 skipped 10"
+  ]
+}

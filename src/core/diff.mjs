@@ -1,7 +1,8 @@
 // Real per-file diffs for a run's changed files — the shared-layer source
 // for the `d` (CHANGES) surface.
 //
-// The working tree IS the run's output (0x2F never stages or commits), so a
+// These are the CURRENT contents for reported paths, not an immutable patch
+// attributable to a run: later agent or human edits may be included. A
 // real diff exists wherever git has a baseline: the actual difference
 // between the tree and the last commit, per file, computed at read time —
 // never provider prose, never fabricated.

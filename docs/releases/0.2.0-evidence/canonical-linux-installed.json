@@ -1,0 +1,51 @@
+{
+  "node": "v26.13.0",
+  "platform": "linux",
+  "inheritedCredentials": false,
+  "offline": true,
+  "stages": [
+    {
+      "label": "offline-global-install",
+      "code": 0
+    },
+    {
+      "label": "installed-version",
+      "code": 0
+    },
+    {
+      "label": "installed-reader-pty",
+      "code": 0
+    }
+  ],
+  "web": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/app/theme.js",
+      "status": 200
+    },
+    {
+      "path": "/app/app.css",
+      "status": 200
+    },
+    {
+      "path": "/app/theme.css",
+      "status": 200
+    },
+    {
+      "path": "/app/app.js",
+      "status": 200
+    },
+    {
+      "path": "/api/health",
+      "status": 200
+    }
+  ],
+  "version": "0.2.0",
+  "sourceFilesMatched": 74,
+  "packageFilesMatched": 77,
+  "sha256": "eb4d9dd9fc43873ca66906b9d06827459192d94b4e75f65636d7ff37563a1fba",
+  "status": "passed"
+}

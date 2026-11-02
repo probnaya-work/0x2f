@@ -13,6 +13,7 @@
 import {
   COLORS,
   projectLedger,
+  traceAtWidth,
   projectRuns,
   eventsForRun,
   toSteps,
@@ -24,6 +25,8 @@ import {
 import { createSoundPolicy } from "/app/sound-policy.mjs";
 import { createSlashPlayer } from "/app/sound.mjs";
 import { loadRemoteState, createRemoteClient } from "/app/remote.mjs";
+import { resultEvidence } from "/app/result-evidence.mjs";
+import { remotePermissionScope } from "/core/permission-scope.mjs";
 
 const EVENT_TYPES = [
   "task.created",
@@ -113,6 +116,8 @@ const state = {
   // the comparison. This is inspection, never evaluation.
   runSelection: [],
   runDetails: new Map(), // `${taskId}:${run}` -> { ...runRecord, result }
+  routing: null,
+  providersLoaded: false,
   providers: [], // [{ id, displayName }] — for display names on run rows
   connected: false,
   width: window.innerWidth,
@@ -130,6 +135,7 @@ const state = {
   remote: false,
   macOnline: true,
   flash: null,
+  appearanceOpen: null,
   soundOn: storedFlag(SOUND_KEY, true),
   notifyOn: storedFlag(NOTIFY_KEY, false),
   pulse: null, // { type: "ready"|"needs_you", at } — the slash's visual trace
@@ -154,7 +160,7 @@ function el(tag, attrs = {}, children = []) {
     if (value === null || value === undefined || value === false) continue;
     if (key === "style" && typeof value === "object") {
       for (const [prop, v] of Object.entries(value)) {
-        if (v !== null && v !== undefined) node.style.setProperty(camelToKebab(prop), String(v));
+        if (v !== null && v !== undefined) node.style.setProperty(camelToKebab(prop), window.workTheme.cssValue(v));
       }
     } else if (key === "text") {
       node.textContent = String(value);
@@ -375,7 +381,7 @@ async function checkStatus() {
 
 function remoteBlocked() {
   if (state.remote && !state.macOnline) {
-    flash("MAC OFFLINE — actions are unavailable until the Mac reconnects.");
+    flash("HOST OFFLINE — actions are unavailable until the execution host reconnects.");
     return true;
   }
   return false;
@@ -860,7 +866,7 @@ function renderRunPanel(taskId, run, events, accent) {
     result
       ? el("div", { class: "run-result" }, [
           el("div", { class: "run-sub-k", text: "RESULT" }),
-          el("div", { class: "run-result-body" }, [richBody(result)])
+          el("div", { class: "run-result-body", "data-reader-scroll": "run-result-" + taskId + "-" + run.run, "data-focus-key": "run-result-" + taskId + "-" + run.run, tabindex: "0", role: "region", "aria-label": "Run result" }, [richBody(result)])
         ])
       : el("div", { class: "band-pending", style: { color: COLORS.muted }, text: "no written result" })
   ]);
@@ -948,10 +954,10 @@ function trackCell(cell, accent) {
     parts.push(
       el("div", {
         class: "track-head",
-        style: { width: cell.w, background: accent, boxShadow: "0 0 9px " + accent + "70" }
+        style: { width: cell.w, height: cell.h, background: accent }
       })
     );
-    return el("div", { class: "track-cell", style: { width: cell.w } }, parts);
+    return el("div", { class: "track-cell", style: { width: cell.w, left: cell.x + "px" } }, parts);
   }
   if (cell.isHalt) {
     parts.push(
@@ -959,12 +965,12 @@ function trackCell(cell, accent) {
         "div",
         {
           class: "track-halt",
-          style: { background: accent, boxShadow: "0 0 10px " + accent + "70" }
+          style: { background: accent }
         },
         [el("span", { style: { color: accent }, text: "!" })]
       )
     );
-    return el("div", { class: "track-cell", style: { width: cell.w } }, parts);
+    return el("div", { class: "track-cell", style: { width: cell.w, left: cell.x + "px" } }, parts);
   }
   parts.push(
     el("div", {
@@ -972,48 +978,105 @@ function trackCell(cell, accent) {
       style: { height: cell.h, background: cell.c }
     })
   );
-  return el("div", { class: "track-cell", style: { width: cell.w }, title: cell.arg || null }, parts);
+  return el("div", { class: "track-cell", style: { width: cell.w, left: cell.x + "px" }, title: cell.arg || null }, parts);
 }
 
-function renderTrack(row, accent) {
-  const t = row.trace;
+const tracePainters = new Map();
+const traceObserver = new ResizeObserver(entries => {
+  for (const entry of entries) tracePainters.get(entry.target)?.(entry.contentRect.width);
+});
+
+function sizeTrace(node, paint) {
+  tracePainters.set(node, paint);
+  return node;
+}
+
+function connectTraces() {
+  for (const [node, paint] of tracePainters) {
+    if (!node.isConnected) continue;
+    paint(node.clientWidth);
+    traceObserver.observe(node);
+  }
+}
+
+function traceLabel(t) {
+  const count = t.cells.filter(c => !c.isHead && !c.isHalt).length;
+  return "Activity trace" + (t.truncated ? ": latest " + count + " of " + t.total + " signals" : "");
+}
+
+function renderTrack(row, accent, provenance = false) {
+  const t = provenance ? row.provenance : row.trace;
   if (!t) return null; // answer-primary rows (ready/failed/done) carry no trace
+  const wrap = el("div", { class: "track-wrap" + (provenance ? " provenance" : ""), role: "img" });
+  const paint = t => {
+    wrap.setAttribute("aria-label", traceLabel(t));
+    wrap.classList.toggle("trace-truncated", t.truncated);
 
-  const wash = el("div", {
-    class: "track-wash",
-    style: {
-      width: t.doneW,
-      background: "linear-gradient(180deg, rgba(47,95,168,0) 40%, " + accent + "1f 100%)"
-    }
-  });
+    const wash = el("div", {
+      class: "track-wash",
+      style: {
+        width: t.doneW,
+        background: "linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--accent) 12%, transparent) 100%)"
+      }
+    });
 
-  const track = el("div", { class: "track" }, t.cells.map(cell => trackCell(cell, accent)));
+    const track = el("div", { class: "track" + (provenance ? " provenance" : ""), style: { width: t.totalW } }, t.cells.map(cell => trackCell(cell, accent)));
 
-  // CHANGES is the one bracket the projection can ever draw (VERIFY/INSPECT
-  // are intentionally unreachable — see ledger.mjs brackets()).
-  const brackets = el(
-    "div",
-    { class: "track-brackets" },
-    t.brackets.map(b =>
-      el(
-        "div",
-        { class: "track-bracket", style: { left: b.x, width: b.w } },
-        b.label ? [el("span", { class: "track-bracket-label", text: b.label })] : []
+    // CHANGES is the one bracket the projection can ever draw (VERIFY/INSPECT
+    // are intentionally unreachable — see ledger.mjs brackets()).
+    const brackets = el(
+      "div",
+      { class: "track-brackets" },
+      t.brackets.map(b =>
+        el(
+          "div",
+          { class: "track-bracket", style: { left: b.x, width: b.w } },
+          b.label ? [el("span", { class: "track-bracket-label", text: b.label })] : []
+        )
       )
-    )
-  );
+    );
 
-  return el("div", { class: "track-wrap" }, [wash, track, el("div", { class: "track-axis" }), brackets]);
+    const traceNote = t.truncated
+      ? "Latest " + t.cells.filter(c => !c.isHead && !c.isHalt).length + " of " + t.total + " signals"
+      : t.total === 0 ? (row.coarse ? "No structured activity reported" : "No activity signals reported yet") : "";
+    const note = traceNote ? el("div", { class: "trace-tail-note", text: traceNote }) : null;
+    wrap.replaceChildren(...[provenance ? null : wash, track, el("div", { class: "track-axis" }), brackets, note].filter(Boolean));
+  };
+  paint(t);
+  return sizeTrace(wrap, width => paint(traceAtWidth(row.traceSource, width, provenance ? "provenance" : "main")));
 }
 
 // A small, unlabelled version of the trace for the collapsed row — never
 // phase-grouped, just marks (or the coarse ambient bar).
+function traceMark(cell, frozen = false) {
+  const marker = cell.isHead || cell.isHalt;
+  return el("span", {
+    class: "trace-mark" + (!frozen && cell.isHead ? " trace-live" : "") + (cell.isHalt ? " trace-stop" : ""),
+    title: cell.arg || (cell.isHead ? "Live" : cell.isHalt ? "Waiting for you" : null),
+    "data-trace-marker": cell.isHead ? "live" : cell.isHalt ? "halt" : null,
+    style: {
+      left: cell.x + "px", width: cell.w,
+      height: marker ? (frozen ? "6px" : cell.isHalt ? "13px" : cell.h) : cell.h,
+      background: frozen ? "var(--frozen-fill, #b3bcc4)" : marker ? COLORS.accent : cell.c
+    }
+  });
+}
+
 function renderMini(row) {
-  return el(
-    "div",
-    { class: "compact-mini" },
-    row.mini.map(cell => el("span", { style: { width: cell.w, height: cell.h, background: cell.c, flex: "none" } }))
-  );
+  return renderMiniLane(row, "compact-mini");
+}
+
+function renderMiniLane(row, className, frozen = false) {
+  const lane = el("div", { class: className, role: "img" });
+  const paint = t => {
+    const label = traceLabel(t);
+    lane.setAttribute("aria-label", label);
+    lane.title = label;
+    lane.classList.toggle("trace-truncated", t.truncated);
+    lane.replaceChildren(...mobileTraceEls(t.cells, frozen));
+  };
+  paint({cells:row.mini, truncated:row.miniTruncated, total:row.miniTotal});
+  return sizeTrace(lane, width => paint(traceAtWidth(row.traceSource, width, "mini")));
 }
 
 // READY/FAILED close with a small provenance trace instead of the live one:
@@ -1023,21 +1086,9 @@ function renderMini(row) {
 function renderProvenance(row, accent) {
   const p = row.provenance;
   if (!p) return null;
-  const track = el("div", { class: "track provenance" }, p.cells.map(cell => trackCell(cell, accent)));
-  const brackets = el(
-    "div",
-    { class: "track-brackets" },
-    p.brackets.map(b =>
-      el(
-        "div",
-        { class: "track-bracket", style: { left: b.x, width: b.w } },
-        b.label ? [el("span", { class: "track-bracket-label", text: b.label })] : []
-      )
-    )
-  );
   return el("div", { class: "provenance-wrap" }, [
     el("div", { class: "provenance-k", text: p.heading }),
-    el("div", { class: "track-wrap provenance" }, [track, el("div", { class: "track-axis" }), brackets])
+    renderTrack(row, accent, true)
   ]);
 }
 
@@ -1085,7 +1136,7 @@ function renderBrief(row) {
     // Only ever set on a remote surface whose transport had to cut the
     // brief; a cut must read as a cut, never as the end of the sentence.
     row.briefTruncated
-      ? el("div", { class: "brief-truncated", text: "TRUNCATED FOR THIS DEVICE — open this task on the Mac to read it in full" })
+      ? el("div", { class: "brief-truncated", text: "TRUNCATED FOR THIS DEVICE — open this task locally on the execution host to read it in full" })
       : null
   ].filter(Boolean));
 }
@@ -1234,7 +1285,7 @@ function renderHalt(row, accent) {
   acts.push(closeButton(row.id));
 
   const options =
-    row.permOptions.length && (!row.permAllowable || !row.permRejectable)
+    row.permOptions.length
       ? el(
           "div",
           { class: "halt-why", style: { color: COLORS.muted } },
@@ -1250,10 +1301,11 @@ function renderHalt(row, accent) {
       row.permLive
         ? el("div", { class: "halt-verb", text: "agent requested permission" })
         : row.permPath
-          ? el("div", { class: "halt-verb", text: "wants to modify" })
+          ? el("div", { class: "halt-verb", text: "permission target" })
           : null,
       row.permPath ? el("div", { class: "halt-path", text: row.permPath }) : null,
       row.permWhy ? el("div", { class: "halt-why", text: row.permWhy }) : null,
+      row.permScopeNotice ? el("div", { class: "halt-why", text: "INCOMPLETE SCOPE — " + row.permScopeNotice }) : null,
       options,
       state.inspectId === row.id && row.permDetail
         ? el("div", { class: "halt-detail", text: row.permDetail })
@@ -1370,11 +1422,22 @@ function renderFailureBand(row) {
   ]);
 }
 
+function renderCheckEvidence(row, detail) {
+  const events = eventsForRun(state.eventsByTask.get(row.id) ?? [], detail?.runs?.at(-1)?.run ?? 1);
+  const facts = resultEvidence(detail?.result, events);
+  return el("div", { class: "check-evidence", style: { marginBottom: "16px", whiteSpace: "pre-wrap", overflowWrap: "anywhere" } }, [
+    el("div", { class: "run-sub-k", text: "PROVIDER-REPORTED CHECKS" }),
+    el("div", { text: facts.verification }),
+    el("div", { class: "m-dmeta", text: facts.receipt }),
+    el("div", { class: "m-dmeta", text: facts.commands.length ? `${facts.commands.length} observed command invocation(s) — success is not inferred; inspect COMMANDS.` : "Command invocation evidence: not recorded." })
+  ]);
+}
+
 function renderResult(row, detail) {
   if (row.failed && row.failureKind === "auth") return renderFailureBand(row);
 
   const body = detail && detail.result && detail.result.trim()
-    ? el("div", { class: "result-body" }, [richBody(detail.result.trim())])
+    ? el("div", { class: "result-body", "data-reader-scroll": "result-" + row.id, "data-focus-key": "result-" + row.id, tabindex: "0", role: "region", "aria-label": "Written result" }, [renderCheckEvidence(row, detail), richBody(detail.result.trim())])
     : row.error
       ? el("div", { class: "result-body", style: { color: COLORS.fail } }, [richBody(row.error)])
       : el("div", { class: "band-pending", style: { color: COLORS.muted }, text: "no written result" });
@@ -1451,6 +1514,7 @@ function renderNoteLine(row) {
         body: JSON.stringify({ note })
       });
       noteInputs.delete(row.id);
+      flash("Note saved for the next run. The current run does not receive it.");
     } catch (error) {
       flash(error.message);
       return;
@@ -1578,19 +1642,54 @@ function counter(value, label, color, labelColor, extraClass = "") {
   ]);
 }
 
+function renderThemeControl(scope) {
+  const preference = window.workTheme.preference;
+  return el("div", { class: "theme-control", role: "group", "aria-label": "Theme" },
+    ["light", "dark", "system"].map(value => el("button", {
+      type: "button", class: "theme-option", "data-theme-option": value, "aria-label": value[0].toUpperCase() + value.slice(1),
+      "data-focus-key": "theme-" + scope + "-" + value,
+      "aria-pressed": String(preference === value),
+      text: value[0].toUpperCase() + value.slice(1)
+    })));
+}
+
+function renderAppearanceSettings(scope) {
+  const notify = renderNotifyControl();
+  notify.setAttribute("data-focus-key", "notify-" + scope);
+  return el("details", {
+    class: "appearance-settings", open: state.appearanceOpen === scope,
+    onToggle: event => {
+      if (!event.currentTarget.isConnected) return;
+      if (event.currentTarget.open) state.appearanceOpen = scope;
+      else if (state.appearanceOpen === scope) state.appearanceOpen = null;
+    }
+  }, [
+    el("summary", { class: "appearance-toggle", "data-focus-key": "settings-" + scope, title: "Theme, sound and notifications" }, [
+      "SETTINGS", el("span", { class: "appearance-toggle-mark", "aria-hidden": "true", text: "+" })
+    ]),
+    el("div", { class: "appearance-panel" }, [
+      el("div", { class: "appearance-k", text: "THEME" }),
+      renderThemeControl(scope),
+      el("p", { class: "appearance-hint", text: "System follows your device’s appearance." }),
+      el("div", { class: "appearance-alerts" }, [
+        el("button", {
+          type: "button", class: "setting", "data-focus-key": "sound-" + scope,
+          onClick: toggleSound, text: state.soundOn ? "SOUND ON" : "SOUND OFF",
+          title: state.soundOn ? "Sounds when you are away; silent while this page has focus" : "Silent — no audio"
+        }), notify
+      ]),
+      el("div", { class: "appearance-host", text: "RUNTIME / " + (state.node || location.host) })
+    ])
+  ]);
+}
+
 function renderChrome(ledger, accent) {
   const now = new Date();
   const clock = [now.getHours(), now.getMinutes(), now.getSeconds()].map(two).join(":");
   const needsColor = ledger.counts.needs_you ? accent : "#a8b3bc";
-  // The accent means "your act is required". At zero nothing is required, so
-  // the label drops to the chrome's label value; the count keeps its own.
-  const needsLabelColor = ledger.counts.needs_you ? accent : "#79838c";
+  const needsLabelColor = ledger.counts.needs_you ? accent : "#9aa6b0";
   const clockCounter = counter(clock, "TODAY", "#c3ccd3", "#9aa6b0", "clock");
   clockNode = clockCounter.querySelector(".counter-n");
-
-  // The "/" mark pulses with the sound: one fade for READY, a split fade for
-  // NEEDS YOU. The negative animation delay resumes a pulse across re-renders
-  // instead of restarting it mid-flight.
   let slashClass = "brand-slash";
   let slashDelay = null;
   if (state.pulse) {
@@ -1598,51 +1697,31 @@ function renderChrome(ledger, accent) {
     if (elapsed < PULSE_MS[state.pulse.type]) {
       slashClass += state.pulse.type === "needs_you" ? " slash-split" : " slash";
       slashDelay = "-" + elapsed + "ms";
-    } else {
-      state.pulse = null;
-    }
+    } else state.pulse = null;
   }
-
   return el("div", { class: "chrome" }, [
     el("div", { class: "chrome-inner" }, [
       el("div", { class: "brand" }, [
         el("span", { class: "brand-mark", text: "0x2F" }),
         el("span", { class: slashClass, style: slashDelay ? { animationDelay: slashDelay } : {}, text: "/" }),
-        // §02: the mark completes the path it was already drawing — "0x2F /
-        // <workspace>" — instead of ending at the slash with nothing after
-        // it. Full absolute path on hover (native title), never printed.
-        state.workspace?.label
-          ? el("span", { class: "brand-workspace", title: state.workspace.path || "", text: state.workspace.label })
-          : null,
-        el("span", { class: "brand-scope", text: state.remote ? "REMOTE" : "LOCAL" }),
-        el("span", { class: "chrome-div" }),
-        el("span", { class: "runtime" }, [
-          el("span", { class: "runtime-label", text: "RUNTIME" }),
-          el("span", { class: "runtime-dot" + (state.connected ? "" : " off") }),
-          // The same machine identity used everywhere else (§01's failure
-          // band, the mobile bar): os.hostname() locally, the paired Mac's
-          // agent name remotely — falling back to the connection target only
-          // if that identity hasn't arrived yet.
-          el("span", { class: "runtime-host", text: state.node || location.host })
+        el("div", { class: "workspace-identity" }, [
+          el("div", { class: "workspace-heading" }, [
+            el("span", { class: "brand-workspace", title: state.workspace?.path || "", text: state.workspace?.label || "WORKSPACE" }),
+            el("span", { class: "brand-scope", text: state.remote ? "REMOTE" : "LOCAL" })
+          ]),
+          el("div", { class: "workspace-runtime" }, [
+            el("span", { class: "runtime-dot" + (state.connected ? "" : " off") }),
+            el("span", { class: "runtime-host", title: state.node || location.host, text: state.node || location.host })
+          ])
         ])
-      ]),
-      el("div", { class: "chrome-settings" }, [
-        el("button", {
-          class: "setting",
-          onClick: toggleSound,
-          text: state.soundOn ? "SOUND ON" : "SOUND OFF",
-          title: state.soundOn
-            ? "the slash sounds when you are away — silent while this page has focus"
-            : "silent — no audio at all"
-        }),
-        renderNotifyControl()
       ]),
       el("div", { class: "counters" }, [
         counter(ledger.countNeeds, "NEEDS YOU", needsColor, needsLabelColor),
         counter(ledger.countWorking, "WORKING", "#f2f5f7", "#a8b3bc"),
         counter(ledger.countReady, "READY", "#f2f5f7", "#a8b3bc"),
         clockCounter
-      ])
+      ]),
+      renderAppearanceSettings("desktop")
     ])
   ]);
 }
@@ -1665,6 +1744,7 @@ let composerInput = null;
 let composerNode = null;
 let adapterNode = null;
 let providerSelect = null;
+let providerOptionsLoaded = false;
 let composerHint = null;
 let refineButton = null;
 let startButton = null;
@@ -1715,6 +1795,7 @@ function buildComposer() {
     title: "execution provider"
   });
   providerSelect = select;
+  populateProviderSelect();
 
   const refineKey = el("span", { class: "composer-key", text: "⌥↵" });
   const refineLabel = el("span", { text: "BRIEF" });
@@ -2040,50 +2121,34 @@ function buildComposer() {
 // disabled — they cannot be submitted here, and the server enforces the same
 // fact at the action boundary. A failure leaves the select empty and submits
 // fall back to the server default, so provider choice never blocks a task.
+function populateProviderSelect() {
+  if (!providerSelect) return;
+  const providers = state.providers;
+  const previous = providerOptionsLoaded ? providerSelect.value : null;
+  providerSelect.replaceChildren(
+    el("option", { value: "auto", text: "AUTO" }),
+    ...providers.map(p => el("option", {
+      value: p.id, text: p.id.toUpperCase() + (p.available ? "" : " — UNAVAILABLE"),
+      disabled: p.available ? undefined : true
+    }))
+  );
+  const available = value => value === "auto" || providers.some(p => p.id === value && p.available);
+  const configured = state.routing?.default;
+  providerSelect.value = previous && available(previous) ? previous
+    : configured && available(configured) ? configured
+      : providers.find(p => p.available)?.id || "auto";
+  providerOptionsLoaded = state.providersLoaded;
+}
+
 async function loadProviders() {
   try {
-    const providers = await api("/api/providers");
-    state.providers = providers;
-    // Declared capabilities drive progressive fidelity everywhere (desktop
-    // AND mobile) — re-render once they land, or every row stays classified
-    // "coarse" (the fidelity() default for an undeclared provider) until the
-    // next unrelated re-render happens to pick state.providers up.
+    state.providers = await api("/api/providers");
+    try { state.routing = await api("/api/routing"); } catch { /* server default */ }
+    state.providersLoaded = true;
     render();
-    // The provider <select> only exists on desktop — the mobile Attention
-    // Stack never mounts the composer (task creation is out of scope for
-    // Remote Control v1).
-    if (!providerSelect) return;
-    let routing = null;
-    try {
-      routing = await api("/api/routing");
-    } catch {
-      /* server default applies */
-    }
-    providerSelect.replaceChildren(
-      el("option", { value: "auto", text: "AUTO" }),
-      ...providers.map(p =>
-        el("option", {
-          value: p.id,
-          text: p.id.toUpperCase() + (p.available ? "" : " — UNAVAILABLE"),
-          disabled: p.available ? undefined : true
-        })
-      )
-    );
-    // Select the configured default when it can actually run; otherwise the
-    // first available provider — or AUTO when none can run. Never preselect
-    // a provider the server would refuse (the select must not look armed
-    // when its value cannot be submitted).
-    const configured = routing?.default;
-    if (configured === "auto") {
-      providerSelect.value = "auto";
-    } else if (configured && providers.some(p => p.id === configured && p.available)) {
-      providerSelect.value = configured;
-    } else {
-      const firstAvailable = providers.find(p => p.available);
-      providerSelect.value = firstAvailable ? firstAvailable.id : "auto";
-    }
+    populateProviderSelect();
   } catch {
-    /* server default applies */
+    /* AUTO delegates to the server default even if discovery is unavailable. */
   }
 }
 
@@ -2151,12 +2216,34 @@ function currentLedger(now = Date.now()) {
   });
 }
 
+// Preserve nested reading positions as live events refresh the surrounding ledger.
+function keepReaderPositions() {
+  const positions = new Map();
+  for (const region of document.querySelectorAll("[data-reader-scroll]")) {
+    [region, ...region.querySelectorAll(".rich-pre")].forEach((node, index) => {
+      positions.set(region.dataset.readerScroll + ":" + index, [node.scrollTop, node.scrollLeft]);
+    });
+  }
+  return () => {
+    for (const region of document.querySelectorAll("[data-reader-scroll]")) {
+      [region, ...region.querySelectorAll(".rich-pre")].forEach((node, index) => {
+        const position = positions.get(region.dataset.readerScroll + ":" + index);
+        if (position) [node.scrollTop, node.scrollLeft] = position;
+      });
+    }
+  };
+}
+
 function render() {
+  traceObserver.disconnect();
+  tracePainters.clear();
+  const restoreReaders = keepReaderPositions();
   // Below 640px this is the Attention Stack, not the desktop ledger narrowed
   // — a different code path entirely (see "--- mobile: the Attention Stack
   // ---" below). Desktop rendering below this line is untouched by it.
   if (isMobileWidth()) {
     renderMobile();
+    connectTraces();
     return;
   }
 
@@ -2206,7 +2293,7 @@ function render() {
     parts.push(
       el("div", {
         class: "mac-offline-bar",
-        text: "MAC OFFLINE — showing last known state. Actions are disabled until the Mac reconnects."
+        text: "HOST OFFLINE — showing last known state. Actions are disabled until the execution host reconnects."
       })
     );
   }
@@ -2218,8 +2305,10 @@ function render() {
     ...(state.flash ? [el("div", { class: "flash", text: state.flash })] : [])
   );
   shell.replaceChildren(...parts);
+  connectTraces();
 
   scroll.scrollTop = scrollTop;
+  restoreReaders();
   if (focusKey) document.querySelector('[data-focus-key="' + focusKey + '"]')?.focus();
 }
 
@@ -2260,6 +2349,17 @@ function onKeyDown(event) {
     return;
   }
   const target = event.target;
+  const settings = target?.closest?.(".appearance-settings");
+  if (settings) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      state.appearanceOpen = null;
+      settings.open = false;
+      settings.querySelector("summary")?.focus();
+    }
+    return;
+  }
+  if (target?.closest?.("button, summary")) return;
   const inField =
     target &&
     (target.tagName === "INPUT" ||
@@ -2451,8 +2551,10 @@ let mobileDetailMounted = null;
 function openMobileDetail(id) {
   mobile.screen = "detail";
   mobile.detailId = id;
+  state.appearanceOpen = null;
   ensureDetail(id);
   render();
+  document.querySelector('.m-detail .m-back')?.focus({ preventScroll: true });
 }
 
 // Back is an edge swipe or the ‹ ALL WORK line — both call this. It plays a
@@ -2464,21 +2566,20 @@ function openMobileDetail(id) {
 // motion skips straight there.
 function closeMobileDetail() {
   if (mobile.screen !== "detail" || mobile.closing) return;
+  const previousId = mobile.detailId;
   mobileDetailMounted = null;
-  if (prefersReducedMotion()) {
-    mobile.screen = "overview";
-    mobile.detailId = null;
-    render();
-    return;
-  }
-  mobile.closing = true;
-  render();
-  setTimeout(() => {
+  state.appearanceOpen = null;
+  const finish = () => {
     mobile.screen = "overview";
     mobile.detailId = null;
     mobile.closing = false;
     render();
-  }, 180);
+    document.querySelector('[data-focus-key="mobile-task-' + previousId + '"]')?.focus({ preventScroll: true });
+  };
+  if (prefersReducedMotion()) { finish(); return; }
+  mobile.closing = true;
+  render();
+  setTimeout(finish, 180);
 }
 
 function openCorrection(id) {
@@ -2526,7 +2627,7 @@ async function submitCorrection(id, { rerun } = {}) {
   }
   closeCorrection();
   if (rerun) await sendBack(id);
-  else await reloadTasks();
+  else { flash("Note saved for the next run. The current run does not receive it."); await reloadTasks(); }
 }
 
 // A small static trace: the same cells ledger.mjs already computed for this
@@ -2534,42 +2635,27 @@ async function submitCorrection(id, { rerun } = {}) {
 // out inline. `frozen` (Mac unreachable) strips the live head/halt-tear
 // treatment and mutes every mark to graphite — nothing here is awaiting you.
 function mobileTraceEls(cells, frozen) {
-  return (cells ?? []).map(cell => {
-    if (frozen) {
-      const h = cell.isHead || cell.isTear ? "6px" : cell.h;
-      return el("span", { style: { width: cell.w, height: h, background: "#b3bcc4", flex: "none" } });
-    }
-    if (cell.isHead) {
-      return el("span", {
-        class: "m-thead",
-        style: { width: cell.w, height: "12px", background: COLORS.accent, flex: "none" }
-      });
-    }
-    if (cell.isHalt) {
-      return el("span", {
-        style: { width: cell.w, height: "13px", background: COLORS.accent, flex: "none" }
-      });
-    }
-    return el("span", { style: { width: cell.w, height: cell.h, background: cell.c, flex: "none" } });
-  });
+  return (cells ?? []).map(cell => traceMark(cell, frozen));
 }
 
 // --- mobile chrome -----------------------------------------------------------
 
 function renderMobileBar(frozen) {
-  // §02: project takes the bright slot, host drops to the dim one — on the
-  // phone you are always somewhere else, so "which repo" outranks "which
-  // Mac" (see renderChrome's desktop equivalent).
+  const host = state.node || location.host;
   return el("div", { class: "m-bar" }, [
     el("div", { class: "m-bar-inner" }, [
-      el("span", { class: "m-mark", text: "0x2F" }),
-      el("span", { class: "m-slash", text: "/" }),
-      state.workspace?.label
-        ? el("span", { class: "m-workspace", title: state.workspace.path || "", text: state.workspace.label })
-        : null,
-      el("span", { class: "m-bar-spacer" }),
-      el("span", { class: "m-dot" + (frozen ? " off" : "") }),
-      el("span", { class: "m-host" + (frozen ? " dim" : ""), text: state.node || location.host })
+      el("div", { class: "m-identity" }, [
+        el("div", { class: "m-identity-title" }, [
+          el("span", { class: "m-mark", text: "0x2F" }),
+          el("span", { class: "m-slash", text: "/" }),
+          el("span", { class: "m-workspace", title: state.workspace?.path || "", text: state.workspace?.label || "WORKSPACE" })
+        ]),
+        el("div", { class: "m-identity-runtime" }, [
+          el("span", { class: "m-dot" + (frozen ? " off" : "") }),
+          el("span", { class: "m-host" + (frozen ? " dim" : ""), title: host, text: host.replace(/\.local$/i, "") })
+        ])
+      ]),
+      renderAppearanceSettings("overview")
     ])
   ]);
 }
@@ -2578,8 +2664,8 @@ function renderMobileOfflineBar() {
   if (!(state.remote && !state.macOnline)) return null;
   const since = mobile.offlineSince;
   const label = since
-    ? "MAC OFFLINE · LAST KNOWN " + hhmm(since) + " · " + Math.max(0, Math.round((Date.now() - since) / 60000)) + " MIN AGO"
-    : "MAC OFFLINE · LAST KNOWN STATE";
+    ? "HOST OFFLINE · LAST KNOWN " + hhmm(since) + " · " + Math.max(0, Math.round((Date.now() - since) / 60000)) + " MIN AGO"
+    : "HOST OFFLINE · LAST KNOWN STATE";
   return el("div", { class: "m-offline-bar", text: label });
 }
 
@@ -2606,13 +2692,14 @@ function renderMobileOverviewToolbar(ledger, frozen) {
 function renderMobileDetailToolbar(row, ledger, frozen) {
   const blue = row.halted;
   const children = [
-    el("span", { class: "m-back", onClick: closeMobileDetail, text: "‹ ALL WORK" })
+    el("button", { type: "button", class: "m-back", "data-focus-key": "all-work", onClick: closeMobileDetail, text: "‹ ALL WORK" })
   ];
   if (!blue && ledger.counts.needs_you) {
     children.push(
       el("span", { class: "m-back-badge", text: ledger.counts.needs_you + " NEEDS YOU" })
     );
   }
+  children.push(renderAppearanceSettings("detail"));
   const cls = "m-toolbar " + (blue ? "blue" : "quiet") + (frozen ? "" : "");
   return el("div", { class: cls }, children);
 }
@@ -2622,7 +2709,20 @@ function renderMobileDetailToolbar(row, ledger, frozen) {
 // The oldest ask, when it is a permission: answerable in place. "The ask is
 // answerable where it appears" — opening the Task is for context you did
 // not need, not a step on the way to ALLOW.
+function mobilePermissionRow(row) {
+  const blocked = state.tasks.find(t => t.id === row.id)?.blockedOn;
+  if (!blocked || blocked.type !== "permission") return row;
+  // Remote scope was assessed on the host from the full recorded request.
+  // Local narrow layouts use exactly the same bounded-scope assessment.
+  const scope = typeof blocked.scopeIncomplete === "boolean"
+    ? { complete: !blocked.scopeIncomplete, reasons: [blocked.scopeNotice] }
+    : remotePermissionScope(blocked, state.base);
+  return { ...row, permAllowable: row.permAllowable && scope.complete,
+    permScopeNotice: scope.complete ? "" : scope.reasons.join(" ") + (blocked.scopeNotice ? "" : " Review and allow on the computer.") };
+}
+
 function renderMobileAskCard(row, frozen) {
+  row = mobilePermissionRow(row);
   const acts = [];
   if (row.permAllowable) {
     const btn = el("button", { class: "m-btn m-btn-primary", text: "ALLOW" });
@@ -2650,16 +2750,18 @@ function renderMobileAskCard(row, frozen) {
     row.permLive
       ? el("div", { class: "m-ask-verb", text: "agent requested permission" })
       : row.permPath
-        ? el("div", { class: "m-ask-verb", text: "wants to modify" })
+        ? el("div", { class: "m-ask-verb", text: "permission target" })
         : null,
     row.permPath ? el("div", { class: "m-ask-path", text: row.permPath }) : null,
-    !row.permPath && row.permWhy ? el("div", { class: "m-ask-why" }, inlineEls(parseInline(row.permWhy))) : null,
+    row.permWhy ? el("div", { class: "m-ask-why", text: row.permWhy }) : null,
+    row.permOptions.length ? el("div", { class: "m-ask-why", text: "Permission choices: " + row.permOptions.map(o => o.name + " (" + o.kind + ")").join(" · ") }) : null,
+    row.permScopeNotice ? el("div", { class: "m-ask-why", text: "INCOMPLETE SCOPE — " + row.permScopeNotice }) : null,
     acts.length ? el("div", { class: "m-ask-acts" }, acts) : null,
     el("div", {
       class: "m-ask-hint" + (frozen ? " offline" : ""),
       onClick: frozen ? null : () => openMobileDetail(row.id),
       text: frozen
-        ? "the answer has to reach the Mac · it will still be waiting when it reconnects"
+        ? "the answer has to reach the execution host · it will still be waiting when it reconnects"
         : "the run continues where it stopped · open for context"
     })
   ]);
@@ -2677,12 +2779,12 @@ function renderMobileAskLine(row, frozen) {
   // title — the title is the disambiguator, the question is the decision —
   // and the line wraps to at most two lines instead of clipping mid-sentence
   // (see .m-ask-line-title in app.css). Every other halt is unchanged: the
-  // task title stays primary, "wants to modify X" (or the raw why) previews.
+  // task title stays primary; the recorded target (or description) previews.
   const primaryText = isDecision && row.permQuestionHeading ? row.permQuestionHeading : row.title;
-  const preview = isDecision ? row.title : row.permPath ? "wants to modify " + row.permPath : row.permWhy;
+  const preview = isDecision ? row.title : row.permPath ? "permission target " + row.permPath : row.permWhy;
   return el(
-    "div",
-    { class: "m-ask-line", onClick: frozen ? null : () => openMobileDetail(row.id) },
+    "button",
+    { type: "button", class: "m-ask-line", "data-focus-key": "mobile-task-" + row.id, disabled: frozen, onClick: frozen ? null : () => openMobileDetail(row.id) },
     [
       el("div", { class: "m-ask-line-body" }, [
         el("span", { class: "m-ask-line-kind", text: kind }),
@@ -2703,21 +2805,21 @@ function renderMobileWorkingRow(row, frozen) {
   else if (row.note) caption = row.note;
   else caption = row.arg || "starting execution";
 
-  return el("div", { class: "m-row-tap", onClick: () => openMobileDetail(row.id) }, [
+  return el("button", { type: "button", class: "m-row-tap", "data-focus-key": "mobile-task-" + row.id, onClick: () => openMobileDetail(row.id) }, [
     el("div", { class: "m-row-head" }, [
       el("span", { class: "m-row-state", text: "WORKING" }),
       el("span", { class: "m-row-t", text: row.elapsed })
     ]),
     el("div", { class: "m-row-title" }, inlineEls(parseInline(row.title))),
     el("div", { class: "m-row-trace-line" }, [
-      el("div", { class: "m-row-trace" }, mobileTraceEls(row.mini, frozen)),
+      renderMiniLane(row, "m-row-trace", frozen),
       el("span", { class: "m-row-caption", text: caption })
     ])
   ]);
 }
 
 function renderMobileReadyRow(row) {
-  return el("div", { class: "m-row-tap", onClick: () => openMobileDetail(row.id) }, [
+  return el("button", { type: "button", class: "m-row-tap", "data-focus-key": "mobile-task-" + row.id, onClick: () => openMobileDetail(row.id) }, [
     el("div", { class: "m-row-head" }, [
       el("span", { class: "m-row-state", text: "READY" }),
       el("span", { class: "m-row-t", text: row.elapsed })
@@ -2733,7 +2835,7 @@ function renderMobileFailedRow(row) {
   // provider display name and node, plus " · task kept" (mobile-only, the
   // one thing this row adds).
   const isAuth = row.failureKind === "auth";
-  return el("div", { class: "m-row-tap", onClick: () => openMobileDetail(row.id) }, [
+  return el("button", { type: "button", class: "m-row-tap", "data-focus-key": "mobile-task-" + row.id, onClick: () => openMobileDetail(row.id) }, [
     el("div", { class: "m-row-head" }, [
       el("span", { class: "m-row-state", text: isAuth ? "FAILED · SIGN IN NEEDED" : "FAILED" }),
       el("span", { class: "m-row-t", text: row.elapsed })
@@ -2862,21 +2964,23 @@ function renderMobileResult(row, detail) {
   if (!text) return el("div", { class: "band-pending", style: { color: COLORS.muted, marginTop: "11px" }, text: "no written result" });
   const blocks = parseRich(text);
   const expanded = mobile.resultExpanded.has(row.id);
-  const shown = expanded ? blocks : blocks.slice(0, 3);
-  const hiddenCount = blocks.length - shown.length;
-  const body = el("div", { class: "m-dresult" }, shown.map(richBlock));
-  const disclosure =
-    hiddenCount > 0
-      ? el("div", {
-          class: "m-disclosure",
-          onClick: () => {
-            mobile.resultExpanded.add(row.id);
-            render();
-          },
-          text: "full result · " + hiddenCount + (hiddenCount === 1 ? " more paragraph ›" : " more paragraphs ›")
-        })
-      : null;
-  return el("div", {}, [body, disclosure].filter(Boolean));
+  let previewEnd = Math.min(3, blocks.length);
+  // A preview must not strand a heading without the text it introduces.
+  while (previewEnd < blocks.length && blocks[previewEnd - 1]?.type === "heading") previewEnd++;
+  const bodyId = "mobile-written-result-" + row.id;
+  const body = el("div", { class: "m-dresult", id: bodyId }, (expanded ? blocks : blocks.slice(0, previewEnd)).map(richBlock));
+  const disclosure = blocks.length > previewEnd ? el("button", {
+    type: "button", class: "m-disclosure", "data-focus-key": "full-result-" + row.id,
+    "aria-expanded": String(expanded), "aria-controls": bodyId,
+    onClick: () => {
+      if (mobile.resultExpanded.has(row.id)) mobile.resultExpanded.delete(row.id);
+      else mobile.resultExpanded.add(row.id);
+      render();
+    },
+    text: expanded ? "show short preview ↑" : "read full result ↓"
+  }) : null;
+  // The toggle stays in place while content expands, retaining keyboard focus.
+  return el("div", {}, [renderCheckEvidence(row, detail), disclosure, body].filter(Boolean));
 }
 
 // THIS TASK SO FAR — a multi-run Task's own history as lines, each earlier
@@ -2950,7 +3054,7 @@ function renderMobileDecisionContent(row) {
           class: "m-dlimit",
           text:
             (provider?.displayName ?? "This provider") +
-            " cannot resume sessions — answering records your decision in this run's history."
+            " cannot resume sessions — continuing starts a new run with your saved answer."
         })
       : null,
     textarea,
@@ -2963,6 +3067,7 @@ function renderMobileDecisionContent(row) {
 // piece gates itself to null when the status does not carry it — the same
 // §10 discipline the desktop ledger already follows.
 function renderMobileDetailContent(row, detail, accent, frozen) {
+  row = mobilePermissionRow(row);
   const parts = [];
 
   const stateCls = row.halted ? "blue" : row.done ? "dim" : "";
@@ -2985,6 +3090,8 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
 
   if (row.halted) {
     parts.push(renderMobileHeldMeta(row));
+    if (row.permScopeNotice) parts.push(el("div", { class: "m-dlimit", text: "INCOMPLETE SCOPE — " + row.permScopeNotice }));
+    if (row.permType !== "decision" && row.permOptions.length) parts.push(el("div", { class: "m-dlimit", text: "Permission choices: " + row.permOptions.map(o => o.name + " (" + o.kind + ")").join(" · ") }));
     if (row.permType === "decision") {
       parts.push(renderMobileDecisionContent(row));
     } else {
@@ -2996,7 +3103,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
       if (row.permPath) {
         parts.push(
           el("div", { class: "m-dsection first" }, [
-            el("div", { class: "m-dresult", style: { marginTop: 0, color: "#5c6771" }, text: "wants to modify" }),
+            el("div", { class: "m-dresult", style: { marginTop: 0, color: "#5c6771" }, text: "permission target" }),
             el("div", { class: "m-dtitle", style: { fontSize: "19px", marginTop: "8px" }, text: row.permPath }),
             row.permWhy ? el("div", { class: "m-dlimit", text: row.permWhy }) : null
           ])
@@ -3091,6 +3198,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
 // Every detail screen ends in a fixed bar: one 52px primary, one secondary.
 // Reading scrolls; deciding never does.
 function renderMobileActionBar(row, frozen) {
+  row = mobilePermissionRow(row);
   if (row.halted && row.permType !== "decision") {
     const allowBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ALLOW", disabled: !row.permAllowable ? true : undefined });
     allowBtn.addEventListener("click", () => {
@@ -3182,8 +3290,8 @@ function renderMobileActionBar(row, frozen) {
 
 // CORRECTION / ADD A CONSTRAINT: one field, one button. The sheet's own
 // sentence is the whole mental model — the note sticks to the Task, and (for
-// READY/FAILED) a new run continues it; for a live WORKING task it applies
-// without stopping the run.
+// READY/FAILED) a new run continues it. A WORKING task saves it for a later
+// run; it is not delivered into the current provider session.
 function renderMobileCorrectionSheet(row) {
   if (mobile.correctionId !== row.id) return null;
   const rerunable = row.ready || row.failed;
@@ -3191,7 +3299,7 @@ function renderMobileCorrectionSheet(row) {
   const textarea = el("textarea", {
     class: "m-sheet-input",
     rows: 3,
-    placeholder: rerunable ? "the approach is right, but…" : "a constraint for the rest of this run…",
+    placeholder: rerunable ? "the approach is right, but…" : "a constraint for the next run…",
     "data-focus-key": "m-correction-" + row.id
   });
   textarea.value = saved;
@@ -3223,14 +3331,14 @@ function renderMobileCorrectionSheet(row) {
     el("div", { class: "m-sheet" }, [
       el("div", { class: "m-sheet-head" }, [
         el("span", { class: "m-sheet-kind", text: rerunable ? "CORRECTION" : "CONSTRAINT" }),
-        el("span", { class: "m-sheet-cancel", onClick: closeCorrection, text: "CANCEL" })
+        el("button", { type: "button", class: "m-sheet-cancel", "data-focus-key": "cancel-correction", onClick: closeCorrection, text: "CANCEL" })
       ]),
       textarea,
       el("div", {
         class: "m-sheet-note",
         text: rerunable
           ? "Kept on the Task, not on this run. The next run starts from the same task with the correction in context."
-          : "Recorded on the Task — applies from here without stopping this run."
+          : "Saved for the next run. The current run does not receive this note."
       }),
       el("div", { class: "m-sheet-acts" }, acts)
     ])
@@ -3255,7 +3363,7 @@ function renderMobileDetail(ledger, accent, frozen) {
     ])
   ]);
 
-  const dcontent = el("div", { class: "m-dcontent" }, [stickyStrip, ...content]);
+  const dcontent = el("div", { class: "m-dcontent", "data-reader-scroll": "mobile-result-" + row.id }, [stickyStrip, ...content]);
 
   return el(
     "div",
@@ -3281,6 +3389,8 @@ let mobileOverviewScroll = 0;
 let mobileDetailScroll = new Map(); // task id -> scrollTop, so re-opening a screen mid-render keeps its position
 
 function renderMobile() {
+  const focusKey = document.activeElement?.getAttribute?.("data-focus-key") ?? null;
+  const restoreReaders = keepReaderPositions();
   const shell = document.getElementById("shell");
   shell.className = "mobile";
   const frozen = state.remote && !state.macOnline;
@@ -3298,11 +3408,17 @@ function renderMobile() {
   const overview = el("div", { class: "m-scroll" }, [renderMobileOverview(ledger, frozen)]);
   const overviewToolbar = renderMobileOverviewToolbar(ledger, frozen);
   const detail = mobile.detailId !== null ? renderMobileDetail(ledger, COLORS.accent, frozen) : null;
+  const bar = renderMobileBar(frozen);
+  if (detail) {
+    // The overview stays visually still beneath the pushed screen, but must
+    // not remain in the keyboard or screen-reader navigation order.
+    for (const node of [bar, overviewToolbar, overview]) node.setAttribute("inert", "");
+  }
 
   shell.replaceChildren(
     el("div", { class: "m-app" }, [
       renderMobileOfflineBar(),
-      renderMobileBar(frozen),
+      bar,
       overviewToolbar,
       overview,
       detail,
@@ -3317,6 +3433,8 @@ function renderMobile() {
     dcontentEl.scrollTop = mobileDetailScroll.get(mobile.detailId) ?? 0;
     wireMobileStickyDetail(dcontentEl);
   }
+  restoreReaders();
+  if (focusKey) document.querySelector('[data-focus-key="' + focusKey + '"]')?.focus({ preventScroll: true });
 }
 
 // The sticky identity strip is the only sticky element inside the scroller.
@@ -3374,7 +3492,7 @@ setInterval(() => {
 
 render();
 // Remote mode (the relay serves this page) polls /api/status so the Mac's
-// presence is live: MAC OFFLINE banner + disabled actions while it is gone.
+// presence is live: HOST OFFLINE banner + disabled actions while it is gone.
 checkStatus().then(() => {
   if (state.remote) setInterval(checkStatus, 4000);
 });
@@ -3385,3 +3503,11 @@ loadAll()
     connect();
   });
 loadProviders();
+
+// Closing the panel is presentation-only; never forward the click as a task action.
+document.addEventListener("pointerdown", event => {
+  if (state.appearanceOpen && !event.target.closest(".appearance-settings")) {
+    state.appearanceOpen = null;
+    document.querySelectorAll(".appearance-settings[open]").forEach(panel => { panel.open = false; });
+  }
+});
