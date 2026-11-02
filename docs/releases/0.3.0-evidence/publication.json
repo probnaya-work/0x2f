@@ -1,0 +1,145 @@
+{
+  "version": "0.3.0",
+  "recordedAt": "2026-11-02T23:05:04.826294+00:00",
+  "verdict": "RELEASED \u2014 qualification and distribution checks passed",
+  "releaseCommit": "33a09878a3f7c941771265e6d1f865cb1aee06f6",
+  "tag": "v0.3.0",
+  "tagTarget": "33a09878a3f7c941771265e6d1f865cb1aee06f6",
+  "artifact": {
+    "sha256": "7cf66322908f446fcd777c62664b425e000a9a752e50d8cbc3e5e84f4285c1be",
+    "integrity": "sha512-Dvp7FpPrgQr75kn1X2xMDnT5TDZ0DbiBnmpibsT94Bl8RbfOQpbqJcv7RfaYu5BFQ6VCI837gwtnudzK4OOhRg==",
+    "filesMatched": 83,
+    "cleanRegistryInstall": true,
+    "plainTarballURLUsable": true
+  },
+  "canonicalQualificationSHA256": "4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626",
+  "comparison": {
+    "files": 83,
+    "byteIdentical": 80,
+    "expectedDifferences": [
+      "package.json version",
+      "README release copy",
+      "src/providers/acp.mjs client version literal only"
+    ],
+    "behavioralChanges": false
+  },
+  "pullRequests": [
+    {
+      "baseRefName": "main",
+      "headRefOid": "6d08b15eb90b0159e635de48ca52aed9b20c9bcd",
+      "mergeCommit": {
+        "oid": "fa79d0ebd5294f1735a94f74548b50dea5b54cc4"
+      },
+      "mergedAt": "2026-11-02T22:31:11Z",
+      "state": "MERGED",
+      "url": "https://github.com/probnaya-work/0x2f/pull/5"
+    },
+    {
+      "baseRefName": "integration/057-engineering-20261101",
+      "headRefOid": "68e6cd4326e21464ed0c49f40d4b59ecdfcbe779",
+      "mergeCommit": {
+        "oid": "830c9dc68ed680e1b824e864193c66265c7abe32"
+      },
+      "mergedAt": "2026-11-02T22:31:46Z",
+      "state": "MERGED",
+      "url": "https://github.com/probnaya-work/057/pull/1"
+    },
+    {
+      "baseRefName": "integration/057-display-mobile-20261101",
+      "headRefOid": "30abe26f84ecbc32f47eab36d3c1bcbb4b9ba644",
+      "mergeCommit": {
+        "oid": "e231dab779bc7181eee2e5ee6c7b5ee801d081e0"
+      },
+      "mergedAt": "2026-11-02T22:31:51Z",
+      "state": "MERGED",
+      "url": "https://github.com/probnaya-work/057-display-mobile/pull/1"
+    },
+    {
+      "baseRefName": "main",
+      "headRefOid": "5785e6692ce8a7054877cc3b5db1d31c804d411d",
+      "mergeCommit": {
+        "oid": "abb85a2588450472a3386890c07a5a46839036f1"
+      },
+      "mergedAt": "2026-11-02T22:59:39Z",
+      "state": "MERGED",
+      "url": "https://github.com/probnaya-work/0x2f-site/pull/2"
+    }
+  ],
+  "checks": {
+    "sourceSyntax": "PASS",
+    "sourceTests": {
+      "passed": 821,
+      "failed": 0,
+      "skipped": 0
+    },
+    "clientBuild": "PASS",
+    "installedPerPlatform": {
+      "mac": {
+        "criticalACP": 120,
+        "remote": 73,
+        "UI": 117
+      },
+      "linux": {
+        "criticalACP": 120,
+        "remote": 73,
+        "UI": 117
+      }
+    },
+    "releaseFixtures": "PASS on Mac/Linux: two runs, note/current rules, independent checks, runtime restart, backup/restore, source-state preservation and independent restored assertions; deterministic process fixture, not a new external AI run",
+    "historicalRealAILink": "Unchanged behavioral bytes link to canonical Linux Codex CLI0.166.0/openai/gpt-6.1-sol real two-run gate; source reports retain their original candidate version.",
+    "registryFreshInstallAndHTTPCLIReopen": "PASS"
+  },
+  "site": {
+    "url": "https://0x2f.space",
+    "target": "production",
+    "status": "READY",
+    "commit": "abb85a2588450472a3386890c07a5a46839036f1",
+    "deployment": "dpl_8WqTKu1sZfNjHodJhFXLTCgPQNVS",
+    "desktopViewport": [
+      1280,
+      900
+    ],
+    "narrowViewport": [
+      390,
+      844
+    ],
+    "pages": [
+      "/",
+      "/docs.html",
+      "/engineering.html"
+    ],
+    "checks": "PASS: 0.3.0 install commands, navigation, no horizontal overflow/JS errors, no obsolete UNRELEASED, deployed asset bytes match merged source",
+    "links": "GitHub/release/docs HTTP200. Exact npm version link is present; npm website challenges automated HTTP/Chrome with403. Public npm registry metadata, tarball and standard installation independently verified.",
+    "runtimeErrorLogs": "No error-level runtime logs returned for the production deployment; static site."
+  },
+  "workingInstallations": {
+    "mac": {
+      "version": "0.3.0",
+      "previousVersion": "0.1.3",
+      "standardCLIAndMainWebUI": "0.3.0",
+      "historyPairingSettingsPreserved": true,
+      "pinnedCustomWorkflowLauncher": "Preserved; separate custom source launcher is outside published CLI. Other pinned source/test runtimes retained."
+    },
+    "linux": {
+      "version": "0.3.0",
+      "previousVersion": "0.2.0",
+      "service": "active",
+      "enabled": "enabled",
+      "linger": "yes",
+      "historyPairingIdentitySettingsPreserved": true
+    },
+    "rollback": "Previous package prefixes/service config and consistent private state backups retained; no restore or rollback drill claimed"
+  },
+  "links": {
+    "release": "https://github.com/probnaya-work/0x2f/releases/tag/v0.3.0",
+    "npm": "https://www.npmjs.com/package/0x2f/v/0.3.0",
+    "site": "https://0x2f.space",
+    "docs": "https://0x2f.space/docs.html"
+  },
+  "remainingUnverified": [
+    "Mobile interruption/runtime-error recovery: owner-approved separate follow-up; not passed and not a 0x2F release blocker",
+    "Cold reboot, production rollback drill, long-duration phone/thermal/pixel scenarios and other declared harness/containment limits are not newly qualified"
+  ],
+  "public057OrMobileRelease": false,
+  "privateEvidenceInGit": false
+}
