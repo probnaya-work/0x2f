@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { createCommandProvider } from '../src/providers/command.mjs';
 import { createRuntime } from '../src/runtime.mjs';
 import { compileContinuation, digest } from '../src/core/context.mjs';
 async function fixture(t) {
  const base=await fs.mkdtemp(path.join(os.tmpdir(),'2f-budget-'));
  t.after(()=>fs.rm(base,{recursive:true,force:true}));
- const rt=createRuntime(base,{node:{id:'fixture',async startExecution(){return null;}}});
+ const rt=createRuntime(base,{providerId:'fixture',providers:[createCommandProvider({id:'fixture',displayName:'fixture',transport:'command',command:[process.execPath,'-e','']})],node:{id:'fixture',async startExecution(){return null;}}});
  return rt;
 }
 test('history is bounded, notes retain code formatting, original input and hashed full artifacts remain',async t=>{

@@ -336,12 +336,18 @@ export function toSteps(task, events = [], opts = {}) {
         }
         break;
 
+      case "tool.updated":
       case "tool.started": {
         const input = event.input ?? {};
         // Paths read as project paths, not as this machine's filesystem.
         const argument = relativePath(base, stepArgument(input));
         const isCommand = typeof input.command === "string";
+        if (event.toolCallId != null) {
+          const existing = steps.findIndex(s => s.toolCallId === event.toolCallId);
+          if (existing >= 0) steps.splice(existing, 1);
+        }
         steps.push({
+          toolCallId: event.toolCallId,
           kind: isCommand ? "command" : "tool",
           verb: String(event.name ?? "step").toUpperCase(),
           arg: argument,

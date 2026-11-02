@@ -595,13 +595,14 @@ test("DOGFOODING: the same task through claude-code then deepseek-harness persis
         const run1Events = eventsForRun(events, 1);
         const run2Events = eventsForRun(events, 2);
         assert.deepEqual(run1Events.map(e => e.type), [
+          "process.observed",
           "run.started",
           "tool.started",
           "file.changed",
           "run.completed"
         ]);
         assert.ok(run1Events.every(e => e.run === 1));
-        assert.deepEqual(run2Events.map(e => e.type), ["run.started", "run.completed"]);
+        assert.deepEqual(run2Events.map(e => e.type), ["run.started", "process.observed", "run.completed"]);
         assert.ok(run2Events.every(e => e.run === 2));
         assert.equal(run2Events[0].sessionId, null); // DSH has no session id
 

@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { backupWorkspace, restoreBackup } from '../src/backup.mjs';
+import { createRuntime } from '../src/runtime.mjs';
+import { createCommandProvider } from '../src/providers/command.mjs';
+const git=(base,...args)=>execFileSync('git',args,{cwd:base,encoding:'utf8'});
+test('private backup restores bytes and task checkout into a new root without touching original or replaying trust',async t=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'2f-backup-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));const base=path.join(root,'source');await fs.mkdir(base);
+ git(base,'init');await fs.writeFile(path.join(base,'.gitignore'),'.work/\n');await fs.writeFile(path.join(base,'file'),'base');git(base,'add','.');git(base,'-c','user.name=fixture','-c','user.email=fixture@example.invalid','commit','-m','fixture');
+ const rt=createRuntime(base,{providerId:'fixture',providers:[createCommandProvider({id:'fixture',command:[process.execPath],transport:'command'})],node:{id:'local',async startExecution(){return null;}}});
+ const task=await rt.actions.createWork({brief:'preserve isolated result'});
+ await rt.store.updateTask({...task,status:'ready',runs:[{...task.runs[0],outcome:'ready'}]});
+ await fs.writeFile(path.join(task.checkout.path,'file'),'unfinished bytes');await fs.symlink('/outside-not-read',path.join(task.checkout.path,'link'));
+ await fs.writeFile(path.join(base,'.work/relay.json'),'secret phone trust');await fs.writeFile(path.join(base,'.work/hosts.json'),'[]');
+ const originalPointer=await fs.readFile(path.join(task.checkout.path,'.git'),'utf8');
+ const backup=path.join(root,'backup'),restored=path.join(root,'restored');await backupWorkspace(base,backup);
+ assert.equal((await fs.stat(backup)).mode&0o077,0);
+ await assert.rejects(()=>restoreBackup(backup,base),/already exists/);
+ const result=await restoreBackup(backup,restored);assert.equal(result.executionReplayed,false);
+ assert.equal(await fs.readFile(path.join(task.checkout.path,'.git'),'utf8'),originalPointer,'original checkout was never repaired or moved');
+ const reloaded=(await createRuntime(restored).store.listTasks())[0];assert.equal(reloaded.pid,undefined);assert.ok(reloaded.checkout.path.startsWith(await fs.realpath(restored)));
+ assert.equal(await fs.readFile(path.join(reloaded.checkout.path,'file'),'utf8'),'unfinished bytes');assert.equal(await fs.readlink(path.join(reloaded.checkout.path,'link')),'/outside-not-read');
+ assert.equal(git(reloaded.checkout.path,'rev-parse','--git-common-dir').trim(),path.join(await fs.realpath(restored),'.git'));
+ await assert.rejects(()=>fs.readFile(path.join(restored,'.work/relay.json')),e=>e.code==='ENOENT');
+ await fs.writeFile(path.join(backup,'workspace/file'),'tampered');await assert.rejects(()=>restoreBackup(backup,path.join(root,'tampered')),/differs from its receipt/);
+});
+test('backup refuses active execution and a destination inside the workspace',async t=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'2f-backup-active-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));const base=path.join(root,'source');await fs.mkdir(base);
+ const rt=createRuntime(base,{node:{id:'fixture',async startExecution(){return null;}}});await rt.actions.createWork({brief:'active'});
+ await assert.rejects(()=>backupWorkspace(base,path.join(root,'backup')),/requires all executions/);
+ await assert.rejects(()=>backupWorkspace(base,path.join(base,'backup')),/outside/);
+});

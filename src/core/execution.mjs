@@ -18,7 +18,7 @@ export async function processIdentity(pid) {
       ]);
       const fields = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
       if (fields[0] === "Z") return null;
-      return { pid, start: fields[19], boot: boot.trim(), platform: process.platform };
+      return { pid, start: fields[19], boot: boot.trim(), platform: process.platform, observedAt: new Date().toISOString() };
     } catch { return null; }
   }
   if (process.platform === "darwin") {
@@ -26,7 +26,7 @@ export async function processIdentity(pid) {
       { timeout: 3000 }, (error, stdout) => {
         const text = stdout?.trim();
         if (error || !text || /\sZ\S*$/.test(text)) return resolve(null);
-        resolve({ pid, start: text.slice(0, 24), platform: process.platform });
+        resolve({ pid, start: text.slice(0, 24), platform: process.platform, observedAt: new Date().toISOString() });
       }));
   }
   return null;

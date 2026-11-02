@@ -5,6 +5,8 @@
 // calls (core/actions.mjs). It contains no lifecycle, provider, or session
 // logic of its own; `2f allow` and `2f reject` are thin wrappers over
 // actions.allowWork / actions.rejectWork.
+import { backupWorkspace, restoreBackup } from "./backup.mjs";
+import { loadHosts, runOnHost, hostIdentity } from "./hosts.mjs";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import readline from "node:readline/promises";
@@ -39,6 +41,11 @@ function help() {
 
 Commands:
   2f                list today's tasks
+  2f backup <new-directory>   private quiescent workspace backup (includes secrets)
+  2f restore-backup <backup> <new-directory>   restore with remote access disabled
+  2f hosts          list explicit host/workspace profiles
+  2f on <host> ...   run the actual CLI on a pinned SSH host (local stays local)
+  2f host-identity   print this host identity for explicit pinning
   2f version        print the installed 0x2F version
   2f init
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
@@ -250,9 +257,31 @@ async function openRun(id, runNumber, base) {
   }
 }
 
-async function main() {
-  const [command, ...args] = process.argv.slice(2);
+async function main(argv = process.argv.slice(2)) {
+  const [command, ...args] = argv;
   const base = process.cwd();
+
+  if (command === "backup") {
+    if (args.length !== 1) throw new Error("Usage: 2f backup <new-directory>");
+    console.log(JSON.stringify(await backupWorkspace(base,args[0]))); return;
+  }
+  if (command === "restore-backup") {
+    if (args.length !== 2) throw new Error("Usage: 2f restore-backup <backup-directory> <new-directory>");
+    console.log(JSON.stringify(await restoreBackup(args[0],args[1]))); return;
+  }
+  if (command === "hosts") {
+    console.log(`local · ${(await hostIdentity()).label}`);
+    for (const h of await loadHosts(base)) console.log(`${h.id} · pinned ${h.machineId.slice(0,12)} · ${h.workspace} · 2f on ${h.id} status`);
+    return;
+  }
+  if (command === "host-identity") { console.log(JSON.stringify(await hostIdentity())); return; }
+  if (command === "on") {
+    if (!args[0]) throw new Error("Usage: 2f on <host-id|local> <command> [args]");
+    if (args[0] === "local") return main(args.slice(1));
+    const result = await runOnHost(base, args[0], args.slice(1));
+    process.exitCode = result.code;
+    return;
+  }
 
   if (!command || command === "status") {
     await status(base);

@@ -2,6 +2,9 @@
 // processes while a provider runs, so every publication merges fresh state
 // under the task lock and verifies this run's worker still owns it.
 import fs from "node:fs/promises";
+import { runAcceptance } from "./core/acceptance.mjs";
+import { hostIdentity } from "./hosts.mjs";
+import os from "node:os";
 import { processIdentity } from "./core/execution.mjs";
 import path from "node:path";
 import { createStore } from "./core/store.mjs";
@@ -74,6 +77,11 @@ const task = await store.withTaskLock(slug, async () => {
     changed = true;
   }
   executionId = current.execution?.id ?? null;
+  current = updateRun(current, runNumber, { executionId });
+  const machine = await hostIdentity();
+  current = updateRun(current, runNumber, { machine, environment: { platform: process.platform, arch: process.arch,
+    release: os.release(), nodeVersion: process.version, cwd: current.checkout?.path ?? base } });
+  changed = true;
   const identity = await processIdentity(process.pid);
   if (identity) {
     current = { ...current, execution: { ...current.execution, process: identity } };
@@ -107,8 +115,11 @@ let runSessionId = null;
 let worktreeBefore = null;
 const executionCwd = task.checkout?.path ?? base;
 let changeReceipt = null;
+let checkReceipts = [];
+const checkAbort = new AbortController();
 let finished = false;
 let stopping = null;
+let stoppedOutcome = null;
 let cancelResolve;
 const cancelled = new Promise(resolve => { cancelResolve = resolve; });
 const partial = [];
@@ -116,13 +127,15 @@ let partialSize = 0;
 function requestStop(request) {
   if (finished || stopping) return;
   stopping = request;
+  checkAbort.abort();
   try { currentProvider?.cancel?.(); } catch { /* the group stop below remains authoritative */ }
   // This process is the live detached group leader, never an old saved PID.
   if (task.processGroupId === process.pid && process.platform !== "win32") {
     try { process.kill(-process.pid, "SIGTERM"); } catch { /* already drained */ }
   }
-  cancelResolve({ status: "failed", error: `${request.reason}. External actions may already have occurred; review before retrying.`,
-    failure: { kind: "cancelled" }, stopReason: "cancelled", result: partial.join("") });
+  stoppedOutcome = { status: "failed", error: `${request.reason}. External actions may already have occurred; review before retrying.`,
+    failure: { kind: "cancelled" }, stopReason: "cancelled", result: partial.join("") };
+  cancelResolve(stoppedOutcome);
 }
 process.on("SIGTERM", () => requestStop({ reason: "Worker received SIGTERM", at: new Date().toISOString() }));
 let pollingCancel = false;
@@ -192,11 +205,32 @@ function onEvent(event) {
         log(`session started: ${event.sessionId ?? "unknown"}`);
         break;
       }
+      case "integration.observed": {
+        await append(fresh, event.type, { integration: event.integration });
+        await store.writeJson(metaPath, updateRun(fresh, runNumber, { integration: event.integration }));
+        break;
+      }
+      case "process.observed": {
+        const identity = await processIdentity(event.pid);
+        await append(fresh, event.type, { pid: event.pid, process: identity });
+        await store.writeJson(metaPath, updateRun(fresh, runNumber, { harnessProcess: identity ?? { pid: event.pid, generation: "unknown" } }));
+        break;
+      }
+      case "tool.completed": {
+        const output = typeof event.output === "string" ? event.output : undefined;
+        const receipt = { toolCallId: event.toolCallId, command: event.command,
+          isError: event.isError === true, status: event.status,
+          exitCode: Number.isInteger(event.exitCode) ? event.exitCode : undefined,
+          output: output?.slice(0, 100000), outputTruncated: output ? output.length > 100000 : undefined };
+        await append(fresh, event.type, receipt);
+        break;
+      }
+      case "tool.updated":
       case "tool.started": {
         const input = event.input ?? {};
         const target = typeof input.file_path === "string" ? input.file_path
           : typeof input.command === "string" ? input.command.slice(0, 80) : "";
-        await append(fresh, "tool.started", { name: event.name, input });
+        await append(fresh, event.type, { name: event.name, input, toolCallId: event.toolCallId });
         log(`tool: ${event.name}${target ? ` ${target}` : ""}`);
         break;
       }
@@ -284,12 +318,13 @@ async function finish(outcome, changed = []) {
       log("outcome: skipped — this worker no longer owns the requested execution");
       return false;
     }
+    if (stoppedOutcome) outcome = stoppedOutcome;
     let current = applyOutcome(fresh, outcome);
     if (outcome.externalSessionId) current.execution = {
       ...(current.execution ?? {}), externalSessionId: outcome.externalSessionId
     };
     current = finalizeRun(current, outcome);
-    current = updateRun(current, runNumber, { changes: changeReceipt });
+    current = updateRun(current, runNumber, { changes: changeReceipt, checks: checkReceipts });
     if (fresh.status === "done") {
       current.status = "done";
       delete current.blockedOn;
@@ -359,6 +394,12 @@ try {
   }
   await stateChain;
   if (eventError) throw eventError;
+  if (outcome.status === "ready" && !stopping) {
+    const runDirectory = path.join(dir, "runs", String(runNumber), "attempts", executionId ?? "legacy");
+    const plan = await store.readJson(path.join(dir, "runs", String(runNumber), "acceptance-plan.json")).catch(() => null);
+    checkReceipts = await runAcceptance({plan,cwd:executionCwd,directory:runDirectory,
+      writeJson:store.writeJson,writeText:store.writeText,signal:checkAbort.signal});
+  }
   await finish(outcome, await observedChanges());
 } catch (error) {
   await stateChain;

@@ -20,7 +20,7 @@
 
 import path from "node:path";
 import { withFileLock } from "./lock.mjs";
-import { prepareWorkspace, requireSharedSlot, git, captureTree, treeDiff } from "./isolation.mjs";
+import { prepareWorkspace, requireSharedSlot, git, captureTree, treeDiff, verifySnapshotBytes } from "./isolation.mjs";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import { reserveExecution, executionAlive } from "./execution.mjs";
@@ -116,6 +116,12 @@ export function createActions(ctx) {
     throw new WorkError(unavailableMessage(id, providers));
   }
 
+  function requireModelSupport(provider, model) {
+    if (model && !['codex','gemini'].includes(provider)) {
+      throw new WorkError(`Explicit model selection is not implemented for ${provider}. Configure its own model externally; 0x2F will not claim the requested model was used.`);
+    }
+  }
+
   // Resolve what the user asked for into an execution target.
   //
   //   requested undefined -> the configured routing default (AUTO when
@@ -183,7 +189,12 @@ export function createActions(ctx) {
       store.readTaskResult(task),
       store.readEvents(task.slug)
     ]);
-    return { ...task, runs: taskRuns(task, { events }), result };
+    const runs = taskRuns(task, { events });
+    if (runs.at(-1)?.checks?.length) {
+      const current = await getRun(id, runs.at(-1).run);
+      runs[runs.length - 1] = { ...runs.at(-1), checks: current.checks };
+    }
+    return { ...task, runs, result };
   }
 
   // getRun(id, run): Promise<{ ...runRecord, result }> — one run's factual
@@ -200,7 +211,12 @@ export function createActions(ctx) {
     const result = await store.readRunResult(task, record);
     const context = await store.readJson(path.join(store.taskDir(task.slug), "runs", String(record.run), "context.json")).catch(() => null);
     const input = await store.readJson(path.join(store.taskDir(task.slug), "runs", String(record.run), "input.json")).catch(() => null);
-    return { ...record, result, ...(context ? { context } : {}), ...(input ? { input } : {}) };
+    const checks = [];
+    for (const receipt of record.checks ?? []) {
+      const dir = path.join(store.taskDir(task.slug), "runs", String(record.run), "attempts", record.executionId ?? task.execution?.id ?? "legacy", receipt.artifacts);
+      checks.push({ ...receipt, stdout: await store.readText(path.join(dir, "stdout.txt")), stderr: await store.readText(path.join(dir, "stderr.txt")) });
+    }
+    return { ...record, checks, result, ...(context ? { context } : {}), ...(input ? { input } : {}) };
   }
 
   // createWork({ brief, provider?, model? }): create the task and start
@@ -230,6 +246,7 @@ export function createActions(ctx) {
     // task's directory name.
     requireWithin(title, MAX_TITLE, "Task title");
     const target = resolveTarget(provider);
+    requireModelSupport(target.provider, model);
 
     // The agent receives the FULL brief, never the derived label.
     const prompt = await ctx.buildPrompt(clean);
@@ -319,6 +336,7 @@ export function createActions(ctx) {
     // Without an explicit request, a rerun is a retry of the task's current
     // provider; `--provider auto` re-routes deterministically.
     const target = resolveTarget(provider ?? task.execution?.provider);
+    requireModelSupport(target.provider, model);
 
     // Materialize run history for legacy tasks BEFORE replacing execution:
     // the legacy run's provider would otherwise be lost when execution is
@@ -664,6 +682,7 @@ export function createActions(ctx) {
     if (ignored) throw new WorkError("Checkout contains ignored files that are not in its Git-visible archive. Preserve or remove them explicitly before cleanup.", 409);
     const objects = path.join(store.workDir(), "evidence");
     const snapshot = await captureTree(expected, objects);
+    await verifySnapshotBytes(expected, objects, snapshot);
     // Archive complete Git-visible contents, including untracked/binary files
     // and symlink targets as links, before removing any unfinished checkout.
     const common = (await git(expected, ["rev-parse", "--git-common-dir"])).trim();
@@ -671,6 +690,15 @@ export function createActions(ctx) {
       GIT_OBJECT_DIRECTORY: path.join(objects, "objects"), GIT_ALTERNATE_OBJECT_DIRECTORIES: path.resolve(expected, common, "objects") } });
     const archivePath = path.join(store.taskDir(task.slug), "workspace.tar");
     await fs.writeFile(archivePath, archive, { mode: 0o600 });
+    const finalSnapshot = await captureTree(expected, objects);
+    if (finalSnapshot.tree !== snapshot.tree) throw new WorkError("Checkout changed while archiving; nothing was removed. Retry after finishing external edits.", 409);
+    await verifySnapshotBytes(expected, objects, finalSnapshot);
+    const checkoutHead = (await git(expected, ["rev-parse", "HEAD"])).trim();
+    if (checkoutHead !== task.checkout.baseHead) {
+      const bundlePath = path.join(store.taskDir(task.slug), "workspace-commits.bundle");
+      await git(expected, ["bundle", "create", bundlePath, "HEAD", `^${task.checkout.baseHead}`]);
+      await fs.chmod(bundlePath, 0o600);
+    }
     await git(store.base, ["worktree", "remove", "--force", expected]);
     const updated = { ...task, checkout: { ...task.checkout, archivedAt: new Date().toISOString(), archive: "workspace.tar", archiveSha256: createHash("sha256").update(archive).digest("hex"), snapshot } };
     await store.updateTask(updated);

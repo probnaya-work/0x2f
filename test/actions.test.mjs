@@ -307,21 +307,21 @@ test("createWork rejects an unknown provider with the shared error", async () =>
   }
 });
 
-test("createWork persists model when reliably known (separate concern from provider)", async () => {
+test("createWork persists requested model only for a transport that forwards it", async () => {
   const runtime = await makeRuntime();
   try {
-    const task = await withFakeBin("DSH_BIN", "dsh", () =>
+    const task = await withFakeBin("CODEX_BIN", "codex", () =>
       runtime.actions.createWork({
         brief: "With model",
-        provider: "deepseek-harness",
-        model: "deepseek-v4-flash"
+        provider: "codex",
+        model: "qualification-model"
       })
     );
-    assert.equal(task.execution.model, "deepseek-v4-flash");
-    assert.equal(task.execution.provider, "deepseek-harness");
+    assert.equal(task.execution.model, "qualification-model");
+    assert.equal(task.execution.provider, "codex");
     assert.equal(task.execution.node, "fake-node");
     const onDisk = await runtime.store.findTask(task.id);
-    assert.equal(onDisk.execution.model, "deepseek-v4-flash");
+    assert.equal(onDisk.execution.model, "qualification-model");
   } finally {
     await fs.rm(runtime.base, { recursive: true, force: true });
   }
@@ -584,3 +584,11 @@ test("getTaskDiff returns one entry per file.changed event, with real hunks when
     await fs.rm(runtime.base, { recursive: true, force: true });
   }
 });
+
+ test('createWork refuses an ignored model before persisting or executing a task', async () => {
+  const runtime=await makeRuntime();
+  try {
+   await withFakeBin('DSH_BIN','dsh',()=>assert.rejects(()=>runtime.actions.createWork({brief:'must not silently ignore model',provider:'deepseek-harness',model:'requested'}),/Explicit model selection is not implemented/));
+   assert.equal((await runtime.store.listTasks()).length,0);assert.deepEqual(runtime.node.calls,[]);
+  } finally {await fs.rm(runtime.base,{recursive:true,force:true});}
+ });

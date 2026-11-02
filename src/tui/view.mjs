@@ -592,8 +592,10 @@ export function buildResult(model, state, cols, p, T) {
   } else {
     heading("ORIGINAL REQUEST"); text(review.brief);
     const evidence = resultEvidence(review.result, review.events);
+    for (const r of review.checks ?? []) { heading(`PROJECT CHECK ${r.id} · ${r.status} · exit ${r.exitCode ?? "unknown"}`); text(r.stdout ?? "Output not recorded."); text(r.stderr ?? ""); }
     heading("PROVIDER-REPORTED CHECKS"); text(evidence.verification);
     text(evidence.receipt);
+    for (const r of evidence.receipts) { text(`${r.command ?? "Tool"} · exit ${r.exitCode ?? "unknown"}`); text(r.output ?? "Output not recorded."); }
     heading("WRITTEN RESULT · PROVIDER REPORT"); text(review.result || review.error || "Not recorded.");
     heading("OBSERVED COMMAND INVOCATIONS · success is not inferred");
     text(evidence.commands.join("\n") || "Not recorded.");

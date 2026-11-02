@@ -84,6 +84,7 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { hostIdentity } from "./hosts.mjs";
 import crypto from "node:crypto";
 import net from "node:net";
 import { URL } from "node:url";
@@ -652,6 +653,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           mode: "local",
           mac: "online",
           base: store.base,
+          host: await hostIdentity(),
           workspace: deriveWorkspace(store.base),
           node: localNodeLabel()
         });

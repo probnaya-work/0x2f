@@ -144,9 +144,13 @@ test("raw text is sent to the refinement service: claude print mode with tools d
     assert.equal(args[0], "-p");
     assert.equal(args[1], "--output-format");
     assert.equal(args[2], "text");
-    assert.match(args[3], /^--disallowedTools=Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch$/);
-    assert.match(args[4], /check mobile remote architecture/);
-    assert.match(args[4], /never invent\s+requirements/);
+    assert.ok(args.includes("--tools="), "all built-in tools are removed, including future ones");
+    assert.ok(args.includes("--disallowedTools=mcp__*"));
+    assert.ok(args.includes("--strict-mcp-config"));
+    assert.ok(args.includes("--restricted"));
+    assert.ok(args.includes('{"mcpServers":{}}'));
+    assert.match(args.at(-1), /check mobile remote architecture/);
+    assert.match(args.at(-1), /never invent\s+requirements/);
     // The model runs in an empty temp cwd — never in the workspace.
     assert.match(recorded.cwd, /0x2f-refine-/);
     assert.ok(!recorded.cwd.includes(base), "cwd must not be the workspace");

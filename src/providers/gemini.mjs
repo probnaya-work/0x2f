@@ -229,6 +229,7 @@ export function consumeGeminiLine(state, line) {
       onEvent({
         type: "tool.started",
         name: event.tool_name ?? "unknown",
+        toolCallId: event.tool_id,
         input: event.parameters ?? {}
       });
       // Mutating tools only — a Read never produces a change. Same
@@ -242,7 +243,8 @@ export function consumeGeminiLine(state, line) {
       }
       break;
     case "tool_result":
-      onEvent({ type: "tool.completed", isError: event.status === "error" });
+      onEvent({ type: "tool.completed", toolCallId: event.tool_id, isError: event.status === "error",
+        output: typeof event.output === "string" ? event.output : undefined });
       break;
     case "result":
       // The terminal event for success AND handled fatal errors. It carries
@@ -274,6 +276,8 @@ function runGemini({ cwd, args, onEvent }) {
     let buffer = "";
     let stderr = "";
     const state = createGeminiParser(onEvent);
+
+    onEvent({ type: "process.observed", pid: child.pid });
 
     child.stdout.on("data", chunk => {
       buffer += chunk.toString();

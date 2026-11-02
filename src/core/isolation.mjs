@@ -102,3 +102,19 @@ export async function saveChanges(store, task, run, before, after) {
   await store.writeJson(path.join(dir, 'changes.json'), receipt);
   return receipt;
 }
+
+// Git filters/attributes can canonicalize bytes. Refuse destructive cleanup
+// unless the Git-visible archive represents every current byte exactly.
+export async function verifySnapshotBytes(base, artifactRoot, snapshot) {
+  const env = await snapshotEnv(base, artifactRoot);
+  const format = (await git(base, ["rev-parse", "--show-object-format"])).trim();
+  const entries = (await git(base, ["ls-tree", "-r", "-z", snapshot.tree], { env })).split("\0").filter(Boolean);
+  for (const entry of entries) {
+    const match = /^(\d+) (\w+) ([a-f0-9]+)\t([\s\S]*)$/.exec(entry);
+    if (!match || match[2] !== "blob") throw new WorkError("Checkout contains a submodule or unsupported Git object. Preserve it explicitly before cleanup.", 409);
+    const file = path.join(base, match[4]);
+    const data = match[1] === "120000" ? Buffer.from(await fs.readlink(file)) : await fs.readFile(file);
+    const actual = createHash(format).update(`blob ${data.length}\0`).update(data).digest("hex");
+    if (actual !== match[3]) throw new WorkError("Checkout bytes differ from the Git-visible archive (attributes, filters or concurrent edits). Nothing was removed; preserve the working copy explicitly.", 409);
+  }
+}

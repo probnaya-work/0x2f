@@ -86,7 +86,7 @@ export const MAX_RAW_LENGTH = 4000;
 // Claude Code print mode with every tool denied. The `=` form binds the whole
 // list to the flag: a bare `--disallowedTools <tools…>` is variadic and would
 // swallow the prompt positional. Verified against Claude Code 2.x print mode.
-const CLAUDE_DISALLOWED_TOOLS = "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch";
+const CLAUDE_DISALLOWED_TOOLS = "mcp__*";
 
 // The refinement model paths, in preference order. Narrowest first: Claude
 // Code's print mode hard-denies tools (a pure text call). This is the ONLY
@@ -98,7 +98,10 @@ const REFINEMENT_PATHS = {
       "-p",
       "--output-format",
       "text",
+      "--tools=",
       "--disallowedTools=" + CLAUDE_DISALLOWED_TOOLS,
+      "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+      "--setting-sources", "", "--restricted", "--no-session-persistence",
       instruction
     ]
   }

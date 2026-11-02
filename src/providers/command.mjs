@@ -88,6 +88,8 @@ function runCommand({ id, cwd, argv, onEvent, onChild }) {
 
     onEvent({ type: "run.started", sessionId: null });
 
+    onEvent({ type: "process.observed", pid: child.pid });
+
     child.stdout.on("data", chunk => {
       stdout += chunk.toString();
       onEvent({ type: "progress", text: chunk.toString() });

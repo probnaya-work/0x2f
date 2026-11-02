@@ -45,7 +45,7 @@ import { classifyResult } from "../core/lifecycle.mjs";
 import { substituteCommand } from "./manifests.mjs";
 
 export const ACP_PROTOCOL_VERSION = 1;
-export const ACP_CLIENT_INFO = { name: "0x2f", version: "0.1.2" };
+export const ACP_CLIENT_INFO = { name: "0x2f", version: "0.2.0" };
 
 // Handshake steps must answer promptly; a prompt turn may legitimately run
 // for minutes, so only the handshake is bounded.
@@ -88,6 +88,47 @@ export function toolInput(kind, title, file) {
     return { file_path: file };
   }
   return {};
+}
+
+// ACP v1 updates are partial. Merge by the observed toolCallId so a
+// completion-only update cannot erase earlier commands, paths or kinds.
+export function createToolTracker(onEvent) {
+  const calls = new Map();
+  return {
+    get(id) { return calls.get(id); },
+    update(update) {
+      const id = update.toolCallId;
+      const previous = calls.get(id) ?? {};
+      const merged = { ...previous };
+      for (const [key, value] of Object.entries(update)) if (value !== undefined && value !== null) merged[key] = value;
+      if (id != null) calls.set(id, merged);
+      const raw = merged.rawInput && typeof merged.rawInput === "object" ? merged.rawInput : {};
+      const locations = Array.isArray(merged.locations) ? merged.locations : [];
+      const file = raw.file_path ?? raw.filePath ?? raw.path ?? locations[0]?.path;
+      const command = typeof raw.command === "string" ? raw.command : typeof raw.cmd === "string" ? raw.cmd : null;
+      const input = command !== null ? { command } : toolInput(merged.kind, merged.title, file);
+      if (typeof file === "string") input.file_path = file;
+      const signature = JSON.stringify([merged.title, input]);
+      if (signature !== previous._signature) {
+        onEvent({ type: previous._signature ? "tool.updated" : "tool.started", toolCallId: id,
+          name: merged.title || merged.kind || "tool", input });
+        merged._signature = signature;
+      }
+      if (["completed", "failed"].includes(merged.status) && !previous._completed) {
+        merged._completed = true;
+        const output = merged.rawOutput;
+        const text = typeof output === "string" ? output : typeof output?.stdout === "string" ? output.stdout
+          : (Array.isArray(merged.content) ? merged.content : []).map(c => c.content?.type === "text" ? c.content.text : "").filter(Boolean).join("\n");
+        const exitCode = output?.exitCode ?? output?.exit_code;
+        onEvent({ type: "tool.completed", toolCallId: id, isError: merged.status === "failed", command: command ?? undefined,
+          output: text || undefined, exitCode: Number.isInteger(exitCode) ? exitCode : undefined, status: merged.status });
+        if (merged.kind === "edit" && merged.status === "completed") {
+          for (const p of new Set([file, ...locations.map(l => l.path)].filter(p => typeof p === "string" && p))) onEvent({ type: "file.changed", path: p });
+        }
+      }
+      return merged;
+    }
+  };
 }
 
 export function createAcpProvider(manifest) {
@@ -209,6 +250,7 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
     let currentMessageId = null;
     let currentText = "";
     let resultText = "";
+    const toolTracker = createToolTracker(onEvent);
     const pollTimers = new Set();
 
     const clearPollTimers = () => {
@@ -404,7 +446,10 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
     // never invented from prose.
     function startInteractivePermission(entry) {
       const { requestId, request, options } = entry;
-      const tool = request.params?.toolCall ?? {};
+      const requestTool = request.params?.toolCall ?? {};
+      const tool = { ...(toolTracker.get(requestTool.toolCallId) ?? {}), ...requestTool };
+      delete tool._signature;
+      delete tool._completed;
       const allowOption = pickOption(options, "allow_");
       const rejectOption = pickOption(options, "reject_");
       const blockedOn = {
@@ -534,35 +579,10 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
               }
               break;
             }
-            case "tool_call": {
-              const locations = Array.isArray(update.locations) ? update.locations : [];
-              const file = locations[0]?.path;
-              const name = update.title || update.kind || "tool";
-              onEvent({
-                type: "tool.started",
-                name,
-                input: toolInput(update.kind, update.title, file)
-              });
+            case "tool_call":
+            case "tool_call_update":
+              toolTracker.update(update);
               break;
-            }
-            case "tool_call_update": {
-              const locations = Array.isArray(update.locations) ? update.locations : [];
-              if (locations.length && (update.status === "completed" || update.status === "failed")) {
-                // The agent reports files this tool call affected.
-                onEvent({
-                  type: "tool.started",
-                  name: update.title || "tool",
-                  input: { file_path: locations[0].path }
-                });
-              }
-              // kind is the agent's OWN classification of what this tool call
-              // did — an "edit" that reached completed is a real change, not
-              // an inference from the tool's name.
-              if (update.kind === "edit" && update.status === "completed" && locations[0]?.path) {
-                onEvent({ type: "file.changed", path: locations[0].path });
-              }
-              break;
-            }
             default:
               // plan / usage_update / agent_plan_update / ... — no reliable
               // Work mapping; ignore rather than fabricate.
@@ -602,6 +622,8 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
         error: `${manifest.id} ended the turn early (${stopReason}).`
       };
     }
+
+    onEvent({ type: "process.observed", pid: child.pid });
 
     child.stdout.on("data", chunk => {
       buffer += chunk.toString();
@@ -668,6 +690,11 @@ function runAcp({ manifest, cwd, prompt, onEvent, permissions, decisionFile = nu
           );
         }
         const agentCapabilities = init.agentCapabilities ?? {};
+        onEvent({ type: "integration.observed", integration: {
+          type: "acp", protocolVersion: init.protocolVersion,
+          agent: init.agentInfo ?? null, nativeResume: agentCapabilities.loadSession === true,
+          permissionTransport: permissions, qualification: "runtime handshake; not a live scenario qualification"
+        } });
 
         if (resumeSessionId) {
           if (agentCapabilities.loadSession !== true) {

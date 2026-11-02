@@ -105,7 +105,9 @@ test("start() runs dsh --profile headless and normalizes a successful run", asyn
       assert.equal(outcome.status, "ready");
       assert.equal(outcome.result, "the fix is in");
       // Only events reliably derivable from the headless CLI: run.started.
-      assert.deepEqual(events, [{ type: "run.started", sessionId: null }]);
+      assert.deepEqual(events.map(e => e.type), ["run.started", "process.observed"]);
+      assert.equal(events[0].sessionId, null);
+      assert.ok(Number.isSafeInteger(events[1].pid));
       for (const event of events) {
         assert.ok(EVENT_TYPES.includes(event.type), `event ${event.type} is Work vocabulary`);
       }

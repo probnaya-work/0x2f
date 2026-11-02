@@ -113,6 +113,8 @@ function runDsh({ cwd, prompt, onEvent }) {
     // run.started carries no session id — honestly.
     onEvent({ type: "run.started", sessionId: null });
 
+    onEvent({ type: "process.observed", pid: child.pid });
+
     child.stdout.on("data", chunk => {
       stdout += chunk.toString();
     });

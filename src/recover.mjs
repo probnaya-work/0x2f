@@ -31,7 +31,7 @@ import { workEvent } from "./core/events.mjs";
 import { currentRunNumber, updateRun } from "./core/runs.mjs";
 
 export const INTERRUPTED_ERROR =
-  "Run was interrupted — the worker process is no longer alive (host restart or crash). Rerun the task to continue.";
+  "Run was interrupted — its worker is gone or its process generation changed (host restart or crash). External actions may already have occurred. Inspect saved evidence before explicitly retrying; nothing was replayed.";
 
 // Is a pid a live process? Signal 0 tests existence without delivering a
 // real signal. EPERM means the process exists but is owned by another user —
