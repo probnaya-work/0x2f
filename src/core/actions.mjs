@@ -508,6 +508,12 @@ export function createActions(ctx) {
     current = reserveExecution(current);
     await store.updateTask(current);
     try {
+      // Retire the previous attempt's input before launch. A registry/spawn
+      // failure must not leave the old fresh prompt labelled as this resume.
+      await store.writeJson(path.join(store.taskDir(task.slug), 'runs', String(currentRunNumber(current)), 'input.json'), {
+        version: 1, executionId: current.execution.id,
+        transport: 'native resume; message not recorded', characters: null, sha256: null
+      });
       const pid = await node.resumeExecution({ task: current, grant });
       // The worker's first read takes this same lock, after its PID is
       // persisted, so it can validate execution ownership before proceeding.

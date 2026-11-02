@@ -40,6 +40,19 @@ test('stale cancellation cannot retarget a newer run or native-resume attempt', 
   assert.equal(stops, 1);
 });
 
+test('failed native-resume launch cannot claim delivery of the previous fresh input', async t => {
+  const base = await root(t);
+  const rt = createRuntime(base, { node: { id: 'fixture', async startExecution() { return null; }, async resumeExecution() { throw Error('fixture spawn refused'); } } });
+  const task = await rt.actions.createWork({ brief: 'original fresh input' });
+  await rt.store.updateTask({ ...task, status: 'needs_you', execution: { ...task.execution, externalSessionId: 'saved-session' }, blockedOn: { type: 'permission' }, runs: [{ ...task.runs[0], outcome: 'needs_you' }] });
+  await assert.rejects(() => rt.actions.allowWork(task.id), /fixture spawn refused/);
+  const run = await rt.actions.getRun(task.id, 1);
+  assert.equal(run.input.transport, 'native resume; message not recorded');
+  assert.equal(run.input.sha256, null);
+  assert.notEqual(run.input.executionId, task.execution.id);
+  assert.equal(run.deliveredInput, 'Native resume input was not recorded.');
+});
+
 test('restore refuses symlinked task control directories before touching original state', async t => {
   const dir = await root(t), base = path.join(dir, 'source'), external = path.join(dir, 'original-tasks');
   await fs.mkdir(path.join(base, '.work'), { recursive: true });
