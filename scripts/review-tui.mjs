@@ -481,12 +481,12 @@ function runChecks(frame, expect) {
     findings.push(`focus marker count is ${caret}, expected ${expect.focus}`);
   }
 
-  // The last row (hint) is painted — the footer never scrolls away. The
+  // The hint sits above the view's intentional one-row bottom gutter. The
   // composer mode carries its own hint inside the frame, so only check the
   // footer hint for the framed modes.
   if (expect.mode !== "composer") {
-    const lastRow = frame.scrubbed[frame.rows - 1] ?? "";
-    if (!lastRow.trim().length) findings.push("the footer hint row is blank");
+    const hintRow = frame.scrubbed[frame.rows - 2] ?? "";
+    if (!hintRow.trim().length) findings.push("the footer hint row is blank");
   }
 
   return findings;
