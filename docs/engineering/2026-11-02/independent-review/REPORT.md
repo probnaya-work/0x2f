@@ -1,12 +1,18 @@
 # Независимый review и квалификация — 2 ноября 2026
 
+Focused follow-up: [FINALIZATION.md](FINALIZATION.md). The latest Linux retry is
+BLOCKED on Thinkbox network access; Mobile software preview is now removed and
+new signed physical normal-path checks passed. Remaining Mobile fault gates
+are explicit in its updated report. The original package qualification below
+remains historical evidence for the same unchanged canonical bytes.
+
 ## Решение о merge
 
 | PR | Verdict | Основание / точное условие |
 | --- | --- | --- |
 | [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **CONDITIONAL GO — merge пока удержать** | Исправления и окончательные package contracts прошли. Final Mac/Linux install и contracts прошли. Первый реальный Linux OpenCode run/check прошёл; второй run отказал с `Free usage limit reached`. Условие: успешный полный Linux AI continuation → checks → restore тем же hash. |
 | [057 #1](https://github.com/probnaya-work/057/pull/1) | **GO в заявленную engineering base** | Исправлены persistence/time-window defects; проверены реальные process-generation links, SQLite reopen и отдельный новый Core: source failure/reconnect сохраняет историю. Reader остаётся opt-in. |
-| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **NO-GO для merge текущего implementation с целью promotion** | Software preview с CoreImage/UIImageView попадает и в Release. Удалить диагностический preview, вернуть обычный AVFoundation path и выполнить физические gates точного signed build. Документальный диагноз сохраняется. |
+| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **CONDITIONAL GO — physical fault gates открыты** | Diagnostic preview удалён в 217403c; новая signed Dev17 прошла owner-observed normal scanning/rotation/reconnect/permission recovery. Остались interruption/runtime-error, expiry и selective revocation observations; см. follow-up. |
 | [Site #2](https://github.com/probnaya-work/0x2f-site/pull/2) | **GO** | Registry 0.2.0 отделён от unreleased source; ограничения, ссылки и desktop/narrow navigation проверены. Deployment не выполнялся. |
 
 Это четыре отдельных решения. GO на documentation/opt-in observer не является разрешением на
