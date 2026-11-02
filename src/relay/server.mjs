@@ -293,7 +293,7 @@ export function createRelayServer({
   function offlineError() {
     return {
       status: 503,
-      body: { error: "Mac is offline — actions are unavailable until it reconnects." }
+      body: { error: "Execution host is offline — actions are unavailable until it reconnects." }
     };
   }
 
@@ -537,7 +537,7 @@ export function createRelayServer({
         const p = pending.get(id);
         if (!p) return;
         pending.delete(id);
-        const result = { status: 504, body: { error: "Timed out waiting for the Mac." } };
+        const result = { status: 504, body: { error: "Timed out waiting for the execution host." } };
         for (const r of p.resolvers) r(result);
       }, commandTimeoutMs);
       pending.set(id, { deviceId, resolvers: [resolve], timer });

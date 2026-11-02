@@ -100,7 +100,7 @@ async function pair(code) {
           ts: Date.now()
         });
         if (!ack.ok) {
-          setStatus(ack.error ?? "Your Mac declined the pairing.", true);
+          setStatus(ack.error ?? "Your execution host declined the pairing.", true);
           return;
         }
         break;

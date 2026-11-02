@@ -381,7 +381,7 @@ async function checkStatus() {
 
 function remoteBlocked() {
   if (state.remote && !state.macOnline) {
-    flash("MAC OFFLINE — actions are unavailable until the Mac reconnects.");
+    flash("HOST OFFLINE — actions are unavailable until the execution host reconnects.");
     return true;
   }
   return false;
@@ -1136,7 +1136,7 @@ function renderBrief(row) {
     // Only ever set on a remote surface whose transport had to cut the
     // brief; a cut must read as a cut, never as the end of the sentence.
     row.briefTruncated
-      ? el("div", { class: "brief-truncated", text: "TRUNCATED FOR THIS DEVICE — open this task on the Mac to read it in full" })
+      ? el("div", { class: "brief-truncated", text: "TRUNCATED FOR THIS DEVICE — open this task locally on the execution host to read it in full" })
       : null
   ].filter(Boolean));
 }
@@ -2293,7 +2293,7 @@ function render() {
     parts.push(
       el("div", {
         class: "mac-offline-bar",
-        text: "MAC OFFLINE — showing last known state. Actions are disabled until the Mac reconnects."
+        text: "HOST OFFLINE — showing last known state. Actions are disabled until the execution host reconnects."
       })
     );
   }
@@ -2664,8 +2664,8 @@ function renderMobileOfflineBar() {
   if (!(state.remote && !state.macOnline)) return null;
   const since = mobile.offlineSince;
   const label = since
-    ? "MAC OFFLINE · LAST KNOWN " + hhmm(since) + " · " + Math.max(0, Math.round((Date.now() - since) / 60000)) + " MIN AGO"
-    : "MAC OFFLINE · LAST KNOWN STATE";
+    ? "HOST OFFLINE · LAST KNOWN " + hhmm(since) + " · " + Math.max(0, Math.round((Date.now() - since) / 60000)) + " MIN AGO"
+    : "HOST OFFLINE · LAST KNOWN STATE";
   return el("div", { class: "m-offline-bar", text: label });
 }
 
@@ -2761,7 +2761,7 @@ function renderMobileAskCard(row, frozen) {
       class: "m-ask-hint" + (frozen ? " offline" : ""),
       onClick: frozen ? null : () => openMobileDetail(row.id),
       text: frozen
-        ? "the answer has to reach the Mac · it will still be waiting when it reconnects"
+        ? "the answer has to reach the execution host · it will still be waiting when it reconnects"
         : "the run continues where it stopped · open for context"
     })
   ]);
@@ -3492,7 +3492,7 @@ setInterval(() => {
 
 render();
 // Remote mode (the relay serves this page) polls /api/status so the Mac's
-// presence is live: MAC OFFLINE banner + disabled actions while it is gone.
+// presence is live: HOST OFFLINE banner + disabled actions while it is gone.
 checkStatus().then(() => {
   if (state.remote) setInterval(checkStatus, 4000);
 });
