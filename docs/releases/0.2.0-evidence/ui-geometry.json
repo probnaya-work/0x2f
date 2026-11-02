@@ -1,0 +1,174 @@
+[
+  {
+    "scrollWidth": 354,
+    "theme": "light",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 326.54827880859375
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 326.54827880859375
+      }
+    ],
+    "width": 354
+  },
+  {
+    "scrollWidth": 698,
+    "theme": "light",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 1,
+        "width": 609.460205078125
+      }
+    ],
+    "width": 698
+  },
+  {
+    "scrollWidth": 1163,
+    "theme": "light",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 1,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      }
+    ],
+    "width": 1163
+  },
+  {
+    "scrollWidth": 354,
+    "theme": "dark",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 326.54827880859375
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 326.54827880859375
+      }
+    ],
+    "width": 354
+  },
+  {
+    "scrollWidth": 698,
+    "theme": "dark",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 609.460205078125
+      },
+      {
+        "clipped": false,
+        "labels": 1,
+        "width": 609.460205078125
+      }
+    ],
+    "width": 698
+  },
+  {
+    "scrollWidth": 1163,
+    "theme": "dark",
+    "traces": [
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 1,
+        "width": 1074.914794921875
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      },
+      {
+        "clipped": false,
+        "labels": 0,
+        "width": 119.99999237060548
+      }
+    ],
+    "width": 1163
+  }
+]

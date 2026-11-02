@@ -1,0 +1,56 @@
+{
+  "node": "v26.11.1",
+  "inheritedCredentials": false,
+  "offline": true,
+  "results": [
+    {
+      "label": "final-check",
+      "start": "2026-11-02T00:54:02.258Z",
+      "end": "2026-11-02T00:54:10.307Z",
+      "code": 0
+    },
+    {
+      "label": "isolated-regression",
+      "start": "2026-11-02T00:54:10.307Z",
+      "end": "2026-11-02T00:54:41.426Z",
+      "code": 0
+    },
+    {
+      "label": "pack",
+      "start": "2026-11-02T00:54:41.426Z",
+      "end": "2026-11-02T00:54:41.673Z",
+      "code": 0
+    },
+    {
+      "label": "install-tarball",
+      "start": "2026-11-02T00:54:41.673Z",
+      "end": "2026-11-02T00:54:41.914Z",
+      "code": 0
+    },
+    {
+      "label": "installed-version",
+      "start": "2026-11-02T00:54:41.915Z",
+      "end": "2026-11-02T00:54:41.982Z",
+      "code": 0
+    },
+    {
+      "label": "installed-pty",
+      "start": "2026-11-02T00:54:41.989Z",
+      "end": "2026-11-02T00:54:54.213Z",
+      "code": 0
+    }
+  ],
+  "platform": "darwin",
+  "npm": "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js",
+  "version": "0.2.0",
+  "sourceFilesMatched": 74,
+  "tarball": "0x2f-0.2.0.tgz",
+  "sha256": "c34acd08b65f6c2d915f1f9acc5c47c6f6be46c14894227899cfa29ea789e023",
+  "status": "passed",
+  "regressionSummary": [
+    "\u2139 tests 783",
+    "\u2139 pass 773",
+    "\u2139 fail 0",
+    "\u2139 skipped 10"
+  ]
+}

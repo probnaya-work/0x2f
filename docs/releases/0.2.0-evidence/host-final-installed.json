@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-02",
+  "version": "0.2.0",
+  "sourceFilesMatched": 74,
+  "archiveSha256": "5bb962ba6dc15311f1e097b9a29dc0fdf31f46c287bb8b816b71252554d48b4b",
+  "service": {
+    "enabled": "enabled",
+    "active": "active",
+    "linger": "yes",
+    "supervised": true,
+    "lan": true
+  },
+  "taskStatus": "done",
+  "runs": 2,
+  "taskBytesPreserved": true,
+  "phoneTrustPreserved": true,
+  "confirmedSessions": 1,
+  "previousPrefixRetained": true
+}

@@ -1,21 +1,21 @@
 # 0x2F Remote Control — setup & testing walkthrough
 
-Control 0x2F from your phone. 0x2F is **LAN-first**: the phone and the Mac
+Control 0x2F from your phone. 0x2F is **LAN-first**: the phone and the execution host
 must be on the same local network — no relay, no tunnels, no accounts.
 
 ```text
-Phone browser ── http://<mac's LAN IP>:4242 ──► Mac runtime
+Phone browser ── http://<mac's LAN IP>:4242 ──► execution host runtime
                 (pairing page + E2E-encrypted envelopes)
 ```
 
 - **Local 0x2F owns work.** Tasks, runs, agents, repositories and credentials
-  stay on the Mac.
-- **The Mac's runtime owns connectivity.** During pairing it becomes its own
+  stay on the execution host.
+- **The execution host's runtime owns connectivity.** During pairing it becomes its own
   local relay: a phone on the same Wi-Fi gets the pairing page and speaks the
   same E2E-encrypted protocol the hosted relay uses — one remote-control
   implementation, two transports.
 - **Web owns control.** The phone runs the same web client (the Attention
-  Stack) and issues commands end-to-end encrypted; the Mac verifies every
+  Stack) and issues commands end-to-end encrypted; the execution host verifies every
   envelope (GCM, freshness, idempotency) before executing anything.
 
 The hosted-relay path (for future remote use, or your own deployment) still
@@ -27,8 +27,8 @@ exists unchanged: `2f pair --relay https://…` / `--client https://…`, or the
 
 ## Prerequisites
 
-- Node.js ≥ 20 and 0x2F installed globally (`npm install -g 0x2f`)
-- The Mac and the phone on the **same Wi-Fi / local network**
+- Node.js ≥ 20 and 0x2F installed globally (`npm install -g 0x2f@0.2.0` after publication)
+- The execution host and the phone on the **same Wi-Fi / local network**
 - One terminal
 
 ---
@@ -51,9 +51,9 @@ is gitignored and never committed.
 2f pair
 ```
 
-No flags, no IPs to find, no relay to configure. `2f pair` detects the Mac's
+On the execution host, no flags or manually selected IPs are required. `2f pair` detects the execution host's
 private LAN address, enables the pairing surface on that interface, rotates
-the Mac's credential, and prints:
+the execution host's credential, and prints:
 
 ```
 0x2F PAIR
@@ -83,10 +83,10 @@ tail -5 .work/ui.log
 On the phone (same Wi-Fi), open the printed URL and type the code. The dashes
 are optional — `ZEPQQ-N4WH8-NG4D` and `ZEPQQN4WH8NG4D` are the same code.
 
-**Quick check on the same Mac instead:** open the printed URL in a browser and
+**Quick check on the same execution host instead:** open the printed URL in a browser and
 type the code — exercises the entire loop except the second device.
 
-macOS may ask to allow incoming connections for `node` — allow it.
+On macOS the system may ask to allow incoming connections for `node` — allow it.
 
 ---
 
@@ -103,21 +103,21 @@ macOS may ask to allow incoming connections for `node` — allow it.
 
 ---
 
-## Step 5 — Offline test ("the Mac goes away")
+## Step 5 — Offline test ("the execution host goes away")
 
 Stop the runtime:
 
 ```bash
-pkill -f "server-entry.mjs"
+systemctl --user stop 0x2f  # for a supervised host; stop only your workspace runtime
 ```
 
-On the phone, within a couple of seconds: the **MAC OFFLINE** banner appears
+On the phone, within a couple of seconds: the **HOST OFFLINE** banner appears
 over the phone's own last-known state, action buttons are disabled, and
-mutating requests answer `503 Mac is offline…` (never queued — this is
+mutating requests answer `503 execution host is offline…` (never queued — this is
 deliberate: an explicit failure beats "you tapped SEND BACK now and it runs
 15 minutes later").
 
-To bring the Mac back, restart the runtime (`2f pair` or `2f ui
+To bring the execution host back, restart the runtime (`2f pair` or `2f ui
 --no-browser`); the agent reconnects and the phone shows fresh state by
 itself. No re-pairing is needed — a plain reconnect (same device credentials,
 same pairing generation) never revokes the phone session.
@@ -130,12 +130,12 @@ same pairing generation) never revokes the phone session.
 2f pair --off
 ```
 
-This is a real revocation: the Mac asks its relay to kill every phone session
+This is a real revocation: the execution host asks its relay to kill every phone session
 and pairing token, the agent disconnects, and the LAN surface closes within a
 second (normal `2f` / `2f ui` stay loopback-only the whole time). The phone is
-locked out immediately — even if the Mac reconnects with the same
+locked out immediately — even if the execution host reconnects with the same
 credentials, the old sessions stay dead. Sessions also expire on their own
-after 30 days. To control the Mac again, run `2f pair` (this rotates the
+after 30 days. To control the execution host again, run `2f pair` (this rotates the
 credential and the E2E key; the previous phone must claim the new code).
 
 Re-running `2f pair` at any time rotates the device credential + token and the
@@ -172,12 +172,12 @@ npm run check   # syntax-check every source and test file
 | Symptom | Cause | Fix |
 |---|---|---|
 | `No .work project found` | command run outside a workspace | `cd` into the project → `2f init` |
-| `No private LAN address found` | the Mac has no private IPv4 (no Wi-Fi / no LAN) | connect to Wi-Fi and re-run `2f pair`, or use `--relay` for remote pairing |
+| `No private LAN address found` | the execution host has no private IPv4 (no Wi-Fi / no LAN) | connect to Wi-Fi and re-run `2f pair`, or use `--relay` for remote pairing |
 | `The relay has not confirmed …` | the runtime is not up, or a foreign runtime owns the port | check `.work/ui.log`; pair with `--port <n>` if another workspace's runtime is on 4242 |
-| Phone can't open the URL / "not found" | the phone is not on the same Wi-Fi, or the URL was truncated | re-run `2f pair`; verify the phone is on the same network as the Mac |
+| Phone can't open the URL / "not found" | the phone is not on the same Wi-Fi, or the URL was truncated | re-run `2f pair`; verify the phone is on the same network as the execution host |
 | `Agent watches the wrong .work/relay.json` | a runtime on port 4242 belongs to another workspace | pair with `--port 4301` |
 | `Relay URL must use https://…` | a public plain-HTTP relay address was given | use `https://`, or `http://127.0.0.1` for loopback / a private-LAN address for LAN dev |
-| `503 Mac is offline` on actions | the Mac is unreachable — by design | restart the runtime and wait for reconnection |
+| `503 execution host is offline` on actions | the execution host is unreachable — by design | restart the runtime and wait for reconnection |
 | Phone locked out after `2f pair --off` / re-pair | revocation or credential rotation — by design | run `2f pair` again and claim the new code on the phone |
 
 ---
@@ -186,8 +186,8 @@ npm run check   # syntax-check every source and test file
 
 Pairing grants a phone a **session** (30-day TTL) that can observe the
 REDACTED task/event projection and issue the same commands the local UI can —
-but only while the Mac's agent is connected (offline commands fail
-immediately, never queued) and only after the Mac verifies each command's
+but only while the execution host's agent is connected (offline commands fail
+immediately, never queued) and only after the execution host verifies each command's
 AES-GCM tag, freshness and idempotency. Every command, ack, event and
 snapshot is end-to-end encrypted with a key derived from the pairing code, so
 a passive observer on the Wi-Fi sees only ciphertext. Pairing tokens are
@@ -203,3 +203,5 @@ other LAN devices. Plain `http://` on the LAN is the documented same-Wi-Fi
 tradeoff: an active attacker on the network could intercept the pairing page
 (the pairing code is typed into it), so LAN pairing is for trusted networks.
 The hosted relay remains HTTPS-only.
+
+For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. This document describes the prepared 0.2.0 candidate, not a completed npm publication.

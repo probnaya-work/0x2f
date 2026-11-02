@@ -51,6 +51,10 @@ All downloaded official runtime SHA256 checks passed; no global Node changed.
 
 ## Fresh harness evidence
 
+Later targeted updates are recorded in the [compatibility matrix](../../../harness-compatibility.md).
+The original rows below retain their historical scope, including the distinction
+between a blocked live API credential path and a separately observed ChatGPT login.
+
 | Harness | Observed version | What actually ran |
 | --- | --- | --- |
 | Codex |0.166.0 |Six distinct real-binary/mock cases have passing observations; same-session resume/context/sandbox confirmed. Live API credential path blocked |
@@ -58,6 +62,8 @@ All downloaded official runtime SHA256 checks passed; no global Node changed.
 | Claude Code |2.1.296 |Isolated version/help inventory; usable credential unavailable for live branch |
 | OpenCode |2.0.27 |Isolated version/help inventory, ACP command surface |
 | DeepSeek Harness |0.1.1-rc.2 |Actual configured DeepSeek API run passes; same-task Gemini → DSH → Gemini continuity verified |
+| Cursor — later targeted preflight |Agent CLI not found; editor 3.26.13 separately observed |**BLOCKED**: `agent acp` / `agent status` return ENOENT; installed corrected 0x2F refuses the task before creation. Live handoff, permissions and native resume **not run**. [Evidence](../cursor-followup/REPORT.md) |
+| Cursor — subsequent live chain |Agent **2026.10.22-27dcf5f**, Codex **0.166.0**, installed **0x2f@0.1.4** |**PASS**: real Codex → Cursor → Codex on one task, plus a corrective Codex run; DONE and reopening verified. Permissions/native resume **NOT RUN**. [Evidence](../cursor-live/REPORT.md) |
 
 Those are macOS native-binary observations. Lenovo had no native harness in
 its noninteractive PATH. See [HARNESS-RESULTS.md](HARNESS-RESULTS.md) for exact

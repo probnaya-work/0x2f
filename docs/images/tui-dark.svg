@@ -1,0 +1,380 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12">
+<title>0x2F TUI frame — 120x36</title>
+<rect width="960" height="540" fill="#161c21"/>
+<rect x="0" y="0" width="960" height="15" fill="#161c21"/>
+<text x="0" y="11" fill="#e2e8ee">                                                                                                                        </text>
+<rect x="0" y="15" width="8" height="15" fill="#161c21"/>
+<text x="0" y="26" fill="#96a1aa"> </text>
+<rect x="8" y="15" width="48" height="15" fill="#161c21"/>
+<text x="8" y="26" fill="#e2e8ee" font-weight="700"> 0x2F </text>
+<rect x="56" y="15" width="224" height="15" fill="#161c21"/>
+<text x="56" y="26" fill="#96a1aa">~/ws                        </text>
+<rect x="280" y="15" width="16" height="15" fill="#161c21"/>
+<text x="280" y="26" fill="#7ac9a5">● </text>
+<rect x="296" y="15" width="80" height="15" fill="#161c21"/>
+<text x="296" y="26" fill="#96a1aa">00:00:00  </text>
+<rect x="376" y="15" width="8" height="15" fill="#161c21"/>
+<text x="376" y="26" fill="#39434b">│</text>
+<rect x="384" y="15" width="56" height="15" fill="#161c21"/>
+<text x="384" y="26" fill="#5d6870"> #001  </text>
+<rect x="440" y="15" width="368" height="15" fill="#161c21"/>
+<text x="440" y="26" fill="#e2e8ee" font-weight="700">Inspect the submit path and add retry handling</text>
+<rect x="808" y="15" width="96" height="15" fill="#161c21"/>
+<text x="808" y="26" fill="#96a1aa">            </text>
+<rect x="904" y="15" width="40" height="15" fill="#161c21"/>
+<text x="904" y="26" fill="#7ac9a5" font-weight="700">READY</text>
+<rect x="944" y="15" width="8" height="15" fill="#161c21"/>
+<text x="944" y="26" fill="#96a1aa"> </text>
+<rect x="952" y="15" width="8" height="15" fill="#161c21"/>
+<text x="952" y="26" fill="#e2e8ee"> </text>
+<rect x="0" y="30" width="8" height="15" fill="#161c21"/>
+<text x="0" y="41" fill="#96a1aa"> </text>
+<rect x="8" y="30" width="72" height="15" fill="#161c21"/>
+<text x="8" y="41" fill="#5d6870"> ! 0  ✕ 0</text>
+<rect x="80" y="30" width="40" height="15" fill="#161c21"/>
+<text x="80" y="41" fill="#7ac9a5">  ✓ 1</text>
+<rect x="120" y="30" width="40" height="15" fill="#161c21"/>
+<text x="120" y="41" fill="#96a1aa">  ▶ 0</text>
+<rect x="160" y="30" width="40" height="15" fill="#161c21"/>
+<text x="160" y="41" fill="#5d6870">  · 0</text>
+<rect x="200" y="30" width="176" height="15" fill="#161c21"/>
+<text x="200" y="41" fill="#96a1aa">                      </text>
+<rect x="376" y="30" width="568" height="15" fill="#161c21"/>
+<text x="376" y="41" fill="#39434b">│ ─────────────────────────────────────────────────────────────────────</text>
+<rect x="944" y="30" width="8" height="15" fill="#161c21"/>
+<text x="944" y="41" fill="#96a1aa"> </text>
+<rect x="952" y="30" width="8" height="15" fill="#161c21"/>
+<text x="952" y="41" fill="#e2e8ee"> </text>
+<rect x="0" y="45" width="8" height="15" fill="#161c21"/>
+<text x="0" y="56" fill="#96a1aa"> </text>
+<rect x="8" y="45" width="360" height="15" fill="#161c21"/>
+<text x="8" y="56" fill="#39434b"> ────────────────────────────────────────────</text>
+<rect x="368" y="45" width="8" height="15" fill="#161c21"/>
+<text x="368" y="56" fill="#96a1aa"> </text>
+<rect x="376" y="45" width="8" height="15" fill="#161c21"/>
+<text x="376" y="56" fill="#39434b">│</text>
+<rect x="384" y="45" width="80" height="15" fill="#161c21"/>
+<text x="384" y="56" fill="#5d6870"> TASK     </text>
+<rect x="464" y="45" width="488" height="15" fill="#161c21"/>
+<text x="464" y="56" fill="#96a1aa">open 0m · 1 run · 0 notes                                    </text>
+<rect x="952" y="45" width="8" height="15" fill="#161c21"/>
+<text x="952" y="56" fill="#e2e8ee"> </text>
+<rect x="0" y="60" width="376" height="15" fill="#161c21"/>
+<text x="0" y="71" fill="#96a1aa">                                               </text>
+<rect x="376" y="60" width="8" height="15" fill="#161c21"/>
+<text x="376" y="71" fill="#39434b">│</text>
+<rect x="384" y="60" width="80" height="15" fill="#161c21"/>
+<text x="384" y="71" fill="#5d6870"> RUN 1    </text>
+<rect x="464" y="60" width="24" height="15" fill="#161c21"/>
+<text x="464" y="71" fill="#e2e8ee" font-weight="700">AL </text>
+<rect x="488" y="60" width="136" height="15" fill="#161c21"/>
+<text x="488" y="71" fill="#e2e8ee">ALPHA            </text>
+<rect x="624" y="60" width="328" height="15" fill="#161c21"/>
+<text x="624" y="71" fill="#96a1aa">   0:00  result available · review       </text>
+<rect x="952" y="60" width="8" height="15" fill="#161c21"/>
+<text x="952" y="71" fill="#e2e8ee"> </text>
+<rect x="0" y="75" width="8" height="15" fill="#161c21"/>
+<text x="0" y="86" fill="#96a1aa"> </text>
+<rect x="8" y="75" width="56" height="15" fill="#161c21"/>
+<text x="8" y="86" fill="#96a1aa" font-weight="700"> READY </text>
+<rect x="64" y="75" width="320" height="15" fill="#161c21"/>
+<text x="64" y="86" fill="#39434b">───────────────────────────────────── 1│</text>
+<rect x="384" y="75" width="344" height="15" fill="#161c21"/>
+<text x="384" y="86" fill="#5d6870"> ON       HHHHHHHHHHHHHHHHHHHHHHHHHHHH · ws</text>
+<rect x="728" y="75" width="224" height="15" fill="#161c21"/>
+<text x="728" y="86" fill="#96a1aa">                            </text>
+<rect x="952" y="75" width="8" height="15" fill="#161c21"/>
+<text x="952" y="86" fill="#e2e8ee"> </text>
+<rect x="0" y="90" width="8" height="15" fill="#161c21"/>
+<text x="0" y="101" fill="#96a1aa"> </text>
+<rect x="8" y="90" width="16" height="15" fill="#232c34"/>
+<text x="8" y="101" fill="#8fb2ee" font-weight="700"> ❯</text>
+<rect x="24" y="90" width="8" height="15" fill="#232c34"/>
+<text x="24" y="101" fill="#7ac9a5">✓</text>
+<rect x="32" y="90" width="40" height="15" fill="#232c34"/>
+<text x="32" y="101" fill="#5d6870"> 001 </text>
+<rect x="72" y="90" width="264" height="15" fill="#232c34"/>
+<text x="72" y="101" fill="#e2e8ee" font-weight="700">Inspect the submit path and add …</text>
+<rect x="336" y="90" width="40" height="15" fill="#232c34"/>
+<text x="336" y="101" fill="#96a1aa"> AL  </text>
+<rect x="376" y="90" width="8" height="15" fill="#161c21"/>
+<text x="376" y="101" fill="#39434b">│</text>
+<rect x="384" y="90" width="568" height="15" fill="#161c21"/>
+<text x="384" y="101" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="90" width="8" height="15" fill="#161c21"/>
+<text x="952" y="101" fill="#e2e8ee"> </text>
+<rect x="0" y="105" width="8" height="15" fill="#161c21"/>
+<text x="0" y="116" fill="#96a1aa"> </text>
+<rect x="8" y="105" width="368" height="15" fill="#232c34"/>
+<text x="8" y="116" fill="#96a1aa">     1 file changed                           </text>
+<rect x="376" y="105" width="8" height="15" fill="#161c21"/>
+<text x="376" y="116" fill="#39434b">│</text>
+<rect x="384" y="105" width="80" height="15" fill="#161c21"/>
+<text x="384" y="116" fill="#5d6870"> REVIEW   </text>
+<rect x="464" y="105" width="408" height="15" fill="#161c21"/>
+<text x="464" y="116" fill="#8fb2ee">r  full request · written result · checks · history</text>
+<rect x="872" y="105" width="80" height="15" fill="#161c21"/>
+<text x="872" y="116" fill="#96a1aa">          </text>
+<rect x="952" y="105" width="8" height="15" fill="#161c21"/>
+<text x="952" y="116" fill="#e2e8ee"> </text>
+<rect x="0" y="120" width="376" height="15" fill="#161c21"/>
+<text x="0" y="131" fill="#96a1aa">                                               </text>
+<rect x="376" y="120" width="8" height="15" fill="#161c21"/>
+<text x="376" y="131" fill="#39434b">│</text>
+<rect x="384" y="120" width="568" height="15" fill="#161c21"/>
+<text x="384" y="131" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="120" width="8" height="15" fill="#161c21"/>
+<text x="952" y="131" fill="#e2e8ee"> </text>
+<rect x="0" y="135" width="376" height="15" fill="#161c21"/>
+<text x="0" y="146" fill="#96a1aa">                                               </text>
+<rect x="376" y="135" width="8" height="15" fill="#161c21"/>
+<text x="376" y="146" fill="#39434b">│</text>
+<rect x="384" y="135" width="208" height="15" fill="#161c21"/>
+<text x="384" y="146" fill="#5d6870"> TRACE    run 1 · 5 events</text>
+<rect x="592" y="135" width="360" height="15" fill="#161c21"/>
+<text x="592" y="146" fill="#96a1aa">                                             </text>
+<rect x="952" y="135" width="8" height="15" fill="#161c21"/>
+<text x="952" y="146" fill="#e2e8ee"> </text>
+<rect x="0" y="150" width="376" height="15" fill="#161c21"/>
+<text x="0" y="161" fill="#96a1aa">                                               </text>
+<rect x="376" y="150" width="8" height="15" fill="#161c21"/>
+<text x="376" y="161" fill="#39434b">│</text>
+<rect x="384" y="150" width="96" height="15" fill="#161c21"/>
+<text x="384" y="161" fill="#5d6870">   TOOL     </text>
+<rect x="480" y="150" width="64" height="15" fill="#161c21"/>
+<text x="480" y="161" fill="#96a1aa">EDIT S… </text>
+<rect x="544" y="150" width="352" height="15" fill="#161c21"/>
+<text x="544" y="161" fill="#e2e8ee">src/app.ts                                  </text>
+<rect x="896" y="150" width="48" height="15" fill="#161c21"/>
+<text x="896" y="161" fill="#5d6870">  0:00</text>
+<rect x="944" y="150" width="8" height="15" fill="#161c21"/>
+<text x="944" y="161" fill="#96a1aa"> </text>
+<rect x="952" y="150" width="8" height="15" fill="#161c21"/>
+<text x="952" y="161" fill="#e2e8ee"> </text>
+<rect x="0" y="165" width="376" height="15" fill="#161c21"/>
+<text x="0" y="176" fill="#96a1aa">                                               </text>
+<rect x="376" y="165" width="8" height="15" fill="#161c21"/>
+<text x="376" y="176" fill="#39434b">│</text>
+<rect x="384" y="165" width="96" height="15" fill="#161c21"/>
+<text x="384" y="176" fill="#5d6870">   CHANGE   </text>
+<rect x="480" y="165" width="64" height="15" fill="#161c21"/>
+<text x="480" y="176" fill="#96a1aa">CHANGED </text>
+<rect x="544" y="165" width="352" height="15" fill="#161c21"/>
+<text x="544" y="176" fill="#e2e8ee">src/app.ts                                  </text>
+<rect x="896" y="165" width="48" height="15" fill="#161c21"/>
+<text x="896" y="176" fill="#5d6870">  0:00</text>
+<rect x="944" y="165" width="8" height="15" fill="#161c21"/>
+<text x="944" y="176" fill="#96a1aa"> </text>
+<rect x="952" y="165" width="8" height="15" fill="#161c21"/>
+<text x="952" y="176" fill="#e2e8ee"> </text>
+<rect x="0" y="180" width="376" height="15" fill="#161c21"/>
+<text x="0" y="191" fill="#96a1aa">                                               </text>
+<rect x="376" y="180" width="8" height="15" fill="#161c21"/>
+<text x="376" y="191" fill="#39434b">│</text>
+<rect x="384" y="180" width="96" height="15" fill="#161c21"/>
+<text x="384" y="191" fill="#5d6870">   HALT     </text>
+<rect x="480" y="180" width="64" height="15" fill="#161c21"/>
+<text x="480" y="191" fill="#8fb2ee" font-weight="700">HALT    </text>
+<rect x="544" y="180" width="352" height="15" fill="#161c21"/>
+<text x="544" y="191" fill="#e2e8ee">waiting on your permission                  </text>
+<rect x="896" y="180" width="48" height="15" fill="#161c21"/>
+<text x="896" y="191" fill="#5d6870">  0:00</text>
+<rect x="944" y="180" width="8" height="15" fill="#161c21"/>
+<text x="944" y="191" fill="#96a1aa"> </text>
+<rect x="952" y="180" width="8" height="15" fill="#161c21"/>
+<text x="952" y="191" fill="#e2e8ee"> </text>
+<rect x="0" y="195" width="376" height="15" fill="#161c21"/>
+<text x="0" y="206" fill="#96a1aa">                                               </text>
+<rect x="376" y="195" width="8" height="15" fill="#161c21"/>
+<text x="376" y="206" fill="#39434b">│</text>
+<rect x="384" y="195" width="96" height="15" fill="#161c21"/>
+<text x="384" y="206" fill="#5d6870">   HUMAN    </text>
+<rect x="480" y="195" width="64" height="15" fill="#161c21"/>
+<text x="480" y="206" fill="#8fb2ee" font-weight="700">YOU     </text>
+<rect x="544" y="195" width="352" height="15" fill="#161c21"/>
+<text x="544" y="206" fill="#8fb2ee">allowed the request · continuing the same r…</text>
+<rect x="896" y="195" width="48" height="15" fill="#161c21"/>
+<text x="896" y="206" fill="#5d6870">  0:00</text>
+<rect x="944" y="195" width="8" height="15" fill="#161c21"/>
+<text x="944" y="206" fill="#96a1aa"> </text>
+<rect x="952" y="195" width="8" height="15" fill="#161c21"/>
+<text x="952" y="206" fill="#e2e8ee"> </text>
+<rect x="0" y="210" width="376" height="15" fill="#161c21"/>
+<text x="0" y="221" fill="#96a1aa">                                               </text>
+<rect x="376" y="210" width="8" height="15" fill="#161c21"/>
+<text x="376" y="221" fill="#39434b">│</text>
+<rect x="384" y="210" width="96" height="15" fill="#161c21"/>
+<text x="384" y="221" fill="#5d6870">   CHANGE   </text>
+<rect x="480" y="210" width="64" height="15" fill="#161c21"/>
+<text x="480" y="221" fill="#96a1aa">CHANGED </text>
+<rect x="544" y="210" width="352" height="15" fill="#161c21"/>
+<text x="544" y="221" fill="#e2e8ee">src/app.ts                                  </text>
+<rect x="896" y="210" width="48" height="15" fill="#161c21"/>
+<text x="896" y="221" fill="#5d6870">  0:00</text>
+<rect x="944" y="210" width="8" height="15" fill="#161c21"/>
+<text x="944" y="221" fill="#96a1aa"> </text>
+<rect x="952" y="210" width="8" height="15" fill="#161c21"/>
+<text x="952" y="221" fill="#e2e8ee"> </text>
+<rect x="0" y="225" width="376" height="15" fill="#161c21"/>
+<text x="0" y="236" fill="#96a1aa">                                               </text>
+<rect x="376" y="225" width="8" height="15" fill="#161c21"/>
+<text x="376" y="236" fill="#39434b">│</text>
+<rect x="384" y="225" width="568" height="15" fill="#161c21"/>
+<text x="384" y="236" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="225" width="8" height="15" fill="#161c21"/>
+<text x="952" y="236" fill="#e2e8ee"> </text>
+<rect x="0" y="240" width="376" height="15" fill="#161c21"/>
+<text x="0" y="251" fill="#96a1aa">                                               </text>
+<rect x="376" y="240" width="8" height="15" fill="#161c21"/>
+<text x="376" y="251" fill="#39434b">│</text>
+<rect x="384" y="240" width="48" height="15" fill="#161c21"/>
+<text x="384" y="251" fill="#7ac9a5" font-weight="700"> READY</text>
+<rect x="432" y="240" width="520" height="15" fill="#161c21"/>
+<text x="432" y="251" fill="#96a1aa">   result available for review · r reads it                      </text>
+<rect x="952" y="240" width="8" height="15" fill="#161c21"/>
+<text x="952" y="251" fill="#e2e8ee"> </text>
+<rect x="0" y="255" width="376" height="15" fill="#161c21"/>
+<text x="0" y="266" fill="#96a1aa">                                               </text>
+<rect x="376" y="255" width="8" height="15" fill="#161c21"/>
+<text x="376" y="266" fill="#39434b">│</text>
+<rect x="384" y="255" width="104" height="15" fill="#161c21"/>
+<text x="384" y="266" fill="#e2e8ee">   src/app.ts</text>
+<rect x="488" y="255" width="464" height="15" fill="#161c21"/>
+<text x="488" y="266" fill="#96a1aa">                                                          </text>
+<rect x="952" y="255" width="8" height="15" fill="#161c21"/>
+<text x="952" y="266" fill="#e2e8ee"> </text>
+<rect x="0" y="270" width="376" height="15" fill="#161c21"/>
+<text x="0" y="281" fill="#96a1aa">                                               </text>
+<rect x="376" y="270" width="8" height="15" fill="#161c21"/>
+<text x="376" y="281" fill="#39434b">│</text>
+<rect x="384" y="270" width="568" height="15" fill="#161c21"/>
+<text x="384" y="281" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="270" width="8" height="15" fill="#161c21"/>
+<text x="952" y="281" fill="#e2e8ee"> </text>
+<rect x="0" y="285" width="376" height="15" fill="#161c21"/>
+<text x="0" y="296" fill="#96a1aa">                                               </text>
+<rect x="376" y="285" width="8" height="15" fill="#161c21"/>
+<text x="376" y="296" fill="#39434b">│</text>
+<rect x="384" y="285" width="568" height="15" fill="#161c21"/>
+<text x="384" y="296" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="285" width="8" height="15" fill="#161c21"/>
+<text x="952" y="296" fill="#e2e8ee"> </text>
+<rect x="0" y="300" width="376" height="15" fill="#161c21"/>
+<text x="0" y="311" fill="#96a1aa">                                               </text>
+<rect x="376" y="300" width="8" height="15" fill="#161c21"/>
+<text x="376" y="311" fill="#39434b">│</text>
+<rect x="384" y="300" width="568" height="15" fill="#161c21"/>
+<text x="384" y="311" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="300" width="8" height="15" fill="#161c21"/>
+<text x="952" y="311" fill="#e2e8ee"> </text>
+<rect x="0" y="315" width="376" height="15" fill="#161c21"/>
+<text x="0" y="326" fill="#96a1aa">                                               </text>
+<rect x="376" y="315" width="8" height="15" fill="#161c21"/>
+<text x="376" y="326" fill="#39434b">│</text>
+<rect x="384" y="315" width="568" height="15" fill="#161c21"/>
+<text x="384" y="326" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="315" width="8" height="15" fill="#161c21"/>
+<text x="952" y="326" fill="#e2e8ee"> </text>
+<rect x="0" y="330" width="376" height="15" fill="#161c21"/>
+<text x="0" y="341" fill="#96a1aa">                                               </text>
+<rect x="376" y="330" width="8" height="15" fill="#161c21"/>
+<text x="376" y="341" fill="#39434b">│</text>
+<rect x="384" y="330" width="568" height="15" fill="#161c21"/>
+<text x="384" y="341" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="330" width="8" height="15" fill="#161c21"/>
+<text x="952" y="341" fill="#e2e8ee"> </text>
+<rect x="0" y="345" width="376" height="15" fill="#161c21"/>
+<text x="0" y="356" fill="#96a1aa">                                               </text>
+<rect x="376" y="345" width="8" height="15" fill="#161c21"/>
+<text x="376" y="356" fill="#39434b">│</text>
+<rect x="384" y="345" width="568" height="15" fill="#161c21"/>
+<text x="384" y="356" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="345" width="8" height="15" fill="#161c21"/>
+<text x="952" y="356" fill="#e2e8ee"> </text>
+<rect x="0" y="360" width="376" height="15" fill="#161c21"/>
+<text x="0" y="371" fill="#96a1aa">                                               </text>
+<rect x="376" y="360" width="8" height="15" fill="#161c21"/>
+<text x="376" y="371" fill="#39434b">│</text>
+<rect x="384" y="360" width="568" height="15" fill="#161c21"/>
+<text x="384" y="371" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="360" width="8" height="15" fill="#161c21"/>
+<text x="952" y="371" fill="#e2e8ee"> </text>
+<rect x="0" y="375" width="376" height="15" fill="#161c21"/>
+<text x="0" y="386" fill="#96a1aa">                                               </text>
+<rect x="376" y="375" width="8" height="15" fill="#161c21"/>
+<text x="376" y="386" fill="#39434b">│</text>
+<rect x="384" y="375" width="568" height="15" fill="#161c21"/>
+<text x="384" y="386" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="375" width="8" height="15" fill="#161c21"/>
+<text x="952" y="386" fill="#e2e8ee"> </text>
+<rect x="0" y="390" width="376" height="15" fill="#161c21"/>
+<text x="0" y="401" fill="#96a1aa">                                               </text>
+<rect x="376" y="390" width="8" height="15" fill="#161c21"/>
+<text x="376" y="401" fill="#39434b">│</text>
+<rect x="384" y="390" width="568" height="15" fill="#161c21"/>
+<text x="384" y="401" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="390" width="8" height="15" fill="#161c21"/>
+<text x="952" y="401" fill="#e2e8ee"> </text>
+<rect x="0" y="405" width="376" height="15" fill="#161c21"/>
+<text x="0" y="416" fill="#96a1aa">                                               </text>
+<rect x="376" y="405" width="8" height="15" fill="#161c21"/>
+<text x="376" y="416" fill="#39434b">│</text>
+<rect x="384" y="405" width="568" height="15" fill="#161c21"/>
+<text x="384" y="416" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="405" width="8" height="15" fill="#161c21"/>
+<text x="952" y="416" fill="#e2e8ee"> </text>
+<rect x="0" y="420" width="376" height="15" fill="#161c21"/>
+<text x="0" y="431" fill="#96a1aa">                                               </text>
+<rect x="376" y="420" width="8" height="15" fill="#161c21"/>
+<text x="376" y="431" fill="#39434b">│</text>
+<rect x="384" y="420" width="568" height="15" fill="#161c21"/>
+<text x="384" y="431" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="420" width="8" height="15" fill="#161c21"/>
+<text x="952" y="431" fill="#e2e8ee"> </text>
+<rect x="0" y="435" width="376" height="15" fill="#161c21"/>
+<text x="0" y="446" fill="#96a1aa">                                               </text>
+<rect x="376" y="435" width="8" height="15" fill="#161c21"/>
+<text x="376" y="446" fill="#39434b">│</text>
+<rect x="384" y="435" width="568" height="15" fill="#161c21"/>
+<text x="384" y="446" fill="#96a1aa">                                                                       </text>
+<rect x="952" y="435" width="8" height="15" fill="#161c21"/>
+<text x="952" y="446" fill="#e2e8ee"> </text>
+<rect x="0" y="450" width="376" height="15" fill="#161c21"/>
+<text x="0" y="461" fill="#96a1aa">                                               </text>
+<rect x="376" y="450" width="568" height="15" fill="#161c21"/>
+<text x="376" y="461" fill="#39434b">│ ─────────────────────────────────────────────────────────────────────</text>
+<rect x="944" y="450" width="8" height="15" fill="#161c21"/>
+<text x="944" y="461" fill="#96a1aa"> </text>
+<rect x="952" y="450" width="8" height="15" fill="#161c21"/>
+<text x="952" y="461" fill="#e2e8ee"> </text>
+<rect x="0" y="465" width="376" height="15" fill="#161c21"/>
+<text x="0" y="476" fill="#96a1aa">                                               </text>
+<rect x="376" y="465" width="8" height="15" fill="#161c21"/>
+<text x="376" y="476" fill="#39434b">│</text>
+<rect x="384" y="465" width="112" height="15" fill="#161c21"/>
+<text x="384" y="476" fill="#8fb2ee" font-weight="700">   ↵ ACCEPT   </text>
+<rect x="496" y="465" width="456" height="15" fill="#161c21"/>
+<text x="496" y="476" fill="#96a1aa">x SEND BACK   c NOTE                                     </text>
+<rect x="952" y="465" width="8" height="15" fill="#161c21"/>
+<text x="952" y="476" fill="#e2e8ee"> </text>
+<rect x="0" y="480" width="8" height="15" fill="#161c21"/>
+<text x="0" y="491" fill="#96a1aa"> </text>
+<rect x="8" y="480" width="936" height="15" fill="#161c21"/>
+<text x="8" y="491" fill="#39434b"> ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</text>
+<rect x="944" y="480" width="16" height="15" fill="#161c21"/>
+<text x="944" y="491" fill="#e2e8ee">  </text>
+<rect x="0" y="495" width="8" height="15" fill="#161c21"/>
+<text x="0" y="506" fill="#96a1aa"> </text>
+<rect x="8" y="495" width="24" height="15" fill="#161c21"/>
+<text x="8" y="506" fill="#7ac9a5" font-weight="700"> ✓ </text>
+<rect x="32" y="495" width="320" height="15" fill="#161c21"/>
+<text x="32" y="506" fill="#e2e8ee">allowed · #001 continues in the same run</text>
+<rect x="352" y="495" width="608" height="15" fill="#161c21"/>
+<text x="352" y="506" fill="#e2e8ee">                                                                            </text>
+<rect x="0" y="510" width="928" height="15" fill="#161c21"/>
+<text x="0" y="521" fill="#96a1aa">  ↵ accept   r result   x send back   c note   d changes   j/k move   / search   tab all   n new   ? keys   q detach</text>
+<rect x="928" y="510" width="32" height="15" fill="#161c21"/>
+<text x="928" y="521" fill="#e2e8ee">    </text>
+<rect x="0" y="525" width="960" height="15" fill="#161c21"/>
+<text x="0" y="536" fill="#e2e8ee">                                                                                                                        </text>
+</svg>

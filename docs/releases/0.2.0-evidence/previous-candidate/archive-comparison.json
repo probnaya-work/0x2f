@@ -1,0 +1,9 @@
+{
+  "gzipDifferent": true,
+  "uncompressedTarEqual": true,
+  "macTarSha256": "2bfa50e463b5bddb20593a0f4c54e3eb5e6b71ee5f672e345aa8d35fbe03cfe0",
+  "linuxTarSha256": "2bfa50e463b5bddb20593a0f4c54e3eb5e6b71ee5f672e345aa8d35fbe03cfe0",
+  "allFileContentsAndModesEqual": true,
+  "canonicalArchive": "macOS verifier output",
+  "canonicalSha256": "c34acd08b65f6c2d915f1f9acc5c47c6f6be46c14894227899cfa29ea789e023"
+}

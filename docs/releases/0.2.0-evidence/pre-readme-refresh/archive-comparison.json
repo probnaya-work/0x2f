@@ -1,0 +1,8 @@
+{
+  "canonicalSha256": "5bb962ba6dc15311f1e097b9a29dc0fdf31f46c287bb8b816b71252554d48b4b",
+  "linuxIndependentSha256": "391980a2215fc782723cef4112b48ecfc9e6cd73d3bd49d9a996e281e55391ba",
+  "uncompressedTarEqual": true,
+  "uncompressedTarSha256": "8869cfacb627d55e977674dc3fd885028660884f01ea172639fe823e1e364df3",
+  "canonicalLinuxInstalledSha256": "5bb962ba6dc15311f1e097b9a29dc0fdf31f46c287bb8b816b71252554d48b4b",
+  "sourceCommit": "b910c91ffc47bec435062c5a127ffe065ea4a92b"
+}

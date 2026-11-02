@@ -1,0 +1,33 @@
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const here=path.dirname(fileURLToPath(import.meta.url));
+const out=path.join(here,'evidence');
+const source=process.cwd();
+const prior=JSON.parse(await fs.readFile(path.join(out,'installed-preflight.json'),'utf8'));
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+for(const file of prior.sourceFiles){assert.equal(hash(await fs.readFile(path.join(source,file.path))),file.sha256);assert.equal(hash(await fs.readFile(path.join(prior.installedRoot,file.path))),file.sha256);}
+const root=await fs.mkdtemp(path.join(os.tmpdir(),'0x2f-cursor-live-'));
+const workspace=path.join(root,'checkout with spaces');
+const commands=[];
+const env={...process.env,CODEX_SANDBOX:'workspace-write',PATH:'/Users/bogart/.local/bin:'+process.env.PATH};
+function run(command,args,cwd=source){const r=spawnSync(command,args,{cwd,env,encoding:'utf8',timeout:30000});commands.push({at:new Date().toISOString(),command:[command,...args],cwd,exitCode:r.status,stdout:String(r.stdout??'').replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[account-email-redacted]'),stderr:String(r.stderr??'')});assert.equal(r.status,0,r.stderr);return r.stdout;}
+const sourceSha=run('git',['rev-parse','HEAD']).trim();
+run('git',['worktree','add','--detach',workspace,sourceSha]);
+run(prior.cli,['init'],workspace);
+const manifest={...JSON.parse(await fs.readFile('examples/providers/cursor.json','utf8')),command:['/Users/bogart/.local/bin/agent','acp']};
+await fs.writeFile(path.join(workspace,'.work/providers/cursor.json'),JSON.stringify(manifest,null,2));
+run(prior.cli,['providers'],workspace);
+run(prior.cli,['version'],workspace);
+run('/Users/bogart/.local/bin/agent',['--version']);
+run('/Users/bogart/.local/bin/agent',['status']);
+run('codex',['--version']);
+run('codex',['login','status']);
+const meta={createdAt:new Date().toISOString(),root,workspace,cli:prior.cli,installedRoot:prior.installedRoot,source,sourceSha,installedPackageSource:prior.sourceBase,version:prior.packageVersion,archiveSha256:prior.archive.sha256,sourceFilesMatched:74,manifest,global2f:prior.globalInstallation,commands,env:{CODEX_SANDBOX:env.CODEX_SANDBOX,ignoreUserConfig:false,existingAuthentication:true,newLoginPerformed:false}};
+await fs.writeFile(path.join(out,'installation.json'),JSON.stringify(meta,null,2));
+await fs.copyFile(path.resolve(here,'../cursor-recheck/evidence/0x2f-0.1.4.tgz'),path.join(out,'0x2f-0.1.4.tgz'));
+console.log(JSON.stringify({root,workspace,cli:prior.cli,sourceSha,sourceFilesMatched:74,version:meta.version}));
