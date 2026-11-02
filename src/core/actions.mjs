@@ -700,7 +700,7 @@ export function createActions(ctx) {
       await fs.chmod(bundlePath, 0o600);
     }
     await git(store.base, ["worktree", "remove", "--force", expected]);
-    const updated = { ...task, checkout: { ...task.checkout, archivedAt: new Date().toISOString(), archive: "workspace.tar", archiveSha256: createHash("sha256").update(archive).digest("hex"), snapshot } };
+    const updated = { ...task, checkout: { ...task.checkout, archivedAt: new Date().toISOString(), archive: "workspace.tar", archiveSha256: createHash("sha256").update(archive).digest("hex"), savedHead: checkoutHead, snapshot } };
     await store.updateTask(updated);
     return updated;
   }
@@ -712,7 +712,15 @@ export function createActions(ctx) {
     if (task.checkout.path !== expected) throw new WorkError("Checkout ownership mismatch.", 409);
     const archive = await fs.readFile(path.join(store.taskDir(task.slug), "workspace.tar"));
     if (createHash("sha256").update(archive).digest("hex") !== task.checkout.archiveSha256) throw new WorkError("Archive integrity check failed.", 409);
-    await git(store.base, ["worktree", "add", "--detach", expected, task.checkout.baseHead]);
+    const savedHead = task.checkout.savedHead ?? task.checkout.baseHead;
+    if (savedHead !== task.checkout.baseHead) {
+      const bundlePath = path.join(store.taskDir(task.slug), "workspace-commits.bundle");
+      await git(store.base, ["bundle", "verify", bundlePath]);
+      const heads = await git(store.base, ["bundle", "list-heads", bundlePath, "HEAD"]);
+      if (!heads.startsWith(savedHead + " ")) throw new WorkError("Archived commit identity mismatch.", 409);
+      await git(store.base, ["fetch", "--no-tags", "--no-write-fetch-head", bundlePath, "HEAD"]);
+    }
+    await git(store.base, ["worktree", "add", "--detach", expected, savedHead]);
     const common = (await git(expected, ["rev-parse", "--git-common-dir"])).trim();
     await git(expected, ["read-tree", "--reset", "-u", task.checkout.snapshot.tree], { env: { ...process.env,
       GIT_OBJECT_DIRECTORY: path.join(store.workDir(), "evidence", "objects"), GIT_ALTERNATE_OBJECT_DIRECTORIES: path.resolve(expected, common, "objects") } });

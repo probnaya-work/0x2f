@@ -116,6 +116,7 @@ let worktreeBefore = null;
 const executionCwd = task.checkout?.path ?? base;
 let changeReceipt = null;
 let checkReceipts = [];
+let drainOwnedGroup = false;
 const checkAbort = new AbortController();
 let finished = false;
 let stopping = null;
@@ -399,6 +400,7 @@ try {
     const plan = await store.readJson(path.join(dir, "runs", String(runNumber), "acceptance-plan.json")).catch(() => null);
     checkReceipts = await runAcceptance({plan,cwd:executionCwd,directory:runDirectory,
       writeJson:store.writeJson,writeText:store.writeText,signal:checkAbort.signal});
+    drainOwnedGroup = checkReceipts.some(r => r.status.startsWith("timeout"));
   }
   await finish(outcome, await observedChanges());
 } catch (error) {
@@ -408,7 +410,7 @@ try {
 }
 
 clearInterval(cancelTimer);
-if (stopping) {
+if (stopping || drainOwnedGroup) {
   // Give normal children time to exit; then stop this still-owned group,
   // including TERM-resistant descendants. Children which deliberately escape
   // the group require OS containment and are not claimed to be reaped.

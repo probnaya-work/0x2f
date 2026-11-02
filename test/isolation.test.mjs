@@ -69,10 +69,19 @@ test('two isolated tasks, immutable run changes, conflict-safe apply and archive
   assert.equal(await fs.readFile(path.join(base,'seed.txt'),'utf8'),'agent change\n');
   await fs.writeFile(path.join(tasks[0].checkout.path,'seed.txt'),'later edit\n');
   assert.equal((await rt.actions.getRunChanges(tasks[0].id,1)).patch,saved.patch);
+  await git(tasks[0].checkout.path,['add','.']);
+  await git(tasks[0].checkout.path,['-c','user.name=fixture','-c','user.email=fixture@example.invalid','commit','-m','preserved task commit']);
+  const committedHead=(await git(tasks[0].checkout.path,['rev-parse','HEAD'])).trim();
+  await fs.writeFile(path.join(tasks[0].checkout.path,'unfinished.txt'),'retain after commit');
   const archived=await rt.actions.cleanupWork(tasks[0].id);
   assert.ok(archived.checkout.archiveSha256);
   await assert.rejects(fs.access(tasks[0].checkout.path));
   assert.ok((await fs.stat(path.join(rt.store.taskDir(tasks[0].slug),'workspace.tar'))).size>0);
+  assert.ok((await fs.stat(path.join(rt.store.taskDir(tasks[0].slug),'workspace-commits.bundle'))).size>0);
+  await rt.actions.restoreWork(tasks[0].id);
+  assert.equal((await git(tasks[0].checkout.path,['rev-parse','HEAD'])).trim(),committedHead);
+  assert.equal(await fs.readFile(path.join(tasks[0].checkout.path,'unfinished.txt'),'utf8'),'retain after commit');
+  assert.equal((await rt.actions.getRunChanges(tasks[0].id,1)).patch,saved.patch);
 });
 test('explicit shared mode serializes two independent local tasks',async t=>{
   const base=await repo(t);
