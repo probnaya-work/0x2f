@@ -1,5 +1,7 @@
 # Инженерный проход 0x2F / ThinkCentre / 057 — 2 ноября 2026
 
+> Independent follow-up: [final review, corrected package and separate merge verdicts](independent-review/REPORT.md). This report below remains historical; its successful intermediate Linux runs do not qualify the newer package.
+
 ## Результат и граница выпуска
 
 Подготовлена интеграция поверх опубликованной **0x2F 0.2.0**, а не новый npm-релиз.
