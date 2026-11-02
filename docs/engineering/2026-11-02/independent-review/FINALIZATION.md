@@ -5,49 +5,29 @@ were checked against GitHub before edits; no newer work was overwritten.
 
 ## Canonical Linux AI gate
 
-**BLOCKED by external free quota** after ThinkCentre returned to the network.
-The initial network failure is resolved: hostname thinkcenter, Linux, production
-0x2f-host.service active. The stored tarball SHA256 was rechecked and all83 files
-in the installed Lenovo qualification package matched it byte for byte:
-`4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626`.
-The existing Mac prefix also matches. No registry0.2.0 replacement was installed;
-product bytes remain implementation839e980dd20db3ea058ef4abc707ceeb322a0e93.
-A pack after report-only updates remained identical.
+**PASS — PR #5 GO for integration.** The full real Linux AI/check/backup/restore
+loop completed using Codex CLI0.166.0 through direct on-host ChatGPT login,
+provider openai/model gpt-6.1-sol. The canonical tarball remains
+`4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626`;
+all83 files matched in a new offline qualification prefix. Product source stays
+839e980dd20db3ea058ef4abc707ceeb322a0e93; no registry package substituted.
 
-Two bounded, distinct real attempts were retained, with no further retries:
+Both runs on one Task passed independent configured checks (11base, then7more).
+The note and current rules are in run2's exact input; launcher disconnect and
+runtime restart preserved the worker. Quiescent backup, new-directory restore,
+independent restored assertions, all57 unchanged original state files and no
+restored execution/replay passed. No ACCEPT was inferred from checks.
 
-1. Existing OpenCode2.2.5 ACP/default model, requested opencode/big-pickle
-   (read from this exact session's model metadata); session/execution IDs stay
-   in private evidence.
-   First AI run failed with `Free usage limit reached`.
-2. The already available catalog exposed explicitly named free models. One
-   alternative used the stock installed command provider and per-run
-   `opencode run --model opencode/deepseek-v4.1-flash-free --auto`, with a private
-   provider manifest. This also failed on the first run with the same free-quota
-   error. Its execution ID stays in private evidence. The command transport
-   did not provide an external OpenCode session receipt; it remains unknown.
-   The argv records the requested model, not a model acknowledgement.
+The additional free OpenCode glm-5.3-flash-free attempt failed quota; the first
+Codex attempt failed its checks because bundled bwrap could not start commands.
+Both failures remain evidence. After the owner installed the official distro
+bubblewrap dependency, standard workspace-write/network isolation worked and the
+whole loop passed in a fresh root. No API key, Mac credential copy, paid API,
+global security disable, bypass, production service or pairing change was used.
+All qualification units are inactive and production active.
 
-Both used existing unauthenticated free access (`No authenticated integrations`),
-Node26.13.0, the unchanged installed tarball, new private workspaces and unique
-transient units/loopback ports. No account, credential transfer, paid provider
-or global model setting was added. No other supported harness binary was found
-on the explicit qualification PATH.
-
-Both runs saved the real input receipt/hash and remained FAILED with zero
-configured checks; no acceptance or successful AI continuation is claimed.
-The input SHA was b1a41e0ec795d5beea01dad8a20a40c4c026a52b3522d795a29bfcccc7cc94d8.
-Note-during-work and disconnected-launcher/runtime-restart worker preservation
-passed before the provider failures. The controllers then stopped their own
-units, leaving production active. The prior deterministic restore success stays
-historical and does not replace this missing full AI loop.
-
-To close the gate, restore available free quota or provide an existing permitted
-Linux harness, then rerun the complete two-AI-run/check/backup/restore controller
-on the same hash. A paid route still requires separate permission. Do not repeat
-calls against the same quota failure. Private logs, inputs and receipts were
-retained outside Git; the controllers are based on installed-live.mjs and keep
-its ABS_PACKAGE ABS_NEW_PRIVATE_ROOT linux interface.
+[Full receipts, hashes, failed-attempt scope and exact execution](LINUX-AI-GATE.md).
+[Controller options and setup](LINUX-AI-CONTROLLER.md).
 
 ## Mobile correction and qualification
 
@@ -102,14 +82,17 @@ were unchanged, Revoke All was not used, and the production app was untouched.
 The owner's general works confirmation after re-pairing is not expanded into
 separate revised-build rotation/Home/Wi-Fi assertions. The earlier217403c
 normal-path/permission results keep their original scope. Physical in-session
-interruption/runtime-error recovery remains open; see the Mobile report.
+interruption/runtime-error recovery remains UNVERIFIED and is transferred, with
+explicit owner acceptance, to a separate Mobile follow-up task. No manual Siri
+check continues here. This condition still governs Mobile promotion, but no
+longer holds 0x2F finalization; see the Mobile report.
 
 ## Subsequent integration and release order
 
 1. 057 #1 may merge into its named engineering base with its reader opt-in;
    site #2 may merge factual unreleased documentation. Neither implies production rollout.
-2. Keep 0x2F #5 on merge hold until the canonical Linux two-AI-run/check/restore gate
-   completes. Then merge the verified branch without substituting registry0.2.0.
+2. 0x2F #5 is now GO: the canonical Linux two-AI-run/check/restore gate is closed.
+   Merge the verified branch when authorized, without substituting registry0.2.0.
 3. Merge Mobile only after its explicit remaining physical gates are closed.
    Keep the existing renderer pin and distinct Dev/Release identities.
 4. Propose **0x2F0.3.0** for the subsequent delivery: this is an additive engineering

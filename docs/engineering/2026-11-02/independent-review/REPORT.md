@@ -1,20 +1,19 @@
 # Независимый review и квалификация — 2 ноября 2026
 
-Focused follow-up: [FINALIZATION.md](FINALIZATION.md). The latest Linux retry is
-BLOCKED on external free quota after Thinkbox network access returned; Mobile software preview is now removed and
-initial signed physical normal-path checks passed. A subsequent rejected-code
-loop correction has a new exact signed artifact: expired refusal/stable preview/CANCEL
-and approved selective revocation/fresh re-pair now passed. Remaining Mobile fault gates
-are explicit in its updated report. The original package qualification below
-remains historical evidence for the same unchanged canonical bytes.
+Focused follow-up: [FINALIZATION.md](FINALIZATION.md).
+**Linux AI gate закрыт реальным Codex CLI0.166.0 на canonical tarball**:
+[полный результат и receipts](LINUX-AI-GATE.md). PR #5 — GO для интеграции.
+Mobile diagnostic preview удалён; expired/refusal и selective revocation/re-pair
+проверены. Владелец перенёс UNVERIFIED interruption/runtime-error сценарии в
+отдельную Mobile follow-up задачу: они не удерживают финализацию 0x2F.
 
 ## Решение о merge
 
 | PR | Verdict | Основание / точное условие |
 | --- | --- | --- |
-| [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **CONDITIONAL GO — merge пока удержать** | Исправления и окончательные package contracts прошли. Final Mac/Linux install и contracts прошли. Первый реальный Linux OpenCode run/check прошёл; второй run отказал с `Free usage limit reached`. Условие: успешный полный Linux AI continuation → checks → restore тем же hash. |
+| [0x2F #5](https://github.com/probnaya-work/0x2f/pull/5) | **GO для интеграции** | Final package contracts и полный Linux Codex loop на том же hash прошли: два AI run, note/current rules, independent checks, disconnect/restart, quiescent backup/restore, restored assertions, original state unchanged и no replay. |
 | [057 #1](https://github.com/probnaya-work/057/pull/1) | **GO в заявленную engineering base** | Исправлены persistence/time-window defects; проверены реальные process-generation links, SQLite reopen и отдельный новый Core: source failure/reconnect сохраняет историю. Reader остаётся opt-in. |
-| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **CONDITIONAL GO — physical fault gates открыты** | Diagnostic preview удалён в 217403c; rejected-QR loop исправлен в 5f8435e (32 tests, новый signed Dev17 установлен). На точном новом артефакте подтверждены CODE EXPIRED/stable preview/CANCEL и selective Dev revocation/fresh re-pair. Normal-path observations предыдущего артефакта сохраняют исходную область; interruption/runtime-error gate открыт; см. follow-up. |
+| [Display Mobile #1](https://github.com/probnaya-work/057-display-mobile/pull/1) | **CONDITIONAL GO — physical fault gates открыты** | Diagnostic preview удалён в 217403c; rejected-QR loop исправлен в 5f8435e (32 tests, новый signed Dev17 установлен). На точном новом артефакте подтверждены CODE EXPIRED/stable preview/CANCEL и selective Dev revocation/fresh re-pair. Normal-path observations предыдущего артефакта сохраняют исходную область; interruption/runtime-error перенесён владельцем в отдельную UNVERIFIED follow-up задачу и не удерживает финализацию 0x2F; Mobile promotion остаётся условным. |
 | [Site #2](https://github.com/probnaya-work/0x2f-site/pull/2) | **GO** | Registry 0.2.0 отделён от unreleased source; ограничения, ссылки и desktop/narrow navigation проверены. Deployment не выполнялся. |
 
 Это четыре отдельных решения. GO на documentation/opt-in observer не является разрешением на
@@ -120,38 +119,29 @@ Native resume хранит своё сообщение, не приписыва�
 отказ до запуска показывает unknown input. Positive native argv fidelity проверена fixture,
 а новая живая parity по каждому harness не заявляется.
 
-### Lenovo: final runtime проверен; AI continuation gate открыт
+### Lenovo: полный реальный Linux AI gate закрыт
 
-OpenCode **2.2.5** реально запущен final installed package. Управляющий SSH launcher был
-отключён; отдельный runtime MainPID сменился, worker сохранился. Первый реальный run достиг
-READY, создал utility files и прошёл independent configured check (11 assertions, exit 0).
-Первый input SHA: `b1a41e0ec795d5beea01dad8a20a40c4c026a52b3522d795a29bfcccc7cc94d8`;
-patch SHA: `c76cac2adf751e1c4cc2d54742df3fc413482f7b8216f5f6c79e105f0b7e8234`.
-Note был сохранён во время работы. **Второй run** отказал с **Free usage limit reached**;
-он остался FAILED, continuation/check-success не выдуманы. Других установленных
-авторизованных harnesses ранее не найдено; `opencode auth list` сообщил No authenticated
-integrations. Платный provider, новый login или перенос credential не инициировались.
+Codex CLI **0.166.0**, provider **openai**, model **gpt-6.1-sol**, direct on-host
+ChatGPT login. Новый offline qualification prefix совпал с canonical tarball
+по всем83 package files. **Два run одной Task** и independent configured checks
+прошли:11base assertions, затем11base +7continuation. Note сохранён при working;
+точный input второго fresh-session run содержит note и текущие rules. Это не
+native resume и не утверждение об осмыслении контекста моделью.
 
-Полный end-to-end runtime путь отдельно выполнен тем же final package с **deterministic
-real-process fixture** без LLM: два run одной Task, note, смена current rules, disconnected
-launcher, runtime restart, реальные utility files, independent configured checks exit 0,
-quiescent backup и restore в новый каталог. Два исторических run/check output сохранены;
-restored execution authority и hosts отключены; ни одного автоматического исполнения;
-source task JSON byte-identical. Independent assertions из восстановленного checkout
-реально прошли. Production `0x2f-host.service` active, qualification units inactive.
-Этот результат квалифицирует runtime/restore, но **не заменяет успешный внешний AI harness gate**.
+SSH launcher отключён; runtime MainPID сменился, worker identity сохранилась.
+После quiescence прошли backup и restore в новый каталог; assertions запущены
+именно в новом restored checkout. История обоих checks сохранена, execution
+identity/PID/hosts не восстановлены, автоматического запуска нет. Все57 исходных
+state files/symlinks после restore совпали. Production active, все новые
+qualification units inactive. Checks не создали ACCEPT.
 
-Перед final доставкой были SSH timeout и два automatic approval refusals. После явного
-ответа пользователя «Разрешаю передачу и Linux-проверку» хост вернулся в сеть, approved
-payload был передан, и final gates выше выполнены. Первый controller отказал до AI launch
-из-за сохранённого имени старого transient unit; отдельный controller с уникальным review
-unit name завершил реальный сценарий до provider-quota failure. Эти setup failures сохранены.
-
-Условие для merge #5: повторить `installed-live.mjs <installed-package> <new-private-root> linux`
-на том же hash после восстановления доступной квоты/существующего разрешённого harness.
-Использовать свободное qualification unit name. Два успешных AI run, checks, quiescent backup,
-restore и independent restored assertions должны завершиться целиком. Старый успешный tarball
-или deterministic fixture условие не закрывают. Переход на платный provider требует разрешения.
+OpenCode quota failures (включая дополнительно разрешённый
+opencode/glm-5.3-flash-free) и первый Codex sandbox/check failure сохранены как
+неуспешные попытки. Штатная установка Ubuntu bubblewrap владельцем устранила
+реальную setup-причину; host AppArmor restriction не отключался. Credentials
+с Mac не переносились, API key/платный API не использовались. Product bytes
+не менялись. Подробные hash receipts и границы:
+[LINUX-AI-GATE.md](LINUX-AI-GATE.md), [controller](installed-live.mjs).
 
 ## Compatibility и rollback
 
@@ -189,11 +179,11 @@ identity worker — явный OS-process fixture без модели; один 
 сохранились во время отказа, **109** после reconnect; completion/idle не выводились из потери source.
 Подробности: [отдельный 057 review](https://github.com/probnaya-work/057/blob/integration/execution-observation-20261102/docs/INDEPENDENT-REVIEW-20261102.md).
 
-Mobile: implementation `ff5e011d4aaeb87c79f91cca4f1e5608ad938943`; **30 Swift tests / 5 suites**,
+Historical initial Mobile review: implementation `ff5e011d4aaeb87c79f91cca4f1e5608ad938943`; **30 Swift tests / 5 suites**,
 unsigned generic physical-iOS build passed. Renderer pin `c5a883a084dd2fd34d86f88e7c619f4688d49fbc`
 и tracked dependency не менялись. Software CIContext preview не доказал устранение camera input
 restriction и не должен попасть в promoted Release. Точный remove/retain list и physical gates:
-[scanner NO-GO](https://github.com/probnaya-work/057-display-mobile/blob/fix/scanner-recovery-20261102/Docs/INDEPENDENT-REVIEW-20261102.md).
+[scanner review and superseding follow-up](https://github.com/probnaya-work/057-display-mobile/blob/fix/scanner-recovery-20261102/Docs/INDEPENDENT-REVIEW-20261102.md).
 Нового signed physical acceptance в этом review не было; прежнее owner observation сохранено
 как историческое. Device Hub не запускался; production app не заменялась.
 
@@ -204,8 +194,9 @@ UNRELEASED boundary и section navigation проверены на local preview 
 Не квалифицированы и не расширялись: escaped-group OS containment, acknowledged live steering,
 полная живая permission/resume/cancel parity всех harnesses, independent phone registrations,
 closed-client push, новый Internet TLS deployment, cold reboot/production rollback,
-длительные RSS/storage/pixel/battery/thermal gates. Эти границы не маскируют точные два merge blockers
-выше: final Linux AI continuation gate для #5 и scanner production-preview/physical gates для Mobile #1.
+длительные RSS/storage/pixel/battery/thermal gates. Linux AI merge gate #5 теперь закрыт.
+Оставшиеся непроверенные Mobile fault-сценарии перенесены владельцем в отдельную follow-up
+задачу и сохраняют своё значение для Mobile promotion, а не для финализации 0x2F.
 
 ## Evidence и состояние доставки
 
