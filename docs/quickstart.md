@@ -1,4 +1,4 @@
-# Quickstart — prepared 0.2.0
+# Quickstart — 0.3.0
 
 Publication is pending npm authorization (401). The version below is the
 prepared target; stable npm latest remains0.1.4 until release.
@@ -7,7 +7,7 @@ Use macOS or Linux/POSIX, Node.js ≥20, npm, and an installed coding harness.
 The harness owns its authentication and model access; 0x2F has no account.
 
 ```sh
-npm install -g 0x2f@0.2.0
+npm install -g 0x2f@0.3.0
 2f version
 cd /path/to/your/repository
 2f init

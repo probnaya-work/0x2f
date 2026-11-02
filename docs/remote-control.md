@@ -27,7 +27,7 @@ exists unchanged: `2f pair --relay https://…` / `--client https://…`, or the
 
 ## Prerequisites
 
-- Node.js ≥ 20 and 0x2F installed globally (`npm install -g 0x2f@0.2.0` after publication)
+- Node.js ≥ 20 and 0x2F installed globally (`npm install -g 0x2f@0.3.0`)
 - The execution host and the phone on the **same Wi-Fi / local network**
 - One terminal
 
@@ -204,4 +204,4 @@ tradeoff: an active attacker on the network could intercept the pairing page
 (the pairing code is typed into it), so LAN pairing is for trusted networks.
 The hosted relay remains HTTPS-only.
 
-For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. The 0.2.0 package is published. New candidate controls and API 0.8 are described in [candidate operations](engineering/2026-11-02/OPERATIONS.md); they are not a new npm release.
+For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. The0.3.0 controls and API0.8 are described in [release operations](releases/0.3.0-operations.md).

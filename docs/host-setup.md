@@ -1,4 +1,4 @@
-# One persistent Linux execution host — 0.2.0
+# One persistent Linux execution host — 0.3.0
 
 0x2F can run directly on an always-on Linux host. Its node is still `local`:
 local to that host. The Mac and phone are control clients. This is one runtime
@@ -11,7 +11,7 @@ Linux itself. Do not transplant Mac credentials or place secrets in a unit file.
 A service does not inherit your interactive shell's PATH or environment.
 
 1. Install the release into a dedicated immutable prefix with
-   `npm install -g --prefix /absolute/release/prefix 0x2f@0.2.0`.
+   `npm install -g --prefix /absolute/release/prefix 0x2f@0.3.0`.
 2. Initialize a persistent repository with `2f init`. Keep `.work/` private and
    excluded from Git. Its task files are the durable state, not the browser.
 3. Copy [the user unit](../deploy/0x2f-user.service) to

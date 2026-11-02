@@ -1,0 +1,50 @@
+{
+  "version": "0.3.0",
+  "sourceTag": "v0.3.0",
+  "tarball": "0x2f-0.3.0.tgz",
+  "sha256": "7cf66322908f446fcd777c62664b425e000a9a752e50d8cbc3e5e84f4285c1be",
+  "npmIntegrity": "sha512-Dvp7FpPrgQr75kn1X2xMDnT5TDZ0DbiBnmpibsT94Bl8RbfOQpbqJcv7RfaYu5BFQ6VCI837gwtnudzK4OOhRg==",
+  "canonicalQualificationSHA256": "4aa0dd547bf3245a78acca09133ecf070a48fc74e3cc5d5afff74e5270250626",
+  "expectedChangedPackageFiles": [
+    "package.json",
+    "README.md",
+    "src/providers/acp.mjs"
+  ],
+  "unchangedPackageFiles": 80,
+  "sourceRegression": {
+    "macPassed": 821,
+    "failed": 0,
+    "skipped": 0,
+    "syntax": "passed",
+    "staticClientBuild": "passed"
+  },
+  "installedContracts": {
+    "mac": {
+      "criticalACP": 120,
+      "encryptedRemote": 73,
+      "TUIWebCLI": 117
+    },
+    "linux": {
+      "criticalACP": 120,
+      "encryptedRemote": 73,
+      "TUIWebCLI": 117
+    }
+  },
+  "releaseRuntimeFixture": {
+    "scope": "deterministic real process, not AI",
+    "mac": "two runs + checks + quiescent backup/restore + independent restored assertions passed",
+    "linux": "two runs + checks + runtime restart + quiescent backup/restore + independent restored assertions passed"
+  },
+  "httpAndFreshCLIReopen": {
+    "mac": "passed",
+    "linux": "passed"
+  },
+  "realAIGateLink": "../engineering/2026-11-02/independent-review/LINUX-AI-GATE.md; historical canonical0.2.0 candidate, not relabelled0.3.0",
+  "limitations": [
+    "worktrees/check environment are not OS containment",
+    "no universal harness parity or acknowledged steering",
+    "no closed-client push or host-to-host task migration",
+    "Mobile interruption/runtime-error UNVERIFIED and deferred",
+    "no new cold-reboot/rollback drill"
+  ]
+}

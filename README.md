@@ -5,7 +5,7 @@ Independent Computational Laboratory
 
 # 0x2F
 
-> Development branch after published **0.2.0**: [execution/isolation/context contracts](docs/engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](docs/engineering/2026-11-02/OPERATIONS.md), and [engineering report](docs/engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+> **0.3.0**: [release scope and upgrade/rollback](docs/releases/0.3.0.md), [execution/isolation/context contracts](docs/engineering/2026-11-02/FOUNDATIONS.md), and [commands](docs/usage.md).
 
 0x2F is a local work router for coding agents. Give it engineering work —
 "Inspect why retries restart the whole run" — and it routes the task to a
@@ -50,10 +50,10 @@ what the agent is doing, surfaces decisions when human attention is required,
 and lets you intervene — without treating every agent session as a separate
 piece of work.
 
-**0.2.0** adds faithful task review, persistent Linux hosting and additional Web themes.
+**0.3.0** adds cancellation/recovery, isolated task worktrees and saved patches, independent checks, bounded continuation receipts, pinned remote-host execution and private backup/restore. Checks and human acceptance remain separate.
 [Quickstart](docs/quickstart.md) · [Commands and troubleshooting](docs/usage.md) ·
 [Observed harness compatibility](docs/harness-compatibility.md) ·
-[Release scope and verification](docs/releases/0.2.0.md) · [Roadmap](docs/roadmap.md).
+[Release scope and verification](docs/releases/0.3.0.md) · [Roadmap](docs/roadmap.md).
 Supported execution hosts are macOS and Linux/POSIX with Node.js ≥20; the
 current release is checked on macOS arm64 and Lenovo/Linux x86_64. Windows
 execution and an operated remote execution service are not qualified.
@@ -78,7 +78,7 @@ small package with WebSocket and cryptography dependencies, no build step,
 no accounts, no daemon.
 
 ```bash
-npm install -g 0x2f@0.2.0  # the `2f` command lands on your PATH
+npm install -g 0x2f@0.3.0  # the `2f` command lands on your PATH
 ```
 
 `npx --yes 0x2f ...` works for a one-off, but install globally for regular
@@ -554,3 +554,13 @@ traces a task through the whole system.
 ## License
 
 [MIT](LICENSE)
+
+## Upgrade from 0.2.0
+
+Quiesce old workers and other workspace writers before changing the executable.
+Keep the old prefix and a consistent private backup of the workspace and state.
+Use a matching0.3.0 executable to inspect/export/apply new isolated tasks; an old
+0.2.0 executable must not execute them against the original checkout. Restore
+uses a new directory and disables credentials, host profiles and execution
+authority; it never replays a run. Review before configuring trust again.
+See [release upgrade/rollback](docs/releases/0.3.0.md#upgrade-and-rollback).

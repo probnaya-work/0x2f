@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 — 2026-11-02
+
+- Add attempt-owned CANCEL with process-group drain and retained partial patches; recovery never signals a new process from an old PID.
+- Isolate Git tasks in worktrees; retain immutable snapshots/patches for review/apply, archive and restore. Refuse cleanup that could lose ignored/index/reserved data.
+- Run independent configured checks with frozen plans and retained receipts; passing checks never imply ACCEPT. Record ACCEPT, DROP and CLOSE separately.
+- Retain exact per-attempt input, bounded continuation context, note/current-rules delivery and correlated command evidence. Fresh continuation and native resume remain distinct.
+- Add explicit Linux host execution over strict SSH with machine identity rechecked on the actual execution connection. No task or credential migration.
+- Add quiescent private workspace backup and integrity-checked new-root restore without restored credentials, hosts or execution authority.
+- Improve Web/mobile task creation, correction, cancellation and reconnect; extend TUI input/run/check/patch review. No closed-client push.
+- Preserve opt-in external057 observation of task/run state;057 and Mobile public apps are separate releases.
+
+Upgrade/rollback and exact qualification linkage: [0.3.0 release notes](docs/releases/0.3.0.md). Historical0.2.0 and candidate reports keep their original artifacts and dates.
+
 ## 0.2.0 — 2026-11-02
 
 - Harden task/run admission, locked publication, permission occurrence matching,

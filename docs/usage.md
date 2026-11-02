@@ -1,6 +1,6 @@
-# Commands and troubleshooting — 0.2.0
+# Commands and troubleshooting — 0.3.0
 
-> Development branch after published **0.2.0**: [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](engineering/2026-11-02/OPERATIONS.md), and [engineering report](engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+> **0.3.0**: [release scope and upgrade/rollback](releases/0.3.0.md), [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), and [commands](usage.md).
 
 `2f --help` is the command reference. Run commands in the Task's workspace.
 
