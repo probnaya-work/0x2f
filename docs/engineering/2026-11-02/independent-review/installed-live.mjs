@@ -68,6 +68,7 @@ try {
   execFileSync(process.execPath,['--test','words.test.mjs'],{cwd:base,stdio:'inherit'});
   execFileSync(process.execPath,plan.commands[0].argv.slice(1),{cwd:base,stdio:'inherit'});
   summary.applyAndIndependentSourceCheck=true;
+  await fs.writeFile(path.join(base,'.work/rules.md'),'Cancellation qualification: only partial.txt may change; no external operations.\n');
   active=await rt.actions.createWork({provider:'codex',workspaceMode:'isolated',brief:'This is a bounded cancellation qualification. Create partial.txt containing exactly PARTIAL-CANCEL-ARTIFACT followed by newline. Then execute a foreground shell sleep for 90 seconds. Do not edit any other file, use network, read credentials, install dependencies or write outside this checkout. Do not complete before the sleep returns; the controller will deliberately cancel while waiting. In any output describe this as partial, never complete.'});
   await until(async()=>{const t=await rt.store.findTask(active.id);return t.status==='working'&&await fs.access(path.join(active.checkout.path,'partial.txt')).then(()=>true,()=>false);},120000);
   await rt.actions.cancelWork(active.id,{executionId:active.execution.id,reason:'Independent real installed-package cancellation'});

@@ -8,6 +8,7 @@ import { backupWorkspace, restoreBackup } from '../src/backup.mjs';
 import { git, captureTree, treeDiff, requireSharedSlot } from '../src/core/isolation.mjs';
 import { resultEvidence } from '../src/web/result-evidence.mjs';
 import { reserveExecution } from '../src/core/execution.mjs';
+import { projectEvent } from '../src/relay/project.mjs';
 
 async function root(t) {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), '2f-independent-'));
@@ -69,6 +70,10 @@ test('tool receipts never borrow commands from a future invocation or different 
   const receipts = resultEvidence('', events).receipts;
   assert.deepEqual(receipts.map(r => r.command), ['false', undefined, 'true']);
   assert.deepEqual(receipts.map(r => r.exitCode), [1, null, 0]);
+  const remote = resultEvidence('', events.map(e => projectEvent(e, '/workspace'))).receipts;
+  assert.deepEqual(remote.map(r => r.command), ['false', 'true']);
+  assert.deepEqual(remote.map(r => r.executionId), ['one', 'two']);
+  assert.deepEqual(remote.map(r => r.exitCode), [1, 0]);
 });
 
 test('Git-visible non-UTF8 text keeps exact bytes through immutable patch and apply', async t => {

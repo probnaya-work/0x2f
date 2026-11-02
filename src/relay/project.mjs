@@ -152,6 +152,7 @@ export function projectRun(run, base) {
     completedAt: run.completedAt ?? null,
     durationMs: run.durationMs ?? null,
     attempts: run.attempts ?? 1,
+    executionId: run.executionId,
     stopReason: run.stopReason,
     checks: Array.isArray(run.checks) ? run.checks.map(r => ({
       id: r.id, status: r.status, exitCode: Number.isInteger(r.exitCode) ? r.exitCode : null,
@@ -254,7 +255,8 @@ export function projectEvent(event, base) {
     type: event.type,
     taskId: event.taskId,
     at: event.at,
-    ...(typeof event.run === "number" ? { run: event.run } : {})
+    ...(typeof event.run === "number" ? { run: event.run } : {}),
+    ...(typeof event.executionId === "string" ? { executionId: event.executionId } : {})
   };
   switch (event.type) {
     case "run.started":
