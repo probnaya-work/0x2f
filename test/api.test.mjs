@@ -289,7 +289,7 @@ test("GET / serves the 0x2F Web shell and its module assets", async () => {
     assert.match(html, /<script type="module" src="\/app\/app.js">/);
     assert.match(html, /0x2F/);
 
-    for (const path of ["/app/app.js", "/app/ledger.mjs", "/app/sound.mjs", "/app/sound-policy.mjs", "/app/app.css", "/app/e2e.mjs", "/app/remote.mjs", "/app/pair.mjs", "/app/pair.css"]) {
+    for (const path of ["/app/theme.js", "/app/theme.css", "/app/app.js", "/app/ledger.mjs", "/app/sound.mjs", "/app/sound-policy.mjs", "/app/app.css", "/app/e2e.mjs", "/app/remote.mjs", "/app/pair.mjs", "/app/pair.css"]) {
       const asset = await apiFetch(handle.url + path);
       assert.equal(asset.status, 200, path);
       assert.match(asset.headers.get("content-type"), /javascript|text\/css/);

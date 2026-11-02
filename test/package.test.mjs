@@ -65,6 +65,8 @@ test("the packed artifact ships only the local product", () => {
     "src/cli.mjs",
     "src/tui/index.mjs",
     "src/web/app.js",
+    "src/web/theme.js",
+    "src/web/theme.css",
     "src/web/index.html",
     "src/web/pair.html",
     "src/web/pair.mjs",

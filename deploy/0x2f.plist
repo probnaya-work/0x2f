@@ -43,6 +43,11 @@
   <key>WorkingDirectory</key>
   <string>/Users/<USER>/<REPO></string>
   <key>RunAtLoad</key>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>0X2F_SUPERVISED</key>
+    <string>1</string>
+  </dict>
   <true/>
   <key>KeepAlive</key>
   <true/>

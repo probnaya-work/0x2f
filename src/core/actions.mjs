@@ -28,6 +28,7 @@ import { deriveTitle } from "./title.mjs";
 import { taskDiff } from "./diff.mjs";
 import { unavailableMessage } from "../providers/index.mjs";
 import { pidAlive, processGroupAlive } from "../recover.mjs";
+import { remotePermissionScope } from "./permission-scope.mjs";
 
 export function createActions(ctx) {
   const { store, node, providers, router } = ctx;
@@ -38,13 +39,15 @@ export function createActions(ctx) {
   }
 
   async function requireExecutionExit(task, id) {
-    // The provider group can survive a killed worker. A terminal worker may
-    // take a few milliseconds to drain after publishing its final state.
-    const drainUntil = Date.now() + 250;
+    // A finished harness may leave short-lived descendants (e.g. plugin
+    // discovery or system profiling) after both harness and worker exit.
+    // Observe the group for a bounded drain interval even if its leader is
+    // gone. Never signal a saved numeric PID/group or admit while it exists.
+    const drainUntil = Date.now() + 2000;
     while (processGroupAlive(task.processGroupId)) {
-      if (!pidAlive(task.pid) || Date.now() >= drainUntil) {
+      if (Date.now() >= drainUntil) {
         throw new WorkError(
-          `Task #${id} still has execution processes in local process group ${task.processGroupId}. Inspect and stop the previous execution before continuing.`, 409
+          `Task #${id} still has execution processes in local process group ${task.processGroupId}. No new run was started. Wait for the previous execution to exit, then retry. If it persists, inspect it on the computer before stopping any verified process.`, 409
         );
       }
       await new Promise(resolve => setTimeout(resolve, 10));
@@ -398,7 +401,7 @@ export function createActions(ctx) {
   //
   //   otherwise — the run ended (provider session persisted); a fresh worker
   //   resumes the same provider session (--resume / session/load).
-  async function resumeWork(id, grant, { decisionId } = {}) {
+  async function resumeWork(id, grant, { decisionId, requireRemoteScope = false } = {}) {
     if (grant !== "allow" && grant !== "reject") throw new WorkError("Permission must be allow or reject.");
     const task = await store.findTask(id);
     if (task.status !== "needs_you") {
@@ -410,6 +413,9 @@ export function createActions(ctx) {
       throw new WorkError(
         `Task #${id} is blocked on a decision, not a permission — answer the decision (2f answer) instead of allowing or rejecting it.`
       );
+    }
+    if (grant === "allow" && requireRemoteScope && !remotePermissionScope(task.blockedOn, ctx.base ?? store.base).complete) {
+      throw new WorkError("Permission scope is incomplete on this device. Review and allow on the computer.", 409);
     }
     if (task.blockedOn?.live === true) {
       // UI clients bind the click to the occurrence they actually displayed.

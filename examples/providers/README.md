@@ -4,16 +4,24 @@ Copy any file below into your workspace's `.work/providers/` to add a
 harness that 0x2F did not ship. Each file is one provider; no source changes,
 no restart of anything but the CLI/server process.
 
-Only invocations verified against official documentation are listed. Where an
-agent needs authentication, that is the user's job **before** the run (see
-the notes) — 0x2F never stores or enters credentials.
+These examples use vendor-documented invocations. An example does not prove
+that its executable, authorization or real end-to-end behavior is available
+on this machine. See [the compatibility matrix](../../docs/harness-compatibility.md).
+Pre-authenticate before a run; 0x2F never stores or enters credentials.
 
 ---
 
 ## `cursor.json` — Cursor CLI (ACP)
 
-Verified: `agent acp` starts Cursor CLI in ACP mode
-(`cursor.com/docs/cli/acp`).
+Documented invocation: `agent acp` ([Cursor ACP documentation](https://cursor.com/docs/cli/acp)).
+The 2026-11-01 live qualification passed **Codex → Cursor → Codex** on one task
+using Cursor Agent **2026.10.22-27dcf5f** and the corrected installed 0x2F package.
+ID, files, context and results survived reopening. Permissions/native resume were
+**not exercised**. See [the live report](../../docs/qualification/2026-11-01/cursor-live/REPORT.md).
+Earlier missing-executable/auth blockers remain in the retained preflight reports.
+The editor CLI's `cursor agent` entry point may install/update the separate Agent;
+it is not a read-only availability probe. Put the real `agent` on PATH, or use
+its discovered absolute executable path in your local manifest.
 
 ```json
 {

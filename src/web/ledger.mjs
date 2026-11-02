@@ -482,10 +482,38 @@ export const TAIL = { expanded: 24, collapsed: 12, provenance: 12 };
 // The widest the collapsed row's coarse ambient bar may draw, in px. Kept in
 // step with --col-exec in app.css by the test below it.
 export const MINI_CAP_PX = 150;
+// At 900–1179px the EXECUTION lane is 120px. Reserve the gap + live marker
+// there too; the wide cap must never be applied to that narrower lane.
+export const MINI_NARROW_CAP_PX = 100;
 
 export function tail(steps, n) {
   const units = steps.filter(s => s.kind !== "halt" && s.kind !== "fail");
-  return { marks: units.slice(-n), truncated: units.length > n, total: units.length };
+  const count = Math.max(0, Math.floor(n));
+  return { marks: count ? units.slice(-count) : [], truncated: units.length > count, total: units.length };
+}
+
+// Use the actual lane, not a breakpoint or an arbitrary twelve-event window.
+// Marks keep their fixed size: extra room reveals more real history, while a
+// narrower lane keeps the most recent signals and always reserves its live end.
+export function traceAtWidth(source, width, variant = "main") {
+  const mini = variant === "mini";
+  const provenance = variant === "provenance";
+  const w = mini ? 2 : provenance ? 3 : 4;
+  const gap = mini ? 1 : 2;
+  const live = !provenance && source.live;
+  const halted = !provenance && source.halted;
+  // Room for the halt glyph, glow and the rightmost bracket label.
+  const lane = Math.max(0, Math.floor(width) - 8);
+  const marker = live ? w + gap : halted ? 2 + gap : 0;
+  const n = Math.max(0, Math.floor((lane - marker + gap) / (w + gap)));
+  const laid = trace(source.steps, {
+    ...source, n, w, gap, live, halted,
+    scale: mini ? source.done ? .26 : .5 : provenance ? .55 : 1,
+    flat: mini && source.done ? COLORS.rule : null,
+    // Coarse providers still get one ambient shape, never invented dashes.
+    cap: Math.max(0, lane - (live ? w + 8 : halted ? 10 : 0))
+  });
+  return { ...laid, brackets: brackets(laid.units, source.capabilities, laid.cells, { observed: source.observedChanges, width: lane }) };
 }
 
 // --- the travel rule ---------------------------------------------------------
@@ -675,11 +703,8 @@ function contiguousRuns(list, predicate) {
   return runs;
 }
 
-// A label is drawn at its own bracket's left edge and never wraps, so two
-// brackets closer together than the label is wide would print one word on
-// top of the other. The projection decides here which spans can carry the
-// word: the rest stay bracketed but unlabelled (`label: null`), so the
-// shape still reads and the text never collides.
+// One label names the change marks across the lane. Separate bursts retain
+// their brackets, but repeating CHANGES under each burst adds no information.
 const BRACKET_LABEL_W = 56; // "CHANGES" at 9.5px/.14em in the mono face, plus a gap
 
 // `units` and `cells` come from the SAME trace() call (units[i] <-> cells[i]
@@ -694,14 +719,14 @@ export function brackets(units, caps = {}, cells = [], opts = {}) {
   // changed" when the repository objectively changed.
   const drawChanges = caps?.supportsFileChanges === true || opts.observed === true;
   if (drawChanges) {
-    let labelledX = -Infinity;
+    let labelled = false;
     for (const span of contiguousRuns(units, s => markClass(s) === "change")) {
       const from = cells[span.from];
       const to = cells[span.to];
       if (!from || !to) continue;
       const x = Math.round(from.x);
-      const room = x - labelledX >= BRACKET_LABEL_W;
-      if (room) labelledX = x;
+      const room = !labelled && (!Number.isFinite(opts.width) || x + BRACKET_LABEL_W <= opts.width);
+      if (room) labelled = true;
       out.push({
         label: room ? "CHANGES" : null,
         x: x + "px",
@@ -1039,14 +1064,12 @@ export function projectRow(task, events, opts = {}) {
   // column stays populated all the way down instead of emptying out at DONE.
   const mini = (() => {
     const laid = trace(steps, {
-      n: TAIL.collapsed, w: 2, scale: done ? 0.26 : 0.5, accent, coarse,
+      n: TAIL.collapsed, w: 2, gap: 1, scale: done ? 0.26 : 0.5, accent, coarse,
       flat: done ? COLORS.rule : null,
-      // --col-exec is 170px; 150 + the 8px gap + the 2px head fits with room
-      // to spare, at every width the collapsed trace is shown at.
-      cap: MINI_CAP_PX,
+      cap: wide ? MINI_CAP_PX : MINI_NARROW_CAP_PX,
       live: running, halted, finished, elapsedSeconds
     });
-    return { cells: laid.cells, doneW: laid.doneW, totalW: laid.totalW };
+    return { cells: laid.cells, doneW: laid.doneW, totalW: laid.totalW, truncated: laid.truncated, total: laid.total };
   })();
 
   const lastActivity = steps.filter(s => s.kind === "tool" || s.kind === "command").slice(-1)[0];
@@ -1091,7 +1114,7 @@ export function projectRow(task, events, opts = {}) {
     phaseLabel = "HALTED AT";
     arg = relativePath(base, task.blockedOn?.file) || task.blockedOn?.text || "waiting on you";
   } else if (ready) {
-    phaseLabel = "COMPLETE";
+    phaseLabel = "RESULT AVAILABLE";
     arg = filesSection
       ? filesSection.paths.length + (filesSection.paths.length === 1 ? " file changed" : " files changed")
       : "";
@@ -1149,9 +1172,9 @@ export function projectRow(task, events, opts = {}) {
     stateColor,
     titleSize: open
       ? longTitle
-        ? halted ? "26px" : "24px"
-        : mid ? (halted ? "34px" : "31px") : (halted ? "26px" : "24px")
-      : done ? "15px" : "17.5px",
+        ? halted ? "24px" : "23px"
+        : mid ? (halted ? "31px" : "29px") : (halted ? "24px" : "23px")
+      : done ? "14px" : "16.5px",
     titleWeight: done ? 400 : 500,
     titleColor: done ? COLORS.muted : COLORS.ink,
     // While a run is live the subline is telemetry and must not compete with
@@ -1172,8 +1195,11 @@ export function projectRow(task, events, opts = {}) {
       : done ? "10px 24px 10px 20px" : "15px 24px 15px 20px",
     sub,
     mini: mini.cells,
+    miniTruncated: mini.truncated,
+    miniTotal: mini.total,
     miniDoneW: mini.doneW,
     miniTotalW: mini.totalW,
+    traceSource: { steps, capabilities, observedChanges, accent, coarse, live: running, halted, finished, elapsedSeconds, done },
     layout,
     tailBudget: layout === "trace-primary" ? TAIL.expanded : TAIL.provenance,
     trace: mainTrace,
@@ -1226,6 +1252,7 @@ export function projectRow(task, events, opts = {}) {
     permDecisionId: task.blockedOn?.decisionId ?? null,
     permAllowable: task.blockedOn?.canAllow !== false,
     permRejectable: task.blockedOn?.canReject !== false,
+    permScopeNotice: task.blockedOn?.scopeNotice ?? "",
     permOptions: task.blockedOn?.options ?? [],
     // The AUTO routing decision of the current run — read from the persisted
     // record, so "why did 0x2F run this here?" never depends on live config.

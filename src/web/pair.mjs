@@ -50,7 +50,7 @@ async function sendCommand(key, phoneId, requestId, plaintext) {
   }
   const frame = await res.json();
   const ack = await decrypt(key, frame, { from: deviceId, requestId });
-  if (!ack) throw new Error("Could not verify the Mac's confirmation.");
+  if (!ack) throw new Error("Could not verify the execution host's confirmation.");
   return ack;
 }
 
@@ -63,7 +63,7 @@ async function pair(code) {
   }
   setBusy(true);
   try {
-    setStatus("Deriving the pairing key… (a few seconds on this page)");
+    setStatus("Deriving the pairing key… Keep this page open. On a plain-HTTP LAN this can take a minute or more.");
     // Yield so the status text paints before the (pure-JS on a plain-http LAN
     // page) derivation starts — otherwise the phone shows nothing for the
     // seconds it takes.
@@ -90,7 +90,7 @@ async function pair(code) {
     // relay answers 503; retry with the SAME requestId (idempotent) — never
     // queue on the relay, never execute twice.
     const requestId = randomId();
-    setStatus("Confirming with your Mac…");
+    setStatus("Confirming with your execution host…");
     for (;;) {
       try {
         const ack = await sendCommand(key, phoneId, requestId, {
@@ -106,7 +106,7 @@ async function pair(code) {
         break;
       } catch (error) {
         if (error.status === 503) {
-          setStatus("Waiting for your Mac to come online… (this retries automatically)");
+          setStatus("Waiting for your execution host to come online… (this retries automatically)");
           await new Promise(r => setTimeout(r, 2000));
           continue;
         }

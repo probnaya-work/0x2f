@@ -8,13 +8,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { startServer } from "../src/server.mjs";
 import { createRuntime } from "../src/runtime.mjs";
 import { createStore } from "../src/core/store.mjs";
 import { TEST_AUTH_TOKEN, authHeaders } from "./helpers.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 // --- fixtures ---------------------------------------------------------------
 

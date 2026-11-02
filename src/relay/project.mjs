@@ -20,11 +20,12 @@
 import { FAILURE_KINDS } from "../core/lifecycle.mjs";
 import { MAX_BRIEF } from "../core/limits.mjs";
 import { canonicalPath } from "../core/paths.mjs";
+import { remotePermissionScope, PERMISSION_LIMITS } from "../core/permission-scope.mjs";
 
 const TRUNC = {
-  text: 500, // progress activity line
+  text: PERMISSION_LIMITS.text, // progress activity line
   arg: 200, // one tool argument
-  path: 300, // file paths
+  path: PERMISSION_LIMITS.path, // file paths
   error: 500, // failure text
   result: 100_000, // READY result shown on the phone
   // §03: raised to match the storage cap (core/lifecycle.mjs) — the question
@@ -40,7 +41,7 @@ const TRUNC = {
   brief: MAX_BRIEF,
   workspaceLabel: 40, // §02: basename only, never the absolute path
   node: 60, // machine display name (os.hostname() or the paired agent name)
-  plannedChange: 200 // allow/reject change summary
+  plannedChange: PERMISSION_LIMITS.plannedChange // allow/reject change summary
 };
 
 function trunc(value, max, base) {
@@ -114,11 +115,14 @@ export function projectBlockedOn(blockedOn, base) {
   if (!blockedOn || typeof blockedOn !== "object") return null;
   const out = { type: blockedOn.type ?? null };
   if (blockedOn.type === "permission") {
+    const scope = remotePermissionScope(blockedOn, base);
     out.tool = blockedOn.tool ?? null;
     out.file = relPath(base, blockedOn.file);
     out.description = trunc(blockedOn.description, TRUNC.text, base);
     out.plannedChange = trunc(blockedOn.plannedChange, TRUNC.plannedChange, base);
-    out.canAllow = blockedOn.canAllow !== false;
+    out.canAllow = blockedOn.canAllow !== false && scope.complete;
+    out.scopeIncomplete = !scope.complete;
+    if (!scope.complete) out.scopeNotice = scope.reasons.join(" ") + " Review and allow on the computer.";
     out.canReject = blockedOn.canReject !== false;
     out.live = blockedOn.live === true;
     // Public request freshness precondition, not a credential. A phone must
@@ -217,6 +221,19 @@ export function projectTask(task, base, result) {
     projected.result = projectResult(result, base);
   }
   return projected;
+}
+
+// Mutation results (and cached acknowledgements from older versions) can
+// contain full local tasks. Apply the same boundary as snapshots/get before
+// encrypting or remembering them. Replays remain idempotent, never reexecute.
+export function projectAck(ack, base) {
+  const body = ack?.body;
+  if (ack?.ok && body?.id != null && typeof body.status === "string" &&
+      (body.execution || body.blockedOn?.raw)) {
+    const task = body.execution ? body : { ...body, execution: { provider: body.provider, model: body.model } };
+    return { ...ack, body: projectTask(task, base, body.result) };
+  }
+  return ack;
 }
 
 export function projectEvent(event, base) {

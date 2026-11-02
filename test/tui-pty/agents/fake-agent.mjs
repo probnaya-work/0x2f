@@ -121,6 +121,22 @@ rl.on("line", line => {
 
   promptId = message.id;
   const promptText = message.params?.prompt?.[0]?.text ?? "";
+  if (role === "investigation") {
+    const finishInvestigation = () => {
+    const carried = promptText.includes("NEXT_RUN_NOTE_SENTINEL");
+    notify(sessionId, { sessionUpdate: "agent_message_chunk", messageId: "investigation", content: {type:"text",text:
+      "## Result\nINVESTIGATION_CONCLUSION: no files changed. " + (carried ? "NOTE_RECEIVED_NEXT_RUN" : "FIRST_RUN_REPORT") +
+      "\n\n## Evidence\n" + Array.from({length:55},(_,i)=>`Evidence line ${i+1}: saved source observation.`).join("\n") +
+      "\nEVIDENCE_END_SENTINEL\n\n## Changes\nNone\n\n## Verification\nPARTIAL_VERIFICATION: unit checks only; integration not run.\n\n## Needs human decision\nREQUIRED: no"
+    }});
+    send({jsonrpc:"2.0",id:promptId,result:{stopReason:"end_turn"}});
+    };
+    const gate = process.env.FAKE_AGENT_INVESTIGATION_GATE;
+    if (gate && !fs.existsSync(gate)) {
+      const timer = setInterval(() => { if(fs.existsSync(gate)) {clearInterval(timer);finishInvestigation();} },20);
+    } else finishInvestigation();
+    return;
+  }
 
   if (role === "authfail") {
     // A normalized provider-auth/environment failure: the agent exits before

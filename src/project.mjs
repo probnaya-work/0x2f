@@ -39,7 +39,7 @@ command — so adding a new harness needs no source changes:
     "id": "cursor",
     "displayName": "Cursor",
     "transport": "acp",
-    "command": ["cursor", "--acp"]
+    "command": ["agent", "acp"]
   }
 
   {

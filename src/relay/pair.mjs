@@ -214,7 +214,7 @@ export async function pairDevice({
       transport,
       enabled: true
     });
-    await ensureLanRuntime({ base, port: lanPort, ensure, fetchImpl, killImpl });
+    await ensureLanRuntime({ base, port: lanPort, ensure, fetchImpl, killImpl, waitMs, pollMs });
   }
 
   if (cfg.deviceSecret) {
@@ -275,7 +275,7 @@ export async function pairDevice({
   // the pre-rotate step; ensureLanRuntime reuses it and the agent picks up
   // the new config on its next poll.
   if (transport === "lan") {
-    await ensureLanRuntime({ base, port: lanPort, ensure, fetchImpl, killImpl });
+    await ensureLanRuntime({ base, port: lanPort, ensure, fetchImpl, killImpl, waitMs, pollMs });
   } else {
     await ensure({ base, port });
   }
@@ -340,19 +340,42 @@ function killRuntime(base, port) {
 // LAN surface before pairing can proceed. Start (or reuse) it; a runtime
 // started before pairing binds loopback only, so restart it once — the fresh
 // spawn re-reads the config and comes up LAN-enabled.
-async function ensureLanRuntime({ base, port, ensure, fetchImpl, killImpl }) {
+async function ensureLanRuntime({ base, port, ensure, fetchImpl, killImpl, waitMs, pollMs }) {
   const e1 = await ensure({ base, port });
   let lanUp = false;
+  let supervised = false;
   try {
     const h = await fetchImpl(`http://127.0.0.1:${port}/api/health`).then(r =>
       r.ok ? r.json() : null
     );
     lanUp = Boolean(h?.lan);
+    supervised = h?.supervised === true;
   } catch {
     /* runtime may still be starting — the fresh spawn below handles it */
   }
   if (e1.status === "reused" && !lanUp) {
     await killImpl(base, port);
+    if (supervised) {
+      // The service manager owns this listener. Spawning a detached replacement
+      // races Restart=always/KeepAlive and leaves the managed service failing.
+      const deadline = Date.now() + waitMs;
+      do {
+        try {
+          const response = await fetchImpl(`http://127.0.0.1:${port}/api/health`, {
+            signal: AbortSignal.timeout(Math.max(1, Math.min(1000, deadline - Date.now())))
+          });
+          const health = response.ok ? await response.json() : null;
+          if (health?.base && health.base !== base) {
+            throw new Error("Another workspace replaced the supervised runtime; refusing to continue pairing.");
+          }
+          if (health?.ok && health.mode === "local" && health.base === base && health.lan) return;
+        } catch (error) {
+          if (error.message?.startsWith("Another workspace")) throw error;
+        }
+        await sleep(Math.min(pollMs, 150));
+      } while (Date.now() < deadline);
+      throw new Error("The supervised 0x2F runtime did not return with LAN pairing enabled. Restart its systemd/launchd service and retry; no detached replacement was started.");
+    }
     // The kill is a signal — the dying runtime still owns the port for a
     // moment, and a probe in that window would reuse it (and then vanish).
     // Wait until the port is actually free before the fresh spawn.

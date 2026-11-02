@@ -128,6 +128,8 @@ const VENDOR_CRYPTO_FILES = [
 ];
 
 const ASSETS = {
+  "/app/theme.js": ["web/theme.js", "text/javascript; charset=utf-8"],
+  "/app/theme.css": ["web/theme.css", "text/css; charset=utf-8"],
   "/": ["web/index.html", "text/html; charset=utf-8"],
   "/pair": ["web/pair.html", "text/html; charset=utf-8"],
   "/app/app.css": ["web/app.css", "text/css; charset=utf-8"],
@@ -137,6 +139,8 @@ const ASSETS = {
   "/app/pair.css": ["web/pair.css", "text/css; charset=utf-8"],
   "/app/remote.mjs": ["web/remote.mjs", "text/javascript; charset=utf-8"],
   "/app/ledger.mjs": ["web/ledger.mjs", "text/javascript; charset=utf-8"],
+  "/app/result-evidence.mjs": ["web/result-evidence.mjs", "text/javascript; charset=utf-8"],
+  "/core/permission-scope.mjs": ["core/permission-scope.mjs", "text/javascript; charset=utf-8"],
   "/app/sound-policy.mjs": ["web/sound-policy.mjs", "text/javascript; charset=utf-8"],
   "/app/sound.mjs": ["web/sound.mjs", "text/javascript; charset=utf-8"],
   // The browser's E2E envelope code (e2e.mjs) imports this shared protocol
@@ -631,6 +635,8 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           ok: true,
           mode: "local",
           base: store.base,
+          ...((process.env["0X2F_SUPERVISED"] === "1" || process.env.INVOCATION_ID)
+            ? { supervised: true } : {}),
           ...(lanRelay ? { lan: true } : {})
         });
         return;

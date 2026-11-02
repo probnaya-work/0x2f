@@ -20,6 +20,7 @@
 import os from "node:os";
 import {
   toSteps,
+  eventsForRun,
   projectRuns,
   relativePath,
   firstSentence,
@@ -137,7 +138,7 @@ function haltOf(task, base) {
       : "";
   return {
     kind: "permission",
-    op: String(blocked.tool ?? "write").toUpperCase(),
+    op: String(blocked.tool ?? "operation").toUpperCase(),
     path: path || "(no path reported)",
     plan: String(blocked.plannedChange ?? description ?? "").trim(),
     why: blocked.plannedChange ? description : "",
@@ -192,27 +193,35 @@ function failOf(task, steps, files, provider, node) {
 export function projectTask(task, events, opts = {}) {
   const { base = "", providers = {}, lookup, node = "", now = Date.now() } = opts;
   const provider = lookup(task.execution?.provider);
-  const { origin, lastAt, steps, files, activity, sessionId } = toSteps(task, events, { base });
+  const run = currentRunNumber(task);
+  const current = task.runs?.at(-1);
+  const trace = toSteps(
+    { ...task, createdAt: current?.startedAt ?? task.createdAt },
+    eventsForRun(events, run),
+    { base }
+  );
+  // The run record precedes worker events, sometimes by several seconds.
+  // Use its clock even when this run has not emitted anything yet; legacy
+  // tasks fall back to the shared projection's event-derived origin.
+  const startedAt = Date.parse(current?.startedAt ?? "");
+  const origin = Number.isFinite(startedAt) ? startedAt : trace.origin;
+  const steps = trace.steps.map(step => ({ ...step, t: Math.max(0, (step.at - origin) / 1000) }));
+  const { lastAt, files, activity, sessionId } = trace;
 
   const state = STATE_KEY[task.status] ?? "working";
   const running = state === "working";
-  const finished = state === "ready" || state === "done" || state === "failed";
-  // A finished run's clock stops at its last reported event; a live one keeps
-  // running. Attention time is not execution time — a task parked on you for
-  // an hour has a long wait, not a long run.
-  const elapsed = Math.max(0, ((running || state === "needs" ? now : lastAt) - origin) / 1000);
+  // A finished run stops at its saved completion (or last run event for
+  // legacy records). Later task notes and closure must not extend it.
+  const completedAt = Date.parse(current?.completedAt ?? "");
+  const end = running || state === "needs" ? now : Number.isFinite(completedAt) ? completedAt : lastAt;
+  const elapsed = Math.max(0, (end - origin) / 1000);
 
   // The progress rule's percentage, measured against THIS run's own clock
   // (a rerun's elapsed must not include its predecessors) and this task's
   // prior run durations — the only real baseline that exists. Null for run 1,
   // where the rule draws reported signals instead (see ledger.progressPercent).
-  const runStartedAt = task.runs?.at(-1)?.startedAt;
-  const runElapsed = runStartedAt
-    ? Math.max(0, (now - Date.parse(runStartedAt)) / 1000)
-    : elapsed;
-  const progress = progressPercent(task, runElapsed);
+  const progress = progressPercent(task, elapsed);
 
-  const run = currentRunNumber(task);
   const runs = projectRuns(task.runs ?? [], {
     providers: Object.fromEntries(
       Object.entries(providers).map(([id, p]) => [id, p.displayName])
