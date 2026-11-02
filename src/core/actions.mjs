@@ -19,7 +19,7 @@
 //   }
 
 import path from "node:path";
-import { closeTask, applyOutcome, cancelledOutcome } from "./lifecycle.mjs";
+import { closeTask, beginResume, applyOutcome } from "./lifecycle.mjs";
 import { WorkError } from "./errors.mjs";
 import { workEvent } from "./events.mjs";
 import { makeRunRecord, taskRuns, legacyRun, currentRunNumber, updateRun } from "./runs.mjs";
@@ -27,14 +27,60 @@ import { MAX_BRIEF, MAX_TITLE, MAX_NOTE, MAX_ANSWER, MAX_SELECTOR } from "./limi
 import { deriveTitle } from "./title.mjs";
 import { taskDiff } from "./diff.mjs";
 import { unavailableMessage } from "../providers/index.mjs";
-import { pidAlive } from "../recover.mjs";
+import { pidAlive, processGroupAlive } from "../recover.mjs";
+import { remotePermissionScope } from "./permission-scope.mjs";
 
 export function createActions(ctx) {
   const { store, node, providers, router } = ctx;
 
+  function withWorkerPid(task, pid) {
+    return { ...task, pid,
+      processGroupId: node.id === "local" && process.platform !== "win32" ? pid : undefined };
+  }
+
+  async function requireExecutionExit(task, id) {
+    // A finished harness may leave short-lived descendants (e.g. plugin
+    // discovery or system profiling) after both harness and worker exit.
+    // Observe the group for a bounded drain interval even if its leader is
+    // gone. Never signal a saved numeric PID/group or admit while it exists.
+    const drainUntil = Date.now() + 2000;
+    while (processGroupAlive(task.processGroupId)) {
+      if (Date.now() >= drainUntil) {
+        throw new WorkError(
+          `Task #${id} still has execution processes in local process group ${task.processGroupId}. No new run was started. Wait for the previous execution to exit, then retry. If it persists, inspect it on the computer before stopping any verified process.`, 409
+        );
+      }
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  }
+
+  // Serialize the complete business operation, including execution admission,
+  // across CLI, server and detached worker processes. Locks are not nested.
+  function lockedAction(action) {
+    return async (id, ...args) => {
+      const task = await store.findTask(id);
+      return store.withTaskLock(task.slug, () => action(id, ...args));
+    };
+  }
+
+  async function launchFailure(task, error) {
+    const message = `Could not launch execution: ${error.message ?? String(error)}`;
+    let failed = applyOutcome(task, { status: "failed", error: message, failure: { kind: "crashed" } });
+    failed = updateRun(failed, currentRunNumber(task), {
+      outcome: "failed", error: message, completedAt: new Date().toISOString()
+    });
+    delete failed.pid;
+    delete failed.processGroupId;
+    await store.updateTask(failed);
+    await record(task, "run.failed", { error: message, run: currentRunNumber(task) });
+  }
+
   // A shared input cap: refuse a value that exceeds its limit with the same
   // message the CLI and the API surface give.
   function requireWithin(value, max, label) {
+    if (value !== undefined && typeof value !== "string") {
+      throw new WorkError(`${label} must be text.`);
+    }
     if (typeof value === "string" && value.length > max) {
       throw new WorkError(
         `${label} is too long (${value.length} characters; the limit is ${max}).`
@@ -163,10 +209,10 @@ export function createActions(ctx) {
   // authenticated. There is deliberately no Title + Description form: the
   // user writes the task, 0x2F names it.
   async function createWork({ brief, provider, model } = {}) {
+    requireWithin(brief, MAX_BRIEF, "Task brief");
     if (!brief || !brief.trim()) {
       throw new WorkError("Task brief is required.");
     }
-    requireWithin(brief, MAX_BRIEF, "Task brief");
     requireWithin(provider, MAX_SELECTOR, "Provider id");
     requireWithin(model, MAX_SELECTOR, "Model id");
     const clean = brief.trim();
@@ -183,6 +229,8 @@ export function createActions(ctx) {
     const startedAt = new Date().toISOString();
 
     const task = await store.createTask({ title, brief: clean, prompt }, {
+      // During the short pre-worker interval, recovery sees the live launcher.
+      pid: process.pid,
       provider: target.provider,
       node: target.node,
       workspace: ctx.workspaceId,
@@ -204,13 +252,30 @@ export function createActions(ctx) {
     // Run 1's input is the original prompt (nothing has accumulated yet);
     // persist it per run so every run's exact input is auditable and the
     // worker reads the per-run file uniformly.
-    await store.writeRunPrompt(task, 1, prompt);
-
-    const pid = await node.startExecution({ task });
-    if (pid) await store.updateTask({ ...task, pid });
-
-    await record(task, "task.created", { status: task.status });
-    return { ...task, pid };
+    return store.withTaskLock(task.slug, async () => {
+      let current = await store.readJson(path.join(store.taskDir(task.slug), "task.json"));
+      try {
+        if (current.status === "done") {
+          const error = "Task was closed before execution started.";
+          current = updateRun(current, 1, {
+            outcome: "failed", error, completedAt: new Date().toISOString()
+          });
+          delete current.pid;
+          await store.updateTask(current);
+          await record(current, "run.failed", { error, run: 1 });
+          await record(current, "task.created", { status: "done" });
+          return current;
+        }
+        await store.writeRunPrompt(current, 1, prompt);
+        const pid = await node.startExecution({ task: current });
+        current = await store.updateTask(withWorkerPid(current, pid));
+        await record(current, "task.created", { status: current.status });
+        return current;
+      } catch (error) {
+        await launchFailure(current, error);
+        throw error;
+      }
+    });
   }
 
   // rerunWork(id, { provider?, model? }): run the SAME task again as a NEW
@@ -222,17 +287,20 @@ export function createActions(ctx) {
   // Runs of one task are STRICTLY SEQUENTIAL: two runs of the same task would
   // race against the same working directory (no isolated worktrees/sandboxes
   // yet), so a rerun refuses while the task is working. A blocked (needs_you)
-  // task may be rerun — the blocked run stays in history, and the new run
-  // starts fresh.
+  // task whose provider has exited may be rerun. A live permission still
+  // owns an execution and must finish first.
   async function rerunWork(id, { provider, model } = {}) {
     requireWithin(provider, MAX_SELECTOR, "Provider id");
     requireWithin(model, MAX_SELECTOR, "Model id");
     const task = await store.findTask(id);
-    if (task.status === "working") {
+    const run = task.runs?.at(-1);
+    if (task.status === "working" || task.blockedOn?.live ||
+      (pidAlive(task.pid) && (run?.outcome === "working" || run?.blockedOn?.live))) {
       throw new WorkError(
         `Task #${id} is working — its current run is still executing. Runs of one task are sequential; wait for it to finish before starting another.`
       );
     }
+    await requireExecutionExit(task, id);
     // Without an explicit request, a rerun is a retry of the task's current
     // provider; `--provider auto` re-routes deterministically.
     const target = resolveTarget(provider ?? task.execution?.provider);
@@ -276,6 +344,9 @@ export function createActions(ctx) {
     };
     delete current.blockedOn;
     delete current.error;
+    delete current.failure;
+    delete current.pid;
+    delete current.processGroupId;
     await store.updateTask(current);
 
     // Build THIS run's input from current Task state — the original task
@@ -283,32 +354,37 @@ export function createActions(ctx) {
     // constraints) and prior run outcomes/verification. Persisted per run
     // (runs/<n>/prompt.md) so the exact prompt the fresh provider session
     // receives is auditable; the original prompt.md is never overwritten.
-    const originalPrompt = await store.readText(
-      path.join(store.taskDir(task.slug), "prompt.md"),
-      ""
-    );
-    const runPrompt = await ctx.buildRunPrompt({
-      task: current,
-      base: store.base,
-      originalPrompt,
-      store
-    });
-    await store.writeRunPrompt(current, runNumber, runPrompt);
+    try {
+      const originalPrompt = await store.readText(
+        path.join(store.taskDir(task.slug), "prompt.md"),
+        ""
+      );
+      const runPrompt = await ctx.buildRunPrompt({
+        task: current,
+        base: store.base,
+        originalPrompt,
+        store
+      });
+      await store.writeRunPrompt(current, runNumber, runPrompt);
 
-    const pid = await node.startExecution({ task: current });
-    if (pid) await store.updateTask({ ...current, pid });
+      const pid = await node.startExecution({ task: current });
+      if (pid) current = await store.updateTask(withWorkerPid(current, pid));
 
-    await record(current, "task.updated", {
-      status: "working",
-      run: runNumber
-    });
-    return { ...current, pid };
+      await record(current, "task.updated", {
+        status: "working",
+        run: runNumber
+      });
+      return { ...current, pid };
+    } catch (error) {
+      await launchFailure(current, error);
+      throw error;
+    }
   }
 
   // resumeWork(id, grant): allow | reject — validate the task can be resumed,
   // then hand execution back to the node (which resumes the SAME provider
-  // session). The needs_you -> working transition is applied by the worker
-  // on the node, exactly as in v0.2.
+  // session). Reserve needs_you -> working under the task lock BEFORE
+  // launch, so another client cannot spawn a second resume.
   //
   // ALLOW / REJECT answer a PERMISSION: a concrete operation that needs
   // authorization. They are NOT the interaction for a DECISION — a decision
@@ -325,7 +401,8 @@ export function createActions(ctx) {
   //
   //   otherwise — the run ended (provider session persisted); a fresh worker
   //   resumes the same provider session (--resume / session/load).
-  async function resumeWork(id, grant) {
+  async function resumeWork(id, grant, { decisionId, requireRemoteScope = false } = {}) {
+    if (grant !== "allow" && grant !== "reject") throw new WorkError("Permission must be allow or reject.");
     const task = await store.findTask(id);
     if (task.status !== "needs_you") {
       throw new WorkError(
@@ -337,12 +414,33 @@ export function createActions(ctx) {
         `Task #${id} is blocked on a decision, not a permission — answer the decision (2f answer) instead of allowing or rejecting it.`
       );
     }
+    if (grant === "allow" && requireRemoteScope && !remotePermissionScope(task.blockedOn, ctx.base ?? store.base).complete) {
+      throw new WorkError("Permission scope is incomplete on this device. Review and allow on the computer.", 409);
+    }
     if (task.blockedOn?.live === true) {
+      // UI clients bind the click to the occurrence they actually displayed.
+      // The CLI's bare allow/reject command deliberately addresses the current
+      // permission; callers that supplied a precondition may never retarget it.
+      if (task.blockedOn.decisionId && decisionId !== undefined &&
+        decisionId !== task.blockedOn.decisionId) {
+        throw new WorkError("The permission request changed. Refresh it before allowing or rejecting.", 409);
+      }
+      if (!pidAlive(task.pid)) {
+        throw new WorkError("The permission worker is no longer alive. Restart the runtime to recover this run.");
+      }
       await store.writePermissionDecision(task, {
         grant,
+        requestId: task.blockedOn.requestId,
+        decisionId: task.blockedOn.decisionId,
         at: new Date().toISOString()
       });
-      return { ...task, status: "working", live: true };
+      let current = { ...task, status: "working" };
+      delete current.blockedOn;
+      current = updateRun(current, currentRunNumber(current), {
+        outcome: "working", completedAt: undefined, durationMs: undefined, blockedOn: undefined
+      });
+      await store.updateTask(current);
+      return { ...current, live: true };
     }
     const provider = providers.getProvider(task.execution?.provider);
     if (provider && provider.capabilities?.supportsResume === false) {
@@ -357,13 +455,25 @@ export function createActions(ctx) {
         `Task #${id} has no resumable execution session. Its provider run ended without a recoverable session, so it cannot be continued in place.`
       );
     }
-    const pid = await node.resumeExecution({ task, grant });
-    // Persist the resumed worker's pid so the crash/reboot recovery sweep
-    // (src/recover.mjs) can tell a live resumed run from an orphaned one.
-    // The worker itself flips the task to working when it starts; until then
-    // the task correctly stays needs_you with the new worker's pid attached.
-    if (pid) await store.updateTask({ ...task, pid });
-    return { ...task, status: "working" };
+    await requireExecutionExit(task, id);
+    let current = beginResume(task, grant);
+    current = updateRun(current, currentRunNumber(current), {
+      outcome: "working", attempts: current.execution.attempts,
+      completedAt: undefined, durationMs: undefined, error: undefined, blockedOn: undefined
+    });
+    delete current.pid;
+    delete current.processGroupId;
+    await store.updateTask(current);
+    try {
+      const pid = await node.resumeExecution({ task: current, grant });
+      // The worker's first read takes this same lock, after its PID is
+      // persisted, so it can validate execution ownership before proceeding.
+      current = await store.updateTask(withWorkerPid(current, pid));
+      return current;
+    } catch (error) {
+      await launchFailure(current, error);
+      throw error;
+    }
   }
 
   // answerWork(id, { answer }): the human's response to a needs_you/decision
@@ -379,6 +489,7 @@ export function createActions(ctx) {
   // needs_you after answering — the human decides next (rerun the task to
   // continue with the answer in context, or close the work).
   async function answerWork(id, { answer } = {}) {
+    requireWithin(answer, MAX_ANSWER, "Answer");
     const task = await store.findTask(id);
     if (task.status !== "needs_you") {
       throw new WorkError(
@@ -393,7 +504,6 @@ export function createActions(ctx) {
     if (!answer || !answer.trim()) {
       throw new WorkError("An answer is required.");
     }
-    requireWithin(answer, MAX_ANSWER, "Answer");
     const clean = answer.trim();
     const now = new Date().toISOString();
     const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
@@ -415,11 +525,11 @@ export function createActions(ctx) {
   // answerWork it is not gated on a needs_you/decision block — a constraint
   // can be added to a READY or FAILED task before rerunning it.
   async function noteWork(id, { note } = {}) {
+    requireWithin(note, MAX_NOTE, "Note");
     const task = await store.findTask(id);
     if (!note || !note.trim()) {
       throw new WorkError("A note is required.");
     }
-    requireWithin(note, MAX_NOTE, "Note");
     const clean = note.trim();
     const now = new Date().toISOString();
     const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
@@ -436,11 +546,11 @@ export function createActions(ctx) {
   // constraint, and every surface must be able to tell the three kinds of
   // human input apart — a note, an answer, a correction.
   async function correctWork(id, { correction } = {}) {
+    requireWithin(correction, MAX_NOTE, "Correction");
     const task = await store.findTask(id);
     if (!correction || !correction.trim()) {
       throw new WorkError("A correction is required.");
     }
-    requireWithin(correction, MAX_NOTE, "Correction");
     const clean = correction.trim();
     const now = new Date().toISOString();
     const notes = [...(task.context?.notes ?? []), { at: now, text: clean }];
@@ -468,73 +578,6 @@ export function createActions(ctx) {
     return taskDiff({ base: store.base, files });
   }
 
-  // Write a cancelled terminal state only while the run is still working.
-  // A completion that landed first is left untouched.
-  async function finalizeCancelled(task, detail) {
-    const fresh = await store.findTask(task.id);
-    if (fresh.status !== "working") return fresh;
-    const outcome = cancelledOutcome(detail);
-    const runNumber = currentRunNumber(fresh);
-    let next = applyOutcome(fresh, outcome);
-    if (Array.isArray(next.runs)) {
-      const record = next.runs.find(r => r.run === runNumber);
-      const startedMs = record ? Date.parse(record.startedAt) : NaN;
-      const completedAt = new Date().toISOString();
-      next = updateRun(next, runNumber, {
-        outcome: "failed",
-        completedAt,
-        ...(Number.isFinite(startedMs)
-          ? { durationMs: Date.parse(completedAt) - startedMs }
-          : {}),
-        error: outcome.error,
-        failure: outcome.failure,
-        blockedOn: undefined
-      });
-    }
-    await store.updateTask(next);
-    await record(next, "run.failed", { error: outcome.error, run: runNumber });
-    await record(next, "task.updated", { status: next.status, run: runNumber });
-    return next;
-  }
-
-  // cancelWork(id): stop the active run through the execution node. The
-  // worker receives SIGTERM, asks its provider to cancel, and records the
-  // terminal state. A finished run is refused and not rewritten. A second
-  // cancel of the same live run does not signal again.
-  async function cancelWork(id) {
-    const task = await store.findTask(id);
-    if (task.status !== "working") {
-      throw new WorkError(
-        `Task #${id} is ${task.status}, not working — nothing to cancel.`
-      );
-    }
-    const runNumber = currentRunNumber(task);
-    const request = await store.readCancelRequest(task);
-    if (request?.run === runNumber) {
-      if (pidAlive(task.pid)) return task;
-      return finalizeCancelled(task, "The worker was no longer running.");
-    }
-    await store.writeCancelRequest(task, {
-      at: new Date().toISOString(),
-      run: runNumber
-    });
-    if (!pidAlive(task.pid)) {
-      return finalizeCancelled(task, "The worker was no longer running.");
-    }
-    try {
-      await node.cancelExecution({ task });
-    } catch (error) {
-      const fresh = await store.findTask(id);
-      if (fresh.status !== "working") return fresh;
-      if (!pidAlive(fresh.pid)) {
-        return finalizeCancelled(fresh, "The worker was no longer running.");
-      }
-      const message = error instanceof Error ? error.message : String(error);
-      throw new WorkError(`Could not cancel task #${id}: ${message}`);
-    }
-    return store.findTask(id);
-  }
-
   // closeWork(id): user closes the task (any status -> done).
   async function closeWork(id) {
     const task = await store.findTask(id);
@@ -544,20 +587,20 @@ export function createActions(ctx) {
     return closed;
   }
 
+  const lockedResume = lockedAction(resumeWork);
   return {
     listWork,
     getWork,
     getRun,
     getTaskDiff,
     createWork,
-    rerunWork,
-    resumeWork,
-    answerWork,
-    noteWork,
-    correctWork,
-    cancelWork,
-    closeWork,
-    allowWork: id => resumeWork(id, "allow"),
-    rejectWork: id => resumeWork(id, "reject")
+    rerunWork: lockedAction(rerunWork),
+    resumeWork: lockedResume,
+    answerWork: lockedAction(answerWork),
+    noteWork: lockedAction(noteWork),
+    correctWork: lockedAction(correctWork),
+    closeWork: lockedAction(closeWork),
+    allowWork: (id, options) => lockedResume(id, "allow", options),
+    rejectWork: (id, options) => lockedResume(id, "reject", options)
   };
 }

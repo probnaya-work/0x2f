@@ -17,7 +17,9 @@ import {
   tail,
   TAIL,
   MINI_CAP_PX,
+  MINI_NARROW_CAP_PX,
   trace,
+  traceAtWidth,
   brackets,
   sections,
   capabilityNote,
@@ -404,10 +406,7 @@ test("brackets: two separated runs of edits give two brackets", () => {
   assert.equal(out.length, 2);
 });
 
-test("brackets: labels that would print on top of each other are dropped, not stacked", () => {
-  // Three edit runs a couple of marks apart: every bracket still draws, but
-  // only the ones far enough apart to fit the word carry it. Two labels at
-  // the same few pixels used to render one on top of the other.
+test("brackets: one CHANGES label names both nearby and separated edit bursts", () => {
   const events = log([
     ["file.changed", 1, { path: "a.ts" }],
     ["tool.started", 2, { name: "Bash", input: { command: "npm test" } }],
@@ -421,7 +420,7 @@ test("brackets: labels that would print on top of each other are dropped, not st
   assert.equal(out.length, 3);
   assert.deepEqual(out.map(b => b.label), ["CHANGES", null, null]);
 
-  // Far apart, both spans are labelled: the rule is distance, not "first only".
+  // Extra room does not justify repeating the same label.
   const spread = log([
     ["file.changed", 1, { path: "a.ts" }],
     ...Array.from({ length: 12 }, (_, i) => [
@@ -434,7 +433,7 @@ test("brackets: labels that would print on top of each other are dropped, not st
   const spreadSteps = toSteps(task(), spread).steps;
   const spreadLaid = trace(spreadSteps, { live: false, finished: true });
   const spreadOut = brackets(spreadLaid.units, { supportsFileChanges: true }, spreadLaid.cells);
-  assert.deepEqual(spreadOut.map(b => b.label), ["CHANGES", "CHANGES"]);
+  assert.deepEqual(spreadOut.map(b => b.label), ["CHANGES", null]);
 });
 
 test("brackets: zero evidence in the tail is a valid, complete reading", () => {
@@ -603,29 +602,6 @@ test("ready shows RESULT-eligible FILES/COMMANDS and a provenance trace, never A
   assert.equal(row.trace, null);
 });
 
-test("a rerun's Web trace excludes events from previous runs", () => {
-  const events = log([
-    ["file.changed", 1, { run: 1, path: "old-run.ts" }],
-    ["run.failed", 2, { run: 1, error: "run 1 failed" }],
-    ["file.changed", 3, { run: 2, path: "current-run.ts" }],
-    ["run.completed", 4, { run: 2, status: "ready" }]
-  ]);
-  const row = projectRow(
-    task({
-      status: "ready",
-      runs: [
-        { run: 1, provider: "claude-code", outcome: "failed" },
-        { run: 2, provider: "claude-code", outcome: "ready" }
-      ]
-    }),
-    events,
-    { open: true, providers: RICH }
-  );
-
-  assert.deepEqual(row.files, ["current-run.ts"]);
-  assert.ok(!row.provenance.cells.some(cell => cell.arg.includes("old-run")));
-});
-
 test("failed shows FAILURE and FILES but never COMMANDS; provenance is labelled before the stop", () => {
   const events = log([
     ["tool.started", 1, { name: "Edit", input: { file_path: "a.ts" } }],
@@ -748,7 +724,7 @@ test("projectRow renders the ready result from the files the run actually change
   assert.equal(row.ready, true);
   assert.equal(row.stateLabel, "READY");
   assert.deepEqual(row.files, ["src/a.ts"]);
-  assert.equal(row.phaseLabel, "COMPLETE");
+  assert.equal(row.phaseLabel, "RESULT AVAILABLE");
   assert.equal(row.arg, "1 file changed");
   assert.equal(row.sub, "1 file · ready for you");
   // The clock measures the run (first event -> last event), not the wall
@@ -765,7 +741,7 @@ test("projectRow compresses a done task and archives its trace, as the design do
   const row = projectRow(task({ status: "done" }), events, { providers: RICH });
 
   assert.equal(row.compact, true);
-  assert.equal(row.titleSize, "15px");
+  assert.equal(row.titleSize, "14px");
   assert.equal(row.titleWeight, 400);
   assert.equal(row.titleColor, "#5c6771");
   assert.match(row.sub, /^closed · /);
@@ -961,6 +937,7 @@ test("projectRow exposes interactive permission options without inventing them",
     blockedOn: {
       type: "permission",
       live: true,
+      decisionId: "rendered-permission-occurrence",
       tool: "Edit submit-capture.ts",
       file: "/w/src/submit-capture.ts",
       description: "Edit submit-capture.ts",
@@ -971,6 +948,7 @@ test("projectRow exposes interactive permission options without inventing them",
   });
   const row = projectRow(blocked, [], { base: "/w", open: true });
   assert.equal(row.permLive, true);
+  assert.equal(row.permDecisionId, "rendered-permission-occurrence");
   assert.equal(row.permAllowable, true);
   assert.equal(row.permRejectable, false);
   assert.equal(row.permOptions.length, 1);
@@ -986,15 +964,15 @@ test("a long intent keeps the expanded heading proportionate (smallest typograph
   assert.ok(long.length > 90, "the fixture should exceed the long-title threshold");
   assert.ok(short.length <= 90, "the default fixture should stay a short title");
 
-  assert.equal(projectRow(task({ title: long }), [], { open: true, mid: true }).titleSize, "24px");
-  assert.equal(projectRow(task({ title: long }), [], { open: true, mid: false }).titleSize, "24px");
-  assert.equal(projectRow(task(), [], { open: true, mid: true }).titleSize, "31px");
-  assert.equal(projectRow(task(), [], { open: true, mid: false }).titleSize, "24px");
+  assert.equal(projectRow(task({ title: long }), [], { open: true, mid: true }).titleSize, "23px");
+  assert.equal(projectRow(task({ title: long }), [], { open: true, mid: false }).titleSize, "23px");
+  assert.equal(projectRow(task(), [], { open: true, mid: true }).titleSize, "29px");
+  assert.equal(projectRow(task(), [], { open: true, mid: false }).titleSize, "23px");
   const halted = task({ title: long, status: "needs_you", blockedOn: { type: "permission" } });
-  assert.equal(projectRow(halted, [], { open: true, mid: true }).titleSize, "26px");
-  assert.equal(projectRow(task({ status: "needs_you", blockedOn: { type: "permission" } }), [], { open: true, mid: true }).titleSize, "34px");
+  assert.equal(projectRow(halted, [], { open: true, mid: true }).titleSize, "24px");
+  assert.equal(projectRow(task({ status: "needs_you", blockedOn: { type: "permission" } }), [], { open: true, mid: true }).titleSize, "31px");
 
-  assert.equal(projectRow(task({ title: long }), [], { open: false }).titleSize, "17.5px");
+  assert.equal(projectRow(task({ title: long }), [], { open: false }).titleSize, "16.5px");
   assert.equal(projectRow(task({ title: long }), [], { open: true }).title, long);
 });
 
@@ -1414,4 +1392,77 @@ test("sections: without observation, provider-reported paths are canonicalized a
   const sec = sections(coarseTask(), steps, COARSE["deepseek-harness"].capabilities, null);
   assert.deepEqual(sec.files.paths, ["src/foo.mjs"]);
   assert.equal(sec.files.observed, 0);
+});
+
+
+test("long-running traces reserve the active end at every desktop execution-column width", () => {
+  const css = readFileSync(new URL("../src/web/app.css", import.meta.url), "utf8");
+  const widths = [...css.matchAll(/--col-exec:\s*(\d+)px/g)].map(m => Number(m[1]));
+  assert.ok(widths.includes(120), "the responsive 120px column is part of the regression");
+  for (const wide of [true, false]) {
+    const lane = wide ? widths[0] : Math.min(...widths);
+    for (const status of ["working", "needs_you", "ready", "done", "failed"]) {
+      const row = projectRow(task({status, execution:{provider:"coarse"}}), [], {
+        wide, now: Date.parse("2026-01-02T10:00:00Z"), providers: {coarse:{capabilities:{}}}
+      });
+      assert.ok(parseFloat(row.miniTotalW) <= lane, `${status}: ${row.miniTotalW} exceeds ${lane}px`);
+      assert.ok(parseFloat(row.mini[0].w) <= (wide ? MINI_CAP_PX : MINI_NARROW_CAP_PX));
+      if (status === "working") assert.equal(parseFloat(row.mini[0].w), wide ? MINI_CAP_PX : MINI_NARROW_CAP_PX);
+      assert.ok(row.mini.every(cell => cell.x + parseFloat(cell.w) <= parseFloat(row.miniTotalW)));
+      if (status === "working") assert.equal(row.mini.at(-1).isHead, true);
+      if (status === "needs_you") assert.equal(row.mini.at(-1).isHalt, true);
+    }
+  }
+});
+
+test("dense mini traces use one geometry for marks, gaps and the terminal marker", () => {
+  const steps = Array.from({length:400}, (_,i) => ({kind:"tool",verb:"READ",arg:`file-${i}`}));
+  for (const halted of [true, false]) {
+    const laid = trace(steps, {n:TAIL.collapsed,w:2,gap:1,scale:.5,live:!halted,halted});
+    assert.equal(laid.total, 400);
+    assert.equal(laid.truncated, true);
+    assert.equal(laid.cells.filter(c=>!c.isHead && !c.isHalt).length, TAIL.collapsed);
+    assert.ok(laid.cells.at(-1).isHalt || laid.cells.at(-1).isHead);
+    for (let i=1;i<laid.cells.length;i++) assert.equal(laid.cells[i].x, laid.cells[i-1].x + parseFloat(laid.cells[i-1].w) + 1);
+    assert.equal(parseFloat(laid.totalW), laid.cells.at(-1).x + parseFloat(laid.cells.at(-1).w));
+    assert.ok(parseFloat(laid.totalW) <= 120);
+  }
+});
+
+
+test("actual lane width reveals real history and keeps every mark and terminal marker inside it", () => {
+  const steps = Array.from({length:2000}, (_,i) => ({kind:i % 5 === 0 ? "change" : "tool", verb:"READ", arg:`file-${i}`}));
+  for (const variant of ["main", "mini", "provenance"]) {
+    for (const halted of [false, true]) {
+      let previous = 0;
+      for (const width of [32, 80, 120, 170, 292, 498, 900, 1200]) {
+        const laid = traceAtWidth({steps, live:!halted, halted, capabilities:{supportsFileChanges:true}}, width, variant);
+        assert.ok(laid.units.length >= previous, "more room must reveal more actual signals");
+        previous = laid.units.length;
+        assert.equal(laid.total, 2000);
+        assert.equal(laid.units.at(-1), steps.at(-1), "the latest fact remains visible");
+        assert.ok(parseFloat(laid.totalW) <= width - 8);
+        for (const c of laid.cells) assert.ok(c.x >= 0 && c.x + parseFloat(c.w) <= width - 8);
+        for (const b of laid.brackets) if (b.label) assert.ok(parseFloat(b.x) + 56 <= width - 8);
+        if (variant !== "provenance") assert.ok(laid.cells.at(-1)[halted ? "isHalt" : "isHead"]);
+      }
+      assert.ok(previous > (variant === "main" ? 24 : 12), "the old hard-coded window no longer limits a wide lane");
+    }
+  }
+});
+
+test("responsive traces distinguish empty, sparse and coarse reporting without padding invented signals", () => {
+  for (const width of [32, 120, 292, 900]) for (const variant of ["main", "mini", "provenance"]) {
+    const empty = traceAtWidth({steps:[], live:true}, width, variant);
+    assert.equal(empty.units.length, 0);
+    assert.equal(empty.cells.length, variant === "provenance" ? 0 : 1);
+    const steps = [{kind:"tool",arg:"only real signal"}];
+    const sparse = traceAtWidth({steps, live:true}, width, variant);
+    assert.equal(sparse.units.length, 1);
+    assert.equal(sparse.truncated, false);
+    const coarse = traceAtWidth({steps:[], coarse:true, live:true, elapsedSeconds:999999}, width, variant);
+    assert.equal(coarse.cells.filter(c=>c.ambient).length, 1);
+    assert.ok(parseFloat(coarse.totalW) <= width - 8);
+  }
+  assert.deepEqual(tail([{kind:"tool"}], 0), {marks:[], truncated:true, total:1});
 });

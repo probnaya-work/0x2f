@@ -15,10 +15,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 function runCli(base, args, env = {}) {
   return new Promise((resolve, reject) => {
@@ -78,7 +80,14 @@ async function waitForStatus(base, id, expected, timeout = 10000) {
   const start = Date.now();
   while (true) {
     const task = await store.findTask(id);
-    if (task.status === expected) return task;
+    if (task.status === expected) {
+      if (task.status !== "working" && !task.blockedOn?.live) {
+        const deadline = Date.now() + 5000;
+        while (pidAlive(task.pid) && Date.now() < deadline) await new Promise(r => setTimeout(r, 20));
+        assert.equal(pidAlive(task.pid), false, "detached fixture writer must exit before teardown");
+      }
+      return task;
+    }
     if (task.status !== "working") {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }
@@ -119,6 +128,32 @@ test("CLI: the dogfooding loop — new, rerun through another provider, open, op
     assert.equal(task.runs[1].provider, "deepseek-harness");
     assert.equal(task.runs[1].outcome, "ready");
 
+    const firstTaskBeforeSecondCreate = structuredClone(task);
+    const secondTitle = "Confirm the persisted task can be reopened";
+    const secondCreated = await runCli(base, ["new", secondTitle], env);
+    assert.equal(secondCreated.code, 0);
+
+    const secondTask = (await store.listTasks()).find(candidate => candidate.title === secondTitle);
+    assert.ok(secondTask, "second task must be persisted");
+    const creationOutput = secondCreated.out.match(
+      /^Created #(\d+): Confirm the persisted task can be reopened\nOpen: (2f open (\d+))$/m
+    );
+    assert.ok(creationOutput, "creation output must immediately include an exact reopen command");
+    assert.equal(Number(creationOutput[1]), secondTask.id);
+    assert.equal(Number(creationOutput[3]), secondTask.id);
+    assert.notEqual(secondTask.id, 1, "regression must exercise a non-first task ID");
+
+    await waitForStatus(base, secondTask.id, "ready");
+    const [, ...openArgs] = creationOutput[2].split(" ");
+    const secondOpened = await runCli(base, openArgs, env);
+    assert.equal(secondOpened.code, 0);
+    assert.match(secondOpened.out, new RegExp(`^#${String(secondTask.id).padStart(3, "0")} ${secondTitle}$`, "m"));
+    assert.match(secondOpened.out, /^Status: ready$/m);
+
+    const firstTaskAfterSecondOpen = await store.findTask(1);
+    assert.deepEqual(firstTaskAfterSecondOpen, firstTaskBeforeSecondCreate);
+    assert.equal(firstTaskAfterSecondOpen.runs.length, 2);
+
     const opened = await runCli(base, ["open", "1"], env);
     assert.equal(opened.code, 0);
     assert.match(opened.out, /RUNS/);
@@ -135,6 +170,14 @@ test("CLI: the dogfooding loop — new, rerun through another provider, open, op
     const missingRun = await runCli(base, ["open", "1", "--run", "9"], env);
     assert.notEqual(missingRun.code, 0);
     assert.match(missingRun.err, /has no run 9/);
+
+    // `--run` with no number must be rejected, not silently reinterpreted as
+    // "open the general Task view" (broke the loop once: the flag was parsed
+    // but its missing value made it indistinguishable from no flag at all).
+    const bareRunFlag = await runCli(base, ["open", "1", "--run"], env);
+    assert.notEqual(bareRunFlag.code, 0);
+    assert.match(bareRunFlag.err, /Usage: 2f open/);
+    assert.doesNotMatch(bareRunFlag.out, /RUNS/, "general Task view must not be rendered");
   } finally {
     await fs.rm(base, { recursive: true, force: true });
   }

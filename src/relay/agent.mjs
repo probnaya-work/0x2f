@@ -47,8 +47,9 @@ import {
 } from "./protocol.mjs";
 import { validateRelayUrl } from "./pair.mjs";
 import { WorkError } from "../core/errors.mjs";
+import { writeJson } from "../core/store.mjs";
 import { deriveKeyRaw, importKey, encrypt, decrypt } from "../web/e2e.mjs";
-import { projectSnapshot, projectEvent, projectTask, projectRun, projectResult } from "./project.mjs";
+import { projectSnapshot, projectEvent, projectTask, projectRun, projectResult, projectAck } from "./project.mjs";
 
 const HELLO_TIMEOUT_MS = 10000;
 const PING_INTERVAL_MS = 30000;
@@ -97,6 +98,7 @@ export function createRelayAgent({
   let stopped = false;
   let unsubscribe = null;
   let configTimer = null;
+  let configTickRunning = false;
   let reconnectTimer = null;
   let keepaliveTimer = null;
   let lastPongAt = 0;
@@ -104,7 +106,11 @@ export function createRelayAgent({
   let sessionKey = null; // CryptoKey derived from code + token (AES-GCM)
   let ackCache = null; // Map requestId -> { ack, at } (persisted)
   let ackSaveTimer = null;
+  let ackSaveChain = Promise.resolve();
+  let ackLoad = Promise.resolve();
   let commandChain = Promise.resolve();
+  const pendingFrames = new Set();
+  let stopPromise = null;
 
   // --- ack cache (replay protection that survives restart) ------------------
 
@@ -125,7 +131,12 @@ export function createRelayAgent({
     }
   }
 
-  async function saveAckCache() {
+  function saveAckCache() {
+    ackSaveChain = ackSaveChain.then(persistAckCache);
+    return ackSaveChain;
+  }
+
+  async function persistAckCache() {
     try {
       const obj = Object.fromEntries([...ackCache.entries()].map(([id, e]) => [id, e]));
       await fs.mkdir(path.dirname(ackCachePath()), { recursive: true });
@@ -140,7 +151,7 @@ export function createRelayAgent({
   }
 
   function scheduleAckSave() {
-    if (ackSaveTimer) return;
+    if (stopped || ackSaveTimer) return;
     ackSaveTimer = setTimeout(() => {
       ackSaveTimer = null;
       saveAckCache();
@@ -161,12 +172,9 @@ export function createRelayAgent({
 
   async function writeConfig(next) {
     try {
-      await fs.mkdir(path.dirname(configPath), { recursive: true });
-      await fs.writeFile(configPath, JSON.stringify(next, null, 2) + "\n", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(configPath, 0o600);
+      // The poller must see the complete old or new config, never writeFile's
+      // truncate-before-write window, which would disable a valid pairing.
+      await writeJson(configPath, next);
     } catch (err) {
       error(`relay: could not write config: ${err.message}`);
     }
@@ -298,7 +306,7 @@ export function createRelayAgent({
     });
 
     sock.on("message", (data, isBinary) => {
-      if (isBinary) return;
+      if (stopped || isBinary) return;
       const text = data.toString();
       const frame = parseFrame(text);
       if (frame) {
@@ -323,7 +331,15 @@ export function createRelayAgent({
       }
       const relayFrame = parseRelayFrame(text);
       if (relayFrame) {
-        onRelayFrame(relayFrame);
+        const processing = onRelayFrame(relayFrame);
+        pendingFrames.add(processing);
+        processing.then(
+          () => pendingFrames.delete(processing),
+          err => {
+            pendingFrames.delete(processing);
+            error(`relay: could not process an envelope: ${err.message}`);
+          }
+        );
         return;
       }
       warn("relay: dropped malformed frame");
@@ -405,7 +421,7 @@ export function createRelayAgent({
       from: frame.from,
       requestId: frame.requestId
     });
-    if (!plaintext || typeof plaintext !== "object") {
+    if (stopped || !plaintext || typeof plaintext !== "object") {
       // Wrong key, tampered payload, or a mismatched from/requestId — the
       // relay cannot produce a valid envelope, so this is dropped.
       return;
@@ -489,7 +505,7 @@ export function createRelayAgent({
     if (cached) {
       // Duplicate delivery (retry, double tap, reconnect) — the action already
       // ran; answer with the stored acknowledgement, never execute again.
-      sendEnvelope({ cmd: "ack", ...cached.ack }, requestId);
+      sendEnvelope({ cmd: "ack", ...projectAck(cached.ack, runtime.store.base) }, requestId);
       return;
     }
     if (typeof ts !== "number" || Math.abs(now() - ts) > TS_WINDOW_MS) {
@@ -503,7 +519,7 @@ export function createRelayAgent({
     }
     commandChain = commandChain
       .then(async () => {
-        const result = await runCommand({ op, taskId, body });
+        const result = projectAck(await runCommand({ op, taskId, body }), runtime.store.base);
         rememberAck(requestId, result);
         await sendEnvelope({ cmd: "ack", ...result }, requestId);
       })
@@ -612,15 +628,13 @@ export function createRelayAgent({
             })
           );
         case "allow":
-          return ok(202, await runtime.actions.allowWork(taskId));
+          return ok(202, await runtime.actions.allowWork(taskId, { decisionId: body?.decisionId ?? null, requireRemoteScope: true }));
         case "reject":
-          return ok(202, await runtime.actions.rejectWork(taskId));
+          return ok(202, await runtime.actions.rejectWork(taskId, { decisionId: body?.decisionId ?? null }));
         case "answer":
           return ok(202, await runtime.actions.answerWork(taskId, { answer: body?.answer }));
         case "note":
           return ok(202, await runtime.actions.noteWork(taskId, { note: body?.note }));
-        case "cancel":
-          return ok(202, await runtime.actions.cancelWork(taskId));
         case "close":
           return ok(200, await runtime.actions.closeWork(taskId));
         case "refine":
@@ -654,16 +668,37 @@ export function createRelayAgent({
   // --- lifecycle ------------------------------------------------------------
 
   async function tickConfig() {
-    const next = await loadConfig();
-    const connKey = connectionKey(next);
-    const cryptoChanged = cryptoKey(next) !== cryptoKey(cfg);
+    // Loading and deriving are asynchronous. An interval tick must not open
+    // a socket while an earlier tick is still preparing its key/config.
+    if (stopped || configTickRunning) return;
+    configTickRunning = true;
+    try {
+      const next = await loadConfig();
+      if (stopped) return;
+      const connKey = connectionKey(next);
+      const cryptoChanged = cryptoKey(next) !== cryptoKey(cfg);
 
-    if (connKey !== seenConfig) {
-      seenConfig = connKey;
-      const disable = cfg && next === null;
-      cfg = next;
-      if (cryptoChanged) await applyKey(next);
-      if (!cfg) {
+      if (connKey !== seenConfig) {
+        seenConfig = connKey;
+        const disable = cfg && next === null;
+        cfg = next;
+        if (cryptoChanged) await applyKey(next);
+        if (stopped) return;
+        if (!cfg) {
+          if (ws) {
+            try {
+              ws.close();
+            } catch {
+              /* already closing */
+            }
+            ws = null;
+          }
+          state = "idle";
+          attempt = 0;
+          sessionKey = null;
+          if (disable) info("relay: remote control disabled");
+          return;
+        }
         if (ws) {
           try {
             ws.close();
@@ -674,34 +709,23 @@ export function createRelayAgent({
         }
         state = "idle";
         attempt = 0;
-        sessionKey = null;
-        if (disable) info("relay: remote control disabled");
-        return;
+        connect();
+      } else if (cryptoChanged) {
+        // New pairing code/token without a transport change: re-derive the key
+        // in place; the pending ceremony waits for the phone's pair-hello.
+        cfg = next;
+        await applyKey(next);
+      } else if (cfg && state === "idle") {
+        connect();
       }
-      if (ws) {
-        try {
-          ws.close();
-        } catch {
-          /* already closing */
-        }
-        ws = null;
-      }
-      state = "idle";
-      attempt = 0;
-      connect();
-    } else if (cryptoChanged) {
-      // New pairing code/token without a transport change: re-derive the key
-      // in place; the pending ceremony waits for the phone's pair-hello.
-      cfg = next;
-      await applyKey(next);
-    } else if (cfg && state === "idle") {
-      connect();
+    } finally {
+      configTickRunning = false;
     }
   }
 
   function start() {
     if (stopped) return agent;
-    loadAckCache().then(cache => {
+    ackLoad = loadAckCache().then(cache => {
       ackCache = cache;
     });
     unsubscribe = runtime.events.on(onBusEvent);
@@ -729,7 +753,7 @@ export function createRelayAgent({
   }
 
   function stop() {
-    if (stopped) return;
+    if (stopPromise) return stopPromise;
     stopped = true;
     clearInterval(configTimer);
     clearInterval(keepaliveTimer);
@@ -739,16 +763,30 @@ export function createRelayAgent({
       ackSaveTimer = null;
     }
     if (unsubscribe) unsubscribe();
-    if (ws) {
+    const socket = ws;
+    const disconnected = !socket || socket.readyState === WebSocket.CLOSED
+      ? Promise.resolve()
+      : new Promise(resolve => socket.once("close", resolve));
+    if (socket) {
       try {
-        ws.close();
+        socket.close();
       } catch {
         /* already closing */
       }
       ws = null;
     }
     state = "idle";
-    if (ackCache) saveAckCache();
+    // Callers removing a workspace or restarting an agent must be able to
+    // await every accepted command/pairing write and the final replay cache.
+    // Keep the immediate timer/subscription shutdown for existing callers.
+    stopPromise = (async () => {
+      await Promise.allSettled([...pendingFrames]);
+      await commandChain;
+      await ackLoad;
+      if (ackCache) await saveAckCache();
+      await disconnected;
+    })();
+    return stopPromise;
   }
 
   function status() {

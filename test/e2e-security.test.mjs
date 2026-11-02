@@ -27,6 +27,7 @@ import { createTailer } from "../src/core/events.mjs";
 import { deriveKeyRaw, importKey, encrypt, decrypt } from "../src/web/e2e.mjs";
 import { pairPhone, createPhoneClient } from "./e2e-phone.mjs";
 import { projectTask, projectEvent } from "../src/relay/project.mjs";
+import { closeSecurityStack } from "./e2e-security-cleanup.mjs";
 
 const quiet = { log() {}, warn() {}, error() {} };
 const TEST_CODE = "PAIRCODE-TEST-014";
@@ -91,11 +92,12 @@ async function waitFor(condition, message, timeout = 8000) {
 // tests) plus a variant that returns the full pairing material.
 async function makeStack(t, { pair = false } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-e2esec-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const cleanup = { base, agents: [], tailers: [], handle: null };
+  t.after(() => closeSecurityStack(cleanup));
   const dataFile = path.join(base, "state.json");
   const relay = createRelayServer({ dataFile, log: quiet, commandTimeoutMs: 4000 });
   const handle = await relay.start();
-  t.after(() => handle.close());
+  cleanup.handle = handle;
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -119,12 +121,10 @@ async function makeStack(t, { pair = false } = {}) {
     emit: event => runtime.events.emit(event),
     readLines: makeReadLines(runtime.store)
   });
+  cleanup.tailers.push(tailer);
   tailer.start();
   const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent.stop();
-    tailer.stop();
-  });
+  cleanup.agents.push(agent);
   agent.start();
   await waitFor(
     () => handle.state.devices.get(deviceId)?.online === true,
@@ -139,7 +139,7 @@ async function makeStack(t, { pair = false } = {}) {
       "pair-hello to be confirmed"
     );
   }
-  return { base, dataFile, handle, node, runtime, agent, configPath, deviceId, deviceSecret, token, phone };
+  return { base, dataFile, handle, node, runtime, agent, configPath, deviceId, deviceSecret, token, phone, cleanup };
 }
 
 // POST an envelope to the relay exactly as the phone would, but with arbitrary
@@ -247,7 +247,7 @@ test("a captured command envelope cannot be replayed to execute twice", async t 
 // --- 4. replay protection survives Mac restart -------------------------------
 
 test("replay protection survives a Mac/runtime restart (persisted ack cache)", async t => {
-  const { handle, configPath, node, phone, agent } = await makeStack(t, { pair: true });
+  const { handle, configPath, node, phone, agent, cleanup } = await makeStack(t, { pair: true });
   const requestId = "restart-" + Math.random().toString(36).slice(2, 10);
   await phone.command("create", { body: { brief: "Before restart" } }, { requestId });
   assert.equal(node.calls.length, 1);
@@ -256,7 +256,7 @@ test("replay protection survives a Mac/runtime restart (persisted ack cache)", a
   // observe the disconnect, then start a fresh one over the same config — the
   // Mac "restarted". (Waiting for the offline transition removes the reconnect
   // race between the old socket's close and the new one's hello.)
-  agent.stop();
+  await agent.stop();
   await waitFor(
     () => handle.state.devices.get(phone.deviceId)?.online === false,
     "agent to go offline"
@@ -265,12 +265,10 @@ test("replay protection survives a Mac/runtime restart (persisted ack cache)", a
   const node2 = fakeNode();
   const runtime2 = createRuntime(path.dirname(path.dirname(configPath)), { node: node2 });
   const tailer2 = createTailer({ interval: 15, emit: () => {}, readLines: async () => [] });
+  cleanup.tailers.push(tailer2);
   tailer2.start();
   const agent2 = createRelayAgent({ runtime: runtime2, configPath, log: quiet, configPollMs: 40 });
-  t.after(() => {
-    agent2.stop();
-    tailer2.stop();
-  });
+  cleanup.agents.push(agent2);
   agent2.start();
   await waitFor(
     () => handle.state.devices.get(phone.deviceId)?.online === true,

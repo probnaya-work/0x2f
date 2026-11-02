@@ -16,11 +16,24 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const DEFAULT_OUT = path.join(ROOT, "deploy", "client", "dist");
 
-// [src-relative file, route, mime]. Must stay in sync with src/server.mjs
-// ASSETS — the local runtime and the hosted client origin serve the same
-// files at the same routes. The route is the URL path (the local server maps
-// "/pair" -> web/pair.html, "/" -> web/index.html, ...).
+// Pure-JS crypto fallback; initialized before CLIENT_ASSETS uses it.
+const VENDOR_CRYPTO_FILES = [
+  "@noble/hashes/pbkdf2.js",
+  "@noble/hashes/sha2.js",
+  "@noble/hashes/_md.js",
+  "@noble/hashes/_u64.js",
+  "@noble/hashes/crypto.js",
+  "@noble/hashes/hmac.js",
+  "@noble/hashes/utils.js",
+  "@noble/ciphers/aes.js",
+  "@noble/ciphers/_polyval.js",
+  "@noble/ciphers/utils.js"
+];
+
+// [src-relative file, route, mime]. Keep in sync with src/server.mjs ASSETS.
 export const CLIENT_ASSETS = [
+  ["src/web/theme.js", "/app/theme.js", "text/javascript; charset=utf-8"],
+  ["src/web/theme.css", "/app/theme.css", "text/css; charset=utf-8"],
   ["src/web/index.html", "/", "text/html; charset=utf-8"],
   ["src/web/pair.html", "/pair", "text/html; charset=utf-8"],
   ["src/web/app.css", "/app/app.css", "text/css; charset=utf-8"],
@@ -30,6 +43,8 @@ export const CLIENT_ASSETS = [
   ["src/web/pair.css", "/app/pair.css", "text/css; charset=utf-8"],
   ["src/web/remote.mjs", "/app/remote.mjs", "text/javascript; charset=utf-8"],
   ["src/web/ledger.mjs", "/app/ledger.mjs", "text/javascript; charset=utf-8"],
+  ["src/web/result-evidence.mjs", "/app/result-evidence.mjs", "text/javascript; charset=utf-8"],
+  ["src/core/permission-scope.mjs", "/core/permission-scope.mjs", "text/javascript; charset=utf-8"],
   ["src/web/sound-policy.mjs", "/app/sound-policy.mjs", "text/javascript; charset=utf-8"],
   ["src/web/sound.mjs", "/app/sound.mjs", "text/javascript; charset=utf-8"],
   ["src/relay/protocol.mjs", "/relay/protocol.mjs", "text/javascript; charset=utf-8"],
@@ -42,21 +57,6 @@ export const CLIENT_ASSETS = [
     `/app/vendor/${file}`,
     "text/javascript; charset=utf-8"
   ])
-];
-
-// The transitive file graph vendored from @noble/hashes + @noble/ciphers.
-// Kept in sync with scripts/vendor-crypto.mjs and src/server.mjs.
-const VENDOR_CRYPTO_FILES = [
-  "@noble/hashes/pbkdf2.js",
-  "@noble/hashes/sha2.js",
-  "@noble/hashes/_md.js",
-  "@noble/hashes/_u64.js",
-  "@noble/hashes/crypto.js",
-  "@noble/hashes/hmac.js",
-  "@noble/hashes/utils.js",
-  "@noble/ciphers/aes.js",
-  "@noble/ciphers/_polyval.js",
-  "@noble/ciphers/utils.js"
 ];
 
 // Route -> file on disk. Two extensionless routes differ from their file

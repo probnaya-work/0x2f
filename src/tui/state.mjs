@@ -32,8 +32,8 @@ export function initialState(opts = {}) {
     // null until the view is opened, so entering `d` never blocks the frame
     // on a git walk.
     diff: null,
+    review: null,
     composer: { text: "", original: null, provider: opts.provider ?? null },
-    confirm: null,
     busy: false
   };
 }
@@ -80,7 +80,8 @@ export function primaryAction(task, state, ctx = {}) {
   const name = ctx.lookup ? ctx.lookup(target).name : String(target ?? "").toUpperCase();
   if (task.state === "needs") {
     return task.halt?.kind === "permission"
-      ? { label: "ALLOW", intent: { type: "allow", id: task.id } }
+      ? { label: "ALLOW", intent: { type: "allow", id: task.id,
+          ...(task.halt.decisionId ? { decisionId: task.halt.decisionId } : {}) } }
       : { label: "ANSWER & CONTINUE", input: "answer" };
   }
   if (task.state === "ready") return { label: "ACCEPT", intent: { type: "accept", id: task.id } };
@@ -103,12 +104,12 @@ export function secondaryAction(task) {
   if (!task) return null;
   if (task.state === "needs") {
     return task.halt?.kind === "permission"
-      ? { label: "REJECT", intent: { type: "reject", id: task.id } }
+      ? { label: "REJECT", intent: { type: "reject", id: task.id,
+          ...(task.halt.decisionId ? { decisionId: task.halt.decisionId } : {}) } }
       : { label: "SAVE ONLY", input: "answer-save" };
   }
   if (task.state === "ready") return { label: "SEND BACK", input: "sendback" };
   if (task.state === "failed") return { label: "DROP", intent: { type: "drop", id: task.id } };
-  if (task.state === "working") return { label: "CANCEL", intent: { type: "cancel", id: task.id } };
   return null;
 }
 
@@ -122,7 +123,7 @@ export const INPUT_LABELS = {
 export const INPUT_NOTES = {
   answer: "recorded on the task · the next run continues with it",
   "answer-save": "recorded on the task · the task stays NEEDS YOU",
-  note: "recorded on the task · every later run carries it",
+  note: "saved for the next run · the current run does not receive it",
   sendback: "recorded on the task · the next run is rebuilt with it"
 };
 
@@ -198,6 +199,29 @@ export function apply(state, key, ctx = {}) {
 
   if (state.mode === "quit") return { state, intent: { type: "quit" } };
 
+  if (state.mode === "result") {
+    const review = state.review;
+    const reviewTask = ctx.tasks.find(t => t.id === review?.taskId) ?? task;
+    if (key.name === "escape" || (key.name === "char" && key.ch === "r")) {
+      const index = list.findIndex(t => t.id === reviewTask?.id);
+      return { state: { ...state, mode: "work", dscroll: 0,
+        ...(index >= 0 ? {sel:index} : {filter:0,search:"",sel:Math.max(0,ctx.tasks.findIndex(t=>t.id===reviewTask?.id))}) }, intent: null };
+    }
+    if (key.name === "down" || (key.name === "char" && key.ch === "j")) return { state: { ...state, dscroll: state.dscroll + 1 }, intent: null };
+    if (key.name === "up" || (key.name === "char" && key.ch === "k")) return { state: { ...state, dscroll: Math.max(0, state.dscroll - 1) }, intent: null };
+    if (key.name === "char" && key.ch === "g") return { state: { ...state, dscroll: 0 }, intent: null };
+    if (key.name === "char" && key.ch === "G") return { state: { ...state, dscroll: Number.MAX_SAFE_INTEGER }, intent: null };
+    if (key.name === "char" && key.ch === "i" && review) return { state: { ...state, dscroll: 0, review: { ...review, input: !review.input } }, intent: null };
+    if (key.name === "char" && ["[", "]"].includes(key.ch) && reviewTask && review) {
+      const runs = reviewTask.runs.map(r => r.run);
+      const index = runs.indexOf(review.run);
+      const run = runs[Math.max(0, Math.min(runs.length - 1, index + (key.ch === "[" ? -1 : 1)))];
+      return { state: { ...state, dscroll: 0 }, intent: { type: "review", id: reviewTask.id, run } };
+    }
+    // Enter deliberately does not accept from a historical result/input view.
+    return none;
+  }
+
   if (state.mode === "diff") {
     if (key.name === "char" && key.ch === "j") return { state: { ...state, dscroll: state.dscroll + 1 }, intent: null };
     if (key.name === "down") return { state: { ...state, dscroll: state.dscroll + 1 }, intent: null };
@@ -221,17 +245,6 @@ export function apply(state, key, ctx = {}) {
     if (key.name === "escape") return { state: { ...state, input: null, draft: "" }, intent: null };
     if (key.name === "backspace") return { state: { ...state, draft: state.draft.slice(0, -1) }, intent: null };
     if (isPrintable(key)) return { state: { ...state, draft: state.draft + key.ch }, intent: null };
-    return none;
-  }
-
-  // Cancel confirms the same way an input does: ↵ commits, esc backs out.
-  // A second x while the confirmation is up does not emit another intent.
-  if (state.confirm?.type === "cancel") {
-    if (key.name === "enter") {
-      const id = state.confirm.id;
-      return { state: { ...state, confirm: null }, intent: { type: "cancel", id } };
-    }
-    if (key.name === "escape") return { state: { ...state, confirm: null }, intent: null };
     return none;
   }
 
@@ -298,13 +311,9 @@ export function apply(state, key, ctx = {}) {
     }
     case "c":
       return task ? { state: { ...state, input: "note", draft: "" }, intent: null } : none;
+    case "r":
+      return task ? { state: { ...state, mode: "result", dscroll: 0, review: null }, intent: { type: "review", id: task.id, run: task.run } } : none;
     case "x": {
-      if (task?.state === "working") {
-        return {
-          state: { ...state, confirm: { type: "cancel", id: task.id } },
-          intent: null
-        };
-      }
       const secondary = secondaryAction(task);
       if (!secondary) return none;
       if (secondary.input) return { state: { ...state, input: secondary.input, draft: "" }, intent: null };

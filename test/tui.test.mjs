@@ -26,8 +26,8 @@ import {
   primaryAction,
   secondaryAction
 } from "../src/tui/state.mjs";
-import { snapshot, STATE_KEY } from "../src/tui/model.mjs";
-import { frame, wrap, cut, pad, oneline, shortPath, cellWord } from "../src/tui/view.mjs";
+import { projectTask, snapshot, STATE_KEY } from "../src/tui/model.mjs";
+import { ruleCells, frame, wrap, cut, pad, oneline, shortPath, cellWord } from "../src/tui/view.mjs";
 import { renderLine, renderFrame, createPainter, colorSupport } from "../src/tui/screen.mjs";
 import { providerSignature, palette } from "../src/tui/theme.mjs";
 import { createApp } from "../src/tui/app.mjs";
@@ -58,7 +58,8 @@ function fakeNode() {
 async function makeRuntime() {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-tui-"));
   const node = fakeNode();
-  return { runtime: createRuntime(base, { node }), node, base };
+  const env = Object.assign(Object.create(process.env), { CLAUDE_BIN: process.execPath });
+  return { runtime: createRuntime(base, { node, env }), node, base };
 }
 
 // A task parked on the human, as a provider run would leave it. `live` marks
@@ -68,6 +69,12 @@ async function blockTask(runtime, brief, blockedOn, { live = false } = {}) {
   const task = await runtime.actions.createWork({ brief });
   const blocked = applyOutcome(task, { status: "needs_you", blockedOn: { ...blockedOn, live } });
   blocked.execution = { ...task.execution, externalSessionId: live ? undefined : "sess-1" };
+  // A live permission belongs to a live worker; this fixture's inert node
+  // has no process of its own, so use the test's PID and a concrete request.
+  if (live) {
+    blocked.pid = process.pid;
+    blocked.blockedOn.requestId = task.id;
+  }
   await runtime.store.updateTask(blocked);
   return blocked;
 }
@@ -179,30 +186,8 @@ test("Enter and x resolve to the action each Work state is actually waiting for"
   assert.equal(
     primaryAction({ state: "working", halt: null }, state, CTX),
     null,
-    "a working run has no primary action"
+    "a working run wants nothing from you"
   );
-  assert.equal(secondary({ state: "working", id: 7, halt: null }), "CANCEL");
-});
-
-test("cancel on a working run confirms once, and a second press does not emit another cancel", () => {
-  const working = { ...TASKS[0], id: 7, state: "working", halt: null };
-  const ctx = { ...CTX, tasks: [working] };
-  const armed = apply(initialState(), KEY("x"), ctx);
-  assert.equal(armed.intent, null);
-  assert.equal(armed.state.confirm?.type, "cancel");
-  assert.equal(armed.state.confirm.id, 7);
-
-  const again = apply(armed.state, KEY("x"), ctx);
-  assert.equal(again.intent, null);
-  assert.equal(again.state.confirm?.type, "cancel");
-
-  const confirmed = apply(armed.state, { name: "enter" }, ctx);
-  assert.deepEqual(confirmed.intent, { type: "cancel", id: 7 });
-  assert.equal(confirmed.state.confirm, null);
-
-  const backed = apply(armed.state, { name: "escape" }, ctx);
-  assert.equal(backed.intent, null);
-  assert.equal(backed.state.confirm, null);
 });
 
 test("Enter on a permission fires immediately; Enter on a decision asks for text first", () => {
@@ -431,6 +416,108 @@ test("projectTask maps Work status onto the design's state keys, never the rever
   });
 });
 
+test("current-run clock, trace and activity stay scoped across providers and a failed retry", () => {
+  const at = seconds => new Date(Date.UTC(2026, 10, 1, 21, 30, seconds)).toISOString();
+  const task = {
+    id: 1, title: "Run attribution", brief: "Keep the original request", status: "working",
+    createdAt: at(0), execution: { provider: "opencode" },
+    runs: [
+      { run: 1, provider: "codex", startedAt: at(0), completedAt: at(300), durationMs: 300_000, outcome: "ready" },
+      { run: 2, provider: "gemini", startedAt: at(310), completedAt: at(311), durationMs: 1000, outcome: "failed" },
+      { run: 3, provider: "opencode", startedAt: at(360), outcome: "working" }
+    ]
+  };
+  const events = [
+    { type: "task.created", at: at(0) },
+    { type: "run.started", run: 1, at: at(1), sessionId: "old-codex-session" },
+    { type: "tool.started", run: 1, at: at(10), name: "command_execution", input: { command: "old-command" } },
+    { type: "file.changed", run: 1, at: at(20), path: "old-file.mjs" },
+    { type: "task.note", at: at(30), note: "Keep this constraint" },
+    { type: "progress", run: 1, at: at(299), text: "old activity" },
+    { type: "run.completed", run: 1, at: at(300) },
+    { type: "run.failed", run: 2, at: at(311), error: "old failure" },
+    { type: "task.updated", run: 3, at: at(360), status: "working" }
+  ];
+  const opts = {
+    now: Date.parse(at(390)),
+    providers: { opencode: { capabilities: { supportsStructuredEvents: true } } },
+    lookup: id => ({ sig: providerSignature(id), name: id.toUpperCase(), displayName: id })
+  };
+  const project = log => projectTask(task, log, opts);
+  const screen = projected => {
+    const built = frame({ tasks: [projected], counts: { needs: 0, failed: 0, ready: 0, working: 1, done: 0 }, workspace: { label: "checkout" }, node: "local", at: opts.now },
+      initialState(), { cols: 160, rows: 50, palette: palette("dark") });
+    return renderFrame(built.lines, 160, 50, { support: "none" }).join("\n");
+  };
+
+  // The run record exists before the worker emits even run.started.
+  const quiet = project(events);
+  assert.equal(quiet.run, 3);
+  assert.equal(quiet.elapsed, 30);
+  assert.deepEqual(quiet.steps, []);
+  assert.deepEqual(quiet.files, []);
+  assert.equal(quiet.hasChanges, false);
+  assert.equal(quiet.activity, "");
+  assert.equal(quiet.sessionId, null);
+  assert.equal(quiet.brief, task.brief);
+  assert.deepEqual(quiet.history.map(r => [r.provider, r.state]), [["CODEX", "READY"], ["GEMINI", "FAILED"]]);
+  assert.deepEqual(quiet.notes.map(n => n.text), ["Keep this constraint"]);
+  const quietScreen = screen(quiet);
+  assert.match(quietScreen, /RUN 3\s+OP OPENCODE\s+0:30/);
+  assert.match(quietScreen, /run 3 · 0 events/);
+  assert.match(quietScreen, /run has not reported yet/);
+  assert.doesNotMatch(quietScreen, /old-command|old-file|old failure|old activity/);
+
+  const started = [...events,
+    { type: "run.started", run: 3, at: at(365), sessionId: "new-opencode-session" },
+    { type: "tool.started", run: 3, at: at(370), name: "shell", input: { command: "current-command" } },
+    { type: "file.changed", run: 3, at: at(375), path: "current-file.mjs" },
+    { type: "progress", run: 3, at: at(380), text: "current activity" }
+  ];
+  const active = project(started);
+  assert.equal(active.elapsed, 30);
+  assert.deepEqual(active.steps.map(s => [s.arg, s.t]), [["current-command", 10], ["current-file.mjs", 15]]);
+  assert.deepEqual(active.files, ["current-file.mjs"]);
+  assert.equal(active.activity, "current activity");
+  assert.equal(active.sessionId, "new-opencode-session");
+  const activeScreen = screen(active);
+  assert.match(activeScreen, /run 3 · 2 events/);
+  assert.match(activeScreen, /current-command\s+0:10/);
+  assert.doesNotMatch(activeScreen, /old-command|old-file|old failure|old activity/);
+
+  // Failure context must also belong to this run, even before it reports work.
+  const failed = projectTask({ ...task, status: "failed", error: "new failure" }, events, opts);
+  assert.equal(failed.fail.at, "before anything was reported");
+  assert.equal(failed.fail.kept, "nothing was reported as changed");
+});
+
+test("a finished current run stops at its recorded completion even without events", () => {
+  for (const status of ["ready", "failed", "done"]) {
+    const task = { id: 1, status, createdAt: "2026-11-01T21:30:00Z", execution: { provider: "codex" },
+      runs: [{ run: 2, startedAt: "2026-11-01T21:36:00Z", completedAt: "2026-11-01T21:36:20Z" }] };
+    const projected = projectTask(task, [
+      { type: "run.failed", run: 1, at: "2026-11-01T21:35:00Z", error: "old failure" },
+      { type: "task.note", at: "2026-11-01T21:40:00Z", note: "next run" },
+      { type: "task.closed", at: "2026-11-01T21:45:00Z" }
+    ], { now: Date.parse("2026-11-01T22:00:00Z"), lookup: () => ({}) });
+    assert.equal(projected.elapsed, 20, status);
+    assert.deepEqual(projected.steps, [], status);
+    assert.equal(projected.notes[0].text, "next run");
+  }
+});
+
+test("legacy untagged events remain visible as run 1", () => {
+  const projected = projectTask({ id: 1, status: "working", createdAt: "2026-11-01T21:30:00Z" }, [
+    { type: "run.started", at: "2026-11-01T21:31:00Z", sessionId: "legacy-session" },
+    { type: "tool.started", at: "2026-11-01T21:31:10Z", name: "Read", input: { path: "legacy.mjs" } }
+  ], { now: Date.parse("2026-11-01T21:31:30Z"), lookup: () => ({}) });
+  assert.equal(projected.run, 1);
+  assert.equal(projected.elapsed, 30);
+  assert.equal(projected.steps[0].arg, "legacy.mjs");
+  assert.equal(projected.steps[0].t, 10);
+  assert.equal(projected.sessionId, "legacy-session");
+});
+
 test("a decision's question reaches the model in full — nothing truncates it on the way", async () => {
   const { runtime } = await makeRuntime();
   const question =
@@ -487,52 +574,14 @@ test("the human record is read from the event log, so NOTE, ANSWER and CORRECTIO
   ]);
 });
 
-test("provider identity covers built-ins and derives configured providers", () => {
+test("provider identity is derived, so a configured provider is not a blank column", () => {
   assert.equal(providerSignature("claude-code"), "CC");
   assert.equal(providerSignature("deepseek-harness"), "DS");
   assert.equal(providerSignature("codex"), "CX");
   assert.equal(providerSignature("gemini"), "GM");
-  assert.equal(providerSignature("opencode"), "OC");
   assert.equal(providerSignature("acme-agent", "Acme Agent"), "AA");
   assert.equal(providerSignature("zed", "Zed"), "ZE");
   assert.equal(providerSignature(null), "??");
-});
-
-test("a READY rerun shows its persisted result and only its own execution trace", async () => {
-  const { runtime } = await makeRuntime();
-  const task = await runtime.actions.createWork({ brief: "OpenCode smoke" });
-  await runtime.store.updateTask(applyOutcome(task, { status: "failed", error: "run 1 failed" }));
-  await runtime.store.appendEvent(task.slug, {
-    type: "run.failed",
-    taskId: task.id,
-    run: 1,
-    at: "2026-01-01T10:00:01.000Z",
-    error: "run 1 failed"
-  });
-
-  const rerun = await runtime.actions.rerunWork(task.id);
-  await runtime.store.updateTask(applyOutcome(rerun, { status: "ready", result: "RUN 2 RESULT" }));
-  await runtime.store.appendEvent(task.slug, {
-    type: "progress",
-    taskId: task.id,
-    run: 2,
-    at: "2026-01-01T10:01:01.000Z",
-    text: "run 2 progress"
-  });
-  await fs.writeFile(
-    path.join(runtime.store.taskDir(task.slug), "result.md"),
-    "## Result\nRUN 2 RESULT\n",
-    "utf8"
-  );
-
-  const model = await snapshot(runtime);
-  const projected = model.tasks[0];
-  assert.equal(projected.result, "## Result\nRUN 2 RESULT\n");
-  assert.equal(projected.activity, "run 2 progress");
-  assert.ok(!projected.steps.some(step => step.kind === "fail"), "run 1 failure is history, not run 2 trace");
-
-  const rendered = await frameFor(runtime, initialState({ selectedId: task.id }));
-  assert.match(rendered.text.join("\n"), /RUN 2 RESULT/);
 });
 
 // --- the frame -------------------------------------------------------------------
@@ -797,6 +846,34 @@ test("overview -> detail -> a NEEDS YOU permission -> back, against the real run
   assert.ok(after.join("\n").includes("drizzle"));
 });
 
+for (const [action, key] of [["allow", { name: "enter" }], ["reject", KEY("x")]]) {
+  test(`TUI ${action} carries the displayed occurrence and refuses a stale snapshot`, async () => {
+    const { runtime, base } = await makeRuntime();
+    const app = createApp(runtime);
+    try {
+      const task = await blockTask(runtime, "Synthetic live permission", {
+        type: "permission", tool: "Edit", decisionId: "shown-occurrence"
+      }, { live: true });
+      await app.refresh();
+      assert.equal(app.selected().halt.decisionId, "shown-occurrence");
+      await runtime.store.updateTask({ ...task, blockedOn: { ...task.blockedOn, decisionId: "newer-occurrence" } });
+      const intent = await app.key(key);
+      assert.deepEqual(intent, { type: action, id: task.id, decisionId: "shown-occurrence" });
+      assert.match(app.state.flash.text, /permission request changed/);
+      const decisionFile = path.join(runtime.store.taskDir(task.slug), "permission.json");
+      await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+      await app.refresh();
+      await app.key(key);
+      const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+      assert.equal(decision.decisionId, "newer-occurrence");
+      assert.equal(decision.grant, action);
+    } finally {
+      app.dispose();
+      await fs.rm(base, { recursive: true, force: true });
+    }
+  });
+}
+
 test("ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY does not", async () => {
   const { runtime, node } = await makeRuntime();
   const task = await blockTask(runtime, "Investigate the correction lifecycle", {
@@ -920,5 +997,38 @@ test("the TUI never writes Work state itself — the store is only reached throu
         `src/tui/${file} must not call ${forbidden} — that belongs to core/actions.mjs`
       );
     }
+  }
+});
+
+
+test("run rules retain every dash and the live/stop marker at narrow and wide sizes in both themes", () => {
+  for (const theme of ["light", "dark"]) {
+    for (const width of [6, 14, 28, 48]) {
+      for (const state of ["working", "needs", "ready", "failed", "done"]) {
+        for (const percent of [null, 1, 50, 99]) {
+          const cells = ruleCells({state, steps:Array(400).fill({kind:"tool"}), progress:percent == null ? null : {percent}}, width, palette(theme));
+          const text = cells.map(c=>c.t).join("");
+          assert.equal(text.length, width);
+          if (state === "working") assert.equal(text.split("◆").length-1, 1);
+          if (state === "needs") assert.equal(text.split("!").length-1, 1);
+        }
+      }
+    }
+  }
+});
+
+
+test("the real TUI frame keeps the active end of a dense run visible after column composition", async () => {
+  const {runtime} = await makeRuntime();
+  const task = await runtime.actions.createWork({brief:"Dense trace geometry"});
+  for (let i=0;i<80;i++) await runtime.store.appendEvent(task.slug, {
+    type:"tool.started", taskId:task.id, run:1, at:new Date().toISOString(), name:"Read", input:{file_path:"a.mjs"}
+  });
+  const model = await snapshot(runtime);
+  for (const theme of ["light","dark"]) for (const cols of [60,80,100,132,160]) {
+    const built = frame(model,initialState(),{cols,rows:38,palette:palette(theme)});
+    const lines = renderFrame(built.lines,cols,38,{support:"none"});
+    assert.ok(lines.some(line=>line.includes("◆")), `${theme} ${cols}: live marker cropped`);
+    assert.ok(lines.every(line=>line.length === cols));
   }
 });

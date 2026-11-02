@@ -13,10 +13,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn, execFile } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 function runCli(base, args, env = {}) {
   return new Promise((resolve, reject) => {

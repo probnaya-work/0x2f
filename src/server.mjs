@@ -17,7 +17,6 @@
 //   POST /api/tasks/:id/allow      -> allowWork(id)
 //   POST /api/tasks/:id/reject     -> rejectWork(id)
 //   POST /api/tasks/:id/answer     -> answerWork(id, { answer })
-//   POST /api/tasks/:id/cancel     -> cancelWork(id)
 //   POST /api/tasks/:id/note       -> noteWork(id, { note })   (task context
 //                                      only — no execution is started)
 //   POST /api/tasks/:id/close      -> closeWork(id)
@@ -86,6 +85,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
+import net from "node:net";
 import { URL } from "node:url";
 import { createRuntime } from "./runtime.mjs";
 import { deriveWorkspace } from "./project.mjs";
@@ -128,6 +128,8 @@ const VENDOR_CRYPTO_FILES = [
 ];
 
 const ASSETS = {
+  "/app/theme.js": ["web/theme.js", "text/javascript; charset=utf-8"],
+  "/app/theme.css": ["web/theme.css", "text/css; charset=utf-8"],
   "/": ["web/index.html", "text/html; charset=utf-8"],
   "/pair": ["web/pair.html", "text/html; charset=utf-8"],
   "/app/app.css": ["web/app.css", "text/css; charset=utf-8"],
@@ -137,6 +139,8 @@ const ASSETS = {
   "/app/pair.css": ["web/pair.css", "text/css; charset=utf-8"],
   "/app/remote.mjs": ["web/remote.mjs", "text/javascript; charset=utf-8"],
   "/app/ledger.mjs": ["web/ledger.mjs", "text/javascript; charset=utf-8"],
+  "/app/result-evidence.mjs": ["web/result-evidence.mjs", "text/javascript; charset=utf-8"],
+  "/core/permission-scope.mjs": ["core/permission-scope.mjs", "text/javascript; charset=utf-8"],
   "/app/sound-policy.mjs": ["web/sound-policy.mjs", "text/javascript; charset=utf-8"],
   "/app/sound.mjs": ["web/sound.mjs", "text/javascript; charset=utf-8"],
   // The browser's E2E envelope code (e2e.mjs) imports this shared protocol
@@ -236,16 +240,40 @@ function requestHostname(req) {
   return colon > 0 ? host.slice(0, colon) : host;
 }
 
-// Layer 1 (LAN-aware): a request is served only when its Host header names a
-// loopback host, OR a private-LAN host while LAN pairing is active (checked
+function requestPeerAddress(req) {
+  const address = req.socket.remoteAddress?.toLowerCase() ?? "";
+  // Dual-stack listeners represent IPv4 peers with this IPv6 prefix.
+  return address.startsWith("::ffff:") ? address.slice(7) : address;
+}
+
+function isLoopbackPeer(address) {
+  return address === "::1" || (net.isIPv4(address) && address.startsWith("127."));
+}
+
+// HTTP requests receive a JSON refusal; upgrades reuse the same predicates
+// without a response object and close their socket when refused.
+function forbidRequest(res, error) {
+  if (res) json(res, { error }, 403);
+  return false;
+}
+
+// Layer 1 (LAN-aware): local Hosts also require a loopback TCP peer. Private
+// LAN Hosts require a private or loopback peer and active pairing (checked
 // against the live config, so `2f pair --off` closes the LAN surface quickly).
 // `lanRelay` is the mounted in-process relay (present only in LAN mode).
 async function guardHostLan(req, res, lanRelay, lanEnabledNow) {
   const hostname = requestHostname(req);
-  if (LOOPBACK_HOSTS.has(hostname)) return true;
-  if (lanRelay && isPrivateLanIp(hostname) && (await lanEnabledNow())) return true;
-  json(res, { error: "Forbidden — 0x2F only serves its own loopback origin." }, 403);
-  return false;
+  const peer = requestPeerAddress(req);
+  const localPeer = isLoopbackPeer(peer);
+  // Host is caller-controlled: on a listener bound to all interfaces it
+  // cannot establish that a request came from this machine. Only the TCP
+  // peer may grant the local API and its auth-cookie bootstrap.
+  if (LOOPBACK_HOSTS.has(hostname) && localPeer) return true;
+  if (
+    lanRelay && isPrivateLanIp(hostname) &&
+    (localPeer || isPrivateLanIp(peer)) && (await lanEnabledNow())
+  ) return true;
+  return forbidRequest(res, "Forbidden — 0x2F only serves its own loopback origin.");
 }
 
 // Layer 2a: a present Origin header must be THIS server's own origin —
@@ -260,13 +288,11 @@ function guardOrigin(req, res) {
   try {
     parsed = new URL(origin);
   } catch {
-    json(res, { error: "Forbidden — bad Origin header." }, 403);
-    return false;
+    return forbidRequest(res, "Forbidden — bad Origin header.");
   }
   const expected = `http://${(req.headers.host ?? "").trim().toLowerCase()}`;
   if (parsed.protocol !== "http:" || origin.toLowerCase() !== expected) {
-    json(res, { error: "Forbidden — cross-origin request." }, 403);
-    return false;
+    return forbidRequest(res, "Forbidden — cross-origin request.");
   }
   return true;
 }
@@ -278,8 +304,7 @@ function guardOrigin(req, res) {
 function guardFetchSite(req, res) {
   const site = req.headers["sec-fetch-site"];
   if (site && site !== "same-origin" && site !== "none") {
-    json(res, { error: "Forbidden — cross-site request." }, 403);
-    return false;
+    return forbidRequest(res, "Forbidden — cross-site request.");
   }
   return true;
 }
@@ -541,13 +566,6 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
     try {
       const url = new URL(req.url || "/", `http://${host}:${port}`);
 
-      // Local-boundary gate: Host allowlist (loopback, or private-LAN while
-      // LAN pairing is active), then Origin, then Sec-Fetch-Site. Runs before
-      // ANY routing — a refused request never reaches a handler.
-      if (!(await guardHostLan(req, res, lanRelay, lanEnabledNow))) return;
-      if (!guardOrigin(req, res)) return;
-      if (!guardFetchSite(req, res)) return;
-
       // LAN surface: a phone on the same Wi-Fi gets ONLY the static client
       // (pairing page + app) and the mounted relay protocol — never the local
       // API. The shell carries no auth cookie here: the LAN client uses the
@@ -621,9 +639,6 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         });
         return;
       }
-
-      // Everything under /api/ (except /api/health) requires the token.
-      if (url.pathname.startsWith("/api/") && !requireAuth(req, res, authToken)) return;
 
       // Surface descriptor: how this server is reached. The local server is
       // always "local" and its Mac is always "online"; the relay serves the
@@ -754,14 +769,16 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
 
       const allowMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/allow$/);
       if (req.method === "POST" && allowMatch) {
-        const task = await actions.allowWork(Number(allowMatch[1]));
+        const body = await readJsonBody(req);
+        const task = await actions.allowWork(Number(allowMatch[1]), { decisionId: body.decisionId ?? null });
         json(res, task, 202);
         return;
       }
 
       const rejectMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/reject$/);
       if (req.method === "POST" && rejectMatch) {
-        const task = await actions.rejectWork(Number(rejectMatch[1]));
+        const body = await readJsonBody(req);
+        const task = await actions.rejectWork(Number(rejectMatch[1]), { decisionId: body.decisionId ?? null });
         json(res, task, 202);
         return;
       }
@@ -805,12 +822,6 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         return;
       }
 
-      const cancelMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/cancel$/);
-      if (req.method === "POST" && cancelMatch) {
-        json(res, await actions.cancelWork(Number(cancelMatch[1])), 202);
-        return;
-      }
-
       const closeMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/close$/);
       if (req.method === "POST" && closeMatch) {
         json(res, await actions.closeWork(Number(closeMatch[1])));
@@ -835,8 +846,33 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
   };
 
   const server = http.createServer(async (req, res) => {
-    const key = req.method === "POST" ? req.headers[IDEMPOTENCY_HEADER] : null;
-    if (typeof key !== "string" || !key) return route(req, res);
+    // Validate the boundary before consulting any response cache. A replay
+    // contains the first caller's task data and requires the same guards as
+    // executing the operation. LAN relay traffic has its own encrypted
+    // idempotency protocol and must never enter the local plaintext cache.
+    if (!(await guardHostLan(req, res, lanRelay, lanEnabledNow))) return;
+    if (!guardOrigin(req, res)) return;
+    if (!guardFetchSite(req, res)) return;
+    const local = LOOPBACK_HOSTS.has(requestHostname(req));
+    let mutationPath = null;
+    if (local) {
+      let url;
+      try {
+        url = new URL(req.url || "/", `http://${host}:${port}`);
+      } catch {
+        json(res, { error: "Invalid request URL." }, 400);
+        return;
+      }
+      if (url.pathname.startsWith("/api/") && url.pathname !== "/api/health") {
+        if (!requireAuth(req, res, authToken)) return;
+        if (req.method === "POST") mutationPath = url.pathname;
+      }
+    }
+    const requestId = mutationPath ? req.headers[IDEMPOTENCY_HEADER] : null;
+    if (typeof requestId !== "string" || !requestId) return route(req, res);
+    // Public/static routes can never retrieve a cached private response.
+    // Even authenticated callers may replay only the same operation.
+    const key = JSON.stringify([req.method, mutationPath, requestId]);
 
     const inFlight = idempotency.get(key);
     if (inFlight) {
@@ -866,10 +902,19 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
 
   // WebSocket upgrades: only the Mac's relay agent upgrades (its outbound
   // /ws channel). In LAN mode the agent connects to THIS server; the mounted
-  // relay authenticates the deviceSecret and handles the upgrade. Without
-  // LAN mode there is no /ws surface at all.
-  server.on("upgrade", (req, socket, head) => {
-    if (lanRelay) return lanRelay.handleUpgrade(req, socket, head);
+  // relay authenticates the deviceSecret and handles the upgrade. The same
+  // boundary applies before handing over the socket, and even loopback
+  // upgrades require active LAN pairing. Without it there is no /ws surface.
+  server.on("upgrade", async (req, socket, head) => {
+    try {
+      if (
+        lanRelay && (await lanEnabledNow()) &&
+        (await guardHostLan(req, null, lanRelay, lanEnabledNow)) &&
+        guardOrigin(req, null) && guardFetchSite(req, null)
+      ) return lanRelay.handleUpgrade(req, socket, head);
+    } catch {
+      // A failed gate must never leave an unauthenticated upgrade open.
+    }
     socket.destroy();
   });
 

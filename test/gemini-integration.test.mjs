@@ -17,12 +17,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
 import { executableAvailable } from "../src/providers/index.mjs";
 import { startGeminiApiMock } from "./fixtures/gemini-api-mock.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 const RESULT_OK = "## Result\nhandled by mock gemini\n## Evidence\nran\n## Verification\nok\n## Needs human decision\nNone";
 

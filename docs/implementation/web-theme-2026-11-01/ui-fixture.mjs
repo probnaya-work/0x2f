@@ -1,0 +1,42 @@
+// Safe, nonshipping UI fixtures. No model calls or real permission execution.
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createRuntime} from '../../../src/runtime.mjs';
+import {initProject} from '../../../src/project.mjs';
+import {startServer} from '../../../src/server.mjs';
+import {applyOutcome} from '../../../src/core/lifecycle.mjs';
+import {normalizeOutcome} from '../../../src/providers/claude-code.mjs';
+import {workEvent} from '../../../src/core/events.mjs';
+import {seedTraceExamples} from './trace-fixture.mjs';
+const base=await fs.mkdtemp(path.join(os.tmpdir(),'0x2f-faithful-web-'));
+await initProject(base);
+const inert={id:'ui-fixture',startExecution:async()=>null,resumeExecution:async()=>null};
+const runtime=createRuntime(base,{node:inert});
+const result='## Result\nThe retry boundary investigation found a mismatch. No source files changed.\n\n## Evidence\nThe caller retries before validating the delay.\n\n## Changes\nNone\n\n## Verification\nPARTIAL: unit checks reported passing; network integration was not run.\n\n## Needs human decision\nREQUIRED: no';
+const longResult = result + '\n\n```diff\n-old behavior\n+new behavior\n context\n```\n\n' + Array.from({length:90}, (_,i)=>`Paragraph ${i+1}: Result detail with a deliberately_long_unbroken_identifier_${'x'.repeat(120)}.\n\n`).join('') + 'END OF LONG RESULT';
+async function seed(brief,outcome){
+  const t=await runtime.actions.createWork({brief});
+  const state=applyOutcome(t,outcome);state.runs=state.runs.map(r=>({...r,outcome:outcome.status}));
+  await runtime.store.updateTask(state);
+  await fs.writeFile(path.join(runtime.store.taskDir(t.slug),'result.md'),outcome.result??'');
+  await fs.writeFile(path.join(runtime.store.taskDir(t.slug),'runs/1/result.md'),outcome.result??'');
+  await runtime.store.appendEvent(t.slug,workEvent('task.updated',t.id,{status:outcome.status,run:1}));return t.id;
+}
+const ready=await seed('Review retry investigation.\nPreserve the public API. This result has partial verification.',{status:'ready',result:longResult});
+await runtime.store.appendEvent((await runtime.store.findTask(ready)).slug,workEvent('tool.started',ready,{run:1,name:'command_execution',input:{command:'node --test unit.test.mjs'}}));
+const working=await seed('Inspect ongoing retry work.\nNotes saved now apply to the next run.',{status:'working'});
+const common={type:'permission',live:true,requestId:100,canAllow:true,canReject:true,options:[{optionId:'once',name:'Allow once',kind:'allow_once'},{optionId:'deny',name:'Reject',kind:'reject_once'}]};
+const sufficient=await seed('Scoped local read.',{status:'needs_you',reason:'permission',blockedOn:{...common,tool:'Read configuration',file:'src/config.mjs',description:'Read src/config.mjs to inspect the retry configuration',decisionId:'ui-scope-complete',raw:{kind:'read',title:'Read configuration',locations:[{path:'src/config.mjs'}]}}});
+const native=normalizeOutcome({permission_denials:[{tool_name:'Bash',tool_input:{command:'echo '+ 'x'.repeat(170)+' && deploy --production'}}]}).blockedOn;
+const incomplete=await seed('Long command requires local review.',{status:'needs_you',reason:'permission',blockedOn:{...common,...native,decisionId:'ui-scope-incomplete'}});
+const external=await seed('External target requires disambiguation.',{status:'needs_you',reason:'permission',blockedOn:{...common,tool:'Edit',file:'/outside/one/deploy.sh',description:'Edit deployment',decisionId:'ui-external'}});
+const decision=await seed('Choose the retry policy.',{status:'needs_you',reason:'decision',blockedOn:{type:'decision',text:'Should retry delays cap at 30 or 120 seconds? The owner must choose.'}});
+const coarse=await seedTraceExamples(runtime,{working,ready,sufficient});
+const server=await startServer(base,0,{runtime});
+const receipt={pid:process.pid,base,url:`http://127.0.0.1:${server.port}`,tasks:{ready,working,sufficient,incomplete,external,decision,coarse},mode:'inert safe fixture, not a phone or model evaluation'};
+const dir=path.dirname(fileURLToPath(import.meta.url));
+await fs.writeFile(path.join(dir,'evidence/ui-fixture.json'),JSON.stringify(receipt,null,2));
+console.log(JSON.stringify(receipt));
+for(const signal of ['SIGTERM','SIGINT'])process.on(signal,async()=>{await server.close();await fs.rm(base,{recursive:true,force:true});process.exit(0);});

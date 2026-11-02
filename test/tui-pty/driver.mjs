@@ -14,14 +14,15 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn, execFile } from "node:child_process";
 import { createStore } from "../../src/core/store.mjs";
 import { initProject } from "../../src/project.mjs";
 
 export const PYTHON = process.env.PYTHON ?? "python3";
-export const CLI = new URL("../../src/cli.mjs", import.meta.url).pathname;
-export const RELAY = new URL("./pty-relay.py", import.meta.url).pathname;
-export const AGENT = new URL("./agents/fake-agent.mjs", import.meta.url).pathname;
+export const CLI = fileURLToPath(new URL("../../src/cli.mjs", import.meta.url));
+export const RELAY = fileURLToPath(new URL("./pty-relay.py", import.meta.url));
+export const AGENT = fileURLToPath(new URL("./agents/fake-agent.mjs", import.meta.url));
 
 export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 

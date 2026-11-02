@@ -7,25 +7,27 @@
 // credentials. The suite skips when the codex executable is not resolvable
 // (CODEX_BIN override or PATH), so it stays green on machines without Codex.
 //
-// CODEX_SANDBOX=bypass is set because the seatbelt sandbox cannot apply
-// inside this sandboxed test environment (verified: sandbox_apply EPERM);
-// on a normal machine the provider defaults to `-s workspace-write`.
+// Keep the product's workspace-write sandbox enabled. A nested macOS
+// sandbox cannot apply seatbelt to command execution; run that integration
+// from a context where Codex can apply its own sandbox, never by bypassing it.
 
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
 import { executableAvailable } from "../src/providers/index.mjs";
+import { codexProvider } from "../src/providers/codex.mjs";
 import {
   startCodexResponsesMock,
   messageStream,
   commandExecutionStream
 } from "./fixtures/codex-responses-mock.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 function codexExecutable() {
   return process.env.CODEX_BIN && executableAvailable(process.env.CODEX_BIN, process.env)
@@ -88,10 +90,49 @@ async function makeCodexProject(mock) {
   const codexEnv = {
     CODEX_HOME: codexHome,
     CODEX_BIN: codex,
-    CODEX_SANDBOX: "bypass"
+    CODEX_SANDBOX: "workspace-write"
   };
   return { base, codexHome, codexEnv };
 }
+
+test("E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox", async t => {
+  if (!codexExecutable()) {
+    t.skip("codex executable not available (set CODEX_BIN or install Codex CLI)");
+    return;
+  }
+  const firstText = "## Result\nfirst-session-marker\n## Needs human decision\nREQUIRED: no";
+  const mock = await startCodexResponsesMock([
+    { events: messageStream(firstText) },
+    { events: messageStream("## Result\nresumed-session-marker\n## Needs human decision\nREQUIRED: no") }
+  ]);
+  const { base, codexHome, codexEnv } = await makeCodexProject(mock);
+  const saved = new Map(Object.keys(codexEnv).map(key => [key, process.env[key]]));
+  Object.assign(process.env, codexEnv);
+  try {
+    const first = await codexProvider.start({ cwd: base, prompt: "Return first-session-marker. No tools." });
+    assert.equal(first.status, "ready");
+    assert.ok(first.externalSessionId);
+    const second = await codexProvider.resume({ cwd: base, externalSessionId: first.externalSessionId });
+    assert.equal(second.status, "ready", second.error);
+    assert.equal(second.externalSessionId, first.externalSessionId);
+    assert.match(second.result, /resumed-session-marker/);
+    const turns = mock.requests.filter(request => request.method === "POST" && request.url.startsWith("/v1/responses"));
+    assert.equal(turns.length, 2);
+    assert.ok(turns[1].body.input.some(item => item.role === "assistant" &&
+      item.content?.some(part => part.text === firstText)), "prior assistant result reaches resumed model request");
+    assert.ok(turns[1].body.input.some(item => item.role === "developer" &&
+      item.content?.some(part => part.text?.includes('sandbox_mode` is `workspace-write'))),
+    "resumed turn retains workspace-write sandbox");
+  } finally {
+    for (const [key, value] of saved) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    await mock.close();
+    await fs.rm(base, { recursive: true, force: true });
+    await fs.rm(codexHome, { recursive: true, force: true });
+  }
+});
 
 test("E2E: `2f providers` detects codex and a task runs to READY through the real CLI", async t => {
   const codex = codexExecutable();

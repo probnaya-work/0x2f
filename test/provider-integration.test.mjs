@@ -8,13 +8,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { startServer } from "../src/server.mjs";
 import { createRuntime } from "../src/runtime.mjs";
 import { createStore } from "../src/core/store.mjs";
 import { TEST_AUTH_TOKEN, authHeaders } from "./helpers.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 // --- fixtures ---------------------------------------------------------------
 
@@ -139,7 +140,7 @@ test("API: configured providers appear in /api/providers with their integration 
       assert.equal(hello.integrationType, "command");
       assert.equal(hello.available, true);
       assert.equal(hello.capabilities.supportsStructuredEvents, false);
-      // Built-ins keep their descriptor too.
+      // Natives keep their descriptor too.
       assert.equal(providers[0].integrationType, "native");
       assert.equal(typeof providers[0].available, "boolean");
     } finally {
@@ -153,7 +154,7 @@ test("API: configured providers appear in /api/providers with their integration 
 
 // --- CLI --------------------------------------------------------------------
 
-test("CLI: `2f providers` lists built-in and configured providers with availability", async () => {
+test("CLI: `2f providers` lists natives and configured providers with availability", async () => {
   const bins = await fs.mkdtemp(path.join(os.tmpdir(), "work-int-bins-"));
   const agent = await fakeCommandAgent(bins);
   const base = await makeProject({
@@ -179,7 +180,6 @@ test("CLI: `2f providers` lists built-in and configured providers with availabil
     assert.match(res.out, /codex\s+native\s+(yes|no)/);
     assert.match(res.out, /deepseek-harness\s+native\s+(yes|no)/);
     assert.match(res.out, /gemini\s+native\s+(yes|no)/);
-    assert.match(res.out, /opencode\s+acp\s+(yes|no)/);
     assert.match(res.out, /hello\s+command\s+yes/);
     assert.match(res.out, /ghost\s+command\s+no/);
   } finally {

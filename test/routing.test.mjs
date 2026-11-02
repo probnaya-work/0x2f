@@ -10,13 +10,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createRouter, loadRoutingConfig, orderCandidates } from "../src/core/router.mjs";
 import { createRuntime } from "../src/runtime.mjs";
+import { createLocalNode } from "../src/nodes/local.mjs";
 import { startServer } from "../src/server.mjs";
 import { TEST_AUTH_TOKEN, authHeaders, unavailableNativesEnv } from "./helpers.mjs";
 
-const CLI = new URL("../src/cli.mjs", import.meta.url).pathname;
+const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
 // --- fake registry ----------------------------------------------------------
 
@@ -296,6 +298,72 @@ test("actions: rerun --provider auto re-routes and keeps the previous run", asyn
 
 // --- API --------------------------------------------------------------------
 
+function trackedLocalWorkers(base) {
+  const exits = [];
+  const node = createLocalNode({ workspace: base, spawn(...args) {
+    const child = spawn(...args);
+    // Observe the real child at launch, including when an API assertion fails
+    // before the response's task/PID can be read. Terminal task state alone
+    // does not prove the worker has released its final state/lock writes.
+    exits.push(new Promise(resolve => child.once("close", resolve)));
+    return child;
+  } });
+  return {
+    node,
+    async waitForExit() {
+      let timer;
+      try {
+        await Promise.race([
+          Promise.all(exits),
+          new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error("timeout waiting for routing fixture workers to exit; workspace retained")), 15000);
+          })
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+  };
+}
+
+test("routing fixture teardown waits for its real worker before deleting state", async () => {
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-routing-cleanup-"));
+  const workers = trackedLocalWorkers(base);
+  const release = path.join(base, "release");
+  try {
+    const agent = path.join(base, "gated-agent.mjs");
+    await fs.writeFile(agent, `import fs from "node:fs";
+const timer = setInterval(() => {
+  if (!fs.existsSync("release")) return;
+  clearInterval(timer);
+  process.stdout.write("local routing result");
+}, 10);
+`);
+    const manifests = path.join(base, ".work", "providers");
+    await fs.mkdir(manifests, { recursive: true });
+    await fs.writeFile(path.join(manifests, "alpha.json"), JSON.stringify({
+      id: "alpha", displayName: "Alpha", transport: "command", command: [process.execPath, agent, "{prompt}"]
+    }));
+    await writeRouting(base, { default: "auto", prefer: ["alpha"] });
+    const runtime = createRuntime(base, { node: workers.node });
+    const task = await runtime.actions.createWork({ brief: "Worker cleanup", provider: "auto" });
+    let exited = false;
+    const drain = workers.waitForExit().then(() => { exited = true; });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    assert.equal(exited, false, "cleanup must wait while the provider is gated");
+    await fs.writeFile(release, "");
+    await drain;
+    assert.throws(() => process.kill(task.pid, 0), { code: "ESRCH" });
+    assert.equal((await runtime.store.findTask(task.id)).status, "ready");
+    const events = await fs.readFile(path.join(runtime.store.taskDir(task.slug), "events.jsonl"), "utf8");
+    assert.equal(JSON.parse(events.trim().split("\n").at(-1)).type, "task.updated");
+  } finally {
+    await fs.writeFile(release, "");
+    await workers.waitForExit();
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
 test("API: GET /api/routing exposes the configured default and preference", async () => {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-routing-"));
   await writeRouting(base, { default: "auto", prefer: ["claude-code"] });
@@ -318,11 +386,12 @@ test("API: POST /api/tasks with provider auto routes through the shared action",
   const bins = await fs.mkdtemp(path.join(os.tmpdir(), "work-routing-bins-"));
   await fakeExecutable(bins, "alpha");
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-routing-"));
+  const workers = trackedLocalWorkers(base);
   await writeRouting(base, { default: "auto", prefer: ["alpha"] });
   try {
     const env = { ...process.env, PATH: bins, ...unavailableNativesEnv(bins) };
     const extra = [{ id: "alpha", displayName: "Alpha", integrationType: "command", capabilities: {}, command: ["alpha", "{prompt}"], start: async () => ({ status: "ready", result: "alpha" }) }];
-    const runtime = createRuntime(base, { env, providers: extra });
+    const runtime = createRuntime(base, { env, providers: extra, node: workers.node });
     const handle = await startServer(base, 0, { runtime, interval: 30, authToken: TEST_AUTH_TOKEN });
     try {
       const res = await fetch(handle.url + "/api/tasks", {
@@ -338,6 +407,7 @@ test("API: POST /api/tasks with provider auto routes through the shared action",
       await handle.close();
     }
   } finally {
+    await workers.waitForExit();
     await fs.rm(bins, { recursive: true, force: true });
     await fs.rm(base, { recursive: true, force: true });
   }

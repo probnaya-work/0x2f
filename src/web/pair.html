@@ -4,13 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>0x2F · pair</title>
+<script src="/app/theme.js"></script>
 <link rel="stylesheet" href="/app/pair.css" />
+<link rel="stylesheet" href="/app/theme.css" />
 </head>
 <body>
 <main class="pair-card">
+  <div class="pair-appearance">
+    <div class="appearance-k">THEME</div>
+    <div class="theme-control" role="group" aria-label="Theme">
+      <button type="button" class="theme-option" data-theme-option="light" aria-label="Light" aria-pressed="false">Light</button>
+      <button type="button" class="theme-option" data-theme-option="dark" aria-label="Dark" aria-pressed="false">Dark</button>
+      <button type="button" class="theme-option" data-theme-option="system" aria-label="System" aria-pressed="true">System</button>
+    </div>
+  </div>
   <div class="pair-k">0X2F / PAIR</div>
   <div class="pair-hint">Enter the pairing code from <b>2f pair</b> on your Mac.</div>
-  <input id="code" class="pair-input" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="PAIRING CODE" />
+  <input id="code" class="pair-input" aria-label="Pairing code" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="PAIRING CODE" />
   <button id="go" class="pair-btn">PAIR</button>
   <div id="status" class="pair-status"></div>
 </main>

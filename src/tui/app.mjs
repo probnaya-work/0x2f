@@ -10,7 +10,6 @@
 //   SAVE ONLY             answerWork                 — answer, stay NEEDS YOU
 //   SEND BACK             noteWork + rerunWork       — correction, next run
 //   ACCEPT / DROP         closeWork
-//   CANCEL                cancelWork                 — stop the active run
 //   RETRY / REOPEN        rerunWork({ provider })
 //   NOTE                  noteWork
 //   NEW TASK              createWork({ brief, provider })
@@ -95,8 +94,17 @@ export function createApp(runtime, opts = {}) {
     state = { ...state, busy: true };
     try {
       switch (intent.type) {
+        case "review": {
+          const task = await actions.getWork(intent.id);
+          const run = await actions.getRun(intent.id, intent.run);
+          const events = (await runtime.store.readEvents(task.slug)).filter(e => (e.run ?? 1) === intent.run);
+          const prompt = await runtime.store.readRunPrompt(task, intent.run) ??
+            await runtime.store.readText(runtime.store.taskDir(task.slug) + "/prompt.md", "");
+          state = { ...state, review: { ...run, taskId: task.id, run: intent.run, brief: task.brief ?? task.title, prompt, events, input: false } };
+          break;
+        }
         case "allow": {
-          const task = await actions.allowWork(intent.id);
+          const task = await actions.allowWork(intent.id, { decisionId: intent.decisionId ?? null });
           setFlash(
             task.live
               ? "allowed · " + ref(intent.id) + " continues in the same run"
@@ -105,7 +113,7 @@ export function createApp(runtime, opts = {}) {
           break;
         }
         case "reject": {
-          await actions.rejectWork(intent.id);
+          await actions.rejectWork(intent.id, { decisionId: intent.decisionId ?? null });
           setFlash(
             "declined · " + ref(intent.id) + " continues with the request withdrawn",
             "warn"
@@ -129,7 +137,7 @@ export function createApp(runtime, opts = {}) {
         }
         case "note": {
           await actions.noteWork(intent.id, { note: intent.text });
-          setFlash("note kept on " + ref(intent.id) + " · every later run carries it");
+          setFlash("note saved on " + ref(intent.id) + " · next run receives it; current run unchanged");
           break;
         }
         case "sendback": {
@@ -144,17 +152,12 @@ export function createApp(runtime, opts = {}) {
         }
         case "accept": {
           await actions.closeWork(intent.id);
-          setFlash("accepted " + ref(intent.id) + " · the changes stay in the working tree");
+          setFlash("accepted " + ref(intent.id) + " · task closed; no new execution started");
           break;
         }
         case "drop": {
           await actions.closeWork(intent.id);
           setFlash("dropped " + ref(intent.id) + " · kept in closed with its whole run history", "warn");
-          break;
-        }
-        case "cancel": {
-          await actions.cancelWork(intent.id);
-          setFlash("cancelling " + ref(intent.id) + " · the run stops, the task stays", "warn");
           break;
         }
         case "rerun": {

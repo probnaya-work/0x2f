@@ -35,7 +35,11 @@ function fakeNode() {
 async function startTestServer() {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-api-"));
   const node = fakeNode();
-  const runtime = createRuntime(base, { node });
+  // This is an inert execution node, so pin native availability as a fixture
+  // rather than depending on a developer's installed Claude binary. Inherit
+  // later withFakeBin changes for the tests that select other providers.
+  const env = Object.assign(Object.create(process.env), { CLAUDE_BIN: process.execPath });
+  const runtime = createRuntime(base, { node, env });
   const handle = await startServer(base, 0, {
     runtime,
     interval: 20,
@@ -165,6 +169,36 @@ test("POST /api/tasks/:id/allow and /reject resume via the shared action; guards
   }
 });
 
+test("permission HTTP actions refuse stale or missing displayed decision IDs", async () => {
+  const { base, runtime, handle } = await startTestServer();
+  try {
+    for (const action of ["allow", "reject"]) {
+      const task = await runtime.actions.createWork({ brief: "Synthetic live permission" });
+      const old = { type: "permission", live: true, tool: "Edit", requestId: 100, decisionId: "shown-" + action };
+      await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: old });
+      const shown = await apiFetch(`${handle.url}/api/tasks/${task.id}`).then(r => r.json());
+      const current = { ...old, decisionId: "newer-" + action };
+      await runtime.store.updateTask({ ...task, pid: process.pid, status: "needs_you", blockedOn: current });
+      const decisionFile = path.join(runtime.store.taskDir(task.slug), "permission.json");
+      for (const body of [undefined, {}, { decisionId: shown.blockedOn.decisionId }]) {
+        const response = await postJson(`${handle.url}/api/tasks/${task.id}/${action}`, body);
+        assert.equal(response.status, 409);
+        assert.match((await response.json()).error, /permission request changed/);
+        await assert.rejects(fs.access(decisionFile), { code: "ENOENT" });
+        assert.equal((await runtime.store.findTask(task.id)).blockedOn.decisionId, current.decisionId);
+      }
+      const response = await postJson(`${handle.url}/api/tasks/${task.id}/${action}`, { decisionId: current.decisionId });
+      assert.equal(response.status, 202);
+      const decision = JSON.parse(await fs.readFile(decisionFile, "utf8"));
+      assert.equal(decision.decisionId, current.decisionId);
+      assert.equal(decision.grant, action);
+    }
+  } finally {
+    await handle.close();
+    await fs.rm(base, { recursive: true, force: true });
+  }
+});
+
 test("POST /api/tasks/:id/close moves the task to done", async () => {
   const { base, runtime, handle } = await startTestServer();
   try {
@@ -255,7 +289,7 @@ test("GET / serves the 0x2F Web shell and its module assets", async () => {
     assert.match(html, /<script type="module" src="\/app\/app.js">/);
     assert.match(html, /0x2F/);
 
-    for (const path of ["/app/app.js", "/app/ledger.mjs", "/app/sound.mjs", "/app/sound-policy.mjs", "/app/app.css", "/app/e2e.mjs", "/app/remote.mjs", "/app/pair.mjs", "/app/pair.css"]) {
+    for (const path of ["/app/theme.js", "/app/theme.css", "/app/app.js", "/app/ledger.mjs", "/app/sound.mjs", "/app/sound-policy.mjs", "/app/app.css", "/app/e2e.mjs", "/app/remote.mjs", "/app/pair.mjs", "/app/pair.css"]) {
       const asset = await apiFetch(handle.url + path);
       assert.equal(asset.status, 200, path);
       assert.match(asset.headers.get("content-type"), /javascript|text\/css/);
@@ -510,11 +544,6 @@ test("GET /api/providers lists the registry (default first) with normalized desc
     assert.equal(codex.capabilities.supportsStructuredEvents, true);
     assert.equal(codex.capabilities.supportsFileChanges, false);
     assert.equal(codex.capabilities.supportsPermissionRequests, false);
-    const opencode = providers.find(p => p.id === "opencode");
-    assert.equal(opencode.displayName, "OpenCode");
-    assert.equal(opencode.integrationType, "acp");
-    assert.equal(opencode.capabilities.supportsResume, true);
-    assert.equal(opencode.capabilities.supportsStreaming, true);
     // No vendor internals leak through the API.
     for (const p of providers) {
       assert.deepEqual(

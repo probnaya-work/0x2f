@@ -211,9 +211,9 @@ Normalized outcome shapes (`src/core/lifecycle.mjs`):
   v1 over stdio — `initialize`, `session/new`, `session/load`,
   `session/prompt`, `session/request_permission` (interactive → live
   needs_you; `deny`/`approve` → headless auto-resolution), cancel.
-  `opencode.mjs` registers OpenCode's `opencode acp` endpoint as a built-in
-  ACP provider, so it is available in every workspace; manifests use the same
-  adapter for project-local ACP agents.
+  OpenCode is registered as a built-in ACP descriptor (`opencode acp`), using
+  the existing protocol adapter. Older workspace manifests named `opencode`
+  continue to take precedence over that default.
 - **Command** (`command.mjs`): a headless argv invocation; exit 0 + stdout →
   ready (honoring the decision protocol), non-zero → failed. Nothing else is
   inferred.
@@ -496,3 +496,31 @@ never committed.
 - **No cancellation surface in the CLI/API.** The node's
   `cancelExecution` and providers' `cancel()` exist as the contract seam; no
   client exposes them yet.
+
+## Review and intervention fidelity (2026-11-01)
+
+The five lifecycle states are unchanged. READY offers a result for review,
+not a check-success assertion. The TUI's `r` reader loads `getRun`, the full
+original brief and exact saved run input, with run selection and scrolling.
+It stays bound to its task across ledger reordering. Provider Verification
+prose is attributed as a claim; a command event alone is not a successful
+check receipt. CHANGES remains a current HEAD-relative diff, not a per-run
+snapshot. Notes still apply only to future runs.
+
+Remote permission projection carries `scopeIncomplete` and a bounded notice.
+`core/permission-scope.mjs` checks recorded parameters against what the
+bounded view retains. Missing raw input alone does not refuse a sufficiently
+described bounded request; hidden operation parameters, truncation or an
+ambiguous target require local review. The relay's ALLOW passes an internal
+`requireRemoteScope` option; the shared locked grant action reassesses fresh
+state before writing permission or resuming. Occurrence IDs, pairing,
+freshness and idempotency keep their existing contracts. These fields are a
+remote projection, not a task.json layout change or a safety proof.
+Mutation acknowledgements pass through that same projection before caching
+and encryption. Legacy cached task replies are projected on replay without
+reexecuting the command, so a note response cannot bypass raw-input removal.
+
+Execution admission observes a terminal run's POSIX process group for up to
+two seconds even if the worker exited. This accommodates short-lived harness
+descendants without signaling saved PIDs or permitting overlapping work.
+Longer-lived groups still refuse retry with a wait/inspect explanation.

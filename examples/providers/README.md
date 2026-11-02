@@ -4,16 +4,24 @@ Copy any file below into your workspace's `.work/providers/` to add a
 harness that 0x2F did not ship. Each file is one provider; no source changes,
 no restart of anything but the CLI/server process.
 
-Only invocations verified against official documentation are listed. Where an
-agent needs authentication, that is the user's job **before** the run (see
-the notes) — 0x2F never stores or enters credentials.
+These examples use vendor-documented invocations. An example does not prove
+that its executable, authorization or real end-to-end behavior is available
+on this machine. See [the compatibility matrix](../../docs/harness-compatibility.md).
+Pre-authenticate before a run; 0x2F never stores or enters credentials.
 
 ---
 
 ## `cursor.json` — Cursor CLI (ACP)
 
-Verified: `agent acp` starts Cursor CLI in ACP mode
-(`cursor.com/docs/cli/acp`).
+Documented invocation: `agent acp` ([Cursor ACP documentation](https://cursor.com/docs/cli/acp)).
+The 2026-11-01 live qualification passed **Codex → Cursor → Codex** on one task
+using Cursor Agent **2026.10.22-27dcf5f** and the corrected installed 0x2F package.
+ID, files, context and results survived reopening. Permissions/native resume were
+**not exercised**. See [the live report](../../docs/qualification/2026-11-01/cursor-live/REPORT.md).
+Earlier missing-executable/auth blockers remain in the retained preflight reports.
+The editor CLI's `cursor agent` entry point may install/update the separate Agent;
+it is not a read-only availability probe. Put the real `agent` on PATH, or use
+its discovered absolute executable path in your local manifest.
 
 ```json
 {
@@ -35,12 +43,19 @@ Notes:
   them, equivalent to DSH headless semantics). A Cursor agent that needs
   tool approval will otherwise see its requests surface as NEEDS YOU.
 
-## `opencode.json` — (removed: OpenCode is now a built-in ACP provider)
+## `opencode.json` — OpenCode (ACP)
 
-OpenCode no longer needs a per-workspace manifest. `opencode` is registered
-globally by 0x2F and uses the same generic ACP adapter with `opencode acp`.
-A `.work/providers/*.json` manifest with `"id": "opencode"` is rejected as
-a redefinition of a built-in provider.
+Verified: `opencode acp` starts OpenCode as an ACP-compatible subprocess
+(`opencode.ai/docs/acp`).
+
+```json
+{
+  "id": "opencode",
+  "displayName": "OpenCode",
+  "transport": "acp",
+  "command": ["opencode", "acp"]
+}
+```
 
 ## `codex-acp.json` — (removed: Codex is now a built-in native provider)
 
@@ -91,5 +106,3 @@ never a shell) with the workspace as its working directory.
 - **Gemini CLI** is a built-in native provider (`gemini -p --skip-trust -o
   stream-json` + `--resume <uuid>`) — no manifest needed; see
   `docs/gemini-capability-map.md` for its verified capability boundaries.
-- **OpenCode** is a built-in ACP provider (`opencode acp`) — no manifest
-  needed. It keeps OpenCode's normal global and project configuration.

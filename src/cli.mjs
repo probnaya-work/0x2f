@@ -23,6 +23,7 @@ import { launchUi } from "./ui.mjs";
 import { runTui } from "./tui/index.mjs";
 import { pairDevice, pairOff } from "./relay/pair.mjs";
 import { formatCode } from "./web/e2e.mjs";
+import { eventsForRun, toSteps } from "./web/ledger.mjs";
 import { unavailableMessage } from "./providers/index.mjs";
 
 // The installed package version — `2f version` / `2f --version` / `2f -v`.
@@ -49,8 +50,7 @@ Commands:
   2f allow <id>     grant the permission a task is blocked on
   2f reject <id>    decline the requested change
   2f answer <id> <answer>   answer a NEEDS YOU decision (not allow/reject)
-  2f cancel <id>    stop the active run; the task and its history stay
-  2f close <id>      stop working on a task; moves it to DONE
+  2f close <id>      move to DONE; does not cancel the provider
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this Mac for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
@@ -78,33 +78,21 @@ Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 function parseFlags(args) {
   const rest = [];
   const flags = {};
+  const valueFlags = new Set(["provider", "relay", "client", "run", "port"]);
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === "--provider") {
-      flags.provider = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--provider=")) {
-      flags.provider = arg.slice("--provider=".length);
-    } else if (arg === "--relay") {
-      flags.relay = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--relay=")) {
-      flags.relay = arg.slice("--relay=".length);
-    } else if (arg === "--client") {
-      flags.client = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--client=")) {
-      flags.client = arg.slice("--client=".length);
-    } else if (arg === "--run") {
-      flags.run = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--run=")) {
-      flags.run = arg.slice("--run=".length);
-    } else if (arg === "--port") {
-      flags.port = args[i + 1];
-      i++;
-    } else if (typeof arg === "string" && arg.startsWith("--port=")) {
-      flags.port = arg.slice("--port=".length);
+    if (arg === "--") {
+      rest.push(...args.slice(i + 1));
+      break;
+    }
+    const equal = arg.indexOf("=");
+    const name = arg.startsWith("--") ? arg.slice(2, equal < 0 ? undefined : equal) : "";
+    if (valueFlags.has(name)) {
+      const value = equal < 0 ? args[++i] : arg.slice(equal + 1);
+      if (typeof value !== "string" || !value.trim() || value.startsWith("--")) {
+        throw new Error(name === "run" ? "Usage: 2f open <id> --run <n>" : `Option --${name} requires a value.`);
+      }
+      flags[name] = value;
     } else if (arg === "--off") {
       flags.off = true;
     } else if (arg === "--lan") {
@@ -139,7 +127,6 @@ function relativeFile(base, file) {
 async function openTask(id, base) {
   const runtime = createRuntime(base);
   const detail = await runtime.actions.getWork(id);
-  const log = await runtime.store.readTaskLog(detail);
 
   console.log(`#${String(detail.id).padStart(3, "0")} ${detail.title}\n`);
 
@@ -163,7 +150,7 @@ async function openTask(id, base) {
         console.log("  (some options cannot be mapped to ALLOW/REJECT — inspect above)");
       }
     } else {
-      console.log(`Agent wants to modify:\n  ${relativeFile(base, blocked.file) ?? "?"}\n`);
+      console.log(`Requested operation: ${blocked.tool ?? "not recorded"}\nTarget: ${relativeFile(base, blocked.file) ?? "not recorded"}\n`);
       if (blocked.plannedChange) {
         console.log(`Planned change:\n  ${blocked.plannedChange}\n`);
       }
@@ -201,15 +188,21 @@ async function openTask(id, base) {
   // run); this is inspection, never evaluation.
   console.log(renderRuns(detail.runs ?? []));
 
-  if (detail.result.trim()) {
-    console.log(detail.result.trim());
-  } else if (detail.error) {
-    console.log(detail.error);
+  // The task-level result survives reruns. Read the saved current run's
+  // result instead, just as explicit run inspection does (including legacy).
+  const result = await runtime.store.readRunResult(detail, currentRun);
+  if (result.trim()) {
+    console.log(result.trim());
   } else {
-    console.log("No final result yet.");
-    if (log.trim()) {
-      console.log("\n--- run.log ---\n");
-      console.log(log.trim());
+    console.log("No written result for this run.");
+    if (currentRun.error) {
+      console.log(currentRun.error);
+    } else {
+      const events = eventsForRun(await runtime.store.readEvents(detail.slug), currentRun.run);
+      const trace = toSteps(detail, events, { base });
+      const step = trace.steps.at(-1);
+      const activity = trace.activity || (step && `${step.verb} ${step.arg}`.trim());
+      console.log(activity ? `\nProgress: ${activity}` : "\nNo activity reported for this run yet.");
     }
   }
 }
@@ -319,6 +312,7 @@ async function main() {
     const task = await runtime.actions.createWork({ brief, provider });
 
     console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
+    console.log(`Open: 2f open ${task.id}`);
     console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
     return;
   }
@@ -328,7 +322,7 @@ async function main() {
     const { rest, flags } = parseFlags(args);
     const id = Number(rest[0]);
     if (!Number.isFinite(id)) throw new Error("Usage: 2f open <id> [--run <n>]");
-    if (flags.run !== undefined) {
+    if ("run" in flags) {
       const runNumber = Number(flags.run);
       if (!Number.isFinite(runNumber)) throw new Error("Usage: 2f open <id> --run <n>");
       await openRun(id, runNumber, base);
@@ -424,15 +418,6 @@ async function main() {
     return;
   }
 
-  if (command === "cancel") {
-    await requireProject(base);
-    const id = Number(args[0]);
-    if (!Number.isFinite(id)) throw new Error("Usage: 2f cancel <id>");
-    await createRuntime(base).actions.cancelWork(id);
-    console.log(`Cancelling #${id}. The run will stop; the task stays.`);
-    return;
-  }
-
   if (command === "close") {
     await requireProject(base);
     const id = Number(args[0]);
@@ -477,6 +462,7 @@ async function main() {
 
     await runtime.actions.closeWork(id);
     console.log(`Closed #${id}.`);
+    console.log("Closing does not cancel the provider. An active run may keep running or wait for permission.");
     return;
   }
 

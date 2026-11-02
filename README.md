@@ -13,7 +13,8 @@ agent sessions.**
 
 `0x2F` is hex for the ASCII `/` (47). The CLI is `2f`.
 
-Node.js ≥ 20, one dependency (`ws`), no build step, local-first.
+Node.js ≥ 20, three dependencies (`ws`, `@noble/ciphers`, `@noble/hashes`),
+no build step, local-first.
 
 ```text
                           0x2F
@@ -47,15 +48,20 @@ what the agent is doing, surfaces decisions when human attention is required,
 and lets you intervene — without treating every agent session as a separate
 piece of work.
 
+**Current release: [0.2.0](https://github.com/probnaya-work/0x2f/releases/tag/v0.2.0).**
+[Quickstart](docs/quickstart.md) · [Commands and troubleshooting](docs/usage.md) ·
+[Observed harness compatibility](docs/harness-compatibility.md) ·
+[Release scope and verification](docs/releases/0.2.0.md) · [Roadmap](docs/roadmap.md).
+Supported execution hosts are macOS and Linux/POSIX with Node.js ≥20; the
+current release is checked on macOS arm64 and Lenovo/Linux x86_64. Windows
+execution and an operated remote execution service are not qualified.
+
 ## Why it exists
 
-A coding harness gives you an agent session: you start one, watch it, and
-either accept its output or start another session that has forgotten
-everything. 0x2F inverts that. The **task** is the object — a description of
-engineering work that persists in the repository. Agent sessions are
-disposable execution underneath it. A task can be run again through a
-different harness, corrected with notes, and continued with prior results in
-context — because the task, not the session, is what 0x2F keeps.
+Coding harnesses have their own session history and resume capabilities. 0x2F
+keeps a separate task record across those harnesses: the original request,
+constraints, decisions, run inputs and saved results. Continue the same work
+through another supported harness without manually assembling the handoff.
 
 ## Install
 
@@ -63,14 +69,14 @@ Requires **Node.js ≥ 20** and at least one coding harness on your PATH:
 [Claude Code](https://code.claude.com/docs) (`claude`) is the built-in
 default, [Codex](https://github.com/openai/codex) (`codex`),
 [DeepSeek Harness](https://github.com/deepseek-ai/DeepSeek-Harness) (`dsh`)
-[Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`), and
-[OpenCode](https://opencode.ai/) (`opencode`, through ACP) are also built in.
-Any other ACP-compatible agent or headless executable can be added per project
-(see [Providers](#providers)). 0x2F itself is one small package — `ws` is its
-only dependency, no build step, no accounts, no daemon.
+and [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`)
+are also built in, and any ACP-compatible agent or headless executable
+can be added per project (see [Providers](#providers)). 0x2F itself is one
+small package with WebSocket and cryptography dependencies, no build step,
+no accounts, no daemon.
 
 ```bash
-npm install -g 0x2f        # the `2f` command lands on your PATH
+npm install -g 0x2f@0.2.0  # the `2f` command lands on your PATH
 ```
 
 `npx --yes 0x2f ...` works for a one-off, but install globally for regular
@@ -84,10 +90,16 @@ Inside the repository you want to work on:
 2f init                          # create .work/ with project.md and rules.md
 2f new "Investigate why retries restart the whole run"
 2f                               # list tasks
-2f open 1                        # run detail, history, result
+2f open 1                        # use the actual ID printed by new
 2f tui                           # open the terminal client (full screen)
 2f ui                            # open the Web UI (starts the local runtime)
 ```
+
+Creation immediately prints the persisted ID and its exact reopen command,
+for example `Created #014: …` followed by `Open: 2f open 14`. Reopen it from
+a separate CLI process; inspect a run with `2f open 14 --run 1`, or continue
+the same task with `2f rerun 14 --provider opencode` once its run has ended.
+See the [verified Codex → OpenCode example](docs/task-continuity.md).
 
 To run a task with the built-in Codex provider, install the
 [Codex CLI](https://github.com/openai/codex), sign in, and select it explicitly:
@@ -101,6 +113,28 @@ codex login
 Codex runs headlessly with workspace-write sandboxing by default and supports
 same-thread resume. Its structured-event and permission boundaries are
 documented in [`docs/codex-capability-map.md`](docs/codex-capability-map.md).
+
+Codex normally keeps your CLI configuration and authentication. If that
+configuration forces a model unavailable to your account, opt in to the
+installed CLI default for one invocation:
+
+```bash
+CODEX_IGNORE_USER_CONFIG=1 2f new "Investigate a CLI bug" --provider codex
+```
+
+This skips the entire Codex user config for that invocation; authentication
+still uses Codex’s existing storage. It does not edit settings, force a model,
+or retry a failed execution. The same opt-in applies to Codex reruns/resumes.
+
+OpenCode is also built in through `opencode acp`:
+
+```bash
+2f providers
+2f new "Inspect a CLI bug" --provider opencode
+```
+
+Configure an available model in OpenCode itself. Existing workspace OpenCode
+manifests retain their explicit command and permission settings.
 
 To run a task with the built-in Gemini CLI provider, install the
 [Gemini CLI](https://github.com/google-gemini/gemini-cli), authenticate once
@@ -118,19 +152,6 @@ file edits (`--approval-mode auto_edit`; override with `GEMINI_APPROVAL_MODE`),
 and supports same-session resume by UUID. Its structured-event, permission
 and resume boundaries are documented in
 [`docs/gemini-capability-map.md`](docs/gemini-capability-map.md).
-
-OpenCode uses its built-in ACP server and is available in every workspace
-without a provider manifest:
-
-```bash
-opencode                            # authenticate/configure OpenCode itself
-2f providers                       # confirm: opencode  acp  yes
-2f new "Audit the auth flow" --provider opencode
-```
-
-0x2F starts `opencode acp` in the project directory. OpenCode resolves its
-normal global and project configuration there, including models, agents,
-commands, skills, plugins, permissions, rules, and MCP servers.
 
 `2f init` creates `.work/` with `project.md`, `rules.md`, `knowledge.md`,
 `decisions.md` and `providers/` — edit `project.md` and `rules.md` once;
@@ -185,6 +206,11 @@ interrupting you for work that did not need you.
 attention — a wrong NEEDS YOU, a non-resumable one, a FAILED or READY run you
 no longer want. It never resumes the provider and never starts a new
 execution.
+
+Closing does not cancel an active provider. Let an active run finish before
+closing it; a later permission request on a closed task can otherwise leave
+the provider waiting. If a local POSIX worker crashes but its execution
+processes survive, rerun refuses until that previous process group exits.
 
 ## One task, many runs
 
@@ -243,8 +269,9 @@ The keymap is the surface's own, not a file manager's:
 | `tab` | filter — all · needs you · failed · ready · working |
 | `/` | search by title, brief or number |
 | `↵` | the one action this task is waiting for (shown bottom-left) |
-| `x` | the alternative — reject · save only · send back · drop · cancel a working run (`↵` confirms) |
+| `x` | the alternative — reject · save only · send back · drop |
 | `d` | changes — the real diff of the working tree, or the planned write |
+| `r` | read the full request, saved result and reported checks; `[` / `]` selects a run, `i` reads its saved input, `j` / `k` scrolls, `g` / `G` jumps to either end, `esc` returns |
 | `c` | note or correct — kept on the task, carried into every later run |
 | `p` | point the next run at another provider |
 | `t` | expand the trace of the current run |
@@ -256,6 +283,19 @@ ANSWER & CONTINUE, on a READY task it ACCEPTS, on a FAILED one it RETRIES. The
 alternative under `x` is the other half of the same pair. Both go through the
 shared actions, so the TUI can never allow something the CLI would refuse.
 
+READY means a result is available for review. `r` reads the provider's saved
+Evidence/Verification and their limitations, including investigations with no
+file changes. Provider-reported checks and observed command invocations are
+distinct from a separately recorded successful check receipt. `d` shows the
+current working-tree diff at viewing time; later edits may be included.
+
+Notes are saved for the next run; they do not steer an already-running worker.
+On a phone, shortened commands, hidden edit parameters and ambiguous targets
+may require review on the computer. Incomplete remote scope disables ALLOW
+and the host also refuses that grant; REJECT and local inspection remain
+available. A completed worker's short-lived descendants get a bounded drain
+interval before retry; a still-existing execution group continues to block it.
+
 ## Desktop + mobile
 
 The CLI, the TUI and the Web are three surfaces over the same core:
@@ -265,11 +305,14 @@ The CLI, the TUI and the Web are three surfaces over the same core:
 ```
 
 `2f ui` behaves like opening a local application: if a 0x2F runtime is already
-healthy on `http://127.0.0.1:4242` (localhost only) it reuses it; otherwise it
-starts the runtime in the background, waits until it is healthy, and opens the
+healthy for this workspace on `http://127.0.0.1:4242` (localhost only) it
+reuses it; otherwise it starts the runtime in the background, waits until it is healthy, and opens the
 UI. Runtime output lands in `.work/ui.log`. The browser calls the same shared
 actions over a local HTTP/SSE API and subscribes to the same normalized
 events.
+
+If that port serves another workspace, use `2f ui <port>` to open this one on
+a different port.
 
 Control 0x2F from your phone on the **same Wi-Fi** — the Mac keeps running
 the work; the phone is a compact control surface:
@@ -361,7 +404,7 @@ to the install.
 | Integration | What it is | Use |
 | --- | --- | --- |
 | **Native** | Deep adapter for one harness's specific capabilities | `claude-code` (permissions → `needs_you` → same-session resume), `codex` (structured exec events + thread resume), `deepseek-harness`, `gemini` (structured stream events + UUID session resume) |
-| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Built-in OpenCode; any other ACP-compatible agent configured by manifest |
+| **ACP** | One generic provider speaking the [Agent Client Protocol](https://agentclientprotocol.com) v1 over stdio | Any ACP-compatible agent — Cursor, OpenCode — configured by manifest |
 | **Command** | One generic provider for headless executables | Any CLI that takes a prompt and prints a result — configured by manifest |
 
 `claude-code`, `codex`, `deepseek-harness`, `gemini`, and `opencode` are built in.
@@ -381,8 +424,11 @@ ACP manifests may set `"permissions"`: `"interactive"` (default — a permission
 request pauses the run and asks you), `"deny"`, or `"approve"` (headless
 auto-resolution). Command manifests must pass the task through the `{prompt}`
 placeholder. Commands are spawned as argv arrays, never through a shell.
-Verified example manifests live in [`examples/providers/`](https://github.com/probnaya-work/0x2f/blob/main/examples/providers/README.md);
+Vendor-documented example manifests live in [`examples/providers/`](https://github.com/probnaya-work/0x2f/blob/main/examples/providers/README.md);
 `2f providers` lists every provider with its integration type and availability.
+Availability is separate from authenticated execution and scenario qualification;
+see the [observed compatibility matrix](docs/harness-compatibility.md), including
+the real Codex → Cursor → Codex task handoff and separately retained setup preflights.
 
 By default `2f new` uses the configured routing default. When it is `auto`,
 0x2F picks the harness deterministically: available providers first, then the
@@ -426,7 +472,7 @@ Execution node     local machine (spawns the detached worker)
 Provider           native · ACP · command
     │
     ▼
-Coding harness     claude-code · codex · dsh · gemini · opencode · cursor · any command
+Coding harness     claude-code · codex · dsh · gemini · cursor · any command
 ```
 
 No surface implements lifecycle or provider logic — the CLI, the terminal
@@ -460,9 +506,9 @@ control layer, not remote execution.
 
 ## Current limitations
 
-- **Execution is local-only.** There is no remote/mini-PC node yet. Remote
+- **Execution is local-only.** There is no remote execution-node transport or operated ThinkCentre host yet. Running 0x2F directly on a Linux machine is local execution on that host. Remote
   control is an outbound control layer, not remote execution.
-- **Remote control is v1.** No push notifications (the phone works while the
+- **Remote control has limits.** No push notifications (the phone works while the
   app is open), no offline command queue by design; one phone at a time per
   Mac (re-pairing revokes the previous phone's session).
 - **AUTO is deterministic policy routing**, not semantic selection — and there
@@ -473,12 +519,17 @@ control layer, not remote execution.
 - **No evaluation.** Run history is for inspection — no scores, no winners,
   no recommendations.
 
+057 already has an external, read-only adapter for `.work/tasks`; a new
+end-to-end 057 desktop/phone observation scenario is not part of 0.2.0.
+See the [roadmap and actual hosting status](docs/roadmap.md).
+
 ## Development
 
-No dependencies, no build step — the repo runs as-is:
+Install the dependencies once; there is no build step:
 
 ```bash
-npm test          # the test suite (node --test, 300+ tests)
+npm install       # ws, @noble/ciphers, @noble/hashes
+npm test          # the test suite (node --test, including real PTY regression)
 npm run check     # syntax-check every source and test file
 npm start         # run the CLI: node src/cli.mjs
 ```

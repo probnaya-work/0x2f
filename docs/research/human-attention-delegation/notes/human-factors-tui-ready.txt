@@ -1,0 +1,13 @@
+ #001  Inspect the CSV importer.                                                                                                      READY
+ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ TASK     open 0m · 1 run · 0 notes
+ RUN 1    CC CLAUDE CODE         0:00  complete · awaiting you
+ ON       research-fixture · 0x2f-human-factors-Kmxt6B
+
+ TRACE    run 1 · 0 events
+   run has not reported yet
+
+ READY   nothing committed · the changes are in the working tree
+   no file changes reported
+
+   ↵ ACCEPT   x SEND BACK   c NOTE

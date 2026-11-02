@@ -137,16 +137,25 @@ export function createRelayServer({
   // --- persistence (tokens, sessions, device identity — NO task content) ----
 
   let saveTimer = null;
+  let saveChain = Promise.resolve();
+  let closePromise = null;
+  let closing = false;
 
   function scheduleSave() {
-    if (!dataFile || saveTimer) return;
+    if (closing || !dataFile || saveTimer) return;
     saveTimer = setTimeout(() => {
       saveTimer = null;
       flushSave().catch(() => {});
     }, saveDelayMs);
   }
 
-  async function flushSave() {
+  function flushSave() {
+    // Include a debounced write already in flight in the shutdown barrier.
+    saveChain = saveChain.catch(() => {}).then(persistState);
+    return saveChain;
+  }
+
+  async function persistState() {
     if (!dataFile) return;
     const snapshot = {
       version: 3,
@@ -753,20 +762,17 @@ export function createRelayServer({
   }
   server.on("upgrade", handleUpgrade);
 
-  async function closeRelay() {
+  function closeRelay() {
+    if (closePromise) return closePromise;
+    closing = true;
     clearInterval(pingTimer);
     if (saveTimer) {
       clearTimeout(saveTimer);
       saveTimer = null;
     }
-    try {
-      await flushSave();
-    } catch {
-      /* best effort */
-    }
-    for (const device of devices.values()) {
+    for (const socket of wss.clients) {
       try {
-        device.ws?.close();
+        socket.close();
       } catch {
         /* already closing */
       }
@@ -774,8 +780,20 @@ export function createRelayServer({
     for (const set of sseClients.values()) {
       for (const res of set) res.destroy();
     }
-    wss.close();
-    await new Promise(resolve => server.close(resolve));
+    closePromise = (async () => {
+      await Promise.all([
+        new Promise(resolve => wss.close(resolve)),
+        new Promise(resolve => server.close(resolve))
+      ]);
+      // Socket close handlers update availability. Persist only after they
+      // finish, without leaving a new debounce timer behind during shutdown.
+      try {
+        await flushSave();
+      } catch {
+        /* best effort */
+      }
+    })();
+    return closePromise;
   }
 
   async function start() {

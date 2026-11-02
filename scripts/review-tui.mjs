@@ -275,7 +275,7 @@ async function scenarioJourney() {
 
     // ALLOW -> READY.
     session.press("enter");
-    await session.waitForText(/complete · awaiting you/, { label: "the ready detail" });
+    await session.waitForText(/result available · review/, { label: "the ready detail" });
     await capture(session, "ready-120x36", { state: "ready", mode: "work" });
 
     // CHANGES / the real diff.
@@ -283,7 +283,7 @@ async function scenarioJourney() {
     await session.waitForText(/working tree vs HEAD/, { label: "the loaded diff" });
     await capture(session, "diff-120x36", { state: "ready-diff", mode: "diff" });
     session.press("escape");
-    await session.waitForText(/complete · awaiting you/, { label: "back to the work frame" });
+    await session.waitForText(/result available · review/, { label: "back to the work frame" });
 
     // SEND BACK -> DECISION.
     session.press("x");
@@ -425,7 +425,7 @@ const EXPECT = {
   "help-120x36": { cols: 120, rows: 36, mode: "help", landmarks: ["KEYS", "a TASK is permanent", "any key"], focus: 0 },
   "working-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["WORKING", "executing"], focus: 1 },
   "needs-you-permission-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · PERMISSION", "ALLOW", "REJECT", "src/app.ts"], focus: 1 },
-  "ready-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["complete · awaiting you", "ACCEPT", "SEND BACK"], focus: 1 },
+  "ready-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["result available · review", "ACCEPT", "SEND BACK"], focus: 1 },
   "diff-120x36": { cols: 120, rows: 36, mode: "diff", landmarks: ["CHANGES", "working tree vs HEAD", "retry with backoff"], focus: 0 },
   "decision-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · DECISION", "ANSWER & CONTINUE", "503 policy"], focus: 1 },
   "failed-auth-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["FAILED", "authentication is no longer valid", "RETRY"], focus: 1 },
