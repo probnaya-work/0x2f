@@ -172,11 +172,19 @@ Apple описывает отсутствие camera/microphone в [iPhone Mirro
 | 057 Display Mobile | `fix/scanner-recovery-20261102`, база `17d2ff0`; `41ca84f` diagnostic/recovery candidate и physical evidence; `ff5e011` сохраняет исходные project UUID, итоговый project diff — 6 строк. Shared renderer pinned `c5a883a`, без tracked изменений dependency |
 | 0x2F site | `integration/engineering-notes-20261102`, база `215325e`; `61ed1f4` separate unreleased scope и HTTP bootstrap limitation |
 
-Состояние push/PR дополняется после review payload. Публикуются только source/test/docs;
-внешний private evidence directory не является частью ни одной ветки. Ранее normal push был
-отклонён automatic approval review как потенциальный private export, несмотря на исходную
-инструкцию пользователя push безопасного прогресса; следующая попытка review timed out.
-Нельзя представлять локальные commits как уже доступные GitHub PR.
+Все четыре ветки запушены штатно, без force. Созданы и прикреплены к чату draft PR:
+
+- [0x2F #5 — execution ownership и reviewable evidence](https://github.com/probnaya-work/0x2f/pull/5).
+- [057 #1 — remote execution / process generations](https://github.com/probnaya-work/057/pull/1),
+  target — существующая engineering integration branch.
+- [Display #1 — physical camera diagnosis](https://github.com/probnaya-work/057-display-mobile/pull/1),
+  target — существующая mobile integration branch; diagnostic preview не готов к release promotion.
+- [Site #2 — unreleased engineering scope](https://github.com/probnaya-work/0x2f-site/pull/2).
+
+Публикуются только source/test/docs/deploy; внешний private evidence directory не включён.
+Предыдущий отказ automatic approval review разрешён после проверки payload и исходной
+авторизации пользователя: normal push прошёл. GitHub connector вернул 403 на создание PR;
+они созданы штатным gh с существующей авторизацией. Merge, release и deployment не выполнялись.
 
 ## Оставшиеся release gates и следующий scope
 
