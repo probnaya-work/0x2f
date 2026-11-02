@@ -1,0 +1,26 @@
+{
+  "kind": "deterministic-source-projection-probe",
+  "humanParticipants": 0,
+  "realProviderCalls": 0,
+  "fixtureStartRequestsIntercepted": 1,
+  "readyTui": {
+    "primaryAction": "ACCEPT",
+    "originalBriefPersisted": true,
+    "fullBriefInTuiViewModel": true,
+    "fullBriefVisibleAnywhereInUnclippedDetail": false,
+    "writtenResultAvailableThroughSharedGetWork": true,
+    "writtenResultVisibleAnywhereInUnclippedDetail": false,
+    "verificationVisibleAnywhereInUnclippedDetail": false
+  },
+  "remotePermission": {
+    "fileProjected": "deploy.sh",
+    "fullRawInputAvailable": false,
+    "plannedChangeLengthAfterProjection": 201,
+    "consequentialTailVisible": false
+  },
+  "classification": {
+    "noChecks": "ready",
+    "integrationNotRun": "ready"
+  },
+  "caveat": "Mechanical information availability only; no measured human time, comprehension, trust, or prevalence."
+}
