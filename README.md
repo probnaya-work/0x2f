@@ -5,6 +5,8 @@ Independent Computational Laboratory
 
 # 0x2F
 
+> Development branch after published **0.2.0**: [execution/isolation/context contracts](docs/engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](docs/engineering/2026-11-02/OPERATIONS.md), and [engineering report](docs/engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+
 0x2F is a local work router for coding agents. Give it engineering work —
 "Inspect why retries restart the whole run" — and it routes the task to a
 coding harness on your machine, runs it in the background, and tracks it

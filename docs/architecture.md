@@ -1,5 +1,7 @@
 # 0x2F — Architecture
 
+> Development branch after published **0.2.0**: [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](engineering/2026-11-02/OPERATIONS.md), and [engineering report](engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+
 This document describes 0x2F as it is implemented: the object model, the
 lifecycle, the layers, the surfaces, and the boundaries. It is written from
 the code outward — file references point at the single place each behavior
@@ -483,19 +485,21 @@ never committed.
 
 ## What is deliberately NOT here
 
-- **No remote execution node.** The only node is `local`; the API binds to
-  127.0.0.1. Remote control is a control layer, not execution.
-- **No concurrent runs of one task.** Runs are strictly sequential (no
-  isolated worktrees/sandboxes yet).
+- **No process migration.** Each runtime executes locally and binds its API to
+  127.0.0.1. Candidate `2f on <host>` invokes a separately installed remote CLI
+  over pinned SSH; it does not transfer tasks, files or credentials.
+- **No concurrent runs of one task.** Runs remain sequential. Separate tasks
+  can use isolated Git worktrees; shared execution is serialized. A worktree
+  separates files and is not a security sandbox.
 - **No evaluation.** Run history is inspection — no scores, winners, or
   recommendations.
 - **No semantic routing.** AUTO is deterministic policy routing; no
   automatic failover.
 - **No provider plugin loading.** The registry seam (`register`) exists for a
   future external/native provider package, but nothing loads remote code.
-- **No cancellation surface in the CLI/API.** The node's
-  `cancelExecution` and providers' `cancel()` exist as the contract seam; no
-  client exposes them yet.
+- **No rollback of external effects.** Candidate CLI/API/TUI/Web/phone CANCEL
+  requests stop from the execution owner and preserves partial evidence.
+  It cannot undo actions already completed in another system.
 
 ## Review and intervention fidelity (2026-11-01)
 

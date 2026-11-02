@@ -1,5 +1,7 @@
 # 0x2F — Development
 
+> Development branch after published **0.2.0**: [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](engineering/2026-11-02/OPERATIONS.md), and [engineering report](engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+
 How to work on this repository. For what the pieces *mean*, see
 [`architecture.md`](architecture.md); for the product-level story, the root
 [`README.md`](../README.md).

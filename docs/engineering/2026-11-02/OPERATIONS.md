@@ -1,0 +1,157 @@
+# Candidate operations — after published 0.2.0
+
+These commands require this integration branch, not the registry's 0.2.0.
+Package version deliberately remains 0.2.0; identify a candidate by its source
+commit and tarball SHA256. Do not overwrite a published prefix in place.
+
+## Execution and results
+
+```sh
+2f new "Implement the utility" --provider codex --workspace-mode auto
+2f cancel 1
+2f open 1 --run 1
+2f changes 1 --run 1
+2f rerun 1 --provider opencode
+2f apply 1
+2f accept 1
+2f cleanup 1
+2f restore 1
+```
+
+Clean committed Git roots default to isolated task checkouts. For dirty source,
+explicit `isolated` excludes original dirty files; `shared` includes them and
+serializes 0x2F tasks. Non-Git/unborn/nested projects use shared execution and
+cannot promise a Git patch. Other applications are not locked out of shared
+files. Apply only while external writers are quiescent. The patch describes a
+saved interval; it is not proof of exclusive authorship or completed intent.
+
+CANCEL requests one attempt; wait for FAILED/cancelled and process-group drain
+before retrying. CLOSE leaves execution alone. ACCEPT requires READY; DROP and
+CLOSE preserve different human dispositions. Never infer that cancelling or a
+crash undid a remote action. Inspect external state before explicitly retrying an
+ambiguous action. There is no automatic failover or replay.
+
+## Context and configured checks
+
+Optional `.work/context.json`:
+
+```json
+{"maxChars":128000}
+```
+
+The allowed range is 16,000–1,000,000 characters, not model tokens. Binding input
+that exceeds the budget refuses intact. Each run retains its delivered input,
+context receipt, current project-context revision and references to full results.
+Saving a note during execution only affects the next fresh run. Native resume
+continues provider-owned session state; it is not a fresh-input delivery receipt.
+
+Optional `.work/acceptance.json`:
+
+```json
+{"runOnReady":true,"commands":[{"id":"unit","argv":["node","--test"],"timeoutMs":60000}]}
+```
+
+This is an explicit grant to execute project code as the host OS user after the
+provider reports READY, outside its sandbox. The command plan is frozen before
+launch; edits by that run cannot replace the current plan. Checks get PATH, a
+private empty HOME, LANG and TMPDIR, not the worker's credential environment.
+This environment reduction is not OS containment: local-user code can still
+access files as that user. Up to eight argv commands, each at most five minutes.
+Real outputs, hashes, exit/signal/status and environment keys are retained under
+`runs/N/attempts/<execution-id>/checks/`. Output caps and timeouts are explicit.
+A timed-out check drains the still-owned worker group. Deliberately escaped
+process groups remain an OS containment gap. A passing check never auto-accepts.
+The phone receives bounded receipt metadata/hashes; raw outputs stay on the host.
+
+## Explicit Linux execution host
+
+Keep `.work/hosts.json` private:
+
+```json
+[{"id":"thinkcentre","target":"user@thinkcentre","workspace":"/srv/project","node":"/absolute/node","cli":"/absolute/prefix/node_modules/0x2f/src/cli.mjs","machineId":"<64 lowercase hex characters>"}]
+```
+
+Use an existing trusted SSH key/host key. Run `2f host-identity` on Linux and pin
+its actual id. Then from the controlling workspace:
+
+```sh
+2f hosts
+2f on thinkcentre providers
+2f on thinkcentre status
+2f on thinkcentre new "bounded engineering brief" --provider opencode
+2f on local status
+```
+
+The first read-only SSH probe checks the actual Linux machine-id hash before any
+CLI request is sent. An identity mismatch refuses. It uses strict known-host
+checking, batch authentication and a fresh SSH connection. The actual CLI runs
+on Linux, against its explicit workspace and installed harness environment.
+For a non-interactive SSH environment, point `cli` at a host-owned entry module
+that sets its explicit executable PATH and imports the installed CLI. This keeps
+configuration on the execution host; do not forward the controlling shell's PATH or account environment. Configure the service/SSH executable environment there; discovery means an
+executable was found, not valid authorization. No task, file, dirty-state or
+credential migration occurs. Mac remains supported locally; the remote identity
+probe currently supports Linux only. Host switching is a CLI control surface;
+the phone controls the single runtime it is paired with, not an arbitrary fleet.
+
+Use [host setup](../../host-setup.md) for persistent user-systemd paths, PATH,
+logs, linger and `KillMode=process`. Runtime stop/restart is distinct from cancel.
+Retain the production prefix and its unit before a candidate cutover. Do not
+place account tokens in a unit, tarball, Git commit or a host profile.
+
+## Private backup and restore
+
+Finish/cancel/recover every execution and stop other workspace writers first.
+The destination parent must exist; choose a new directory outside the workspace.
+
+```sh
+2f backup /private/backups/project-20261102
+2f restore-backup /private/backups/project-20261102 /private/restored-project
+```
+
+Backups include the workspace, owning Git repository, task worktrees and `.work`:
+therefore they can contain secrets. Directories are private; files retain only
+owner permissions. No symlink target is followed. Special filesystem entries,
+external Git common directories/object alternates, active execution, content
+changes during copying and an existing destination refuse. A manifest verifies
+the copied bytes; it is an integrity receipt, not an authenticated signature.
+Never restore an untrusted backup. Keep external dependencies/SSH login and
+systemd configuration in an independent operator backup.
+
+Restore verifies that manifest, copies into a new directory, relocates current
+checkout pointers and repairs only the copied repository. It strips current
+execution authority and disables relay credentials, replay cache and host
+profiles. Historical evidence remains verbatim, including original paths.
+No execution is launched. Re-pair and configure hosts explicitly after review.
+
+Rollback: quiesce workers, stop the candidate runtime and restore the old unit's
+absolute prefix, then restart it. Preserve the newer `.work` and a verified
+backup; never delete state. Old 0.2.0 can read much of the additive history but
+does not implement isolated checkout ownership, cancellation, checks or context
+receipts. Do not rerun an isolated candidate task through the old binary: it
+could execute against the original checkout. Use the matching candidate to
+inspect/export/apply it, or retain a candidate runtime for those tasks. This
+boundary is not a claim of complete backwards workflow parity.
+
+## Mobile and external access
+
+NEW TASK uses the existing composer, explicit execution checkout and providers
+reported by that runtime. A refused request retains the draft. NEXT RUN HARNESS
+changes a future run. CORRECT preserves a correction separately from a constraint;
+SAVE ONLY starts nothing. CANCEL, permission occurrence checks and reconnect use
+the same core actions as desktop. Mutating 503 responses are not retried after
+reconnect; ambiguous delivery requires inspection rather than a new request id.
+
+FAILED now participates in foreground-client attention policy. Browser
+Notification requires a live supported client and permission; it is not closed-
+client push. Independent multi-device registration remains unimplemented:
+re-pairing rotates the one phone relationship and revokes the previous phone.
+
+The static encrypted client builds with `npm run build:client`. Existing
+[deployment material](../../../deploy/README.md) describes independent HTTPS
+client and TLS relay origins. A trusted LAN's HTTP bootstrap does not protect
+against an active attacker replacing the client. No Internet relay or push
+service has been provisioned in this pass. Current Safari supports more than
+one Web Push mechanism; do not assume a service worker alone makes delivery
+reliable. Actual HTTPS origin, subscription, sender and background/closed-device
+qualification are still required ([WebKit](https://webkit.org/blog/16535/)).

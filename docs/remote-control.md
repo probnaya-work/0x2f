@@ -204,4 +204,4 @@ tradeoff: an active attacker on the network could intercept the pairing page
 (the pairing code is typed into it), so LAN pairing is for trusted networks.
 The hosted relay remains HTTPS-only.
 
-For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. This document describes the prepared 0.2.0 candidate, not a completed npm publication.
+For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. The 0.2.0 package is published. New candidate controls and API 0.8 are described in [candidate operations](engineering/2026-11-02/OPERATIONS.md); they are not a new npm release.
