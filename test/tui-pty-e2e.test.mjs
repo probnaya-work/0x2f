@@ -444,10 +444,11 @@ test("NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? he
     // ? help opens a full frame; any key closes it back to the ledger.
     session.press("?");
     await session.waitForText(/KEYS/, { label: "the help frame" });
+    session.key("G");
     await session.waitForText(/a TASK is permanent/, { label: "the model notes" });
     await session.waitForText(/any key/, { label: "the help hint" });
     session.press("escape");
-    await session.waitForText(/n to submit work/, { label: "back to the work frame" });
+    await session.waitForText(/n new task/, { label: "back to the work frame" });
 
     // Resize: the frame repaints at the new size, header and footer intact.
     session.resize(24, 80);
@@ -455,14 +456,14 @@ test("NAVIGATION: many tasks overflow the ledger; j/k/g/G move, / searches, ? he
     assert.equal(session.width(), 80, "the frame is 80 columns wide");
     assert.equal(session.rows(), 24, "the frame is 24 rows tall");
     assert.match(session.text(), /0x2F/);
-    assert.match(session.text(), /n to submit work/);
+    assert.match(session.text(), /n new task/);
 
     session.resize(36, 120);
     await session.waitForFrame(36, 120);
     assert.equal(session.width(), 120);
     assert.equal(session.rows(), 36);
     assert.match(session.text(), /0x2F/);
-    assert.match(session.text(), /n to submit work/);
+    assert.match(session.text(), /n new task/);
 
     session.press("q");
     await session.waitForText(/detached\./, { label: "the detach frame" });

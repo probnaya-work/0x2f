@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 
 import { createRuntime } from "../src/runtime.mjs";
 import { applyOutcome } from "../src/core/lifecycle.mjs";
-import { decodeKeys, isPrintable } from "../src/tui/keys.mjs";
+import { decodeKeys, createKeyDecoder, isPrintable } from "../src/tui/keys.mjs";
 import {
   initialState,
   apply,
@@ -120,6 +120,40 @@ test("isPrintable rejects modified keys, so Ctrl+z never lands in a draft", () =
   assert.equal(isPrintable({ name: "char", ch: "z", alt: true }), false);
   assert.equal(isPrintable({ name: "enter" }), false);
   assert.equal(isPrintable(KEY("z")), true);
+});
+
+test("pasting an audit brief creates one task and never answers the old selected decision", async () => {
+  const { runtime, node, base } = await makeRuntime();
+  const app = createApp(runtime);
+  try {
+    const old = await blockTask(runtime, "Existing editorial task", { type: "decision", text: "Publish?" });
+    const before = await runtime.actions.getWork(old.id);
+    const events = await runtime.store.readEventLog(old.slug);
+    await app.refresh();
+    assert.equal(app.selected().id, old.id);
+    const decoder = createKeyDecoder();
+    const brief = "Perform a security audit.\n\nRead AGENTS.md first.\n- Review pairing.\nSave SECURITY-AUDIT.md.";
+    const wire = "\x1b[200~" + brief + "\x1b[201~";
+    for (const key of decoder.push(wire)) await app.key(key);
+    assert.deepEqual(await runtime.actions.getWork(old.id), before);
+    await app.key(KEY("n"));
+    for (const part of [wire.slice(0, 4), wire.slice(4, 35), wire.slice(35)]) {
+      for (const key of decoder.push(part)) await app.key(key);
+    }
+    assert.equal(app.state.composer.text, brief);
+    assert.equal((await runtime.store.listTasks()).length, 1, "pasting starts no execution");
+    assert.equal(node.calls.length, 1);
+    await app.key({ name: "enter" });
+    const tasks = await runtime.store.listTasks();
+    assert.equal(tasks.length, 2);
+    assert.equal(tasks.find(t => t.id !== old.id).brief, brief);
+    assert.deepEqual(await runtime.actions.getWork(old.id), before);
+    assert.equal(await runtime.store.readEventLog(old.slug), events);
+    assert.equal(node.calls.length, 2, "one explicit Enter starts exactly one execution");
+  } finally {
+    app.dispose();
+    await fs.rm(base, { recursive: true, force: true });
+  }
 });
 
 // --- the keymap ----------------------------------------------------------------
@@ -492,7 +526,7 @@ test("current-run clock, trace and activity stay scoped across providers and a f
 });
 
 test("a finished current run stops at its recorded completion even without events", () => {
-  for (const status of ["ready", "failed", "done"]) {
+  for (const status of ["ready", "failed", "done", "needs_you"]) {
     const task = { id: 1, status, createdAt: "2026-11-01T21:30:00Z", execution: { provider: "codex" },
       runs: [{ run: 2, startedAt: "2026-11-01T21:36:00Z", completedAt: "2026-11-01T21:36:20Z" }] };
     const projected = projectTask(task, [
@@ -680,14 +714,14 @@ test("both themes paint their own ground, in every mode and at every size", asyn
   }
 });
 
-test("the two palettes are the design's, and they never share an ink", () => {
+test("both palettes define their own semantic inks and ground", () => {
   const dark = palette("dark");
   const light = palette("light");
-  assert.equal(dark.bg, "#161c21");
+  assert.equal(dark.bg, "#121923");
   assert.equal(light.bg, "#f2f4f6");
   // Every role is defined in both, and no role was left pointing at the
   // other theme's value.
-  for (const role of ["bg", "fg", "dim", "rule", "accent", "ok", "bad", "sel", "ghost"]) {
+  for (const role of ["bg", "title", "fg", "dim", "heading", "rule", "accent", "key", "ok", "bad", "sel", "ghost"]) {
     assert.match(dark[role], /^#[0-9a-f]{6}$/, `dark.${role}`);
     assert.match(light[role], /^#[0-9a-f]{6}$/, `light.${role}`);
     assert.notEqual(dark[role], light[role], `${role} is theme-specific`);
@@ -712,7 +746,7 @@ test("the frame shows the workspace, the counts, the halt and the action it is w
   assert.ok(screen.includes("PERMISSION"), "the state word says which kind of block");
   assert.ok(screen.includes("services/capture/dedupe.ts"));
   assert.ok(screen.includes("derive the ingest key in one place"));
-  // The one action, in the pinned row and in the hint line.
+  // The task actions stay in their pinned row.
   assert.ok(screen.includes("ALLOW"));
   assert.ok(screen.includes("REJECT"));
 });
@@ -724,7 +758,7 @@ test("the last three rows above the bottom gutter are a fixed footer that the pa
   // The very last row is blank — the frame's own bottom gutter.
   assert.match(text[text.length - 1], /^\s*$/, "the bottom gutter");
   assert.match(text[text.length - 4], /^\s+─+\s*$/, "a rule");
-  assert.match(text[text.length - 3], /n to submit work/, "the message line");
+  assert.match(text[text.length - 3], /waiting for your decision/, "the message line explains the selected task");
   assert.match(text[text.length - 2], /q detach/, "the hint line");
 });
 
@@ -738,7 +772,9 @@ test("help, the composer and the changes view each render their own full frame",
   });
 
   const help = (await frameFor(runtime, { ...initialState(), mode: "help" })).text.join("\n");
-  assert.ok(help.includes("KEYS") && help.includes("a TASK is permanent"));
+  assert.ok(help.includes("KEYS") && help.includes("F1"));
+  const helpEnd = (await frameFor(runtime, { ...initialState(), mode: "help", dscroll: 99999 })).text.join("\n");
+  assert.ok(helpEnd.includes("a TASK is permanent"), "all help remains reachable by scrolling");
 
   const composer = (await frameFor(runtime, {
     ...initialState(),

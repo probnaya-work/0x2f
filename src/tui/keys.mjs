@@ -1,19 +1,87 @@
 // Raw stdin bytes -> key names. Pure, so the whole input path is testable
 // without a terminal.
 //
-// One chunk from a raw-mode tty is one key press (or one paste). That is
-// what makes ESC unambiguous: a lone "\x1b" chunk is the Escape key, while
-// "\x1b" FOLLOWED by more bytes in the SAME chunk is a modifier prefix —
-// either an escape sequence (arrows, shift-tab) or Alt+<key>, which is how
-// terminals deliver ⌥↵. A timing-based ESC disambiguator would add latency
-// to the most-pressed key in the design's keymap; the chunk boundary the tty
-// already gives us is both faster and simpler.
+// The session's streaming decoder separates bracketed paste from keys.
+// A paste may span arbitrary tty chunks; its newlines are text, never Enter.
+// decodeKeys below handles ordinary key sequences after that framing.
 //
 // A decoded key is { name, ch?, alt?, ctrl? }:
 //
 //   name  "char" | "enter" | "escape" | "backspace" | "tab" | "shift-tab"
-//         | "up" | "down" | "left" | "right" | "ctrl-c" | "unknown"
+//         | "up" | "down" | "left" | "right" | "ctrl-c" | "unknown" | "paste"
 //   ch    the character, for name === "char"
+//   text  the entire insertion, for name === "paste"
+
+const PASTE_START = "\x1b[200~";
+const PASTE_END = "\x1b[201~";
+
+function paste(text) {
+  return { name: "paste", text: text.replace(/\r\n?/g, "\n").replace(/[\x00-\x08\x0b-\x1f\x7f]/g, "") };
+}
+
+function markerSuffix(text, marker) {
+  for (let n = Math.min(text.length, marker.length - 1); n > 0; n--) {
+    if (text.endsWith(marker.slice(0, n))) return n;
+  }
+  return 0;
+}
+
+export function createKeyDecoder() {
+  let pending = "";
+  let insertion = null;
+  const plain = text => {
+    if (text.length > 1 && /[\r\n]/.test(text) && !text.startsWith("\x1b")) return [paste(text)];
+    // A tty read may contain several complete navigation sequences. Decode
+    // each one, rather than dropping every key after the first Escape.
+    const units = text.match(/\x1b(?:\[[0-?]*[ -/]*[@-~]|O.|.)|[^\x1b]+|\x1b/gs) ?? [];
+    return units.flatMap(decodeKeys);
+  };
+  return {
+    push(chunk) {
+      const keys = [];
+      const text = typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8");
+      // A subsequent plain key is not an Alt chord from the previous read.
+      // Keep only actual CSI/SS3 prefixes buffered across tty events.
+      if (insertion === null && pending === "\x1b" && text && !["[", "O"].includes(text[0])) {
+        keys.push({ name: "escape" });
+        pending = "";
+      }
+      pending += text;
+      while (pending) {
+        const marker = insertion === null ? PASTE_START : PASTE_END;
+        const end = pending.indexOf(marker);
+        if (end >= 0) {
+          const text = pending.slice(0, end);
+          pending = pending.slice(end + marker.length);
+          if (insertion === null) {
+            keys.push(...plain(text));
+            insertion = "";
+          } else {
+            keys.push(paste(insertion + text));
+            insertion = null;
+          }
+        } else {
+          const keep = markerSuffix(pending, marker);
+          const text = pending.slice(0, pending.length - keep);
+          pending = pending.slice(pending.length - keep);
+          if (insertion === null) keys.push(...plain(text));
+          else insertion += text;
+          break;
+        }
+      }
+      return keys;
+    },
+    // A lone Escape could also be the first byte of a paste marker. The
+    // session calls this after a short key-sequence timeout; unfinished
+    // paste contents must never be flushed as shortcuts.
+    flush() {
+      if (insertion !== null) return [];
+      const keys = decodeKeys(pending);
+      pending = "";
+      return keys;
+    }
+  };
+}
 
 const SEQUENCES = {
   "[A": "up",
@@ -21,10 +89,14 @@ const SEQUENCES = {
   "[C": "right",
   "[D": "left",
   "[Z": "shift-tab",
+  "[H": "home",
+  "[F": "end",
   OA: "up",
   OB: "down",
   OC: "right",
-  OD: "left"
+  OD: "left",
+  OH: "home",
+  OF: "end"
 };
 
 // Shift+Enter, when the terminal can deliver it. Kitty sends the CSI-u form,
@@ -58,6 +130,8 @@ export function decodeKeys(chunk) {
 
   if (text.charCodeAt(0) === 0x1b && text.length > 1) {
     if (SHIFT_ENTER.has(text)) return [{ name: "enter", shift: true }];
+    const extended = { "\x1bOP": "help", "\x1b[11~": "help", "\x1b[3~": "delete", "\x1b[5~": "page-up", "\x1b[6~": "page-down", "\x1b[1~": "home", "\x1b[4~": "end" };
+    if (extended[text]) return [{ name: extended[text] }];
     const rest = text.slice(1);
     const named = SEQUENCES[rest.slice(0, 2)];
     if (named) return [{ name: named }];

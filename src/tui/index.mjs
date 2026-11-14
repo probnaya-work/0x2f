@@ -4,7 +4,7 @@
 // stdin, the alternate screen buffer, resize, and the live refresh. It owns
 // no Work state and no layout; it drives the pure pieces around it.
 //
-//   stdin  -> keys.decodeKeys -> app.key -> state.apply -> core/actions
+//   stdin  -> keys.createKeyDecoder -> app.key -> state.apply -> core/actions
 //   disk   -> core/events.createTailer  -> app.refresh
 //   both   -> app.frame -> screen.createPainter -> stdout
 //
@@ -16,8 +16,9 @@
 
 import { createRuntime } from "../runtime.mjs";
 import { createTailer } from "../core/events.mjs";
-import { decodeKeys } from "./keys.mjs";
+import { createKeyDecoder } from "./keys.mjs";
 import { createApp } from "./app.mjs";
+import { MIN_TUI_COLS, MIN_TUI_ROWS } from "./view.mjs";
 import {
   createPainter,
   ALT_SCREEN_ON,
@@ -63,6 +64,9 @@ export async function runTui(opts = {}) {
 
   let stopped = false;
   let pending = null;
+  let keyTimer = null;
+  let inputChain = Promise.resolve();
+  const decoder = createKeyDecoder();
 
   const size = () => ({
     cols: output.columns || 132,
@@ -104,9 +108,13 @@ export async function runTui(opts = {}) {
     draw();
   };
 
-  const onKey = async chunk => {
-    if (stopped) return;
-    for (const key of decodeKeys(chunk)) {
+  const handleKeys = async keys => {
+    for (const key of keys) {
+      if (stopped) return;
+      if (size().cols < MIN_TUI_COLS || size().rows < MIN_TUI_ROWS) {
+        if (key.name === "ctrl-c" || (key.name === "char" && key.ch === "q")) return stop();
+        continue; // Actions whose target and consequence cannot be seen are disabled.
+      }
       const before = app.state.mode;
       await app.key(key);
       if (app.state.mode === "quit") {
@@ -119,6 +127,19 @@ export async function runTui(opts = {}) {
       }
       draw();
     }
+  };
+
+  // Input events can arrive while createWork/answerWork is awaiting disk.
+  // Preserve their order so one chunk cannot operate on another's state.
+  const enqueueKeys = keys => {
+    inputChain = inputChain.then(() => handleKeys(keys)).catch(() => stop());
+  };
+  const onKey = chunk => {
+    if (stopped) return;
+    if (keyTimer) clearTimeout(keyTimer);
+    enqueueKeys(decoder.push(chunk));
+    keyTimer = setTimeout(() => enqueueKeys(decoder.flush()), 35);
+    keyTimer.unref?.();
   };
 
   let done;
@@ -135,13 +156,14 @@ export async function runTui(opts = {}) {
     input.pause?.();
     input.off?.("data", onKey);
     output.off?.("resize", onResize);
-    output.write(RESET + CURSOR_SHOW + ALT_SCREEN_OFF);
+    output.write("\x1b[?2004l" + RESET + CURSOR_SHOW + ALT_SCREEN_OFF);
   }
 
   function stop() {
     if (stopped) return;
     stopped = true;
     if (pending) clearTimeout(pending);
+    if (keyTimer) clearTimeout(keyTimer);
     clearInterval(ticker);
     tailer.stop();
     app.dispose();
@@ -152,7 +174,7 @@ export async function runTui(opts = {}) {
   const ticker = setInterval(draw, TICK_MS);
   ticker.unref?.();
 
-  output.write(ALT_SCREEN_ON + CURSOR_HIDE);
+  output.write(ALT_SCREEN_ON + CURSOR_HIDE + "\x1b[?2004h");
   input.setRawMode?.(true);
   input.resume?.();
   input.setEncoding?.("utf8");
@@ -164,20 +186,23 @@ export async function runTui(opts = {}) {
   // the user came from.
   const onExit = () => restore();
   process.once("exit", onExit);
-  process.once("SIGTERM", () => {
+  const onTerminate = () => {
     stop();
     process.exit(0);
-  });
-  process.once("SIGHUP", () => {
+  };
+  process.once("SIGTERM", onTerminate);
+  process.once("SIGHUP", onTerminate);
+
+  try {
+    await app.refresh();
+    draw();
+    tailer.start();
+    await finished;
+    return { stopped: true };
+  } finally {
     stop();
-    process.exit(0);
-  });
-
-  await app.refresh();
-  draw();
-  tailer.start();
-
-  await finished;
-  process.off("exit", onExit);
-  return { stopped: true };
+    process.off("exit", onExit);
+    process.off("SIGTERM", onTerminate);
+    process.off("SIGHUP", onTerminate);
+  }
 }

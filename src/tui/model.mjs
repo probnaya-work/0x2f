@@ -81,6 +81,7 @@ export function providerMap(providers) {
   for (const provider of providers?.listProviders?.() ?? []) {
     out[provider.id] = {
       displayName: provider.displayName,
+      available: providers.available?.(provider.id) ?? null,
       capabilities: provider.capabilities ?? {}
     };
   }
@@ -213,7 +214,8 @@ export function projectTask(task, events, opts = {}) {
   // A finished run stops at its saved completion (or last run event for
   // legacy records). Later task notes and closure must not extend it.
   const completedAt = Date.parse(current?.completedAt ?? "");
-  const end = running || state === "needs" ? now : Number.isFinite(completedAt) ? completedAt : lastAt;
+  const live = running || (state === "needs" && task.blockedOn?.live === true);
+  const end = live ? now : Number.isFinite(completedAt) ? completedAt : lastAt;
   const elapsed = Math.max(0, (end - origin) / 1000);
 
   // The progress rule's percentage, measured against THIS run's own clock

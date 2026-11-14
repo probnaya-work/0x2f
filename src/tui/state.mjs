@@ -13,6 +13,7 @@
 
 import { FILTER_KEYS } from "./model.mjs";
 import { isPrintable } from "./keys.mjs";
+import { editText } from "./editor.mjs";
 
 export function initialState(opts = {}) {
   return {
@@ -22,12 +23,15 @@ export function initialState(opts = {}) {
     searching: false,
     mode: "work",
     input: null,
+    inputTaskId: null,
     draft: "",
+    draftCursor: null,
     rscroll: 0,
     dscroll: 0,
     expand: false,
     rerunProvider: null,
     flash: null,
+    lastError: null,
     // The loaded change set for the diff view (actions.getTaskDiff output) —
     // null until the view is opened, so entering `d` never blocks the frame
     // on a git walk.
@@ -154,7 +158,7 @@ function commitInput(state, task) {
 // same read.
 function composerKey(state, key, ctx) {
   const c = state.composer;
-  const set = patch => ({ ...state, composer: { ...c, ...patch } });
+  const set = patch => ({ ...state, composer: { ...c, scroll: 0, ...patch } });
 
   if (key.name === "escape") return { state: { ...state, mode: "work" }, intent: null };
   if (key.name === "enter" && key.alt) {
@@ -162,14 +166,14 @@ function composerKey(state, key, ctx) {
     return { state, intent: { type: "refine", text: c.text } };
   }
   if (key.name === "enter" && key.shift) {
-    return { state: set({ text: c.text + "\n" }), intent: null };
+    return { state: set(editText(c.text, c.cursor, { name: "paste", text: "\n" })), intent: null };
   }
   if (key.name === "char" && key.ctrl && key.ch === "n") {
-    return { state: set({ text: c.text + "\n" }), intent: null };
+    return { state: set(editText(c.text, c.cursor, { name: "paste", text: "\n" })), intent: null };
   }
   if (key.name === "char" && key.ctrl && key.ch === "z") {
     return c.original !== null
-      ? { state: set({ text: c.original, original: null }), intent: null }
+      ? { state: set({ text: c.original, original: null, cursor: c.original.length }), intent: null }
       : { state, intent: null };
   }
   if (key.name === "enter") {
@@ -179,8 +183,14 @@ function composerKey(state, key, ctx) {
   if (key.name === "tab") {
     return { state: set({ provider: nextProvider(ctx.providerOrder ?? [], c.provider) }), intent: null };
   }
-  if (key.name === "backspace") return { state: set({ text: c.text.slice(0, -1) }), intent: null };
-  if (isPrintable(key)) return { state: set({ text: c.text + key.ch }), intent: null };
+  if (key.name === "shift-tab") {
+    const order = ctx.providerOrder ?? [];
+    return { state: set({ provider: nextProvider([...order].reverse(), c.provider) }), intent: null };
+  }
+  if (key.name === "page-up") return { state: set({ scroll: (c.scroll ?? 0) + 8 }), intent: null };
+  if (key.name === "page-down") return { state: set({ scroll: Math.max(0, (c.scroll ?? 0) - 8) }), intent: null };
+  const edited = editText(c.text, c.cursor, key);
+  if (edited) return { state: set(edited), intent: null };
   return { state, intent: null };
 }
 
@@ -193,11 +203,43 @@ export function apply(state, key, ctx = {}) {
   const task = selected(tasks, state);
   const none = { state, intent: null };
 
+  // Paste is one text insertion. It cannot submit, navigate, grant a
+  // permission or answer another task, even when it contains shortcut keys.
+  if (key.name === "paste") {
+    if (state.mode === "composer") return {
+      state: { ...state, composer: { ...state.composer,
+        ...editText(state.composer.text, state.composer.cursor, key), scroll: 0 } }, intent: null
+    };
+    if (state.mode === "work" && state.input) {
+      const edited = editText(state.draft, state.draftCursor, key);
+      return { state: { ...state, draft: edited.text, draftCursor: edited.cursor }, intent: null };
+    }
+    if (state.mode === "work" && state.searching) return {
+      state: { ...state, search: state.search + key.text.replace(/\s+/g, " "), sel: 0 }, intent: null
+    };
+    return none;
+  }
+
   if (key.name === "ctrl-c") return { state: { ...state, mode: "quit" }, intent: { type: "quit" } };
+  if (key.name === "help" || (key.ctrl && key.ch === "g")) return { state: { ...state,
+    mode: state.mode === "help" ? (state.helpReturn ?? "work") : "help",
+    helpReturn: state.mode === "help" ? null : state.mode,
+    helpScroll: state.mode === "help" ? 0 : state.dscroll,
+    dscroll: state.mode === "help" ? (state.helpScroll ?? 0) : 0 }, intent: null };
 
   if (state.mode === "composer") return composerKey(state, key, ctx);
 
   if (state.mode === "quit") return { state, intent: { type: "quit" } };
+
+  if (["help", "result", "diff"].includes(state.mode)) {
+    const delta = key.name === "page-down" ? 10 : key.name === "page-up" ? -10
+      : key.name === "down" ? 1 : key.name === "up" ? -1
+      : key.name === "char" && key.ch === "j" ? 1 : key.name === "char" && key.ch === "k" ? -1 : 0;
+    if (delta) return { state: { ...state, dscroll: Math.max(0, state.dscroll + delta) }, intent: null };
+    if (key.name === "home" || (key.name === "char" && key.ch === "g")) return { state: { ...state, dscroll: 0 }, intent: null };
+    if (key.name === "end" || (key.name === "char" && key.ch === "G")) return { state: { ...state, dscroll: Number.MAX_SAFE_INTEGER }, intent: null };
+    if (state.mode === "help") return { state: { ...state, mode: state.helpReturn ?? "work", helpReturn: null, dscroll: state.helpScroll ?? 0 }, intent: null };
+  }
 
   if (state.mode === "result") {
     const review = state.review;
@@ -241,10 +283,13 @@ export function apply(state, key, ctx = {}) {
   }
 
   if (state.input) {
-    if (key.name === "enter") return commitInput(state, task);
-    if (key.name === "escape") return { state: { ...state, input: null, draft: "" }, intent: null };
-    if (key.name === "backspace") return { state: { ...state, draft: state.draft.slice(0, -1) }, intent: null };
-    if (isPrintable(key)) return { state: { ...state, draft: state.draft + key.ch }, intent: null };
+    const target = state.inputTaskId == null ? task : tasks.find(t => t.id === state.inputTaskId);
+    const edited = editText(state.draft, state.draftCursor,
+      (key.name === "enter" && key.shift) || (key.ctrl && key.ch === "n") ? { name: "paste", text: "\n" } : key);
+    if (edited) return { state: { ...state, draft: edited.text, draftCursor: edited.cursor }, intent: null };
+    if (key.name === "enter" && (key.alt || key.ctrl)) return none;
+    if (key.name === "enter") return commitInput(state, target);
+    if (key.name === "escape") return { state: { ...state, input: null, inputTaskId: null, draft: "", draftCursor: null }, intent: null };
     return none;
   }
 
@@ -278,7 +323,7 @@ export function apply(state, key, ctx = {}) {
   if (key.name === "enter") {
     const primary = primaryAction(task, state, ctx);
     if (!primary) return { state: { ...state, expand: !state.expand }, intent: null };
-    if (primary.input) return { state: { ...state, input: primary.input, draft: "" }, intent: null };
+    if (primary.input) return { state: { ...state, input: primary.input, inputTaskId: task.id, draft: "", draftCursor: null }, intent: null };
     return { state, intent: primary.intent };
   }
   if (key.name !== "char" || key.ctrl || key.alt) return none;
@@ -310,13 +355,13 @@ export function apply(state, key, ctx = {}) {
       };
     }
     case "c":
-      return task ? { state: { ...state, input: "note", draft: "" }, intent: null } : none;
+      return task ? { state: { ...state, input: "note", inputTaskId: task.id, draft: "", draftCursor: null }, intent: null } : none;
     case "r":
       return task ? { state: { ...state, mode: "result", dscroll: 0, review: null }, intent: { type: "review", id: task.id, run: task.run } } : none;
     case "x": {
       const secondary = secondaryAction(task);
       if (!secondary) return none;
-      if (secondary.input) return { state: { ...state, input: secondary.input, draft: "" }, intent: null };
+      if (secondary.input) return { state: { ...state, input: secondary.input, inputTaskId: task.id, draft: "", draftCursor: null }, intent: null };
       return { state, intent: secondary.intent };
     }
     case "s":
@@ -326,7 +371,7 @@ export function apply(state, key, ctx = {}) {
     case "t":
       return { state: { ...state, expand: !state.expand, rscroll: 0 }, intent: null };
     case "?":
-      return { state: { ...state, mode: "help" }, intent: null };
+      return { state: { ...state, mode: "help", helpReturn: "work", helpScroll: state.dscroll, dscroll: 0 }, intent: null };
     case "q":
       return { state: { ...state, mode: "quit" }, intent: { type: "quit" } };
     default:

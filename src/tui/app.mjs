@@ -22,7 +22,7 @@
 // is deliberately NOT re-implemented here: a second copy of the guard would
 // be a second opinion about Work state.
 
-import { initialState, apply, selected } from "./state.mjs";
+import { initialState, apply, selected, visible } from "./state.mjs";
 import { snapshot } from "./model.mjs";
 import { frame } from "./view.mjs";
 import { palette } from "./theme.mjs";
@@ -44,24 +44,30 @@ export function createApp(runtime, opts = {}) {
   }
   let model = null;
   let flashTimer = null;
+  let preferredTaskId = null;
+  let refreshVersion = 0;
 
   function setFlash(text, tone = "ok") {
     state = { ...state, flash: { text, tone } };
     if (flashTimer) clearTimeout(flashTimer);
-    flashTimer = setTimeout(() => {
+    flashTimer = tone === "warn" ? null : setTimeout(() => {
       state = { ...state, flash: null };
       opts.onChange?.();
     }, FLASH_MS);
     // A timer must never hold the process open on its own.
-    flashTimer.unref?.();
+    flashTimer?.unref?.();
   }
 
   async function refresh() {
-    model = await snapshot(runtime, { now: clock() });
-    // A task can disappear from the filtered list under the cursor; keep the
-    // selection inside the list rather than pointing at nothing.
-    const list = model.tasks.length;
-    if (state.sel >= list && list > 0) state = { ...state, sel: list - 1 };
+    const version = ++refreshVersion;
+    const next = await snapshot(runtime, { now: clock() });
+    if (version !== refreshVersion) return model;
+    const taskId = preferredTaskId ?? (model ? selected(model.tasks, state)?.id : null);
+    const list = visible(next.tasks, state);
+    const index = list.findIndex(task => task.id === taskId);
+    state = { ...state, sel: index >= 0 ? index : Math.max(0, Math.min(state.sel, list.length - 1)) };
+    model = next;
+    preferredTaskId = null;
     return model;
   }
 
@@ -182,6 +188,7 @@ export function createApp(runtime, opts = {}) {
             provider: intent.provider ?? undefined
           });
           const name = model.lookup(task.execution?.provider).name;
+          preferredTaskId = task.id;
           state = {
             ...state,
             mode: "work",
@@ -198,7 +205,7 @@ export function createApp(runtime, opts = {}) {
           const refined = await runtime.refine.refineTaskPrompt(intent.text);
           state = {
             ...state,
-            composer: { ...state.composer, original: intent.text, text: refined }
+            composer: { ...state.composer, original: intent.text, text: refined, cursor: refined.length, scroll: 0 }
           };
           setFlash("briefed · review it, then ↵ starts the run");
           break;
@@ -211,10 +218,14 @@ export function createApp(runtime, opts = {}) {
       // WorkError carries the shared refusal message — the same words the
       // CLI and the Web show. Anything else is surfaced as-is rather than
       // swallowed; a TUI that hides a failure is worse than one that is ugly.
-      setFlash(String(error?.message ?? error).split("\n")[0], "warn");
+      const detail = String(error?.message ?? error);
+      state = { ...state, lastError: detail };
+      setFlash("Error · F1 details · " + detail.split("\n")[0], "warn");
+      return false;
     } finally {
       state = { ...state, busy: false };
     }
+    return true;
   }
 
   return {
@@ -238,7 +249,13 @@ export function createApp(runtime, opts = {}) {
         lookup: model.lookup
       });
       state = result.state;
-      if (result.intent) await run(result.intent);
+      if (result.intent) {
+        const ok = await run(result.intent);
+        // An unsuccessful save must leave the user's answer/correction
+        // editable, still bound to the task it was written for.
+        if (!ok && previous.input) state = { ...state, input: previous.input,
+          inputTaskId: previous.inputTaskId, draft: previous.draft, draftCursor: previous.draftCursor };
+      }
       // Opening the diff view fetches the real hunks — the mode transition
       // is TUI state, but the data behind it comes from the shared action.
       if (state.mode === "diff" && previous.mode !== "diff") await loadDiff();

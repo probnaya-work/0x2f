@@ -411,9 +411,10 @@ export async function startTui({
     press(name) {
       return session.write(KEY_BYTES[name] ?? name);
     },
-    // Type text exactly like a paste: one chunk, many printable keys.
+    // Type through the bracketed-paste protocol enabled by the real TUI.
+    // Framing keeps queued Enter/newline keys distinct even if tty reads merge.
     type(text) {
-      return session.write(text);
+      return session.write("\x1b[200~" + text + "\x1b[201~");
     },
     // A single logical keypress, sent as its own chunk.
     key(ch) {

@@ -76,7 +76,7 @@ function sgrColor(value, background, support) {
 // `bg` is the frame's GROUND, and it is painted under every cell — including
 // the trailing pad. A full-screen surface that names its own palette has to
 // paint the ground that palette was drawn against: the design's two themes
-// specify #161c21 and #f2f4f6 precisely, and the ink colours are contrast-
+// specify their own ground, and the ink colours are contrast-
 // tuned against them. Inheriting the terminal's own background instead would
 // make the light theme dark ink on a dark ground for anyone whose terminal is
 // dark — a theme flag that only works if you already had that theme. The alt

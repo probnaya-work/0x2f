@@ -1,6 +1,7 @@
 // TUI palettes and provider identity — presentation only.
 //
-// The colours are the finalized TUI design's two palettes, verbatim. They
+// Both palettes separate bright titles, body copy, muted metadata and section
+// headings. Label inks retain contrast on normal and selected backgrounds. They
 // are deliberately NOT src/web/ledger.mjs's COLORS: that palette is tuned
 // for a white browser page, and the terminal's dark ground needs its own.
 // What both surfaces DO share is the meaning behind a colour (accent =
@@ -9,26 +10,32 @@
 
 export const PALETTES = {
   dark: {
-    bg: "#161c21",
-    fg: "#e2e8ee",
-    dim: "#96a1aa",
-    rule: "#39434b",
-    accent: "#8fb2ee",
-    ok: "#7ac9a5",
-    bad: "#e79274",
-    sel: "#232c34",
-    ghost: "#5d6870"
+    bg: "#121923",
+    title: "#f1f5fb",
+    fg: "#c9d3e1",
+    dim: "#a0adc0",
+    ghost: "#8c9ab0",
+    heading: "#bcaee0",
+    rule: "#344158",
+    accent: "#9bbcff",
+    key: "#e8d19d",
+    ok: "#7dd9b6",
+    bad: "#f2a38e",
+    sel: "#202e43"
   },
   light: {
     bg: "#f2f4f6",
-    fg: "#10161c",
+    title: "#10161c",
+    fg: "#2b3646",
     dim: "#4d5760",
+    heading: "#665080",
     rule: "#c4ccd3",
     accent: "#1f4f9e",
+    key: "#765220",
     ok: "#1c6b4e",
     bad: "#a33a1e",
     sel: "#dfe6ed",
-    ghost: "#98a3ac"
+    ghost: "#5e6872"
   }
 };
 
