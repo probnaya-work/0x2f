@@ -191,8 +191,8 @@ function buildSvg(scrubbed, styleRows, cols, rows) {
       const fg = style.fg ?? P.fg;
       const x = runStart * CW;
       out.push(
-        `<rect x="${x}" y="${r * CH}" width="${(end - runStart) * CW}" height="${CH}" fill="${bg}"/>`,
-        `<text x="${x}" y="${y}" fill="${fg}"${style.bold ? ' font-weight="700"' : ""}>${xml(text)}</text>`
+        `<rect x="${x}" y="${r * CH}" width="${(end - runStart) * CW}" height="${CH}" fill="${bg}" shape-rendering="crispEdges"/>`,
+        `<text x="${x}" y="${y}" fill="${fg}" xml:space="preserve" textLength="${(end - runStart) * CW}" lengthAdjust="spacingAndGlyphs"${style.bold ? ' font-weight="700"' : ""}>${xml(text)}</text>`
       );
     };
     for (let c = 0; c < cols; c++) {
@@ -280,7 +280,8 @@ async function scenarioJourney() {
 
     // CHANGES / the real diff.
     session.press("d");
-    await session.waitForText(/working tree vs HEAD/, { label: "the loaded diff" });
+    await session.waitForText(/SAVED RUN CHANGE EVIDENCE/, { label: "the saved diff" });
+    await session.waitForText(/retry with backoff/, { label: "the loaded patch" });
     await capture(session, "diff-120x36", { state: "ready-diff", mode: "diff" });
     session.press("escape");
     await session.waitForText(/result available · review/, { label: "back to the work frame" });
@@ -414,6 +415,43 @@ async function scenarioOverview() {
   }
 }
 
+async function scenarioDrafts(light = false) {
+  const { base } = await makeWorkspace({ name: "ws" });
+  const session = await startTui({ workspace: base, cols: 80, rows: 24,
+    args: light ? ["tui", "--light"] : ["tui"] });
+  try {
+    await session.waitForText(/no task selected/, { timeout: 15000 });
+    await session.press("n");
+    await session.waitForText(/ALPHA/);
+    await session.press("tab");
+    await session.press("tab");
+    await session.waitForText(/CHARLIE/);
+    const request = "FIRST AUDIT REQUIREMENT\n\nRead AGENTS.md first.\n" +
+      "Review authentication and permission boundaries.\n".repeat(24) + "FINAL AUDIT REQUIREMENT";
+    await session.write("\x1b[200~" + request + "\x1b[201~");
+    await session.waitForText(/FINAL AUDIT REQUIREMENT/);
+    await capture(session, light ? "composer-long-light-80x24" : "composer-long-80x24", { state: "composer", mode: "composer" });
+    if (!light) {
+      for (let i = 0; i < 5; i++) await session.write("\x1b[5~");
+      await session.waitForText(/FIRST AUDIT REQUIREMENT/);
+      await capture(session, "composer-start-80x24", { state: "composer", mode: "composer" });
+      await session.write("\x1bOP");
+      await session.waitForText(/KEYS/);
+      await capture(session, "help-80x24", { state: "help", mode: "help" });
+      await session.key("G");
+      await session.waitForText(/a TASK is permanent/);
+      await capture(session, "help-end-80x24", { state: "help", mode: "help" });
+    }
+    await session.press("ctrl-c");
+    await session.waitForExit({ timeout: 5000 });
+    return { base };
+  } catch (error) {
+    session.kill();
+    await session.waitForExit({ timeout: 3000 }).catch(() => {});
+    throw error;
+  }
+}
+
 // --- objective local checks --------------------------------------------------------
 //
 // Always run — deterministic structural invariants that catch real layout
@@ -422,18 +460,24 @@ async function scenarioOverview() {
 
 const EXPECT = {
   "composer-120x36": { cols: 120, rows: 36, mode: "composer", landmarks: ["NEW TASK", "↵ START", "ALPHA"], focus: 0 },
-  "help-120x36": { cols: 120, rows: 36, mode: "help", landmarks: ["KEYS", "a TASK is permanent", "any key"], focus: 0 },
+  "help-120x36": { cols: 120, rows: 36, mode: "help", landmarks: ["KEYS", "F1", "any key"], focus: 0 },
   "working-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["WORKING", "executing"], focus: 1 },
   "needs-you-permission-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · PERMISSION", "ALLOW", "REJECT", "src/app.ts"], focus: 1 },
   "ready-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["result available · review", "ACCEPT", "SEND BACK"], focus: 1 },
-  "diff-120x36": { cols: 120, rows: 36, mode: "diff", landmarks: ["CHANGES", "working tree vs HEAD", "retry with backoff"], focus: 0 },
+  "diff-120x36": { cols: 120, rows: 36, mode: "diff", landmarks: ["CHANGES", "SAVED RUN CHANGE EVIDENCE", "retry with backoff"], focus: 0 },
   "decision-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · DECISION", "ANSWER & CONTINUE", "503 policy"], focus: 1 },
   "failed-auth-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["FAILED", "authentication is no longer valid", "RETRY"], focus: 1 },
   "overview-many-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["! 5", "✕ 4", "✓ 6", "▶ 6", "· 5", "NEEDS YOU", "FAILED"], focus: 1 },
-  "decision-long-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · DECISION", "multi-region", "J K"], focus: 1 },
+  "decision-long-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["Option C:", "multi-region", "ANSWER & CONTINUE", "J K"], focus: 1 },
   "overview-many-80x24": { cols: 80, rows: 24, mode: "work", landmarks: ["! 5", "✕ 4", "· 5", "NEEDS YOU", "0x2F", "…"], focus: 1 },
   "decision-long-80x24": { cols: 80, rows: 24, mode: "work", landmarks: ["multi-region", "ANSWER & CONTINUE"], focus: 1 }
 };
+for (const id of ["composer-long-80x24", "composer-long-light-80x24"]) {
+  EXPECT[id] = { cols: 80, rows: 24, mode: "composer", landmarks: ["NEW TASK", "CHARLIE", "FINAL AUDIT REQUIREMENT", "↵ START", "PgUp/PgDn"], focus: 0 };
+}
+EXPECT["composer-start-80x24"] = { cols: 80, rows: 24, mode: "composer", landmarks: ["FIRST AUDIT REQUIREMENT", "↵ START"], focus: 0 };
+EXPECT["help-80x24"] = { cols: 80, rows: 24, mode: "help", landmarks: ["KEYS", "PgUp/PgDn", "any key"], focus: 0 };
+EXPECT["help-end-80x24"] = { cols: 80, rows: 24, mode: "help", landmarks: ["a TASK is permanent", "any key"], focus: 0 };
 
 function runChecks(frame, expect) {
   const findings = [];
@@ -717,6 +761,10 @@ async function main() {
     if (failed.base) bases.push(failed.base);
     const overview = await scenarioOverview();
     if (overview.base) bases.push(overview.base);
+    for (const light of [false, true]) {
+      const drafts = await scenarioDrafts(light);
+      if (drafts.base) bases.push(drafts.base);
+    }
 
     // The gallery + manifest.
     await fs.writeFile(path.join(FRAMES_DIR, "index.html"), buildGallery());

@@ -136,8 +136,8 @@ node --test test/actions.test.mjs
 ## The TUI dogfood suite
 
 `test/tui-pty-e2e.test.mjs` is the golden-path E2E for the terminal client —
-the reason a human no longer has to click through the basic TUI workflow
-before every release. It drives the REAL `2f tui` entry point on a REAL
+a repeatable regression check of the basic TUI workflow. It drives the REAL
+`2f tui` entry point on a REAL
 pseudo-terminal (`test/tui-pty/pty-relay.py` allocates the PTY; the test
 writes keystrokes to it and reads the ANSI output), through the same
 keyboard/terminal path a user uses — never through the controller functions.

@@ -1,0 +1,206 @@
+{
+  "date": "2026-11-14",
+  "scope": "Preserve the split-pane TUI; apply consistent hierarchy across every screen and validate a real provider task through saved result and changes",
+  "verdict": "readability_validated_live_workflow_complete_input_audit_findings_open",
+  "base_commit": "0a00adb2185774e3d6ea13f4976ad5d8fe9e20a9",
+  "source_tui_sha256": "5e4945233942961d51f1d0c94deee0451ee374b29772a9acc47c3ecddf2e6fe2",
+  "design_skill": "https://github.com/hyperb1iss/hyperskills/blob/main/skills/tui-design/SKILL.md",
+  "primary_references": [
+    "https://github.com/github/TUIKit/blob/main/docs/foundations.md",
+    "https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/"
+  ],
+  "findings": [
+    {
+      "priority": "P1",
+      "problem": "Multiline paste executed newlines and shortcuts",
+      "resolution": "Text insertion is atomic, including split paste markers and unframed multiline chunks; one explicit Enter starts one task.",
+      "file": "src/tui/keys.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P1",
+      "problem": "Long task drafts hid the caret and START",
+      "resolution": "Bounded draft viewport, paging, in-place editing, grapheme-safe deletion, visible character limit and fixed controls.",
+      "file": "src/tui/view.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P1",
+      "problem": "Status updates moved selection to another task",
+      "resolution": "Selection follows task ID; note/answer drafts retain their original target; new tasks get focus.",
+      "file": "src/tui/app.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P1",
+      "problem": "Failed note/answer saves discarded text and errors disappeared",
+      "resolution": "Failed saves preserve draft and target; persistent warning and full error/draft review via F1 or Ctrl+G.",
+      "file": "src/tui/app.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P1",
+      "problem": "Small windows could show truncated actions or hide submit controls",
+      "resolution": "60x18 minimum; smaller surfaces render a recovery message and suppress task actions; complete action labels are prioritized.",
+      "file": "src/tui/index.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P1",
+      "problem": "Startup failures could leave terminal modes active",
+      "resolution": "Guaranteed restoration of raw mode, cursor, alternate screen and bracketed paste on startup errors and normal shutdown.",
+      "file": "src/tui/index.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Selected providers could be clipped out of the composer",
+      "resolution": "Current provider is always visible, with bidirectional cycling and executable discovery status.",
+      "file": "src/tui/view.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Help was truncated and could lose reading position",
+      "resolution": "Scrollable contextual help preserves editing state and previous result scroll; keyboard fallback is Ctrl+G.",
+      "file": "src/tui/state.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Secondary labels had low contrast",
+      "resolution": "Muted text exceeds 4.5:1 against both normal and selected backgrounds in both palettes; no formal accessibility compliance claim.",
+      "file": "src/tui/theme.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Completed decision runs kept accumulating execution time",
+      "resolution": "A completed non-live decision stops its clock at the saved completion; live permission waits keep a live clock.",
+      "file": "src/tui/model.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Visual review stopped on an obsolete diff label",
+      "resolution": "Review uses saved-change evidence and captures long drafts, late provider choices, light theme and help paging; SVG preserves the terminal cell grid.",
+      "file": "scripts/review-tui.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Metadata, activity and results had similar visual weight",
+      "resolution": "Cool blue-grey grounds, bright titles, muted metadata, lilac section headings and status-specific inks; tinted status/action bands. Current result or question precedes history. Completed traces show the last two signals by default, with t retaining access to every signal. Result Markdown headings receive their own type hierarchy.",
+      "file": "src/tui/view.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Repeated navigation sequences merged into a tty read lost keys",
+      "resolution": "Every complete navigation sequence in a read is delivered in order; PTY type helper uses the bracketed-paste protocol enabled by the app.",
+      "file": "src/tui/keys.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Full terminal cell-width handling for CJK, combining marks and complex emoji is incomplete in the existing renderer",
+      "status": "open",
+      "file": "src/tui/screen.mjs",
+      "acceptance_scope": "Latin/Cyrillic task prose was reviewed; grapheme-safe editing is tested, full display-width qualification remains."
+    },
+    {
+      "priority": "P2",
+      "problem": "Keys, action labels and explanatory text merged visually across the interface",
+      "resolution": "Shared binding renderer with warm bold keys, neutral labels and quiet separators; complete bindings at narrow widths. Applied to task actions, composer, help, search, input, report and diff navigation. Task actions and global navigation no longer repeat one another.",
+      "file": "src/tui/view.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Detailed command receipts buried the written result in real audits",
+      "resolution": "The task pane shows the reported conclusion, changed files and reported checks together. The full report precedes detailed command receipts; every receipt remains in the review appendix. Markdown headings, inline code, emphasis and links use readable terminal styles.",
+      "file": "src/tui/view.mjs",
+      "status": "fixed"
+    },
+    {
+      "priority": "P2",
+      "problem": "Split SS3 navigation sequences can insert a literal character instead of moving the cursor",
+      "status": "open",
+      "file": "src/tui/keys.mjs",
+      "evidence": ".review/live/0x2f-input-audit/.work/worktrees/001-audit-0x2f-terminal-input-safety/terminal-input-repro.test.mjs",
+      "scope": "Reproduced against the audited source; not changed by the UI readability pass."
+    },
+    {
+      "priority": "P2",
+      "problem": "Unframed letter plus Enter in a single tty read is conservatively interpreted as paste and does not submit",
+      "status": "open",
+      "file": "src/tui/keys.mjs",
+      "evidence": ".review/validation/live-independent-repro.log",
+      "scope": "The unframed multiline safety heuristic depends on read boundaries. Confirmed as an input reliability limitation; no permission action was exercised."
+    }
+  ],
+  "verification": {
+    "syntax": "pass",
+    "full_suite": {
+      "tests": 840,
+      "passed": 840,
+      "failed": 0,
+      "skipped": 0
+    },
+    "visual_frames": {
+      "reviewed": 17,
+      "structural_failures": 0,
+      "structural_findings": 0,
+      "gallery": ".review/frames/index.html"
+    },
+    "real_pty_paths": [
+      "launch",
+      "atomic multiline paste",
+      "create once",
+      "provider selection",
+      "permission allow/reject",
+      "decision answer and continuation",
+      "saved result and diff",
+      "failed save recovery",
+      "context help and draft return",
+      "resize and tiny-window recovery",
+      "clean detach and signals",
+      "startup-error restoration"
+    ],
+    "evidence": ".review/validation/",
+    "live_provider": {
+      "provider": "codex",
+      "harness_version": "0.166.0",
+      "task_id": 1,
+      "status": "ready",
+      "duration_seconds": 136,
+      "workspace": ".review/live/0x2f-input-audit",
+      "checkout": ".review/live/0x2f-input-audit/.work/worktrees/001-audit-0x2f-terminal-input-safety",
+      "observed_changed_files": [
+        "SECURITY-AUDIT.md",
+        "terminal-input-repro.test.mjs"
+      ],
+      "source_edits": false,
+      "reproduction_checks": 3,
+      "reproduced_reliability_findings": 2,
+      "conditional_security_risk": "Paste-to-action exposure outside recognized framing remains unverified on a live terminal; not a confirmed vulnerability.",
+      "log": ".review/validation/live-audit.log",
+      "independent_reproduction": ".review/validation/live-independent-repro.log",
+      "installed_ui_frames": ".review/live/frames/final-live-*.svg"
+    },
+    "evidence_scope": "Aggregate findings are committed; raw captures, tasks and logs remain local in ignored .review/ and .work/ directories."
+  },
+  "boundaries": [
+    "Unsent new-task drafts are kept only for the current TUI session.",
+    "Deterministic provider fixtures validate UI and persistence, not real-provider sign-in or model access.",
+    "The existing renderer still needs a dedicated full Unicode terminal-cell-width pass for CJK, combining marks and complex emoji; editor movement/deletion is grapheme-aware.",
+    "This pass ran on macOS PTYs; Linux, SSH/tmux and screen-reader acceptance were not requalified.",
+    "The live qualification covers one real Codex source-audit task. Its two reproduced input reliability findings remain open; it is not a clean security-audit verdict."
+  ],
+  "local_installation": {
+    "command": "2f (global npm installation)",
+    "status": "installed_source_matches_reviewed_tree_and_both_pty_flows_pass",
+    "pty_tests_passed": 2
+  },
+  "source_tui_sha256_algorithm": "sha256 of sorted relative path, NUL, file bytes, NUL for src/tui/*.mjs"
+}

@@ -4,6 +4,30 @@
 
 `2f --help` is the command reference. Run commands in the Task's workspace.
 
+Open `2f tui`, press `n`, type or paste the task, choose a provider with
+Tab / Shift+Tab, then press Enter to start one task. Paste and its line breaks
+never submit. The selected provider shows executable discovery, not sign-in
+or model authorization; those belong to the harness.
+
+Use arrows, Home/End and Delete to edit; Ctrl+N inserts a newline (Shift+Enter
+also works where the terminal distinguishes it). PgUp/PgDn reviews a long
+draft while START remains visible. Esc keeps a new-task draft in the current
+TUI session; an unsent draft is not persisted across exiting the TUI.
+
+F1 (or Ctrl+G) opens scrollable help from any text field without losing the draft. For
+notes and answers it also shows the complete draft, and failed actions retain
+their full error there. Esc returns to the previous view. `r` reads saved
+results, `d` shows changes, `s` requests cancellation, and `q` detaches while
+runs continue. The minimum interactive size is 60×18; 80×24 and larger are
+the main review sizes. Below the minimum, task actions are disabled until
+resize; q / Ctrl+C still exit.
+
+The task pane puts the reported conclusion, changed files and reported checks
+together. These checks are the provider's claims; `r` opens the complete saved
+report and recorded command evidence. Long command output follows the written
+result. Highlighted keys and neutral action labels use the same styling across
+the composer, task actions, help, search and review screens.
+
 | Action | Command / meaning |
 | --- | --- |
 | Create | `2f new "brief" --provider <id>`; prints the persisted ID and reopen command |
