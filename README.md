@@ -233,10 +233,14 @@ processes survive, rerun refuses until that previous process group exits.
 ## One task, many runs
 
 
-<img width="1120" alt="0x2F 0.2.0 Web interface in Dark, with a filled activity trace and visible live marker" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/web-dark.png" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/web-dark.jpg">
+  <img width="1120" alt="0x2F 1.0.0 Web: a completed encryption and terminal review beside an active theme check" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/web-light.jpg">
+</picture>
 
-Current Dark interface with demonstration data. The filled marks show reported
-activity; they are not an invented completion percentage.
+Real Codex release-review tasks. The result records 18 passing checks on each
+of Node 20 and 26; the activity lane shows events from the running theme check.
+Images follow your light or dark preference.
 
 Every execution is recorded as a **run** under the task, so the same task can
 be run again — through a different harness, for comparison:
@@ -269,9 +273,15 @@ part of the next run's context, with no manual copying. The original
 selected task in full on the right, and — pinned to the bottom of the detail
 pane — the one action that task is waiting for.
 
-<img width="960" alt="Current dark 0x2F TUI: READY result, original request and task controls" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/tui-dark.svg" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/tui-dark.jpg">
+  <img width="1120" alt="0x2F 1.0.0 TUI: real task history, saved notes and a working run with measured progress" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/tui-light.jpg">
+</picture>
 
-Captured from the real TUI on a PTY with deterministic demonstration providers.
+Captured from the installed TUI on a real 140 × 42 PTY with Codex. The 43%
+readout compares elapsed time with this task’s previous run; it is an estimate,
+not proof of completion. Terminal cells are rendered with the application
+palette; this is not a native terminal font screenshot.
 
 ```bash
 2f tui                     # or: 2f tui --light
@@ -293,7 +303,7 @@ The keymap is the surface's own, not a file manager's:
 | `/` | search by title, brief or number |
 | `↵` | the one action this task is waiting for (shown bottom-left) |
 | `x` | the alternative — reject · save only · send back · drop |
-| `d` | changes — the real diff of the working tree, or the planned write |
+| `d` | inspect the saved run patch; legacy tasks use the current working-tree diff |
 | `r` | read the full request, saved result and reported checks; `[` / `]` selects a run, `i` reads its saved input, `j` / `k` scrolls, `g` / `G` jumps to either end, `esc` returns |
 | `c` | note or correct — kept on the task, carried into every later run |
 | `p` | point the next run at another provider |
@@ -310,7 +320,8 @@ READY means a result is available for review. `r` reads the provider's saved
 Evidence/Verification and their limitations, including investigations with no
 file changes. Provider-reported checks and observed command invocations are
 distinct from a separately recorded successful check receipt. `d` shows the
-current working-tree diff at viewing time; later edits may be included.
+immutable observed run patch where available. Legacy tasks use the current
+working-tree diff, which may include later edits.
 
 Notes are saved for the next run; they do not steer an already-running worker.
 On a phone, shortened commands, hidden edit parameters and ambiguous targets
@@ -340,10 +351,13 @@ a different port.
 Control 0x2F from your phone on the **same Wi-Fi** — the Mac keeps running
 the work; the phone is a compact control surface:
 
-<img width="354" alt="0x2F mobile Dark interface with a complete filled activity lane and constraint action" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v0.2.0/docs/images/mobile-dark.png" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/mobile-dark.jpg">
+  <img width="390" alt="0x2F 1.0.0 mobile view: one running theme check and three saved release-review results" src="https://raw.githubusercontent.com/probnaya-work/0x2f/v1.0.0/docs/images/1.0.0/mobile-light.jpg">
+</picture>
 
-Responsive browser capture with demonstration data; this image is not the
-separate physical-iPhone qualification.
+Responsive 390 × 844 browser capture of the same real Codex tasks, with a live
+activity lane. Physical-device qualification is recorded separately.
 
 
 ```bash

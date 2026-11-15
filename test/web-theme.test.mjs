@@ -99,8 +99,12 @@ test("ledger presentation colours stay reactive without rebuilding task DOM", ()
 test("both Web entrypoints load the blocking theme script before CSS and the app", async () => {
   for (const page of ["index.html", "pair.html"]) {
     const html = await fs.readFile(new URL("../src/web/" + page, import.meta.url), "utf8");
-    assert.ok(html.indexOf('<script src="/app/theme.js"></script>') < html.indexOf('<link rel="stylesheet"'));
-    assert.ok(html.indexOf('/app/theme.css') < html.indexOf('</head>'));
+    const script = html.indexOf('<script src="/app/theme.js"></script>');
+    const stylesheet = html.indexOf('<link rel="stylesheet"');
+    const palette = html.indexOf('/app/theme.css');
+    const headEnd = html.indexOf('</head>');
+    assert.ok(script >= 0 && stylesheet > script, page + ': blocking theme script must exist before CSS');
+    assert.ok(palette >= 0 && headEnd > palette, page + ': theme palette must exist in the head');
     assert.doesNotMatch(html, /<script[^>]*(?:async|defer)[^>]*theme\.js/);
   }
 });
