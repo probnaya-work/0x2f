@@ -4,5 +4,6 @@
   "sha256": "9ee1d61be7ee906014d536554adce3db75842742d0c14a2ec6572543fe2d90d9",
   "size": 324551,
   "files": 87,
-  "published": false
+  "published": true,
+  "registry": "https://registry.npmjs.org/0x2f/-/0x2f-1.0.0.tgz"
 }

@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "sourceFiles": 84,
+  "readmeMatches": true,
+  "allSourcesMatch": true,
+  "host": "linux",
+  "architecture": "x64",
+  "node": "v26.13.0"
+}
