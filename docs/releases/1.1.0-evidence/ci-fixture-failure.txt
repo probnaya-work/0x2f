@@ -1,0 +1,55 @@
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0855220Z ✔ actual lane width reveals real history and keeps every mark and terminal marker inside it (8.71975ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0857180Z ✔ responsive traces distinguish empty, sparse and coarse reporting without padding invented signals (0.489ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0858090Z ✔ first synchronous execution resolves System before DOMContentLoaded, for either OS scheme (5.68725ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0858760Z ✔ explicit saved theme takes precedence over OS and follows a reload (2.210625ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0859430Z ✔ returning to System follows live OS changes without rewriting preference (0.792292ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0860150Z ✔ invalid storage and unavailable storage degrade to System, with working session selection (1.653292ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0860890Z ✔ segmented choices and cross-tab changes keep controls and preference in sync (2.563333ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0861840Z ✔ ledger presentation colours stay reactive without rebuilding task DOM (1.597083ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0862480Z ✔ both Web entrypoints load the blocking theme script before CSS and the app (10.918125ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0863260Z ✔ static client bundle includes the same bootstrap and palette as the local surface (49.00625ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0872310Z ✔ both Web palettes provide contrast for prose, attention, selection and primary actions (1.528875ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.0874370Z ✔ terminal palettes retain legible prose, code, diff additions/removals and selected text (1.256958ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.1090850Z ✔ parsePorcelain: status lines become { code, path }, renames take the destination (1.708791ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.1249730Z ✔ snapshotWorktree returns null when the directory is not a git repository (17.712417ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.2215680Z ✔ changedSince reports files introduced or altered during the run (96.482542ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.3344340Z ✔ a file already dirty before the run is not re-reported when it stays dirty (112.221459ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4267170Z ✔ gitignored paths are invisible to the observation (0x2F's own .work never counts) (92.694459ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4280850Z ✔ changedSince returns null without a baseline (non-git workspace) (1.3835ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4349210Z ℹ tests 904
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4349620Z ℹ suites 0
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4349900Z ℹ pass 891
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4350240Z ℹ fail 1
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4350510Z ℹ cancelled 0
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4350860Z ℹ skipped 12
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4351180Z ℹ todo 0
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4351480Z ℹ duration_ms 100894.587709
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4363940Z 
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4365130Z ✖ failing tests:
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4365640Z 
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4366330Z test at test/task-context.test.mjs:426:1
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4376930Z ✖ DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session (788.496917ms)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4379160Z   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4380580Z   + actual - expected
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4381520Z   
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4382130Z     [
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4382850Z       'run.started',
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4383640Z       'process.observed',
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4384600Z   -   'run.completed'
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4385280Z     ]
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4385860Z   
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4386840Z       at file:///Users/runner/work/0x2f/0x2f/test/task-context.test.mjs:483:20
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4389960Z       at async file:///Users/runner/work/0x2f/0x2f/test/task-context.test.mjs:438:11
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4391850Z       at async file:///Users/runner/work/0x2f/0x2f/test/task-context.test.mjs:437:9
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4393530Z       at async file:///Users/runner/work/0x2f/0x2f/test/task-context.test.mjs:436:7
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4395950Z       at async TestContext.<anonymous> (file:///Users/runner/work/0x2f/0x2f/test/task-context.test.mjs:435:5)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4397710Z       at async Test.run (node:internal/test_runner/test:1409:7)
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4399110Z       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4404370Z     generatedMessage: true,
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4421100Z     code: 'ERR_ASSERTION',
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4428410Z     actual: [ 'run.started', 'process.observed' ],
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4429000Z     expected: [ 'run.started', 'process.observed', 'run.completed' ],
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4429560Z     operator: 'deepStrictEqual',
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4429930Z     diff: 'simple'
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4430140Z   }
+verify (macos-latest, 26)	Run npm test	2026-11-15T19:45:59.4962280Z ##[error]Process completed with exit code 1.

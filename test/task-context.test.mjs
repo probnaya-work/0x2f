@@ -356,8 +356,11 @@ async function waitForStatus(runtime, id, expected, opts = {}) {
   const { timeout = 10000, tolerate = [] } = opts;
   const ok = new Set(["working", ...tolerate]);
   const start = Date.now();
+  const { slug } = await runtime.store.findTask(id);
   while (true) {
-    const task = await runtime.store.findTask(id);
+    // READY is written before the terminal events in the worker's locked
+    // publication. Read after that publication finishes, not between writes.
+    const task = await runtime.store.withTaskLock(slug, () => runtime.store.findTask(id));
     if (task.status === expected) return task;
     if (!ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
