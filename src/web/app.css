@@ -694,3 +694,23 @@
   .mobile .m-dsection select { display: block; width: 100%; min-height: 44px; margin-top: 8px; }
   .mobile .m-abar .act { min-height: 48px; flex: 1; justify-content: center; }
 }
+/* Local continuation review stays mounted while the ledger updates. */
+.continuation-dialog {
+  box-sizing: border-box; width: min(850px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px); overflow: hidden; padding: 28px;
+  border: 1px solid var(--edge); background: var(--paper); color: var(--ink);
+  font: 16px/1.55 var(--font-prose); box-shadow: 0 20px 70px #0005;
+}
+.continuation-dialog::backdrop { background: var(--overlay, #12181db8); }
+.continuation-dialog[open] { display: flex; flex-direction: column; }
+.continuation-content { min-height: 0; overflow: auto; }
+.continuation-dialog h2 { margin: 0 0 12px; font-size: 24px; }
+.continuation-dialog h3 { margin: 24px 0 8px; font-size: 16px; }
+.continuation-dialog pre { font: 13px/1.6 var(--font-data); white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: var(--pre); }
+.continuation-dialog .continuation-prompt { max-height: 45vh; overflow: auto; }
+.continuation-dialog summary { cursor: pointer; padding: 12px 0; color: var(--accent); }
+.continuation-error { color: var(--fail); white-space: pre-wrap; max-height: 14vh; overflow: auto; }
+.continuation-scope { color: var(--muted); font-size: 14px; }
+.continuation-actions { display: flex; flex: none; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--edge); }
+.continuation-actions .act { margin: 0; }
+@media (max-width: 640px) { .continuation-dialog { padding: 18px; } }

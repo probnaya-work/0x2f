@@ -24,7 +24,7 @@
 
 import { initialState, apply, selected, visible } from "./state.mjs";
 import { snapshot } from "./model.mjs";
-import { frame } from "./view.mjs";
+import { frame, continuationScrollMax } from "./view.mjs";
 import { palette } from "./theme.mjs";
 
 const FLASH_MS = 3400;
@@ -100,6 +100,22 @@ export function createApp(runtime, opts = {}) {
     state = { ...state, busy: true };
     try {
       switch (intent.type) {
+        case "preview": {
+          const continuation = await actions.previewRerunWork(intent.id, intent.options);
+          state = { ...state, mode: "continuation", continuation, dscroll: 0 };
+          setFlash("preview ready · no run started · Enter starts, Esc returns to the task");
+          break;
+        }
+        case "preview-start": {
+          const preview = state.continuation;
+          if (!preview) break;
+          const task = await actions.rerunWork(preview.taskId, { ...preview.options, previewId: preview.previewId });
+          state = { ...state, mode: "work", continuation: null, dscroll: 0,
+            input: null, inputTaskId: null, draft: "", draftCursor: null, rerunProvider: null };
+          preferredTaskId = task.id;
+          setFlash("run " + task.runs.at(-1).run + " started with the reviewed input");
+          break;
+        }
         case "cancel": {
           await actions.cancelWork(intent.id, { executionId: intent.executionId });
           setFlash("cancellation requested · partial work stays; wait for the worker receipt", "warn");
@@ -246,6 +262,7 @@ export function createApp(runtime, opts = {}) {
       const result = apply(state, key, {
         tasks: model.tasks,
         cols: size.cols,
+        continuationMaxScroll: state.mode === "continuation" ? continuationScrollMax(state, size) : undefined,
         providerOrder,
         lookup: model.lookup
       });

@@ -52,7 +52,9 @@ Commands:
   2f new <task> [--provider <id>]   provider: auto | <id> (default from routing)
   2f status
   2f open <id> [--run <n>]
+  2f preview <id> [--provider <id>]   inspect the next run's exact input; no run starts
   2f rerun <id> [--provider <id>]   run the same task again as a new run
+                          --preview <id> starts only if the preview still matches
   2f note <id> <text>    record a constraint/correction on the task; the next
                           run's context includes it (no execution is started)
   2f allow <id>     grant the permission a task is blocked on
@@ -94,7 +96,7 @@ Routing:    .work/routing.json (default: auto | <id>, prefer: [<ids>])
 function parseFlags(args) {
   const rest = [];
   const flags = {};
-  const valueFlags = new Set(["workspace-mode", "provider", "relay", "client", "run", "port"]);
+  const valueFlags = new Set(["workspace-mode", "provider", "relay", "client", "run", "port", "preview"]);
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--") {
@@ -377,6 +379,24 @@ async function main(argv = process.argv.slice(2)) {
     return;
   }
 
+  if (command === "preview") {
+    await requireProject(base);
+    const { rest, flags } = parseFlags(args);
+    const id = Number(rest[0]);
+    if (!Number.isSafeInteger(id) || id < 1 || rest.length !== 1) throw new Error("Usage: 2f preview <id> [--provider <id>]");
+    const preview = await createRuntime(base).actions.previewRerunWork(id, { provider: flags.provider });
+    print(`#${String(id).padStart(3, "0")} ${preview.title} · NEXT RUN ${preview.run} · ${preview.provider}`);
+    print("CONTINUATION PREVIEW · no run started");
+    print(`Original request: full · User inputs: ${preview.context.userInputs} in full`);
+    for (const artifact of preview.context.artifacts) print(`Run ${artifact.run}: ${artifact.delivery}`);
+    print(`${preview.context.characters} / ${preview.context.maxChars} characters (not model tokens)`);
+    print("\nEXACT NEXT RUN INPUT\n");
+    print(preview.prompt);
+    print("\nStart this reviewed continuation:");
+    print(`2f rerun ${id}${preview.options.provider ? " --provider " + preview.options.provider : ""} --preview ${preview.previewId}`);
+    return;
+  }
+
   if (command === "rerun") {
     await requireProject(base);
     const { rest, flags } = parseFlags(args);
@@ -387,7 +407,8 @@ async function main(argv = process.argv.slice(2)) {
 
     const runtime = createRuntime(base);
     const task = await runtime.actions.rerunWork(id, {
-      provider: flags.provider
+      provider: flags.provider,
+      previewId: flags.preview
     });
     const runNumber = task.runs?.at(-1)?.run ?? 1;
 

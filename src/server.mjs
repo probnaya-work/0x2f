@@ -13,6 +13,7 @@
 //                                      the short display title is derived
 //                                      from it (core/title.mjs), never sent
 //   POST /api/tasks/:id/rerun      -> rerunWork(id, { provider?, model? })
+//   POST /api/tasks/:id/preview    -> previewRerunWork(id, { provider?, model?, input? })
 //   GET  /api/tasks/:id/runs/:n    -> getRun(id, n)      ({ ...runRecord, result })
 //   POST /api/tasks/:id/allow      -> allowWork(id)
 //   POST /api/tasks/:id/reject     -> rejectWork(id)
@@ -765,9 +766,22 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         const body = await readJsonBody(req);
         const task = await actions.rerunWork(Number(rerunMatch[1]), {
           provider: body.provider,
-          model: body.model
+          model: body.model,
+          previewId: body.previewId,
+          input: body.input
         });
         json(res, task, 201);
+        return;
+      }
+
+      // Local, authenticated read-only projection. Full task input is never
+      // added to the minimized phone/relay protocol.
+      const previewMatch = url.pathname.match(/^\/api\/tasks\/(\d+)\/preview$/);
+      if (req.method === "POST" && previewMatch) {
+        const body = await readJsonBody(req);
+        json(res, await actions.previewRerunWork(Number(previewMatch[1]), {
+          provider: body.provider, model: body.model, input: body.input
+        }));
         return;
       }
 
@@ -892,7 +906,9 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
       }
       if (url.pathname.startsWith("/api/") && url.pathname !== "/api/health") {
         if (!requireAuth(req, res, authToken, authCookieName)) return;
-        if (req.method === "POST") mutationPath = url.pathname;
+        // Preview is a read with a body. Refresh must see current context,
+        // and large prompt projections must not fill the mutation cache.
+        if (req.method === "POST" && !/^\/api\/tasks\/\d+\/preview$/.test(url.pathname)) mutationPath = url.pathname;
       }
     }
     const requestId = mutationPath ? req.headers[IDEMPOTENCY_HEADER] : null;

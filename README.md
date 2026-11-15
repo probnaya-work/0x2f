@@ -119,6 +119,16 @@ a separate CLI process; inspect a run with `2f open 14 --run 1`, or continue
 the same task with `2f rerun 14 --provider opencode` once its run has ended.
 See the [verified Codex → OpenCode example](docs/task-continuity.md).
 
+### Preview a continuation — development branch
+
+This branch adds a [next-run preview](docs/continuation-preview.md), beyond
+published 1.0.0. Inspect the exact task input, your recorded instructions and
+which prior results are full, excerpted or reference-only before starting.
+Local Web continuation opens the preview; TUI `v` and `2f preview <id>` open
+it explicitly. If the task or its context changes after review, a guarded
+start refuses and asks for a refreshed preview. Draft corrections are saved
+only when that reviewed continuation starts.
+
 To run a task with the built-in Codex provider, install the
 [Codex CLI](https://github.com/openai/codex), sign in, and select it explicitly:
 
