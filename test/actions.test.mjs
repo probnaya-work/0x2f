@@ -27,11 +27,11 @@ function fakeNode() {
     resolveWorkspace: id => (id === "local" ? "/virtual/workspace" : (() => { throw new Error("nope"); })()),
     async startExecution({ task }) {
       calls.push(["start", task.slug]);
-      return 1234;
+      return null;
     },
     async resumeExecution({ task, grant }) {
       calls.push(["resume", task.slug, grant]);
-      return 5678;
+      return null;
     },
     async cancelExecution() {},
     calls
@@ -77,7 +77,7 @@ test("createWork creates a persistent task and starts execution on the node", as
     assert.equal(task.execution.provider, "claude-code");
     assert.equal(task.execution.node, "fake-node");
     assert.equal(task.execution.workspace, "local");
-    assert.equal(task.pid, 1234);
+    assert.equal(task.pid, null, "the inert node starts no OS process");
 
     // Persisted under .work/tasks/<slug>/task.json
     const onDisk = await runtime.store.findTask(task.id);

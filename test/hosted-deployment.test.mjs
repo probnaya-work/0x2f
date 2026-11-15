@@ -106,7 +106,7 @@ test("shipped Caddy deployment serves pairing and modules, then proxies encrypte
   await fs.writeFile(configFile, JSON.stringify({ url: relayUrl, enabled: true, deviceId, deviceSecret: crypto.randomUUID(), token,
     tokenExpiresAt: new Date(Date.now() + 600_000).toISOString(), code, pairing: "pending" }), { mode: 0o600 });
   // Synthetic execution isolates the deployment contract from model accounts.
-  const node = { id: "fixture", resolveWorkspace: () => base, async startExecution() { return 111; } };
+  const node = { id: "fixture", resolveWorkspace: () => base, async startExecution() { return null; } };
   const runtime = createRuntime(base, { node });
   tailer = createTailer({ interval: 20, emit: event => runtime.events.emit(event), readLines: async () => {
     const tasks = await runtime.store.listTasks();

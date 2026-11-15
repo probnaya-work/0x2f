@@ -51,11 +51,11 @@ function fakeNode() {
     resolveWorkspace: () => "/virtual/workspace",
     async startExecution({ task }) {
       calls.push(["start", task.slug]);
-      return 4242;
+      return null;
     },
     async resumeExecution({ task, grant }) {
       calls.push(["resume", task.slug, grant]);
-      return 4243;
+      return null;
     },
     async cancelExecution() {},
     calls
