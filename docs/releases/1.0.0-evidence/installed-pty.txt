@@ -1,4 +1,4 @@
-✔ PTY: read a no-change investigation, partial checks, full intent, old run and exact input before acceptance (3755.543791ms)
+✔ PTY: read a no-change investigation, partial checks, full intent, old run and exact input before acceptance (6326.966584ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 1
@@ -6,4 +6,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 13228.223
+ℹ duration_ms 16110.145167

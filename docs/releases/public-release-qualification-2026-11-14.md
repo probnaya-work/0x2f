@@ -1,24 +1,23 @@
 # 0x2F public release qualification — 2026-11-14
 
-## Current prepared package: 1.0.0 — 2026-11-15
+## Current package: 1.0.0 — 2026-11-15
 
-**First-use evaluation — GO** for checked local CLI/TUI/desktop scope.
-**Public release — NO-GO until the actual GitHub CI run passes.**
-The exact local core archive is prepared and its local checks pass.
-Phone companion and operator self-hosting stay experimental; supported-phone
-and operated-service claims remain NO-GO pending physical/HTTPS checks.
+**First-use evaluation — GO. Public release — GO for the qualified local core.**
+Phone companion and operator self-hosting remain experimental; supported-phone
+and operated-relay claims remain NO-GO pending physical/HTTPS checks.
 
-The unpublished stable archive has SHA256
-`cb0e32d079df52107f27fcd897790e3fd001060520a6a50e6fe800d3be58447f`.
+The exact stable archive has SHA256
+`9ee1d61be7ee906014d536554adce3db75842742d0c14a2ec6572543fe2d90d9`.
 All six complete macOS/Linux Node 20/24/26 suites pass with zero failures,
 as do separate-prefix and empty-HOME/offline installation, installed PTY,
 37 terminal captures and upgrade from 0.3.0 with unchanged task bytes.
-[Exact stable qualification](1.0.0-qualification.md).
+Both actual GitHub workflows for the final executable/test tree passed.
+[Exact stable qualification](1.0.0-qualification.md) ·
+[Distribution record](1.0.0-handoff.md).
 
-The owner reports the phone unavailable: exact-final physical tests are
-NOT RUN. The website and docs are prepared separately for the same release.
-Actual GitHub CI, registry publication and site rollout remain outstanding;
-no commit, push, tag or production deployment has occurred.
+The owner approved real-task screenshots in both themes. Exact-final physical
+phone checks remain NOT RUN because the device was unavailable. Earlier
+candidate receipts below retain their original attribution.
 
 ## Previous candidate: 1.0.0-rc.1 — 2026-11-15
 

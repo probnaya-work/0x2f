@@ -1,0 +1,51 @@
+{
+  "approved": "2026-11-15",
+  "provider": "codex",
+  "harnessVersion": "codex-cli 0.166.0",
+  "terminalCapture": "Actual installed 2f tui on a 140x42 PTY. Unmodified ANSI cell grid rendered to SVG with the actual palette; captured in browser. Not a native terminal font screenshot.",
+  "mobileCapture": "Responsive browser preview, not a physical iPhone test.",
+  "screenshots": [
+    {
+      "file": "web-result-dark.jpg",
+      "width": 1280,
+      "height": 880,
+      "capturedAtUtc": "2026-11-15T03:22:45.967854+00:00",
+      "sha256": "13043d15260289aa067bfdca746619da184698e92a9f59d8f085163b7e1a0d99"
+    },
+    {
+      "file": "web-result-light.jpg",
+      "width": 1280,
+      "height": 880,
+      "capturedAtUtc": "2026-11-15T03:22:44.949792+00:00",
+      "sha256": "071cb6cded867921f26021c8620cdb818e3a09d265d98964ecb64ab0eca98f01"
+    },
+    {
+      "file": "tui-progress-dark.jpg",
+      "width": 1120,
+      "height": 630,
+      "capturedAtUtc": "2026-11-15T03:22:33.223203+00:00",
+      "sha256": "6fae9458192ed78f5966b43c9bc130ead4ca06192e31211accc7cecb057f843c"
+    },
+    {
+      "file": "tui-progress-light.jpg",
+      "width": 1120,
+      "height": 630,
+      "capturedAtUtc": "2026-11-15T03:22:34.420424+00:00",
+      "sha256": "bbee127d845d0c11f6f57cab2d844e4e66e3211d7973469e9e42536466754103"
+    },
+    {
+      "file": "mobile-tasks-dark.jpg",
+      "width": 390,
+      "height": 844,
+      "capturedAtUtc": "2026-11-15T03:22:59.961902+00:00",
+      "sha256": "08091d6cacebf4b9d6d002b171a3090dd9c902caf296f851dc37146b33d430dd"
+    },
+    {
+      "file": "mobile-tasks-light.jpg",
+      "width": 390,
+      "height": 844,
+      "capturedAtUtc": "2026-11-15T03:23:00.825078+00:00",
+      "sha256": "313eca7a018a99ce3c241839d9dc458c6f55d739905d4dc6015acce501518c32"
+    }
+  ]
+}

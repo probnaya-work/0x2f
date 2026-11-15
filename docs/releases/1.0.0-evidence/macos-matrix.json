@@ -2,16 +2,19 @@
   {
     "node": "v20.20.2",
     "exitCode": 0,
-    "seconds": 45.4
+    "seconds": 39.8,
+    "retry": true,
+    "initialFailure": "Unlocked ownership-test fixture raced process observation; fixture now uses task lock",
+    "intermediateInvocationFailure": "Offline npx exported offline npm mode into a fresh-cache installation test; final run uses the cached Node binary directly"
   },
   {
     "node": "v24.22.3",
     "exitCode": 0,
-    "seconds": 39.8
+    "seconds": 50.5
   },
   {
     "node": "v26.13.1",
     "exitCode": 0,
-    "seconds": 40.8
+    "seconds": 51.4
   }
 ]

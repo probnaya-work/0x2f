@@ -1,12 +1,8 @@
 {
   "version": "1.0.0",
-  "sha256": "cb0e32d079df52107f27fcd897790e3fd001060520a6a50e6fe800d3be58447f",
-  "totalFiles": 87,
-  "sourceFiles": 84,
-  "installedMatch": true,
-  "readmeMatch": true,
-  "installHooks": false,
-  "changedSourceSinceRc1": [
-    "src/providers/acp.mjs"
-  ]
+  "archive": "0x2f-1.0.0.tgz",
+  "sha256": "9ee1d61be7ee906014d536554adce3db75842742d0c14a2ec6572543fe2d90d9",
+  "size": 324551,
+  "files": 87,
+  "published": false
 }
