@@ -1,0 +1,17 @@
+{
+  "version": "1.1.0",
+  "date": "2026-11-15",
+  "registry": "https://registry.npmjs.org/",
+  "tarball": "https://registry.npmjs.org/0x2f/-/0x2f-1.1.0.tgz",
+  "initialTarballNegativeCacheSeconds": 300,
+  "downloadVerificationQuery": "verification=20261115",
+  "sha256": "39ee39b9c7d1f6f892a373da08af0f5b514bc68c648ac24d8d08795fd0a31ef4",
+  "sha1MatchesRegistry": true,
+  "sha512MatchesRegistry": true,
+  "publicArchiveMatchesQualifiedArchive": true,
+  "files": 87,
+  "macPublicInstallAllFilesMatch": true,
+  "unmodifiedTarballUrlAlsoVerified": true,
+  "ordinaryRegistryInstallMacOS": true,
+  "ordinaryRegistryInstallLinux": true
+}
