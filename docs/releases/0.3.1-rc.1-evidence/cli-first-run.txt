@@ -1,0 +1,30 @@
+#001 · RUN 01 — Codex
+
+Provider     Codex
+Node         local
+Model        —
+Started      2026-11-14T14:36:52.648Z
+Completed    2026-11-14T14:37:16.441Z
+Duration     24s
+Outcome      READY
+Session      01a1da7d-6630-7a50-84e9-89cae4c7f0b8
+Attempts     1
+
+## Result
+
+`add` now returns the sum of its arguments, and `node check.mjs` passes.
+
+## Evidence
+
+[check.mjs](/Users/bogart/Dev/PROBNAYA/0x2f-audit-evidence-20261114/first-use/.work/worktrees/001-fix-add-in-sum-mjs-so-check-mjs-passes/check.mjs:3) expects `add(2, 3)` to return `5`. Before the fix, it returned `-1`.
+
+## Changes
+
+Replaced subtraction with addition in [sum.mjs](/Users/bogart/Dev/PROBNAYA/0x2f-audit-evidence-20261114/first-use/.work/worktrees/001-fix-add-in-sum-mjs-so-check-mjs-passes/sum.mjs:1), the only modified file.
+
+## Verification
+
+`node check.mjs` exited successfully and printed `arithmetic check passed`. `git diff --check` passed.
+
+## Needs human decision
+REQUIRED: no

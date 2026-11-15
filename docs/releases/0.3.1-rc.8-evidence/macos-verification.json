@@ -1,0 +1,9 @@
+{
+  "node": "v26.11.1",
+  "tests": 881,
+  "passCount": 880,
+  "failCount": 0,
+  "skipCount": 1,
+  "caddy": "2.10.2 loopback",
+  "artifactSha256": "c3bc75e58b8785f8688507b3dca97a9376f80a72fd111a564e7c7bc599b4947a"
+}

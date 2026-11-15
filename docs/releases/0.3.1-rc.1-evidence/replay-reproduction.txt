@@ -1,0 +1,39 @@
+✖ remote mutations persist an uncertainty receipt before effects and a final ack before responding (174.199917ms)
+✖ an untrusted relay duplicating a frame while it is queued cannot repeat a mutation (462.5675ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 774.550417
+
+✖ failing tests:
+
+test at test/e2e-security.test.mjs:227:1
+✖ remote mutations persist an uncertainty receipt before effects and a final ack before responding (174.199917ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/work-e2esec-5qrtgf/.work/relay-acks.json'
+      at Object.command (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/e2e-phone.mjs:116:19)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/e2e-security.test.mjs:237:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    status: 500
+  }
+
+test at test/e2e-security.test.mjs:243:1
+✖ an untrusted relay duplicating a frame while it is queued cannot repeat a mutation (462.5675ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/e2e-security.test.mjs:263:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

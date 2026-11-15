@@ -34,3 +34,17 @@ test("incomplete selectors refuse before creating work, rerunning, pairing or la
     await fs.rm(base, { recursive: true, force: true });
   }
 });
+
+test("misspelled options refuse before executing, and command help never creates work", async t => {
+  const base = await fs.mkdtemp(path.join(os.tmpdir(),"work-unknown-flags-"));
+  t.after(()=>fs.rm(base,{recursive:true,force:true}));
+  await exec(process.execPath,[cli,"init"],{cwd:base});
+  for (const args of [["new","Task","--providre","codex"],["ui","--prot","4648"],["pair","--clinet","https://example.com"],["open","1","--rnu","1"]]) {
+    await assert.rejects(exec(process.execPath,[cli,...args],{cwd:base}),error=>error.code===1 && /Unknown option:/.test(error.stderr));
+  }
+  const help=await exec(process.execPath,[cli,"new","--help"],{cwd:base});
+  assert.match(help.stdout,/Commands:/);
+  assert.equal((await createStore(base).listTasks()).length,0);
+  await assert.rejects(fs.access(path.join(base,".work/ui.log")));
+  await assert.rejects(fs.access(path.join(base,".work/relay.json")));
+});

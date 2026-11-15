@@ -30,7 +30,9 @@ test('a timed-out project check cannot strand a resistant descendant after its o
  await fs.writeFile(path.join(base,'.work/providers/fixture.json'),JSON.stringify({id:'fixture',displayName:'fixture',transport:'command',command:[process.execPath,'-e',"console.log('ready')",'{prompt}']}));
  const pidFile=path.join(base,'check-child.pid');
  const command=`const fs=require('node:fs');const {spawn}=require('node:child_process');const c=spawn(process.execPath,['-e',"process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"],{stdio:'ignore'});fs.writeFileSync(${JSON.stringify(pidFile)},String(c.pid));setInterval(()=>{},1000);`;
- await fs.writeFile(path.join(base,'.work/acceptance.json'),JSON.stringify({runOnReady:true,commands:[{id:'timeout',argv:[process.execPath,'-e',command],timeoutMs:200}]}));
+ // Leave time for Node to launch the resistant descendant under the full
+ // parallel suite; the assertion must exercise group cleanup, not startup.
+ await fs.writeFile(path.join(base,'.work/acceptance.json'),JSON.stringify({runOnReady:true,commands:[{id:'timeout',argv:[process.execPath,'-e',command],timeoutMs:1500}]}));
  const rt=createRuntime(base),task=await rt.actions.createWork({brief:'check timeout ownership',provider:'fixture'});
  let done;const deadline=Date.now()+10000;while(Date.now()<deadline){done=await rt.store.findTask(task.id);if(done.status==='ready')break;await delay(50);}
  assert.equal(done.status,'ready');assert.match(done.runs[0].checks[0].status,/^timeout/);

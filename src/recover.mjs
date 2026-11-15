@@ -24,6 +24,7 @@
 // task reruns normally (rerunWork only refuses while a task is "working").
 
 import path from "node:path";
+import fsSync from "node:fs";
 import { executionAlive } from "./core/execution.mjs";
 import { createStore } from "./core/store.mjs";
 import { applyOutcome } from "./core/lifecycle.mjs";
@@ -43,6 +44,16 @@ export function pidAlive(pid, kill = process.kill) {
   if (!Number.isInteger(pid) || pid <= 0) return false;
   try {
     kill(pid, 0);
+    if (process.platform === "linux" && kill === process.kill) {
+      try {
+        const stat = fsSync.readFileSync(`/proc/${pid}/stat`, "utf8");
+        const state = stat.slice(stat.lastIndexOf(")") + 2).split(" ")[0];
+        return state !== "Z" && state !== "X";
+      } catch (error) {
+        if (error.code === "ENOENT" || error.code === "ESRCH") return false;
+        // An unreadable process table is not evidence of death.
+      }
+    }
     return true;
   } catch (error) {
     return error?.code === "EPERM";
@@ -56,6 +67,25 @@ export function processGroupAlive(pgid, kill = process.kill) {
   if (process.platform === "win32" || !Number.isSafeInteger(pgid) || pgid <= 0) return false;
   try {
     kill(-pgid, 0);
+    if (process.platform === "linux" && kill === process.kill) {
+      // kill(0) includes unreaped zombies. They cannot execute or fork, and
+      // must not block recovery forever. Keep refusing if ANY live member
+      // remains, or if process-table access prevents a complete observation.
+      try {
+        let unknown = false;
+        for (const pid of fsSync.readdirSync("/proc")) {
+          if (!/^\d+$/.test(pid)) continue;
+          try {
+            const stat = fsSync.readFileSync(`/proc/${pid}/stat`, "utf8");
+            const fields = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
+            if (Number(fields[2]) === pgid && fields[0] !== "Z" && fields[0] !== "X") return true;
+          } catch (error) {
+            if (error.code !== "ENOENT" && error.code !== "ESRCH") unknown = true;
+          }
+        }
+        return unknown;
+      } catch { /* conservative existence result below */ }
+    }
     return true;
   } catch (error) {
     return error?.code === "EPERM";

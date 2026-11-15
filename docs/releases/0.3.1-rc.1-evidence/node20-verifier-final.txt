@@ -1,0 +1,15 @@
+TAP version 13
+# Subtest: phone verifier derives the host key from the CLI's grouped display code
+ok 1 - phone verifier derives the host key from the CLI's grouped display code
+  ---
+  duration_ms: 206.8925
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 284.134208

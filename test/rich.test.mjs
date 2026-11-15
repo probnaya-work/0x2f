@@ -14,6 +14,17 @@ import { parseInline, parseRich } from "../src/web/ledger.mjs";
 const BLOCK_TYPES = new Set(["heading", "paragraph", "list", "code"]);
 const TOKEN_TYPES = new Set(["text", "code", "bold"]);
 
+test("bare check commands get code typography without swallowing prose or interpreting markup", () => {
+  for (const command of ["npm test", "npm run check", "npm test -- queue", "node --test", "cargo test", "pytest -q", "npx vitest run"]) {
+    assert.deepEqual(parseRich(command), [{type:"paragraph",inline:[{code:command}]}]);
+  }
+  assert.deepEqual(parseRich("- npm test")[0].items, [[{code:"npm test"}]]);
+  assert.deepEqual(parseRich("Run npm test before merging.")[0].inline, [{text:"Run npm test before merging."}]);
+  assert.deepEqual(parseRich("npm test\nrequires a configured account.")[0].inline, [{text:"npm test requires a configured account."}]);
+  const command="npm test -- '<img src=x onerror=alert(1)>'";
+  assert.deepEqual(parseRich(command)[0].inline, [{code:command}]);
+});
+
 // Every leaf of the AST, in order, as type tags. Asserts the parser never
 // emits a node type the DOM builder does not know how to render safely.
 function leafTypes(ast) {

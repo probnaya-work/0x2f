@@ -1,5 +1,6 @@
 // Text editing is presentation state. Offsets are UTF-16 (as in JS strings),
 // but movement/deletion respects whole graphemes, including pasted emoji.
+import { displayWidth, takeCells } from "./text.mjs";
 const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 export function editText(text, position, key) {
@@ -17,11 +18,11 @@ export function editText(text, position, key) {
   if (key.name === "home" || (key.ctrl && key.ch === "a")) return { text, cursor: start };
   if (key.name === "end" || (key.ctrl && key.ch === "e")) return { text, cursor: end };
   if (key.name === "up" || key.name === "down") {
-    const column = cursor - start;
+    const column = displayWidth(text.slice(start, cursor));
     const previousStart = start <= 1 ? 0 : text.lastIndexOf("\n", start - 2) + 1;
     const followingEnd = text.indexOf("\n", end + 1);
-    const target = key.name === "up" ? (start === 0 ? cursor : Math.min(start - 1, previousStart + column))
-      : (end === text.length ? cursor : Math.min(followingEnd < 0 ? text.length : followingEnd, end + 1 + column));
+    const target = key.name === "up" ? (start === 0 ? cursor : previousStart + takeCells(text.slice(previousStart, start - 1), column).length)
+      : (end === text.length ? cursor : end + 1 + takeCells(text.slice(end + 1, followingEnd < 0 ? text.length : followingEnd), column).length);
     return { text, cursor: bounds.findLast(n => n <= target) ?? 0 };
   }
   if (key.name === "backspace") return replace(prev, cursor);
@@ -34,14 +35,17 @@ export function editText(text, position, key) {
 export function editorRows(text, position, width) {
   const cursor = Math.max(0, Math.min(position ?? text.length, text.length));
   const rows = [""];
+  let used = 0;
   let caret = { row: 0, col: 0 };
   for (const part of segmenter.segment(text)) {
-    if (rows.at(-1).length >= width) rows.push("");
+    const shown = part.segment === "\t" ? "    " : part.segment;
+    const cells = part.segment === "\n" ? 0 : displayWidth(shown);
+    if (used >= width || (used > 0 && used + cells > width)) { rows.push(""); used = 0; }
     if (part.index === cursor) caret = { row: rows.length - 1, col: rows.at(-1).length };
-    if (part.segment === "\n") rows.push("");
-    else rows[rows.length - 1] += part.segment;
+    if (part.segment === "\n") { rows.push(""); used = 0; }
+    else { rows[rows.length - 1] += shown; used += cells; }
   }
-  if (rows.at(-1).length >= width) rows.push("");
+  if (used >= width) rows.push("");
   if (cursor === text.length) caret = { row: rows.length - 1, col: rows.at(-1).length };
   return { rows, caret };
 }

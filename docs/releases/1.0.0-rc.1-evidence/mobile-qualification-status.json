@@ -1,0 +1,13 @@
+{
+  "candidate": "1.0.0-rc.1",
+  "artifactSha256": "01e69a26dedf35c06daa11b992c488d817598374421bad3eca404296039cfdad",
+  "runtimeInstalled": true,
+  "fixture": "synthetic LAN companion",
+  "physicalObservation": "NOT RUN",
+  "requestedCheck": "Create/open a result and return after 30 seconds locked; not the full 60-second checklist",
+  "browserVersion": "not recorded",
+  "android": "NOT RUN",
+  "operatedHttps": "NOT RUN",
+  "reason": "Owner reported the phone is unavailable",
+  "updatedAt": "2026-11-15"
+}

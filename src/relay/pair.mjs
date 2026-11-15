@@ -87,6 +87,18 @@ export function validateRelayUrl(relayUrl) {
   return "Relay URL must use https:// (http:// is allowed only for localhost and private-LAN development).";
 }
 
+export function validateClientOrigin(value, { lan = false } = {}) {
+  let parsed;
+  try { parsed = new URL(value); }
+  catch { return "Client origin is not a valid URL."; }
+  if (parsed.username || parsed.password || parsed.pathname !== "/" || parsed.search || parsed.hash) {
+    return "Client origin must contain only scheme, hostname and optional port, without credentials, path, query or fragment.";
+  }
+  if (parsed.protocol === "https:") return null;
+  if (parsed.protocol === "http:" && (LOOPBACK_HOSTS.has(parsed.hostname) || (lan && isPrivateLanIp(parsed.hostname)))) return null;
+  return "Client origin must use https:// (http:// is allowed only for localhost development or default LAN pairing).";
+}
+
 // Rotate the device credential at the relay: authorize with the CURRENT
 // deviceSecret, present the nextSecret + a fresh one-time token. The relay
 // retires every old session and token and registers the new token.
@@ -168,8 +180,11 @@ export async function pairDevice({
     relayUrl = `http://${lanIp}:${lanPort}`;
     clientOrigin = relayUrl;
   } else {
-    relayUrl = (url ?? cfg.url ?? defaultRelayUrl()).replace(/\/+$/, "");
-    clientOrigin = (client ?? cfg.clientOrigin ?? defaultClientOrigin()).replace(/\/+$/, "");
+    // Explicit environment overrides saved config. Never substitute a LAN
+    // client or an unoperated example domain into a hosted trust ceremony.
+    const hosted = cfg.transport === "lan" ? {} : cfg;
+    relayUrl = (url ?? (defaultRelayUrl() || hosted.url) ?? "").replace(/\/+$/, "");
+    clientOrigin = (client ?? (defaultClientOrigin() || hosted.clientOrigin) ?? "").replace(/\/+$/, "");
   }
   if (!relayUrl) {
     throw new Error(
@@ -183,8 +198,11 @@ export async function pairDevice({
   // mode the relay never serves it — the E2E trust surface is outside the
   // relay's control. On the LAN the Mac itself serves both (it IS the trusted
   // party there); local development can pass `--client http://127.0.0.1:<port>`.
-  if (!/^https?:\/\//.test(clientOrigin)) {
-    throw new Error("Client origin must start with https:// (or http:// for localhost).");
+  if (!clientOrigin) throw new Error("Client origin is required — pass --client <https://client.example.com>; no hosted service is supplied.");
+  const clientError = validateClientOrigin(clientOrigin, { lan: transport === "lan" });
+  if (clientError) throw new Error(clientError);
+  if (transport === "hosted" && new URL(clientOrigin).origin === new URL(relayUrl).origin) {
+    throw new Error("Hosted client and relay must use separate origins; the relay must not serve the page that receives the pairing code.");
   }
 
   cfg.url = relayUrl;

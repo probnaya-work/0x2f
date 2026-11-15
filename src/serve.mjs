@@ -32,11 +32,6 @@ import { startServer } from "./server.mjs";
 import { createRelayAgent } from "./relay/agent.mjs";
 import { recoverInterruptedRuns } from "./recover.mjs";
 
-// How long shutdown waits for the relay agent to flush its persisted ack
-// cache before exiting. stop() fires the save without awaiting it; a short
-// grace window lets the final write land so a retried remote command can
-// never re-execute after a restart.
-const SHUTDOWN_AGENT_GRACE_MS = 150;
 // Belt-and-braces: if the server cannot close within this window, force exit.
 const SHUTDOWN_FORCE_MS = 5000;
 
@@ -124,8 +119,7 @@ export async function serveRuntime({
     info(`${signal} received — shutting down the runtime (detached workers keep running)`);
     (async () => {
       try {
-        agent.stop();
-        await new Promise(resolve => setTimeout(resolve, SHUTDOWN_AGENT_GRACE_MS));
+        await agent.stop();
       } catch (e) {
         error(`relay agent shutdown failed: ${e?.message ?? e}`);
       }

@@ -17,6 +17,7 @@ import path from "node:path";
 import { WebSocket } from "ws";
 import { createRelayServer } from "../relay/server.mjs";
 import { createRelayAgent } from "../src/relay/agent.mjs";
+import { createRemoteClient } from "../src/web/remote.mjs";
 import { createRuntime } from "../src/runtime.mjs";
 import { createTailer } from "../src/core/events.mjs";
 import { applyOutcome } from "../src/core/lifecycle.mjs";
@@ -382,6 +383,21 @@ test("a duplicate requestId returns the cached acknowledgement and never execute
   const second = await phone.command("create", { body: { brief: "One" } }, { requestId });
   assert.deepEqual(second, first);
   assert.equal(node.calls.length, 1, "the action ran exactly once");
+});
+
+test("the actual browser transport decodes serialized JSON bodies for create, answer and notes", async t => {
+  const {handle,runtime,phone,node}=await makeHarness(t);
+  const client=await createRemoteClient({relayUrl:handle.url,session:phone.session,phoneId:phone.phoneId,deviceId:phone.deviceId,key:phone.keyB64});
+  const task=await client.api('/api/tasks',{method:'POST',body:JSON.stringify({brief:'Browser-created task'})});
+  assert.equal(task.title,'Browser-created task');assert.equal(node.calls.length,1);
+  await runtime.store.updateTask({...await runtime.store.findTask(task.id),status:'needs_you',blockedOn:{type:'decision',text:'Which policy?'}});
+  await client.api(`/api/tasks/${task.id}/answer`,{method:'POST',body:JSON.stringify({answer:'Keep the existing public API'})});
+  await client.api(`/api/tasks/${task.id}/note`,{method:'POST',body:JSON.stringify({note:'Preserve all prior results'})});
+  const saved=await runtime.store.findTask(task.id);
+  assert.ok(saved.context.notes.some(n=>n.text.includes('Keep the existing public API')));
+  assert.ok(saved.context.notes.some(n=>n.text.includes('Preserve all prior results')));
+  for (const body of ['{','null','[]']) await assert.rejects(client.api('/api/tasks',{method:'POST',body}),/JSON|object/);
+  assert.equal((await runtime.store.listTasks()).length,1,'invalid bodies must not start work');
 });
 
 test("encrypted remote ALLOW cannot bypass insufficient scope, even with a fresh occurrence", async t => {

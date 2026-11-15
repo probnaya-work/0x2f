@@ -5,6 +5,7 @@
 // calls (core/actions.mjs). It contains no lifecycle, provider, or session
 // logic of its own; `2f allow` and `2f reject` are thin wrappers over
 // actions.allowWork / actions.rejectWork.
+import { print, printError } from "./core/terminal.mjs";
 import { backupWorkspace, restoreBackup } from "./backup.mjs";
 import { loadHosts, runOnHost, hostIdentity } from "./hosts.mjs";
 import { readFileSync } from "node:fs";
@@ -37,7 +38,7 @@ function packageVersion() {
 }
 
 function help() {
-  console.log(`2f — task-native coding-agent wrapper
+  print(`2f — task-native coding-agent wrapper
 
 Commands:
   2f                list today's tasks
@@ -68,7 +69,8 @@ Commands:
   2f pair [--relay <url>] [--client <url>] [--lan]   pair this execution host for phone control over
                           the same Wi-Fi: prints a phone-openable URL + one-time code
                           (default; --relay/--client or 0X2F_RELAY_URL/0X2F_CLIENT_ORIGIN
-                          pair through a hosted relay instead; --lan forces LAN;
+                          pair through a hosted relay; configure both origins;
+                          --lan forces LAN;
                           --off revokes remote access and disables the connection)
   2f providers      list execution providers (built-in + configured)
   2f ui [port]      open the Web UI (start the runtime if needed; --no-browser
@@ -115,6 +117,8 @@ function parseFlags(args) {
       flags.noBrowser = true;
     } else if (arg === "--light") {
       flags.light = true;
+    } else if (arg.startsWith("--")) {
+      throw new Error(`Unknown option: ${arg}. Use -- before literal task text beginning with --.`);
     } else {
       rest.push(arg);
     }
@@ -129,7 +133,7 @@ function parseNewArgs(args) {
 
 async function status(base) {
   await requireProject(base);
-  console.log(renderTasks(await createRuntime(base).actions.listWork()));
+  print(renderTasks(await createRuntime(base).actions.listWork()));
 }
 
 function relativeFile(base, file) {
@@ -142,81 +146,81 @@ async function openTask(id, base) {
   const runtime = createRuntime(base);
   const detail = await runtime.actions.getWork(id);
 
-  console.log(`#${String(detail.id).padStart(3, "0")} ${detail.title}\n`);
+  print(`#${String(detail.id).padStart(3, "0")} ${detail.title}\n`);
 
   const blocked = detail.blockedOn;
   if (blocked?.type === "permission") {
-    console.log("NEEDS YOU — Permission\n");
+    print("NEEDS YOU — Permission\n");
     if (blocked.live) {
       // An interactive ACP permission request: the run's session is still
       // alive, holding the request. Show only what the agent actually
       // supplied — tool/action, path, description, options.
-      console.log("Agent requested permission:\n");
-      if (blocked.tool) console.log(`  action: ${blocked.tool}`);
-      if (blocked.file) console.log(`  path:   ${relativeFile(base, blocked.file)}`);
+      print("Agent requested permission:\n");
+      if (blocked.tool) print(`  action: ${blocked.tool}`);
+      if (blocked.file) print(`  path:   ${relativeFile(base, blocked.file)}`);
       if (blocked.description && blocked.description !== blocked.tool) {
-        console.log(`  detail: ${blocked.description}`);
+        print(`  detail: ${blocked.description}`);
       }
       if (blocked.options?.length) {
-        console.log(`  options: ${blocked.options.map(o => `${o.name} (${o.kind})`).join(" · ")}`);
+        print(`  options: ${blocked.options.map(o => `${o.name} (${o.kind})`).join(" · ")}`);
       }
       if (blocked.canAllow === false || blocked.canReject === false) {
-        console.log("  (some options cannot be mapped to ALLOW/REJECT — inspect above)");
+        print("  (some options cannot be mapped to ALLOW/REJECT — inspect above)");
       }
     } else {
-      console.log(`Requested operation: ${blocked.tool ?? "not recorded"}\nTarget: ${relativeFile(base, blocked.file) ?? "not recorded"}\n`);
+      print(`Requested operation: ${blocked.tool ?? "not recorded"}\nTarget: ${relativeFile(base, blocked.file) ?? "not recorded"}\n`);
       if (blocked.plannedChange) {
-        console.log(`Planned change:\n  ${blocked.plannedChange}\n`);
+        print(`Planned change:\n  ${blocked.plannedChange}\n`);
       }
     }
-    console.log(`\n[2f allow ${detail.id}]  [2f reject ${detail.id}]  [2f close ${detail.id}]`);
+    print(`\n[2f allow ${detail.id}]  [2f reject ${detail.id}]  [2f close ${detail.id}]`);
     return;
   }
   if (blocked?.type === "decision") {
-    console.log(`NEEDS YOU — Decision\n`);
-    if (blocked.text) console.log(`${blocked.text}\n`);
+    print(`NEEDS YOU — Decision\n`);
+    if (blocked.text) print(`${blocked.text}\n`);
     // A decision is answered, not allowed/rejected — and CLOSE is always the
     // way to remove a Work from active attention.
-    console.log(`[2f answer ${detail.id} "<your answer>"]  [2f close ${detail.id}]`);
+    print(`[2f answer ${detail.id} "<your answer>"]  [2f close ${detail.id}]`);
     return;
   }
 
-  console.log(`Status: ${detail.status}${detail.status === "working" ? ` · ${providerName(detail, runtime.providers.getProvider)}` : ""}\n`);
+  print(`Status: ${detail.status}${detail.status === "working" ? ` · ${providerName(detail, runtime.providers.getProvider)}` : ""}\n`);
 
   const execution = detail.execution ?? {};
   const model = execution.model ? ` · model ${execution.model}` : "";
-  console.log(`Execution: provider ${execution.provider ?? "?"} · node ${execution.node ?? "?"}${model}`);
+  print(`Execution: provider ${execution.provider ?? "?"} · node ${execution.node ?? "?"}${model}`);
 
   // The AUTO routing decision for the current run — why 0x2F ran it here.
   // Read from the persisted run record, never reconstructed from config.
   const currentRun = detail.runs?.at(-1);
   if (currentRun?.routing?.mode === "auto") {
-    console.log(
+    print(
       `Routing:   auto → ${currentRun.provider} (${currentRun.routing.reason})`
     );
   }
-  console.log("");
+  print("");
 
   // Run history: the same task through different providers, side by side.
   // Every task has at least one run (a legacy task reads as one historical
   // run); this is inspection, never evaluation.
-  console.log(renderRuns(detail.runs ?? []));
+  print(renderRuns(detail.runs ?? []));
 
   // The task-level result survives reruns. Read the saved current run's
   // result instead, just as explicit run inspection does (including legacy).
   const result = await runtime.store.readRunResult(detail, currentRun);
   if (result.trim()) {
-    console.log(result.trim());
+    print(result.trim());
   } else {
-    console.log("No written result for this run.");
+    print("No written result for this run.");
     if (currentRun.error) {
-      console.log(currentRun.error);
+      print(currentRun.error);
     } else {
       const events = eventsForRun(await runtime.store.readEvents(detail.slug), currentRun.run);
       const trace = toSteps(detail, events, { base });
       const step = trace.steps.at(-1);
       const activity = trace.activity || (step && `${step.verb} ${step.arg}`.trim());
-      console.log(activity ? `\nProgress: ${activity}` : "\nNo activity reported for this run yet.");
+      print(activity ? `\nProgress: ${activity}` : "\nNo activity reported for this run yet.");
     }
   }
 }
@@ -229,52 +233,57 @@ async function openRun(id, runNumber, base) {
   const run = await runtime.actions.getRun(id, runNumber);
   const provider = providerLabel(run.provider, runtime.providers.getProvider);
 
-  console.log(`#${String(id).padStart(3, "0")} · RUN ${String(run.run).padStart(2, "0")} — ${provider}\n`);
+  print(`#${String(id).padStart(3, "0")} · RUN ${String(run.run).padStart(2, "0")} — ${provider}\n`);
 
   const outcome =
     { working: "WORKING", needs_you: "NEEDS YOU", ready: "READY", failed: "FAILED" }[run.outcome] ??
     String(run.outcome ?? "?").toUpperCase();
-  console.log(`Provider     ${provider}`);
-  console.log(`Node         ${run.node ?? "—"}`);
-  console.log(`Model        ${run.model ?? "—"}`);
-  console.log(`Started      ${run.startedAt ?? "—"}`);
-  console.log(`Completed    ${run.completedAt ?? "—"}`);
-  console.log(`Duration     ${fmtRunDuration(run.durationMs)}`);
-  console.log(`Outcome      ${outcome}`);
-  console.log(`Session      ${run.externalSessionId ?? "—"}`);
-  console.log(`Attempts     ${run.attempts ?? 1}`);
+  print(`Provider     ${provider}`);
+  print(`Node         ${run.node ?? "—"}`);
+  print(`Model        ${run.model ?? "—"}`);
+  print(`Started      ${run.startedAt ?? "—"}`);
+  print(`Completed    ${run.completedAt ?? "—"}`);
+  print(`Duration     ${fmtRunDuration(run.durationMs)}`);
+  print(`Outcome      ${outcome}`);
+  print(`Session      ${run.externalSessionId ?? "—"}`);
+  print(`Attempts     ${run.attempts ?? 1}`);
   if (run.requestedProvider === "auto" && run.routing) {
-    console.log(`Routed       auto → ${run.provider} (${run.routing.reason})`);
+    print(`Routed       auto → ${run.provider} (${run.routing.reason})`);
   }
-  console.log("");
+  print("");
 
   if (run.result?.trim()) {
-    console.log(run.result.trim());
+    print(run.result.trim());
   } else if (run.error) {
-    console.log(run.error);
+    print(run.error);
   } else {
-    console.log("No written result for this run.");
+    print("No written result for this run.");
   }
 }
 
 async function main(argv = process.argv.slice(2)) {
   const [command, ...args] = argv;
   const base = process.cwd();
+  const helpIndex = args.indexOf("--help");
+  if (helpIndex >= 0 && !args.slice(0, helpIndex).includes("--")) {
+    help();
+    return;
+  }
 
   if (command === "backup") {
     if (args.length !== 1) throw new Error("Usage: 2f backup <new-directory>");
-    console.log(JSON.stringify(await backupWorkspace(base,args[0]))); return;
+    print(JSON.stringify(await backupWorkspace(base,args[0]))); return;
   }
   if (command === "restore-backup") {
     if (args.length !== 2) throw new Error("Usage: 2f restore-backup <backup-directory> <new-directory>");
-    console.log(JSON.stringify(await restoreBackup(args[0],args[1]))); return;
+    print(JSON.stringify(await restoreBackup(args[0],args[1]))); return;
   }
   if (command === "hosts") {
-    console.log(`local · ${(await hostIdentity()).label}`);
-    for (const h of await loadHosts(base)) console.log(`${h.id} · pinned ${h.machineId.slice(0,12)} · ${h.workspace} · 2f on ${h.id} status`);
+    print(`local · ${(await hostIdentity()).label}`);
+    for (const h of await loadHosts(base)) print(`${h.id} · pinned ${h.machineId.slice(0,12)} · ${h.workspace} · 2f on ${h.id} status`);
     return;
   }
-  if (command === "host-identity") { console.log(JSON.stringify(await hostIdentity())); return; }
+  if (command === "host-identity") { print(JSON.stringify(await hostIdentity())); return; }
   if (command === "on") {
     if (!args[0]) throw new Error("Usage: 2f on <host-id|local> <command> [args]");
     if (args[0] === "local") return main(args.slice(1));
@@ -294,20 +303,20 @@ async function main(argv = process.argv.slice(2)) {
   }
 
   if (command === "version" || command === "--version" || command === "-v") {
-    console.log(packageVersion());
+    print(packageVersion());
     return;
   }
 
   if (command === "init") {
     const wd = await initProject();
-    console.log(`Initialized ${wd}`);
-    console.log("  project.md     describe the project once — every task prompt starts from it");
-    console.log("  rules.md       working rules for every run");
-    console.log("  knowledge.md   results you promote from finished tasks");
-    console.log("  decisions.md   past decisions, carried into future runs");
-    console.log("  providers/     manifests for extra ACP/command providers");
-    console.log("");
-    console.log('Next: 2f new "<your first task>"  ·  2f ui to open the Web UI');
+    print(`Initialized ${wd}`);
+    print("  project.md     describe the project once — every task prompt starts from it");
+    print("  rules.md       working rules for every run");
+    print("  knowledge.md   results you promote from finished tasks");
+    print("  decisions.md   past decisions, carried into future runs");
+    print("  providers/     manifests for extra ACP/command providers");
+    print("");
+    print('Next: 2f new "<your first task>"  ·  2f ui to open the Web UI');
 
     // First use: say which provider will actually run, or what to install.
     // The availability fact is the same cheap executable resolution the
@@ -318,11 +327,11 @@ async function main(argv = process.argv.slice(2)) {
       .filter(p => runtime.providers.available(p.id))
       .map(p => p.id);
     if (available.length) {
-      console.log(`Provider: ${available.join(", ")} executables detected; authorization is not checked.`);
+      print(`Provider: ${available.join(", ")} executables detected; authorization is not checked.`);
     } else {
-      console.log("No coding harness detected on PATH — install Claude Code (`claude`), Codex (`codex`),");
-      console.log("DeepSeek Harness (`dsh`), or Gemini CLI (`gemini`), or add a manifest to .work/providers/.");
-      console.log("(2f providers lists what 0x2F sees and whether each is available.)");
+      print("No coding harness detected on PATH — install Claude Code (`claude`), Codex (`codex`),");
+      print("DeepSeek Harness (`dsh`), or Gemini CLI (`gemini`), or add a manifest to .work/providers/.");
+      print("(2f providers lists what 0x2F sees and whether each is available.)");
     }
     return;
   }
@@ -347,9 +356,9 @@ async function main(argv = process.argv.slice(2)) {
 
     const task = await runtime.actions.createWork({ brief, provider, workspaceMode });
 
-    console.log(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
-    console.log(`Open: 2f open ${task.id}`);
-    console.log(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
+    print(`Created #${String(task.id).padStart(3, "0")}: ${task.title}`);
+    print(`Open: 2f open ${task.id}`);
+    print(`${providerName(task, runtime.providers.getProvider)} is running in the background.`);
     return;
   }
 
@@ -382,8 +391,8 @@ async function main(argv = process.argv.slice(2)) {
     });
     const runNumber = task.runs?.at(-1)?.run ?? 1;
 
-    console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
-    console.log(
+    print(`#${String(task.id).padStart(3, "0")} ${task.title}`);
+    print(
       `Run ${String(runNumber).padStart(2, "0")} started with ${providerName(task, runtime.providers.getProvider)} in the background.`
     );
     return;
@@ -395,18 +404,18 @@ async function main(argv = process.argv.slice(2)) {
     if (!Number.isFinite(id)) throw new Error(`Usage: 2f ${command} <id>`);
 
     const task = await createRuntime(base).actions.resumeWork(id, command);
-    console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
+    print(`#${String(task.id).padStart(3, "0")} ${task.title}`);
     if (task.live) {
       // An interactive permission request: the run's process is still alive,
       // holding the outstanding request; the grant is delivered in place and
       // the SAME execution continues.
-      console.log(
+      print(
         command === "allow"
           ? "Permission granted — continuing the run in the background."
           : "Change declined — the agent continues with the request withdrawn."
       );
     } else {
-      console.log(
+      print(
         command === "allow"
           ? "Permission granted — resuming the same session in the background."
           : "Change declined — resuming the session with the request withdrawn."
@@ -429,9 +438,9 @@ async function main(argv = process.argv.slice(2)) {
     }
 
     const task = await createRuntime(base).actions.answerWork(id, { answer });
-    console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
-    console.log("Answer recorded — it is now part of this task's context.");
-    console.log("The task stays NEEDS YOU — rerun it to continue with the answer in context, or close it.");
+    print(`#${String(task.id).padStart(3, "0")} ${task.title}`);
+    print("Answer recorded — it is now part of this task's context.");
+    print("The task stays NEEDS YOU — rerun it to continue with the answer in context, or close it.");
     return;
   }
 
@@ -449,8 +458,8 @@ async function main(argv = process.argv.slice(2)) {
     }
 
     const task = await createRuntime(base).actions.noteWork(id, { note });
-    console.log(`#${String(task.id).padStart(3, "0")} ${task.title}`);
-    console.log("Note recorded on the task — it will be included in the next run's context.");
+    print(`#${String(task.id).padStart(3, "0")} ${task.title}`);
+    print("Note recorded on the task — it will be included in the next run's context.");
     return;
   }
 
@@ -462,10 +471,10 @@ async function main(argv = process.argv.slice(2)) {
     const actions = createRuntime(base).actions;
     if (command === "changes") {
       const receipt = await actions.getRunChanges(id, flags.run);
-      console.log(receipt.available ? `${receipt.attribution}\n${receipt.patch || "No changes."}` : receipt.reason);
+      print(receipt.available ? `${receipt.attribution}\n${receipt.patch || "No changes."}` : receipt.reason);
     } else {
       await actions[command === "apply" ? "applyWork" : command === "restore" ? "restoreWork" : "cleanupWork"](id);
-      console.log(command === "apply" ? "Saved task changes applied to the original workspace." : "Checkout archived privately before cleanup. Restore from the task's workspace.tar.");
+      print(command === "apply" ? "Saved task changes applied to the original workspace." : "Checkout archived privately before cleanup. Restore from the task's workspace.tar.");
     }
     return;
   }
@@ -478,7 +487,7 @@ async function main(argv = process.argv.slice(2)) {
     const task = ["cancel", "stop"].includes(command)
       ? await actions.cancelWork(id)
       : await actions.closeWork(id, { disposition: command });
-    console.log(`#${task.id}: ${task.cancelRequested ? "Cancellation requested; wait for the worker receipt. Partial work stays; external actions are not rolled back." : task.disposition}`);
+    print(`#${task.id}: ${task.cancelRequested ? "Cancellation requested; wait for the worker receipt. Partial work stays; external actions are not rolled back." : task.disposition}`);
     return;
   }
 
@@ -490,8 +499,8 @@ async function main(argv = process.argv.slice(2)) {
     const runtime = createRuntime(base);
     const detail = await runtime.actions.getWork(id);
 
-    console.log(`#${detail.id} ${detail.title}\n`);
-    console.log(detail.result.trim() || detail.error || "No final result.");
+    print(`#${detail.id} ${detail.title}\n`);
+    print(detail.result.trim() || detail.error || "No final result.");
 
     // Interactive-only: ask about knowledge/decision promotion. With piped
     // stdin (scripting, CI) readline questions can hang on EOF, so we skip.
@@ -525,15 +534,15 @@ async function main(argv = process.argv.slice(2)) {
     }
 
     await runtime.actions.closeWork(id);
-    console.log(`Closed #${id}.`);
-    console.log("Closing does not cancel the provider. An active run may keep running or wait for permission.");
+    print(`Closed #${id}.`);
+    print("Closing does not cancel the provider. An active run may keep running or wait for permission.");
     return;
   }
 
   if (command === "providers") {
     await requireProject(base);
     const runtime = createRuntime(base);
-    console.log(renderProviders(runtime.providers.listProviders(), runtime.providers));
+    print(renderProviders(runtime.providers.listProviders(), runtime.providers));
     return;
   }
 
@@ -559,11 +568,11 @@ async function main(argv = process.argv.slice(2)) {
       port,
       open: !flags.noBrowser
     });
-    console.log(
+    print(
       `0x2F UI: ${result.url}${result.status === "reused" ? " (already running)" : ""}`
     );
     if (!result.opened) {
-      console.log(`Open ${result.url} in your browser.`);
+      print(`Open ${result.url} in your browser.`);
     }
     return;
   }
@@ -618,8 +627,8 @@ async function main(argv = process.argv.slice(2)) {
     const { flags } = parseFlags(args);
     if (flags.off) {
       await pairOff({ base });
-      console.log("Remote control revoked at the relay and disabled locally.");
-      console.log('Re-enable with: 2f pair');
+      print("Remote control revoked at the relay and disabled locally.");
+      print('Re-enable with: 2f pair');
       return;
     }
     const port = flags.port ? Number(flags.port) : 4242;
@@ -634,23 +643,23 @@ async function main(argv = process.argv.slice(2)) {
       lan: flags.lan
     });
     if (result.transport === "lan") {
-      console.log("0x2F PAIR");
-      console.log("");
-      console.log("same Wi-Fi required");
-      console.log("");
-      console.log(`  ${result.url}`);
-      console.log("");
-      console.log(`code  ${formatCode(result.code)}`);
+      print("0x2F PAIR");
+      print("");
+      print("same Wi-Fi required");
+      print("");
+      print(`  ${result.url}`);
+      print("");
+      print(`code  ${formatCode(result.code)}`);
     } else {
-      console.log("Open this URL on your phone (the pairing page is served by the");
-      console.log("client origin — never by the relay):");
-      console.log(`  ${result.url}`);
-      console.log("");
-      console.log(`Pairing code:  ${formatCode(result.code)}`);
+      print("Open this URL on your phone (the pairing page is served by the");
+      print("client origin — never by the relay):");
+      print(`  ${result.url}`);
+      print("");
+      print(`Pairing code:  ${formatCode(result.code)}`);
     }
-    console.log(`It expires ${result.expiresAt} and is one-time — a second phone re-pairs with 2f pair again.`);
+    print(`It expires ${result.expiresAt} and is one-time — a second phone re-pairs with 2f pair again.`);
     if (!result.registered) {
-      console.log("The relay has not confirmed the token yet — it will register as soon as the agent connects.");
+      print("The relay has not confirmed the token yet — it will register as soon as the agent connects.");
     }
     return;
   }
@@ -659,6 +668,6 @@ async function main(argv = process.argv.slice(2)) {
 }
 
 main().catch(error => {
-  console.error(error instanceof Error ? error.message : String(error));
+  printError(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });

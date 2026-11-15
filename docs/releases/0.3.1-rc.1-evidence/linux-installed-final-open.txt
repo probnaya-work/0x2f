@@ -1,0 +1,29 @@
+#001 Fix add in sum.mjs so node check.mjs passes.
+
+Status: done
+
+Execution: provider opencode · node local
+
+RUNS
+
+  01   codex         24s   READY
+  02   opencode      12s   READY
+
+## Result
+The previous fix is confirmed correct and complete: `add` in `sum.mjs` computes addition, the exported function signature is unchanged, and `node check.mjs` passes.
+
+## Evidence
+- `sum.mjs:1` now reads `export const add = (a,b) => a+b;` — same `add(a, b)` signature as before, only the operator changed.
+- `check.mjs:1` imports `add` and asserts `add(2,3) === 5`, then prints `arithmetic check passed`.
+- `git diff` shows exactly one changed line in `sum.mjs` (`a-b` → `a+b`), and `git status --short` lists only ` M sum.mjs`.
+
+## Changes
+None. This run only verified the existing fix; no edits were made.
+
+## Verification
+- `node check.mjs` → `arithmetic check passed` (exit success).
+- `git diff --check` → no whitespace errors.
+- `git status --short` → only `sum.mjs` modified, confirming scope.
+
+## Needs human decision
+REQUIRED: no

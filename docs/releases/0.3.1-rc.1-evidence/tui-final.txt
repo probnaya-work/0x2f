@@ -1,0 +1,28 @@
+  0x2F ~/first-use            ● 15:01:11  │ #002  Read README.md and report the exact rele…  READY
+  ! 0  ✕ 0  ✓ 1  ▶ 0  · 1                 │ ──────────────────────────────────────────────────────
+  ─────────────────────────────────────── │ TASK     open 4m · 1 run · 0 notes
+                                          │ RUN 1    CX CODEX               0:13  result available
+  READY ──────────────────────────────── 1│ ON       Aleksandrs-MacBook-Air.local · first-use
+  ❯✓ 002 Read README.md and report t… CX  │
+      no file changes reported            │ RESULT   r reads the full report
+                                          │   no file changes reported
+  CLOSED ─────────────────────────────── 1│
+   · 001 Fix add in sum.mjs so ch… OC·r2  │   first-use-20261114
+                                          │
+                                          │ REPORTED CHECKS
+                                          │   Read README.md and confirmed it contains exactly
+                                          │   one release_marker entry.
+                                          │
+                                          │ TRACE    run 1 · 2 events
+                                          │   COMMAND  COMMAN… /bin/zsh -lc "rg -n -- 'rele…  0:06
+                                          │            COMMAN… /bin/zsh -lc 'cat -n README.…  0:08
+                                          │
+                                          │
+                                          │
+                                          │
+                                          │
+                                          │ ──────────────────────────────────────────────────────
+                                          │   ↵ ACCEPT · x SEND BACK · c NOTE
+  ────────────────────────────────────────────────────────────────────────────────────────────────
+  › Review the result, then accept or send back
+  n new task · j/k select · r result · ? help · q detach · J/K scroll · / search · tab all

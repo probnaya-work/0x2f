@@ -1,0 +1,28 @@
+# 0x2F TUI frame — composer-long-light-80x24
+# state: composer   mode: composer   terminal: 80x24
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                
+  NEW TASK                                                                      
+  Nothing runs until you choose Start.                                          
+                                                                                
+  Provider    CH CHARLIE    tab change                                          
+                                                                                
+  WHAT NEEDS DOING?                                                             
+  ┌──────────────────────────────────────────────────────────────────────────┐  
+  │  Review authentication and permission boundaries.                        │  
+  │  Review authentication and permission boundaries.                        │  
+  │  Review authentication and permission boundaries.                        │  
+  │  Review authentication and permission boundaries.                        │  
+  │  Review authentication and permission boundaries.                        │  
+  │  Review authentication and permission boundaries.                        │  
+  │  FINAL AUDIT REQUIREMENT                                                 │  
+  └──────────────────────────────────────────────────────────────────────────┘  
+  Lines 22–28/28 · PgUp/PgDn review · 1246/16000 characters                     
+                                                                                
+   ↵ START    ctrl-n newline   F1 help   esc keep draft                         
+  0x2F names the task from what you write.                                      
+  ────────────────────────────────────────────────────────────────────────────  
+  › Draft · nothing has started                                                 
+  ←/→ edit   Home/End line ends   PgUp/PgDn review   F1 help                    
+                                                                                

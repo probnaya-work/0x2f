@@ -5,7 +5,11 @@ Independent Computational Laboratory
 
 # 0x2F
 
-> **0.3.0**: [release scope and upgrade/rollback](docs/releases/0.3.0.md), [execution/isolation/context contracts](docs/engineering/2026-11-02/FOUNDATIONS.md), and [commands](docs/usage.md).
+> **1.0.0 — local CLI, TUI and desktop Web.**
+> Install the versioned package using [Install](#install).
+> Local CLI, TUI and desktop Web are the release scope on macOS and Linux.
+> Phone companion and self-hosted remote access remain experimental.
+> [Release changes, support and qualification](docs/releases/1.0.0.md).
 
 0x2F is a local work router for coding agents. Give it engineering work —
 "Inspect why retries restart the whole run" — and it routes the task to a
@@ -15,7 +19,7 @@ agent sessions.**
 
 `0x2F` is hex for the ASCII `/` (47). The CLI is `2f`.
 
-Node.js ≥ 20, three dependencies (`ws`, `@noble/ciphers`, `@noble/hashes`),
+Node.js ≥ 20, four direct dependencies (`ws`, `@noble/ciphers`, `@noble/hashes`, `string-width`),
 no build step, local-first.
 
 ```text
@@ -50,13 +54,15 @@ what the agent is doing, surfaces decisions when human attention is required,
 and lets you intervene — without treating every agent session as a separate
 piece of work.
 
-**0.3.0** adds cancellation/recovery, isolated task worktrees and saved patches, independent checks, bounded continuation receipts, pinned remote-host execution and private backup/restore. Checks and human acceptance remain separate.
+Tasks support cancellation/recovery, isolated worktrees and saved patches, independent checks, bounded continuation receipts, pinned remote-host execution and private backup/restore. Checks and human acceptance remain separate.
 [Quickstart](docs/quickstart.md) · [Commands and troubleshooting](docs/usage.md) ·
 [Observed harness compatibility](docs/harness-compatibility.md) ·
-[Release scope and verification](docs/releases/0.3.0.md) · [Roadmap](docs/roadmap.md).
+[Release scope and verification](docs/releases/1.0.0.md) · [Roadmap](docs/roadmap.md).
 Supported execution hosts are macOS and Linux/POSIX with Node.js ≥20; the
-current release is checked on macOS arm64 and Lenovo/Linux x86_64. Windows
+release qualification covers macOS arm64 and Linux x86_64. Windows
 execution and an operated remote execution service are not qualified.
+Complete physical mobile browser qualification remains open;
+the responsive companion and self-hosted HTTPS path remain experimental.
 
 ## Why it exists
 
@@ -76,14 +82,23 @@ default, [Codex](https://github.com/openai/codex) (`codex`),
 are also built in, and any ACP-compatible agent or headless executable
 can be added per project (see [Providers](#providers)). 0x2F itself is one
 small package with WebSocket and cryptography dependencies, no build step,
-no accounts, no daemon.
+no accounts. The Web runtime and task workers run as background processes.
+
+Install a supplied release archive into a separate prefix to use one exact
+version. This also preserves the previous executable for rollback:
 
 ```bash
-npm install -g 0x2f@0.3.0  # the `2f` command lands on your PATH
+npm install -g --prefix "$HOME/.local/0x2f-1.0-review" /absolute/path/0x2f-1.0.0.tgz
+export PATH="$HOME/.local/0x2f-1.0-review/bin:$PATH"
+2f version                       # 1.0.0
 ```
 
-`npx --yes 0x2f ...` works for a one-off, but install globally for regular
-use — `2f` is a local app you invoke repeatedly, not a one-shot script.
+At the preparation check on 2026-11-15, the public registry served 0.3.0.
+The archive above contains the security and interface changes described in
+this release. Once 1.0.0 is available in the registry, use
+`npm install -g --prefix "$HOME/.local/0x2f-1.0-review" 0x2f@1.0.0`.
+Verify `2f version` after either path; [upgrade and rollback](docs/releases/1.0.0.md#install-upgrade-and-rollback)
+cover an existing installation.
 
 ## Quick start
 
@@ -370,9 +385,10 @@ private-LAN addresses (RFC 1918) — the normal local API is never reachable
 from other devices on the network.
 
 For **remote control away from the LAN** (future use, or your own
-deployment), the hosted relay path is unchanged: `2f pair --relay https://…`
-/ `--client https://…`, or the `0X2F_RELAY_URL` / `0X2F_CLIENT_ORIGIN` env
-vars (see [`deploy/README.md`](deploy/README.md)). The hosted relay is
+deployment), use `2f pair --relay https://… --client https://…`. Supply both
+operator-owned origins (or both legacy env vars via `env`; see
+[`deploy/README.md`](deploy/README.md)). No hosted service address is filled in
+automatically. The hosted relay is
 **private infrastructure, not part of the local product**: a small standalone
 app that forwards encrypted envelopes, holds no task state, and is never
 shipped in the npm package. Deployment details live in
@@ -395,14 +411,20 @@ unless you opt into remote pairing:
 | UI runtime log | `.work/ui.log` |
 | pairing credentials (only if you pair) | `.work/relay.json` |
 
-Delete `.work/` to remove 0x2F's state from a project — your source files
-are never touched.
+Before deleting `.work/`, stop its runtime and workers and preserve any results
+or isolated task changes you need. Isolated checkouts live inside `.work/`:
+deleting it also deletes their unapplied work. Apply or privately back up that
+work first. Uninstalling the npm package leaves project state in place.
 
 ## Updating and uninstalling
 
+For an archive installation, install the next versioned archive into a fresh
+prefix and follow the [upgrade procedure](docs/releases/1.0.0.md#install-upgrade-and-rollback).
+Registry update commands select the earlier public version until publication.
+Remove the review installation explicitly from its own prefix:
+
 ```bash
-npm update -g 0x2f              # or: npm install -g 0x2f@latest
-npm uninstall -g 0x2f           # removes the CLI; project .work/ stays
+npm uninstall -g --prefix "$HOME/.local/0x2f-1.0-review" 0x2f
 ```
 
 Project `.work/` state survives uninstalls — it belongs to the project, not
@@ -511,14 +533,17 @@ task runtime                           · no task state, no credentials
 desktop UI
 ```
 
-Execution is local-only (the API binds to `127.0.0.1`, is token-authenticated
-and refuses cross-site browser requests); remote control is an outbound
-control layer, not remote execution.
+Execution stays on the selected runtime's host. The API binds to
+`127.0.0.1` by default, is token-authenticated and refuses cross-site browser
+requests. Explicit `2f on <host> ...` profiles invoke that host's own CLI over
+pinned SSH; they do not migrate tasks or provider credentials. Phone control
+uses the optional relay or the explicitly enabled LAN pairing surface.
 
 ## Current limitations
 
-- **Execution is local-only.** There is no remote execution-node transport. [One persistent Linux host](docs/host-setup.md) runs the existing runtime locally; Mac and phone control it. Remote
-  control is an outbound control layer, not remote execution.
+- **Execution belongs to its host runtime.** [A persistent Linux host](docs/host-setup.md)
+  runs its own runtime and workspaces. `2f on` is explicit SSH CLI dispatch;
+  there is no automatic task migration, credential transfer or host failover.
 - **Remote control has limits.** No push notifications (the phone works while the
   app is open), no offline command queue by design; one phone at a time per
   Mac (re-pairing revokes the previous phone's session).
@@ -541,7 +566,7 @@ See the [roadmap and actual hosting status](docs/roadmap.md).
 Install the dependencies once; there is no build step:
 
 ```bash
-npm install       # ws, @noble/ciphers, @noble/hashes
+npm install       # ws, @noble/ciphers, @noble/hashes, string-width
 npm test          # the test suite (node --test, including real PTY regression)
 npm run check     # syntax-check every source and test file
 npm start         # run the CLI: node src/cli.mjs
@@ -556,12 +581,12 @@ traces a task through the whole system.
 
 [MIT](LICENSE)
 
-## Upgrade from 0.2.0
+## Upgrade from previous releases
 
 Quiesce old workers and other workspace writers before changing the executable.
 Keep the old prefix and a consistent private backup of the workspace and state.
-Use a matching0.3.0 executable to inspect/export/apply new isolated tasks; an old
-0.2.0 executable must not execute them against the original checkout. Restore
+Use the matching executable to inspect/export/apply its isolated
+tasks; an old 0.2.0 executable must not execute them against the original checkout. Restore
 uses a new directory and disables credentials, host profiles and execution
 authority; it never replays a run. Review before configuring trust again.
-See [release upgrade/rollback](docs/releases/0.3.0.md#upgrade-and-rollback).
+See [release upgrade/rollback](docs/releases/1.0.0.md#install-upgrade-and-rollback).

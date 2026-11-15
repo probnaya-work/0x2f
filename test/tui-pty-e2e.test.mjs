@@ -219,10 +219,10 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     // screen — the visual wrap is not content.)
     await session.waitForText(/NEEDS YOU · DECISION/, { timeout: 15000, label: "the decision halt" });
     await session.waitForFlatText(/Should the offline queue fall back to the same 503 policy as the live path\?/, {
-      label: "the question heading"
+      label: "the question heading", pane: "detail"
     });
-    await session.waitForFlatText(/fixed 30s delay/, { label: "the question's tradeoff prose" });
-    await session.waitForFlatText(/Aligning it to 503 plus Retry-After/, { label: "the closing prose" });
+    await session.waitForFlatText(/fixed 30s delay/, { label: "the question's tradeoff prose", pane: "detail" });
+    await session.waitForFlatText(/Aligning it to 503 plus Retry-After/, { label: "the closing prose", pane: "detail" });
     task = await waitForTask(base, 1, "needs_you");
     assert.equal(task.blockedOn.type, "decision");
     assert.ok(task.blockedOn.text.includes("Aligning it to 503 plus Retry-After"));

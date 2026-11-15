@@ -112,6 +112,8 @@ const bootstrap = readBootstrap();
 
 const state = {
   tasks: [],
+  loaded: false,
+  loadError: null,
   eventsByTask: new Map(),
   seen: new Map(),
   openId: null,
@@ -122,6 +124,7 @@ const state = {
   // the comparison. This is inspection, never evaluation.
   runSelection: [],
   runDetails: new Map(), // `${taskId}:${run}` -> { ...runRecord, result }
+  runDetailErrors: new Map(),
   routing: null,
   providersLoaded: false,
   providers: [], // [{ id, displayName }] — for display names on run rows
@@ -547,6 +550,8 @@ function recordEvent(event) {
 // and paths are relative — base stays empty so the ledger renders them as-is.
 function applySnapshot(snap) {
   state.tasks = Array.isArray(snap.tasks) ? snap.tasks : [];
+  state.loaded = true;
+  state.loadError = null;
   policy.seed(state.tasks);
   state.base = "";
   state.eventsByTask = new Map();
@@ -624,6 +629,8 @@ async function loadAll() {
     api("/api/events/history")
   ]);
   state.tasks = tasks;
+  state.loaded = true;
+  state.loadError = null;
   policy.seed(tasks); // baseline: what is already on screen never sounds
   state.base = history.base ?? "";
   state.eventsByTask = new Map();
@@ -639,6 +646,7 @@ async function loadAll() {
 }
 
 async function reloadTasks() {
+  if (!state.loaded) return loadAll();
   state.tasks = remoteClient ? await remoteClient.api("/api/tasks") : await api("/api/tasks");
   policy.seed(state.tasks);
   render();
@@ -795,12 +803,14 @@ function selectRun(taskId, run) {
 async function ensureRunDetail(taskId, run, force = false) {
   const key = taskId + ":" + run;
   if (!force && state.runDetails.has(key)) return;
+  if (state.runDetailErrors.delete(key)) render();
   try {
     const detail = await api("/api/tasks/" + taskId + "/runs/" + run);
     state.runDetails.set(key, detail);
     render();
-  } catch {
-    /* the task may have been closed underneath us */
+  } catch (error) {
+    state.runDetailErrors.set(key, error.message || "Check the connection and try again.");
+    render();
   }
 }
 
@@ -890,7 +900,7 @@ function renderRunPanel(taskId, run, events, accent) {
           ...files.map(f => el("div", { class: "run-file", text: f }))
         ])
       : null,
-    result
+    !detail ? renderDetailPending(taskId, run.run) : result
       ? el("div", { class: "run-result" }, [
           el("div", { class: "run-sub-k", text: "RESULT" }),
           el("div", { class: "run-result-body", "data-reader-scroll": "run-result-" + taskId + "-" + run.run, "data-focus-key": "run-result-" + taskId + "-" + run.run, tabindex: "0", role: "region", "aria-label": "Run result" }, [richBody(result)])
@@ -1034,6 +1044,7 @@ function traceLabel(t) {
 function renderTrack(row, accent, provenance = false) {
   const t = provenance ? row.provenance : row.trace;
   if (!t) return null; // answer-primary rows (ready/failed/done) carry no trace
+  if (t.total === 0 && (row.halted || provenance)) return null;
   const wrap = el("div", { class: "track-wrap" + (provenance ? " provenance" : ""), role: "img" });
   const paint = t => {
     wrap.setAttribute("aria-label", traceLabel(t));
@@ -1112,7 +1123,7 @@ function renderMiniLane(row, className, frozen = false) {
 // different name for what it is showing.
 function renderProvenance(row, accent) {
   const p = row.provenance;
-  if (!p) return null;
+  if (!p || p.total === 0) return null;
   return el("div", { class: "provenance-wrap" }, [
     el("div", { class: "provenance-k", text: p.heading }),
     renderTrack(row, accent, true)
@@ -1191,6 +1202,7 @@ function renderDecisionCard(row, accent) {
 
   const input = el("textarea", {
     class: "decision-answer",
+    "data-focus-key": "decision-draft-" + row.id,
     rows: 3,
     placeholder: "your answer to the decision…"
   });
@@ -1390,7 +1402,7 @@ function renderFilesSection(row) {
 function renderCommandsSection(row) {
   const c = row.commandsSection;
   if (!c) return null;
-  const items = c.commands.map(cmd => el("div", { class: "band-item" }, [el("span", { class: "band-arg", text: cmd })]));
+  const items = c.commands.map(cmd => el("div", { class: "band-item" }, [el("code", { class: "command-code", text: cmd })]));
   return sectionRow("COMMANDS", c.commands.length + (c.commands.length === 1 ? " command" : " commands"), items);
 }
 
@@ -1426,7 +1438,7 @@ function renderFailureBand(row) {
             copy.hintLabel
               ? el("div", { class: "failure-hint-wrap" }, [
                   el("div", { class: "failure-hint-label", text: copy.hintLabel }),
-                  el("div", { class: "failure-hint", text: copy.hint })
+                  el("code", { class: "failure-hint", text: copy.hint })
                 ])
               : null,
             el("div", { class: "failure-instruction", text: copy.instruction }),
@@ -1458,23 +1470,52 @@ function renderCheckEvidence(row, detail) {
       return `Context v${c.version} · project ${c.projectVersion?.slice(0, 12)} · ${c.characters}/${c.maxChars} characters · ${c.shortenedRuns ?? c.artifacts?.filter(a => a.delivery !== "full").length ?? 0} prior results shortened; full hashed artifacts stay on the host.`;
     })() }) : null,
     el("div", { class: "run-sub-k", text: "PROVIDER-REPORTED CHECKS" }),
-    el("div", { text: facts.verification }),
-    el("div", { class: "m-dmeta", text: facts.receipt }),
+    richBody(facts.verification),
+    el("div", { class: "m-dmeta evidence-meta", text: facts.receipt }),
     ...(detail?.runs?.at(-1)?.checks ?? []).map(r => el("details", {}, [
       el("summary", { text: `PROJECT CHECK ${r.id} · ${r.status} · exit ${r.exitCode ?? "unknown"}` }),
       el("pre", { style: { whiteSpace: "pre-wrap", overflowWrap: "anywhere" }, text: `${r.argv?.join(" ") ?? ""}\n${r.stdout ?? "Output retained on the host."}\n${r.stderr ?? ""}\nstdout SHA256 ${r.stdoutSha256 ?? "unknown"}` })
     ])),
     ...facts.receipts.map(r => el("details", {}, [el("summary", { text: `${r.command ?? "Tool output"} · exit ${r.exitCode ?? "unknown"}` }),
       el("pre", { style: { whiteSpace: "pre-wrap", overflowWrap: "anywhere" }, text: r.output ?? "Output not retained on this surface." })])),
-    el("div", { class: "m-dmeta", text: facts.commands.length ? `${facts.commands.length} observed command invocation(s) — success is not inferred; inspect COMMANDS.` : "Command invocation evidence: not recorded." })
+    el("div", { class: "m-dmeta evidence-meta", text: facts.commands.length ? `${facts.commands.length} observed command invocation(s) — success is not inferred; inspect COMMANDS.` : "Command invocation evidence: not recorded." })
   ]);
+}
+
+function renderDetailPending(id, run = null) {
+  const error = run === null ? state.detailErrors?.get(id) : state.runDetailErrors?.get(id + ":" + run);
+  return el("div", { class: "detail-status", role: "status" }, [
+    el("p", { text: error ? "Could not load this result." : "Loading result…" }),
+    error ? el("p", { class: "detail-status-note", text: error }) : null,
+    error ? el("button", {
+      type: "button", class: "act act-quiet", text: "Retry loading",
+      "data-focus-key": "retry-detail-" + id + (run === null ? "" : "-" + run),
+      disabled: state.remote && !state.macOnline ? true : undefined,
+      onClick: () => run === null ? ensureDetail(id) : ensureRunDetail(id, run, true)
+    }) : null
+  ].filter(Boolean));
+}
+
+function renderWorkspaceStatus() {
+  return el("div", { class: "workspace-status", role: "status" }, [
+    el("p", { class: "workspace-status-title", text: state.loadError ? "Could not load tasks" : "Loading tasks…" }),
+    state.loadError ? el("p", { text: state.loadError }) : null,
+    state.loadError ? el("button", {
+      type: "button", class: "act act-quiet", text: "Retry connection",
+      "data-focus-key": "retry-workspace", onClick: async () => {
+        state.loadError = null; render();
+        try { await loadAll(); }
+        catch (error) { state.loadError = error.message; render(); }
+      }
+    }) : null
+  ].filter(Boolean));
 }
 
 function renderResult(row, detail) {
   if (row.failed && row.failureKind === "auth") return renderFailureBand(row);
 
-  const body = detail && detail.result && detail.result.trim()
-    ? el("div", { class: "result-body", "data-reader-scroll": "result-" + row.id, "data-focus-key": "result-" + row.id, tabindex: "0", role: "region", "aria-label": "Written result" }, [renderCheckEvidence(row, detail), richBody(detail.result.trim())])
+  const body = !detail ? renderDetailPending(row.id) : detail.result && detail.result.trim()
+    ? el("div", { class: "result-body", "data-reader-scroll": "result-" + row.id, "data-focus-key": "result-" + row.id, tabindex: "0", role: "region", "aria-label": "Written result" }, [richBody(detail.result.trim()), renderCheckEvidence(row, detail)])
     : row.error
       ? el("div", { class: "result-body", style: { color: COLORS.fail } }, [richBody(row.error)])
       : el("div", { class: "band-pending", style: { color: COLORS.muted }, text: "no written result" });
@@ -1529,6 +1570,7 @@ const noteInputs = new Map(); // taskId -> half-typed note
 function renderNoteLine(row) {
   const input = el("input", {
     class: "note-input",
+    "data-focus-key": "note-draft-" + row.id,
     placeholder: "correction / constraint for the next run…",
     autocomplete: "off",
     spellcheck: "false"
@@ -1597,8 +1639,9 @@ function renderRow(row, accent) {
   let body;
   if (row.compact) {
     body = el(
-      "div",
-      { class: "compact", style: { padding: row.pad }, onClick: () => toggleOpen(row.id) },
+      "button",
+      { type: "button", class: "compact", "aria-expanded": "false", "aria-label": row.stateLabel + ": " + row.title + ". " + row.sub,
+        "data-focus-key": "task-row-" + row.id, style: { padding: row.pad }, onClick: () => toggleOpen(row.id) },
       [
         el("span", {
           class: "compact-title",
@@ -1619,18 +1662,18 @@ function renderRow(row, accent) {
     // has a trace and no RESULT, a ready row has RESULT/PROVENANCE and no
     // trace, a done row has only RESULT. No per-status branching is needed
     // here because ledger.mjs already decided what exists.
-    body = el("div", { style: { padding: row.pad } }, [
+    body = el("div", { class: "task-detail", style: { padding: row.pad } }, [
       el("div", { class: "detail-head", onClick: () => toggleOpen(row.id) }, [
         el("h1", { class: "detail-title", style: { fontSize: row.titleSize } }, inlineEls(parseInline(row.title))),
         el("span", { class: "detail-state", style: { color: row.stateColor }, text: row.stateLabel })
       ]),
       renderBrief(row),
-      detail?.checkout?.mode === "isolated" ? el("div", { class: "m-dmeta", text: detail.appliedTree ? "Saved isolated result applied to the original workspace." : "Result lives in an isolated checkout. Review the saved patch; use 2f apply on its host to transfer changes." }) : null,
+      detail?.checkout?.mode === "isolated" ? el("div", { class: "checkout-notice" }, inlineEls(parseInline(detail.appliedTree ? "Saved isolated result applied to the original workspace." : "Result lives in an isolated checkout. Review the saved patch; use `2f apply` on its host to transfer changes."))) : null,
       row.running || state.tasks.find(t => t.id === row.id)?.runs?.at(-1)?.blockedOn?.live || (row.done && state.tasks.find(t => t.id === row.id)?.runs?.at(-1)?.outcome === "working") ? cancelButton(row.id) : null,
       renderTrack(row, accent),
-      el("div", { class: "status-line" }, [
-        el("span", { class: "status-phase", text: row.phaseLabel }),
-        el("span", { class: "status-arg", text: row.arg }),
+      el("div", { class: "status-line" + (row.ready || row.done || row.halted ? " terminal" : "") }, [
+        row.halted ? null : el("span", { class: "status-phase", text: row.phaseLabel }),
+        row.halted ? null : el("span", { class: "status-arg", text: row.arg }),
         el("span", { class: "status-node", text: row.node }),
         el("span", { class: "status-div" }),
         el("span", { class: "status-elapsed", text: row.elapsed })
@@ -1704,7 +1747,7 @@ function renderAppearanceSettings(scope) {
     }
   }, [
     el("summary", { class: "appearance-toggle", "data-focus-key": "settings-" + scope, title: "Theme, sound and notifications" }, [
-      "SETTINGS", el("span", { class: "appearance-toggle-mark", "aria-hidden": "true", text: "+" })
+      "Settings", el("span", { class: "appearance-toggle-mark", "aria-hidden": "true", text: "+" })
     ]),
     el("div", { class: "appearance-panel" }, [
       el("div", { class: "appearance-k", text: "THEME" }),
@@ -1810,12 +1853,16 @@ let refineAbort = null;
 // reset the caret and drop a half-typed task every time an event lands.
 function buildComposer() {
   let creating = false;
+  let previousNarrow = null;
   // A textarea, not a single-line input: BRIEF produces a longer, structured
   // brief and the user must be able to review/edit it in place before START.
   // A single-line note still submits on Enter; a multi-line brief only
   // submits on the mod key (see the keydown handler below) so Enter can add
   // a line to it.
   const input = el("textarea", {
+    id: "task-brief",
+    "data-focus-key": "task-brief",
+    "aria-label": "Task brief",
     placeholder: "what needs doing?",
     autocomplete: "off",
     spellcheck: "false",
@@ -1831,10 +1878,11 @@ function buildComposer() {
   // /api/providers, so adding a provider needs no client change.
   const select = el("select", {
     class: "composer-provider",
+    "data-focus-key": "composer-provider",
     "aria-label": "execution provider",
     title: "execution provider"
   });
-  const workspaceSelect = el("select", { class: "composer-provider", "aria-label": "workspace mode", title: "Execution checkout" }, [
+  const workspaceSelect = el("select", { class: "composer-provider", "data-focus-key": "composer-workspace", "aria-label": "workspace mode", title: "Execution checkout" }, [
     el("option", { value: "auto", text: "AUTO CHECKOUT" }),
     el("option", { value: "isolated", text: "ISOLATED · COMMITTED HEAD" }),
     el("option", { value: "shared", text: "SHARED · INCLUDES DIRTY FILES" })
@@ -1845,6 +1893,7 @@ function buildComposer() {
   const refineKey = el("span", { class: "composer-key", text: "⌥↵" });
   const refineLabel = el("span", { text: "BRIEF" });
   const startKeyEl = el("span", { class: "composer-key", text: "↵" });
+  const startLabel = el("span", { text: "START" });
 
   const revertButton = el(
     "button",
@@ -1879,16 +1928,21 @@ function buildComposer() {
     const startKey = multiline ? (mac() ? "⌘↵" : "^↵") : "↵";
     startKeyEl.textContent = startKey;
 
-    let hintNodes = ["BACKGROUND JOB"];
+    input.placeholder = narrow ? "Describe the change, question or problem…" : "what needs doing?";
+    startLabel.textContent = creating ? (narrow ? "Starting…" : "STARTING…") : narrow ? "Start task" : "START";
+    workspaceSelect.options[0].textContent = narrow ? "Auto checkout" : "AUTO CHECKOUT";
+    workspaceSelect.options[1].textContent = narrow ? "Isolated · committed HEAD" : "ISOLATED · COMMITTED HEAD";
+    workspaceSelect.options[2].textContent = narrow ? "Shared · includes dirty files" : "SHARED · INCLUDES DIRTY FILES";
+    let hintNodes = narrow ? [] : ["BACKGROUND JOB"];
     let hintClass = "composer-hint";
     if (refining) {
-      hintNodes = ["REVISING… 0:" + two(refineElapsedSec) + "   ESC CANCEL"];
+      hintNodes = [narrow ? "Refining brief… 0:" + two(refineElapsedSec) : "REVISING… 0:" + two(refineElapsedSec) + "   ESC CANCEL"];
       hintClass = "composer-hint refining";
     } else if (refineError) {
       hintNodes = [refineError];
       hintClass = "composer-hint error";
     } else if (revised && !dirtySinceRefine) {
-      hintNodes = ["REVISED · REVIEW AND START"];
+      hintNodes = [narrow ? "Brief refined. Review it before starting." : "REVISED · REVIEW AND START"];
     } else if (armed) {
       // §02: the moment right before START is the moment that would have
       // prevented the dogfood incident — the destination read in the same
@@ -1898,13 +1952,13 @@ function buildComposer() {
       if (state.workspace?.label) {
         hintClass = "composer-hint workspace";
         hintNodes = [
-          "RUNS IN ",
+          narrow ? "Runs in " : "RUNS IN ",
           el("span", { class: "composer-hint-emph", text: state.workspace.label }),
-          state.node ? " ON " + state.node : ""
+          state.node ? (narrow ? " on " : " ON ") + state.node : ""
         ];
       } else {
         hintClass = "composer-hint armed";
-        hintNodes = [startKey + " START"];
+        hintNodes = [narrow ? "Ready to start on this host." : startKey + " START"];
       }
     }
     composerHint.textContent = "";
@@ -1922,12 +1976,13 @@ function buildComposer() {
     }
 
     revertButton.style.display = revised && !refining && !narrow ? "" : "none";
-    refineLabel.textContent = refineError ? "RETRY" : "BRIEF";
+    refineLabel.textContent = refineError ? (narrow ? "Retry refinement" : "RETRY") : narrow ? "Refine brief" : "BRIEF";
     if (refineButton) refineButton.disabled = refining;
-    if (startButton) startButton.disabled = refining || creating;
+    if (startButton) startButton.disabled = refining || creating || !state.loaded;
 
-    input.style.fontSize = narrow ? "16px" : multiline ? "15px" : "18px";
-    input.style.color = refining ? "#7d8892" : "#f2f5f7";
+    input.style.fontSize = "16px";
+    input.style.color = narrow ? (refining ? "var(--muted)" : "var(--ink)") : refining ? "#7d8892" : "#f2f5f7";
+    if (narrow !== previousNarrow) { autosize(); previousNarrow = narrow; }
 
     const caretBg = refining ? "#2f5fa8" : armed ? "#2f5fa8" : "#4b545c";
     composerCaret.style.background = caretBg;
@@ -1968,7 +2023,7 @@ function buildComposer() {
       }
     }
     creating = true;
-    startButton.disabled = true;
+    syncComposer();
     try {
       const task = await api("/api/tasks", {
         method: "POST",
@@ -2089,7 +2144,7 @@ function buildComposer() {
     // into a multi-line brief, Enter is a plain newline -- only the mod key
     // (or the button) submits, or the brief could never be edited past line
     // one.
-    if (event.key === "Enter" && !event.shiftKey && !input.value.includes("\n")) {
+    if (event.key === "Enter" && !isMobileWidth() && !event.shiftKey && !input.value.includes("\n")) {
       event.preventDefault();
       submit();
       return;
@@ -2120,7 +2175,7 @@ function buildComposer() {
   startButton = el(
     "button",
     { class: "composer-btn composer-start", title: "start this task" },
-    ["START", startKeyEl]
+    [startLabel, startKeyEl]
   );
   startButton.addEventListener("click", submit);
 
@@ -2131,10 +2186,11 @@ function buildComposer() {
   return el("div", { class: "composer" }, [
     el("div", { class: "composer-inner" }, [
       el("div", { class: "composer-row" }, [
+        el("label", { class: "composer-prompt", for: "task-brief", text: "What needs doing?" }),
         el("span", { class: "composer-k", text: "SUBMIT" }),
         composerCaret,
-        select,
-        workspaceSelect,
+        el("label", { class: "composer-field" }, [el("span", { class: "composer-field-label", text: "Provider" }), select]),
+        el("label", { class: "composer-field" }, [el("span", { class: "composer-field-label", text: "Workspace" }), workspaceSelect]),
         input
       ]),
       el("div", { class: "composer-acts" }, [
@@ -2177,7 +2233,7 @@ function populateProviderSelect() {
   providerSelect.replaceChildren(
     el("option", { value: "auto", text: "AUTO" }),
     ...providers.map(p => el("option", {
-      value: p.id, text: p.id.toUpperCase() + (p.available ? "" : " — UNAVAILABLE"),
+      value: p.id, text: (p.displayName ?? p.id) + (p.available ? "" : " — unavailable"),
       disabled: p.available ? undefined : true
     }))
   );
@@ -2277,9 +2333,39 @@ function keepReaderPositions() {
     for (const region of document.querySelectorAll("[data-reader-scroll]")) {
       [region, ...region.querySelectorAll(".rich-pre")].forEach((node, index) => {
         const position = positions.get(region.dataset.readerScroll + ":" + index);
-        if (position) [node.scrollTop, node.scrollLeft] = position;
+        if (position) {
+          if (node.scrollTop !== position[0]) node.scrollTop = position[0];
+          if (node.scrollLeft !== position[1]) node.scrollLeft = position[1];
+        }
       });
     }
+  };
+}
+
+// Retain the connected composer subtree while live rows change around it.
+// Removing/reinserting a textarea closes the phone keyboard and drops focus.
+function replaceChildrenKeepingConnected(parent, children) {
+  const next = children.filter(Boolean);
+  const retained = new Set(next);
+  for (const child of [...parent.childNodes]) if (!retained.has(child)) child.remove();
+  next.forEach((child, index) => {
+    if (parent.childNodes[index] !== child) parent.insertBefore(child, parent.childNodes[index] ?? null);
+  });
+}
+
+function keepFocus() {
+  const active = document.activeElement;
+  const key = active?.getAttribute?.("data-focus-key");
+  const selection = typeof active?.selectionStart === "number"
+    ? [active.selectionStart, active.selectionEnd, active.selectionDirection] : null;
+  const scroll = [active?.scrollTop ?? 0, active?.scrollLeft ?? 0];
+  return () => {
+    if (!key) return;
+    const node = document.querySelector('[data-focus-key="' + key + '"]');
+    if (!node || node.disabled || node.closest("[inert]")) return;
+    if (document.activeElement !== node) node.focus({ preventScroll: true });
+    if (selection && typeof node.setSelectionRange === "function") node.setSelectionRange(...selection);
+    [node.scrollTop, node.scrollLeft] = scroll;
   };
 }
 
@@ -2304,7 +2390,7 @@ function render() {
 
   const previousScroll = document.querySelector(".scroll");
   if (previousScroll) scrollTop = previousScroll.scrollTop;
-  const focusKey = document.activeElement?.getAttribute?.("data-focus-key") ?? null;
+  const restoreFocus = keepFocus();
 
   const head = el("div", { class: "head" }, [
     el("div", { class: "head-gutter", text: "/" }),
@@ -2321,7 +2407,10 @@ function render() {
     head,
     ...(ledger.rows.length
       ? ledger.rows.map(row => renderRow(row, accent))
-      : [el("div", { class: "empty", text: "no tasks in this workspace — submit one below" })]),
+      : [state.loaded ? el("div", { class: "empty" }, [
+          el("p", { class: "empty-title", text: "No tasks yet" }),
+          el("p", { text: "Describe a task below to start work on this host." })
+        ]) : renderWorkspaceStatus()]),
     el("div", { style: { height: "56px" } })
   ]);
 
@@ -2353,12 +2442,12 @@ function render() {
     ...(SOUND_DEMO ? [renderSoundDemo()] : []),
     ...(state.flash ? [el("div", { class: "flash", text: state.flash })] : [])
   );
-  shell.replaceChildren(...parts);
+  replaceChildrenKeepingConnected(shell, parts);
   connectTraces();
 
   scroll.scrollTop = scrollTop;
   restoreReaders();
-  if (focusKey) document.querySelector('[data-focus-key="' + focusKey + '"]')?.focus();
+  restoreFocus();
 }
 
 function renderClock() {
@@ -2371,14 +2460,17 @@ function renderClock() {
 // The expanded row shows the task's written result, which lives outside the
 // event log (getWork reads result.md). Fetch it lazily for the open task.
 state.details = new Map();
+state.detailErrors = new Map();
 async function ensureDetail(id) {
   if (id === null || id === undefined) return;
+  if (state.detailErrors.delete(id)) render();
   try {
     const detail = await api("/api/tasks/" + id);
     state.details.set(id, detail);
     render();
-  } catch {
-    /* the task may have been closed underneath us */
+  } catch (error) {
+    state.detailErrors.set(id, error.message || "Check the connection and try again.");
+    render();
   }
 }
 
@@ -2729,9 +2821,9 @@ function renderMobileOverviewToolbar(ledger, frozen) {
   if (c.working) items.push(el("span", { class: "m-count", text: "WORKING " + c.working }));
   if (c.ready) items.push(el("span", { class: "m-count", text: "READY " + c.ready }));
   if (c.failed) items.push(el("span", { class: "m-count", text: "FAILED " + c.failed }));
-  const children = [...items];
+  const children = [el("span", { class: "m-overview-title", text: "Tasks" }), ...items];
   children.push(el("button", { type: "button", class: "m-back", disabled: frozen || undefined,
-    "data-focus-key": "new-mobile-task", text: mobile.showComposer ? "HIDE DRAFT" : "NEW TASK",
+    "data-focus-key": "new-mobile-task", text: mobile.showComposer ? "Close draft" : "New task",
     onClick: () => { mobile.showComposer = !mobile.showComposer; render(); if (mobile.showComposer) composerInput?.focus(); } }));
   if (frozen) {
     children.push(el("span", { class: "m-toolbar-fill" }));
@@ -2746,7 +2838,7 @@ function renderMobileOverviewToolbar(ledger, frozen) {
 function renderMobileDetailToolbar(row, ledger, frozen) {
   const blue = row.halted;
   const children = [
-    el("button", { type: "button", class: "m-back", "data-focus-key": "all-work", onClick: closeMobileDetail, text: "‹ ALL WORK" })
+    el("button", { type: "button", class: "m-back", "data-focus-key": "all-work", onClick: closeMobileDetail, text: "‹ All tasks" })
   ];
   if (!blue && ledger.counts.needs_you) {
     children.push(
@@ -2779,7 +2871,7 @@ function renderMobileAskCard(row, frozen) {
   row = mobilePermissionRow(row);
   const acts = [];
   if (row.permAllowable) {
-    const btn = el("button", { class: "m-btn m-btn-primary", text: "ALLOW" });
+    const btn = el("button", { class: "m-btn m-btn-primary", text: "Allow" });
     btn.addEventListener("click", () => {
       btn.disabled = true;
       allow(row.id, row.permDecisionId);
@@ -2787,7 +2879,7 @@ function renderMobileAskCard(row, frozen) {
     acts.push(btn);
   }
   if (row.permRejectable) {
-    const btn = el("button", { class: "m-btn m-btn-secondary", text: "REJECT" });
+    const btn = el("button", { class: "m-btn m-btn-secondary", text: "Reject" });
     btn.addEventListener("click", () => {
       btn.disabled = true;
       reject(row.id, row.permDecisionId);
@@ -2909,6 +3001,7 @@ function renderMobileFailedRow(row) {
 // — "the screen's emptiest state is its best news" applies to NEEDS YOU
 // dropping out entirely, not to hiding what is still open.
 function renderMobileOverview(ledger, frozen) {
+  if (!state.loaded) return renderWorkspaceStatus();
   const rows = ledger.rows;
   // ledger.mjs orders rows newest-task-first (desktop's own priority order);
   // the Attention Stack needs the OLDEST ask primary — the one that has been
@@ -2938,7 +3031,10 @@ function renderMobileOverview(ledger, frozen) {
   }
 
   if (!items.length) {
-    return el("div", { class: "m-empty", text: "no tasks in this workspace" });
+    return el("div", { class: "m-empty" }, [
+      el("p", { class: "m-empty-title", text: "No tasks yet" }),
+      el("p", { text: mobile.showComposer ? "Start with a change, a question or a problem to investigate." : "Create a task to start work on this host." })
+    ]);
   }
   return el("div", {}, items);
 }
@@ -3007,13 +3103,14 @@ function renderMobileCommandsBox(row, first) {
   if (!c) return null;
   return el("div", { class: "m-dsection" + (first ? " first" : "") }, [
     el("div", { class: "m-dsection-k", text: "COMMANDS" }),
-    ...c.commands.map(cmd => el("div", { class: "m-dfile" }, [el("span", { class: "m-dfile-path", text: cmd })]))
+    ...c.commands.map(cmd => el("div", { class: "m-dfile" }, [el("code", { class: "command-code", text: cmd })]))
   ]);
 }
 
 // Real result text, paragraph-truncated to the first three with a disclosure
 // that expands to the rest — never a fade, always a rule and a count.
 function renderMobileResult(row, detail) {
+  if (!detail) return renderDetailPending(row.id);
   const text = (detail?.result && detail.result.trim()) || (row.error ? row.error : "");
   if (!text) return el("div", { class: "band-pending", style: { color: COLORS.muted, marginTop: "11px" }, text: "no written result" });
   const blocks = parseRich(text);
@@ -3034,7 +3131,7 @@ function renderMobileResult(row, detail) {
     text: expanded ? "show short preview ↑" : "read full result ↓"
   }) : null;
   // The toggle stays in place while content expands, retaining keyboard focus.
-  return el("div", {}, [renderCheckEvidence(row, detail), disclosure, body].filter(Boolean));
+  return el("div", {}, [disclosure, body, renderCheckEvidence(row, detail)].filter(Boolean));
 }
 
 // THIS TASK SO FAR — a multi-run Task's own history as lines, each earlier
@@ -3097,7 +3194,7 @@ function renderMobileDecisionContent(row) {
     state.answers.set(row.id, textarea.value);
     const has = textarea.value.trim().length > 0;
     document.querySelectorAll("[data-mobile-answer-gate]").forEach(btn => {
-      btn.disabled = !has;
+      btn.disabled = (state.remote && !state.macOnline) || !has;
     });
   });
 
@@ -3147,7 +3244,7 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
   // desktop detail uses, and the reason a long brief is never lost on the
   // phone (the relay carries it in full; see src/relay/project.mjs).
   parts.push(renderBrief(row));
-  if ((detail?.checkout?.mode ?? detail?.workspaceMode) === "isolated") parts.push(el("div", { class: "m-dlimit", text: "Result lives in an isolated checkout on this host. Review 2f changes before 2f apply transfers it to the original workspace." }));
+  if ((detail?.checkout?.mode ?? detail?.workspaceMode) === "isolated") parts.push(el("div", { class: "checkout-notice" }, inlineEls(parseInline("Result lives in an isolated checkout on this host. Review `2f changes` before `2f apply` transfers it to the original workspace."))));
 
   if (row.trace) {
     parts.push(el("div", { class: "m-dtrace-wrap" }, [renderTrack(row, accent)]));
@@ -3264,17 +3361,23 @@ function renderMobileDetailContent(row, detail, accent, frozen) {
 // Every detail screen ends in a fixed bar: one 52px primary, one secondary.
 // Reading scrolls; deciding never does.
 function renderMobileActionBar(row, frozen) {
+  const bar = buildMobileActionBar(row);
+  if (frozen) for (const control of bar.querySelectorAll("button")) control.disabled = true;
+  return bar;
+}
+
+function buildMobileActionBar(row) {
   row = mobilePermissionRow(row);
   const raw = state.tasks.find(t => t.id === row.id);
   if (row.done && (raw?.runs?.at(-1)?.outcome === "working" || raw?.runs?.at(-1)?.blockedOn?.live))
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-hint", text: "Task closed; execution remains active." }), cancelButton(row.id)]);
   if (row.halted && row.permType !== "decision") {
-    const allowBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ALLOW", disabled: !row.permAllowable ? true : undefined });
+    const allowBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "Allow", disabled: !row.permAllowable ? true : undefined });
     allowBtn.addEventListener("click", () => {
       allowBtn.disabled = true;
       allow(row.id, row.permDecisionId);
     });
-    const rejectBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "REJECT", disabled: !row.permRejectable ? true : undefined });
+    const rejectBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "Reject", disabled: !row.permRejectable ? true : undefined });
     rejectBtn.addEventListener("click", () => {
       rejectBtn.disabled = true;
       reject(row.id, row.permDecisionId);
@@ -3286,7 +3389,7 @@ function renderMobileActionBar(row, frozen) {
     const value = (state.answers.get(row.id) ?? "").trim();
     const continueBtn = el("button", {
       class: "m-abar-btn m-abar-primary",
-      text: "ANSWER & CONTINUE",
+      text: "Answer & continue",
       "data-mobile-answer-gate": true,
       disabled: !value ? true : undefined
     });
@@ -3296,7 +3399,7 @@ function renderMobileActionBar(row, frozen) {
     });
     const saveBtn = el("button", {
       class: "m-abar-btn m-abar-secondary quiet",
-      text: "SAVE ONLY",
+      text: "Save only",
       "data-mobile-answer-gate": true,
       disabled: !value ? true : undefined
     });
@@ -3310,17 +3413,17 @@ function renderMobileActionBar(row, frozen) {
     ]);
   }
   if (row.running) {
-    const btn = el("button", { class: "m-abar-btn m-abar-single", style: { flex: "1" }, text: "ADD A CONSTRAINT" });
+    const btn = el("button", { class: "m-abar-btn m-abar-single", style: { flex: "1" }, text: "Add a constraint" });
     btn.addEventListener("click", () => openCorrection(row.id));
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [btn, cancelButton(row.id)])]);
   }
   if (row.ready) {
-    const acceptBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "ACCEPT" });
+    const acceptBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "Accept" });
     acceptBtn.addEventListener("click", () => {
       acceptBtn.disabled = true;
       accept(row.id).finally(() => render());
     });
-    const correctBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "CORRECT" });
+    const correctBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "Correct" });
     correctBtn.addEventListener("click", () => openCorrection(row.id));
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [acceptBtn, correctBtn])]);
   }
@@ -3329,13 +3432,13 @@ function renderMobileActionBar(row, frozen) {
     // nothing to correct, only the provider's own sign-in needs fixing
     // outside 0x2F. CLOSE replaces CORRECT: the same rerun action, honest
     // labels.
-    const retryBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "RETRY" });
+    const retryBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "Retry" });
     retryBtn.addEventListener("click", () => {
       retryBtn.disabled = true;
       sendBack(row.id).finally(() => render());
     });
     const closeBtn = el("button", {
-      class: "m-abar-btn m-abar-secondary", text: "CLOSE",
+      class: "m-abar-btn m-abar-secondary", text: "Close",
       title: "Move to DONE without cancelling the provider",
       "aria-label": "Close task without cancelling the provider"
     });
@@ -3346,12 +3449,12 @@ function renderMobileActionBar(row, frozen) {
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [retryBtn, closeBtn])]);
   }
   if (row.failed) {
-    const runBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "RUN AGAIN" });
+    const runBtn = el("button", { class: "m-abar-btn m-abar-primary", text: "Run again" });
     runBtn.addEventListener("click", () => {
       runBtn.disabled = true;
       sendBack(row.id).finally(() => render());
     });
-    const correctBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "CORRECT" });
+    const correctBtn = el("button", { class: "m-abar-btn m-abar-secondary", text: "Correct" });
     correctBtn.addEventListener("click", () => openCorrection(row.id));
     return el("div", { class: "m-abar" }, [el("div", { class: "m-abar-row" }, [runBtn, correctBtn])]);
   }
@@ -3362,7 +3465,7 @@ function renderMobileActionBar(row, frozen) {
 // sentence is the whole mental model — the note sticks to the Task, and (for
 // READY/FAILED) a new run continues it. A WORKING task saves it for a later
 // run; it is not delivered into the current provider session.
-function renderMobileCorrectionSheet(row) {
+function renderMobileCorrectionSheet(row, frozen) {
   if (mobile.correctionId !== row.id) return null;
   const rerunable = row.ready || row.failed;
   const saved = noteInputs.get(row.id) ?? "";
@@ -3375,12 +3478,12 @@ function renderMobileCorrectionSheet(row) {
   textarea.value = saved;
   const submitBtn = el("button", {
     class: "m-abar-btn m-abar-primary",
-    text: rerunable ? "SEND BACK" : "SAVE",
-    disabled: !saved.trim() ? true : undefined
+    text: rerunable ? "Send back" : "Save",
+    disabled: frozen || !saved.trim() ? true : undefined
   });
   textarea.addEventListener("input", () => {
     noteInputs.set(row.id, textarea.value);
-    submitBtn.disabled = textarea.value.trim().length === 0;
+    submitBtn.disabled = frozen || textarea.value.trim().length === 0;
   });
   submitBtn.addEventListener("click", () => {
     submitBtn.disabled = true;
@@ -3388,7 +3491,7 @@ function renderMobileCorrectionSheet(row) {
   });
   const acts = [submitBtn];
   if (rerunable) {
-    const saveOnlyBtn = el("button", { class: "m-abar-btn m-abar-secondary quiet", text: "SAVE ONLY" });
+    const saveOnlyBtn = el("button", { class: "m-abar-btn m-abar-secondary quiet", text: "Save only", disabled: frozen ? true : undefined });
     saveOnlyBtn.addEventListener("click", () => {
       saveOnlyBtn.disabled = true;
       submitCorrection(row.id, { rerun: false }).finally(() => render());
@@ -3400,8 +3503,8 @@ function renderMobileCorrectionSheet(row) {
     el("div", { class: "m-sheet-overlay", onClick: closeCorrection }),
     el("div", { class: "m-sheet" }, [
       el("div", { class: "m-sheet-head" }, [
-        el("span", { class: "m-sheet-kind", text: rerunable ? "CORRECTION" : "CONSTRAINT" }),
-        el("button", { type: "button", class: "m-sheet-cancel", "data-focus-key": "cancel-correction", onClick: closeCorrection, text: "CANCEL" })
+        el("span", { class: "m-sheet-kind", text: rerunable ? "Correction" : "Constraint" }),
+        el("button", { type: "button", class: "m-sheet-cancel", "data-focus-key": "cancel-correction", onClick: closeCorrection, text: "Cancel" })
       ]),
       textarea,
       el("div", {
@@ -3419,13 +3522,15 @@ function renderMobileDetail(ledger, accent, frozen) {
   const row = ledger.rows.find(r => r.id === mobile.detailId);
   if (!row) return null;
   const detail = state.details?.get(row.id) ?? null;
+  const mounted = document.querySelector('.m-detail[data-mobile-task="' + row.id + '"]');
 
   const entering = !mobile.closing && mobileDetailMounted !== row.id;
   mobileDetailMounted = row.id;
 
   const content = renderMobileDetailContent(row, detail, accent, frozen);
 
-  const stickyStrip = el("div", { class: "m-sticky" }, [
+  const stickyStrip = mounted?.querySelector(".m-sticky") ?? el("div", { class: "m-sticky" });
+  replaceChildrenKeepingConnected(stickyStrip, [
     el("div", { class: "m-sticky-inner" }, [
       el("span", { class: "m-sticky-state", text: row.stateLabel }),
       el("span", { class: "m-sticky-title", text: row.title }),
@@ -3433,24 +3538,31 @@ function renderMobileDetail(ledger, accent, frozen) {
     ])
   ]);
 
-  const dcontent = el("div", { class: "m-dcontent", "data-reader-scroll": "mobile-result-" + row.id }, [stickyStrip, ...content]);
-
-  return el(
-    "div",
-    {
-      class:
+  // Keep the scrolling element connected across live snapshots. Replacing
+  // it interrupts iOS momentum and briefly resets its sticky identity strip.
+  const dcontent = mounted?.querySelector(".m-dcontent") ?? el("div", { class: "m-dcontent", "data-reader-scroll": "mobile-result-" + row.id });
+  replaceChildrenKeepingConnected(dcontent, [stickyStrip, ...content]);
+  const panel = mounted ?? el("div", {
+    "data-mobile-task": row.id,
+    onAnimationEnd: event => {
+      if (event.target === event.currentTarget) event.currentTarget.classList.remove("m-detail-enter");
+    }
+  });
+  panel.className =
         "m-detail" +
         (row.halted ? " blue" : "") +
-        (entering ? " m-detail-enter" : "") +
-        (mobile.closing ? " m-detail-exit" : "")
-    },
+        ((entering || mounted?.classList.contains("m-detail-enter")) ? " m-detail-enter" : "") +
+        (mobile.closing ? " m-detail-exit" : "");
+  replaceChildrenKeepingConnected(panel,
     [
+      renderMobileOfflineBar(),
       renderMobileDetailToolbar(row, ledger, frozen),
       dcontent,
       renderMobileActionBar(row, frozen),
-      renderMobileCorrectionSheet(row)
-    ]
+      renderMobileCorrectionSheet(row, frozen)
+    ].filter(Boolean)
   );
+  return panel;
 }
 
 // --- mobile root -------------------------------------------------------------
@@ -3459,7 +3571,7 @@ let mobileOverviewScroll = 0;
 let mobileDetailScroll = new Map(); // task id -> scrollTop, so re-opening a screen mid-render keeps its position
 
 function renderMobile() {
-  const focusKey = document.activeElement?.getAttribute?.("data-focus-key") ?? null;
+  const restoreFocus = keepFocus();
   const restoreReaders = keepReaderPositions();
   const shell = document.getElementById("shell");
   shell.className = "mobile";
@@ -3478,58 +3590,74 @@ function renderMobile() {
   if (!composerNode) composerNode = buildComposer();
   if (mobile.showComposer) {
     syncComposerFn?.();
-    for (const control of composerNode.querySelectorAll("button, select, textarea")) control.disabled = frozen;
+    for (const control of composerNode.querySelectorAll("button, select, textarea")) {
+      control.disabled = frozen || ((control === startButton || control === refineButton) && control.disabled);
+    }
   }
-  const overview = el("div", { class: "m-scroll" }, [
-    mobile.showComposer ? el("div", { class: "m-new-work" }, [
-      el("div", { class: "m-dmeta", text: `${state.workspace?.label ?? "Paired workspace"} · ${state.node ?? "paired execution host"}. This host owns the files and task history.` }), composerNode
-    ]) : null,
-    renderMobileOverview(ledger, frozen)
-  ].filter(Boolean));
+  const overview = prevScroll ?? el("div", { class: "m-scroll" });
+  const composerSection = mobile.showComposer
+    ? (overview.querySelector(".m-new-work") ?? el("div", { class: "m-new-work" }, [composerNode]))
+    : null;
+  replaceChildrenKeepingConnected(overview, [composerSection, renderMobileOverview(ledger, frozen)]);
   const overviewToolbar = renderMobileOverviewToolbar(ledger, frozen);
   const detail = mobile.detailId !== null ? renderMobileDetail(ledger, COLORS.accent, frozen) : null;
   const bar = renderMobileBar(frozen);
+  overview.toggleAttribute("inert", Boolean(detail));
   if (detail) {
     // The overview stays visually still beneath the pushed screen, but must
     // not remain in the keyboard or screen-reader navigation order.
     for (const node of [bar, overviewToolbar, overview]) node.setAttribute("inert", "");
   }
 
-  shell.replaceChildren(
-    el("div", { class: "m-app" }, [
-      renderMobileOfflineBar(),
+  const app = shell.querySelector(".m-app") ?? el("div", { class: "m-app" });
+  replaceChildrenKeepingConnected(app, [
+      detail ? null : renderMobileOfflineBar(),
       bar,
       overviewToolbar,
       overview,
       detail,
       state.flash ? el("div", { class: "flash", text: state.flash }) : null
-    ].filter(Boolean))
-  );
+    ]);
+  replaceChildrenKeepingConnected(shell, [app]);
 
   const scrollEl = document.querySelector(".m-scroll");
-  if (scrollEl) scrollEl.scrollTop = mobileOverviewScroll;
+  if (scrollEl && scrollEl.scrollTop !== mobileOverviewScroll) scrollEl.scrollTop = mobileOverviewScroll;
   const dcontentEl = document.querySelector(".m-dcontent");
   if (dcontentEl && mobile.detailId !== null) {
-    dcontentEl.scrollTop = mobileDetailScroll.get(mobile.detailId) ?? 0;
+    const top = mobileDetailScroll.get(mobile.detailId) ?? 0;
+    if (dcontentEl.scrollTop !== top) dcontentEl.scrollTop = top;
     wireMobileStickyDetail(dcontentEl);
   }
   restoreReaders();
-  if (focusKey) document.querySelector('[data-focus-key="' + focusKey + '"]')?.focus({ preventScroll: true });
+  restoreFocus();
 }
 
 // The sticky identity strip is the only sticky element inside the scroller.
-// It is always present (so its 40px never causes a layout jump), and shown
-// only once the real title has scrolled out from under it.
+// Its fixed box overlays the content without changing flow geometry. Showing
+// it must not move the title used to decide whether it should be shown.
+const mobileStickyScrollers = new WeakSet();
 function wireMobileStickyDetail(scrollEl) {
-  const sticky = scrollEl.querySelector(".m-sticky");
-  const title = scrollEl.querySelector(".m-dtitle");
-  if (!sticky || !title) return;
   function update() {
+    const sticky = scrollEl.querySelector(".m-sticky");
+    const title = scrollEl.querySelector(".m-dtitle");
+    if (!sticky || !title) return;
     const hidden = title.getBoundingClientRect().bottom <= scrollEl.getBoundingClientRect().top + 4;
     sticky.classList.toggle("shown", hidden);
   }
-  scrollEl.addEventListener("scroll", update, { passive: true });
+  if (!mobileStickyScrollers.has(scrollEl)) {
+    scrollEl.addEventListener("scroll", update, { passive: true });
+    mobileStickyScrollers.add(scrollEl);
+  }
   update();
+}
+
+function onViewportResize() {
+  // Safari emits height-only resize events as its address bar or keyboard
+  // moves. CSS handles that viewport change without rebuilding the reader.
+  const width = window.innerWidth;
+  if (width === state.width) return;
+  state.width = width;
+  render();
 }
 
 // Back is an edge swipe (from the left 24px) or the ‹ ALL WORK line. This is
@@ -3553,10 +3681,7 @@ window.addEventListener("pointerup", event => {
 // --- boot ------------------------------------------------------------------
 
 window.addEventListener("keydown", onKeyDown);
-window.addEventListener("resize", () => {
-  state.width = window.innerWidth;
-  render();
-});
+window.addEventListener("resize", onViewportResize);
 // Prime audio after the first real interaction (autoplay policy): a context
 // starts suspended until the page has user activation, and only after that
 // can background-tab signals sound.
@@ -3579,7 +3704,8 @@ checkStatus().then(() => {
 loadAll()
   .then(() => connect())
   .catch(error => {
-    flash(error.message);
+    state.loadError = error.message;
+    render();
     connect();
   });
 loadProviders();

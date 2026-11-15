@@ -1,0 +1,131 @@
+TAP version 13
+# Subtest: incomplete selectors refuse before creating work, rerunning, pairing or launching UI
+ok 1 - incomplete selectors refuse before creating work, rerunning, pairing or launching UI
+  ---
+  duration_ms: 487.444875
+  ...
+# Subtest: misspelled options refuse before executing, and command help never creates work
+ok 2 - misspelled options refuse before executing, and command help never creates work
+  ---
+  duration_ms: 367.087708
+  ...
+# Subtest: mobile offline detail contains its own visible banner above the toolbar
+ok 3 - mobile offline detail contains its own visible banner above the toolbar
+  ---
+  duration_ms: 1.212125
+  ...
+# Subtest: mobile offline bars disable every mutation; online permissions keep their own restrictions
+ok 4 - mobile offline bars disable every mutation; online permissions keep their own restrictions
+  ---
+  duration_ms: 0.402625
+  ...
+# Subtest: editing a decision draft offline cannot re-enable its mutation buttons
+ok 5 - editing a decision draft offline cannot re-enable its mutation buttons
+  ---
+  duration_ms: 0.802958
+  ...
+# Subtest: encrypted cancellation binds the displayed attempt and refuses stale or missing nonces
+ok 6 - encrypted cancellation binds the displayed attempt and refuses stale or missing nonces
+  ---
+  duration_ms: 314.453875
+  ...
+# Subtest: the Mac authenticates outbound; unpaired and mismatched hellos are rejected
+ok 7 - the Mac authenticates outbound; unpaired and mismatched hellos are rejected
+  ---
+  duration_ms: 2.070917
+  ...
+# Subtest: a pairing token is one-time: a second claim fails
+ok 8 - a pairing token is one-time: a second claim fails
+  ---
+  duration_ms: 225.888875
+  ...
+# Subtest: an expired pairing token cannot be claimed
+ok 9 - an expired pairing token cannot be claimed
+  ---
+  duration_ms: 3.306291
+  ...
+# Subtest: the phone pairs end-to-end and pulls a redacted snapshot
+ok 10 - the phone pairs end-to-end and pulls a redacted snapshot
+  ---
+  duration_ms: 249.511625
+  ...
+# Subtest: creating a Task through the encrypted channel starts it on the Mac's node
+ok 11 - creating a Task through the encrypted channel starts it on the Mac's node
+  ---
+  duration_ms: 224.796875
+  ...
+# Subtest: redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac
+ok 12 - redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac
+  ---
+  duration_ms: 4240.893625
+  ...
+# Subtest: ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions
+ok 13 - ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions
+  ---
+  duration_ms: 232.002792
+  ...
+# Subtest: remote permission commands refuse stale or missing displayed occurrence IDs
+ok 14 - remote permission commands refuse stale or missing displayed occurrence IDs
+  ---
+  duration_ms: 247.11875
+  ...
+# Subtest: a duplicate requestId returns the cached acknowledgement and never executes twice
+ok 15 - a duplicate requestId returns the cached acknowledgement and never executes twice
+  ---
+  duration_ms: 223.958541
+  ...
+# Subtest: the actual browser transport decodes serialized JSON bodies for create, answer and notes
+ok 16 - the actual browser transport decodes serialized JSON bodies for create, answer and notes
+  ---
+  duration_ms: 222.857084
+  ...
+# Subtest: encrypted remote ALLOW cannot bypass insufficient scope, even with a fresh occurrence
+ok 17 - encrypted remote ALLOW cannot bypass insufficient scope, even with a fresh occurrence
+  ---
+  duration_ms: 226.748833
+  ...
+# Subtest: encrypted mutation acknowledgements and their retries never export hidden permission input
+ok 18 - encrypted mutation acknowledgements and their retries never export hidden permission input
+  ---
+  duration_ms: 224.935542
+  ...
+# Subtest: the Mac is offline: status reports offline and commands answer 503 — never queued
+ok 19 - the Mac is offline: status reports offline and commands answer 503 — never queued
+  ---
+  duration_ms: 215.701542
+  ...
+# Subtest: a relay restart loses no session and keeps the phone paired
+ok 20 - a relay restart loses no session and keeps the phone paired
+  ---
+  duration_ms: 1325.894375
+  ...
+# Subtest: the relay holds no task content — state and state.json are content-free
+ok 21 - the relay holds no task content — state and state.json are content-free
+  ---
+  duration_ms: 321.951875
+  ...
+# Subtest: the relay is a broker: it serves no client or pairing page
+ok 22 - the relay is a broker: it serves no client or pairing page
+  ---
+  duration_ms: 216.128042
+  ...
+# Subtest: pairing claims and command forwarding are rate limited
+ok 23 - pairing claims and command forwarding are rate limited
+  ---
+  duration_ms: 2.781583
+  ...
+# 0x2F UI: http://127.0.0.1:56170
+# Subtest: the local server reports mode 'local' — the client keeps its local behavior
+ok 24 - the local server reports mode 'local' — the client keeps its local behavior
+  ---
+  duration_ms: 14.926209
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8821.307459

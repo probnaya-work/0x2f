@@ -1,6 +1,6 @@
 # 0x2F — Development
 
-> **0.3.0**: [release scope and upgrade/rollback](releases/0.3.0.md), [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), and [commands](usage.md).
+> **1.0.0**: [release scope and upgrade/rollback](releases/1.0.0.md), [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), and [commands](usage.md).
 
 How to work on this repository. For what the pieces *mean*, see
 [`architecture.md`](architecture.md); for the product-level story, the root
@@ -73,7 +73,7 @@ test/                  node --test suite
 ## Running
 
 ```bash
-npm install          # installs ws, @noble/ciphers, and @noble/hashes
+npm install          # installs ws, @noble/ciphers, @noble/hashes, string-width
 npm test             # the full suite (node --test, including real PTY regression)
 npm run check        # syntax-check every source and test file (node --check)
 npm start            # run the CLI: node src/cli.mjs

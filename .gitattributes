@@ -1,0 +1,3 @@
+
+# Retain captured logs and terminal cell grids byte-for-byte.
+docs/releases/*-evidence/*.txt -whitespace

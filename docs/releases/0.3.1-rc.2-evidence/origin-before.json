@@ -1,0 +1,20 @@
+[
+  {
+    "client": "omitted",
+    "accepted": true,
+    "printedClientOrigin": "https://app.0x2f.dev",
+    "network": "stubbed; no external transmission"
+  },
+  {
+    "client": "http://client.example.com",
+    "accepted": true,
+    "printedClientOrigin": "http://client.example.com",
+    "network": "stubbed; no external transmission"
+  },
+  {
+    "client": "https://relay.example.com",
+    "accepted": true,
+    "printedClientOrigin": "https://relay.example.com",
+    "network": "stubbed; no external transmission"
+  }
+]

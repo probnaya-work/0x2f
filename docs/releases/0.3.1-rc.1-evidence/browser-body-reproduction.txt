@@ -1,0 +1,21 @@
+✖ the actual browser transport decodes serialized JSON bodies for create, answer and notes (134.389459ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 233.332916
+
+✖ failing tests:
+
+test at test/relay.test.mjs:388:1
+✖ the actual browser transport decodes serialized JSON bodies for create, answer and notes (134.389459ms)
+  Error: Task brief is required.
+      at sendCommand (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/src/web/remote.mjs:140:23)
+      at async TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/relay.test.mjs:391:14)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    status: 400
+  }

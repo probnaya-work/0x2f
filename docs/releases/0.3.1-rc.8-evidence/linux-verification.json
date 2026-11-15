@@ -1,0 +1,23 @@
+{
+  "node": "v20.20.2",
+  "results": [
+    {
+      "check": "check",
+      "exitCode": 0,
+      "seconds": 7.0
+    },
+    {
+      "check": "test",
+      "exitCode": 0,
+      "seconds": 52.8
+    },
+    {
+      "check": "install",
+      "exitCode": 0,
+      "seconds": 1.6
+    }
+  ],
+  "artifactSha256": "c3bc75e58b8785f8688507b3dca97a9376f80a72fd111a564e7c7bc599b4947a",
+  "installedSourceMatch": true,
+  "sourceFiles": 84
+}

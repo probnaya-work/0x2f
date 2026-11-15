@@ -1,0 +1,7 @@
+
+> 0x2f@0.3.1-rc.2 build:client
+> node deploy/client/build.mjs
+
+Client bundle -> /Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/deploy/client/dist
+Upload this directory to your static host, or point Caddy at it:
+  Use deploy/Caddyfile with root /Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/deploy/client/dist (including its /pair rewrite).

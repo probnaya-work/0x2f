@@ -1,0 +1,105 @@
+{
+  "candidate": "0.3.1-rc.7",
+  "sha256": "cb7acc6c1c2bea9ac59c4da16a190bf8f5a21da86427075fbb748ca0b6ce53bd",
+  "desktop": {
+    "synthetic": true,
+    "widthsChecked": [
+      700,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "flows": [
+      "task creation to READY",
+      "decision answer to run 2",
+      "permission inspect and reject",
+      "active cancellation",
+      "note persisted",
+      "accept to DONE",
+      "earlier run reading",
+      "long result end"
+    ],
+    "oneMainResultScroller": true,
+    "draftFocusHeldSeconds": 142,
+    "decisionFocusHeldSeconds": 24
+  },
+  "typography": {
+    "bodyPx": 14,
+    "h2Px": 17,
+    "h2Weight": 600,
+    "commands": "monospace, terminal green",
+    "mobileReceiptPosition": "after written result"
+  },
+  "mobileBrowser": {
+    "synthetic": true,
+    "widthsChecked": [
+      320,
+      390
+    ],
+    "horizontalOverflow": false,
+    "selectsStackAt320": true
+  },
+  "tui": {
+    "ptyGoldenPaths": 4,
+    "structuralFrames": 17,
+    "structuralFailures": 0,
+    "widthCoverage": [
+      60,
+      80,
+      132
+    ],
+    "colorModes": [
+      "none",
+      "256",
+      "truecolor"
+    ],
+    "nativeTerminalVisualCheck": "NOT RUN: Computer Use excludes terminal apps",
+    "unicodeCoverage": [
+      "CJK",
+      "combining marks",
+      "emoji sequences",
+      "flags"
+    ],
+    "codeIndentationPreserved": true
+  },
+  "physicalSafari": [
+    {
+      "candidate": "rc.3",
+      "result": "READY observed for Physical Safari smoke; synthetic Charlie"
+    },
+    {
+      "candidate": "rc.4",
+      "ownerFeedback": "Much better: size, insets and select indicators"
+    },
+    {
+      "candidate": "rc.5",
+      "taskId": 2,
+      "ownerFeedback": "Commands appear as code with green highlighting; text and controls comfortable",
+      "persistedState": "DONE"
+    },
+    {
+      "candidate": "rc.6",
+      "taskId": 3,
+      "ownerFeedback": "Flicker disappeared after slow and fast scrolling"
+    },
+    {
+      "candidate": "rc.7",
+      "result": "Installed at the retained private LAN fixture; compact typography checked in source preview with matching shipped assets"
+    }
+  ],
+  "physicalLimits": [
+    "Safari exact version not captured",
+    "fresh worker-based pairing performance not timed on device",
+    "full permission, note, cancellation, offline/no-queue, background/lock and revocation checklist not completed on device",
+    "Android not run"
+  ],
+  "scope": "Protocol and local browser QA are separate from physical and operated-public-HTTPS qualification",
+  "physicalDevice": {
+    "model": "iPhone 15",
+    "os": "iOS 27.0.1",
+    "browser": "Safari",
+    "exactBrowserVersion": "not captured"
+  }
+}

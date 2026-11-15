@@ -31,7 +31,7 @@ import http from "node:http";
 import https from "node:https";
 import net from "node:net";
 import { spawn, execFile } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRelayServer } from "../relay/server.mjs";
 import { buildClient, CLIENT_ASSETS, routeToFile } from "../deploy/client/build.mjs";
 import { initProject } from "../src/project.mjs";
@@ -91,14 +91,14 @@ async function runCli(args, cwd, timeoutMs = 90000) {
   });
 }
 
-function parsePairing(stdout) {
+export function parsePairing(stdout) {
   const urlLine = stdout.split("\n").find(l => l.includes("/pair?relay="));
   const codeLine = stdout.split("\n").find(l => l.startsWith("Pairing code:"));
   if (!urlLine || !codeLine) {
     throw new Error("Could not parse pairing output:\n" + stdout);
   }
   const url = urlLine.trim();
-  const code = codeLine.replace(/^Pairing code:\s*/, "").trim();
+  const code = codeLine.replace(/^Pairing code:\s*/, "").replace(/[-\s]/g, "").toUpperCase();
   const q = new URL(url).searchParams;
   return { url, code, token: q.get("token"), deviceId: q.get("device") };
 }
@@ -425,6 +425,13 @@ async function main() {
 
   try {
     await initProject(ws);
+    // Exercise transport with an explicit deterministic command provider;
+    // this verifier must not spend a model call or inherit harness sign-in.
+    await fs.writeFile(path.join(ws, ".work/providers/verification.json"), JSON.stringify({
+      id: "verification", displayName: "Synthetic verification fixture", transport: "command",
+      command: [process.execPath, "-e", "console.log('## Result\\nSynthetic transport verification\\n## Needs human decision\\nREQUIRED: no')", "{prompt}"]
+    }));
+    await fs.writeFile(path.join(ws, ".work/routing.json"), JSON.stringify({ default: "verification" }));
     await buildClient(clientDir);
 
     const relay = createRelayServer({
@@ -608,15 +615,18 @@ async function main() {
     }
     log("  phone session dead at the relay. ✓");
 
-    log("\nReal-device-path verification passed: https pairing, E2E commands,");
-    log("encrypted events, and revocation all work over public TLS.");
+    log(localTls ? "\nLocal TLS protocol verification passed with synthetic task execution." :
+      "\nPublic TLS protocol verification passed with synthetic task execution.");
+    log("HTTPS pairing, E2E commands, encrypted events and revocation passed; physical device behavior requires a separate run.");
   } finally {
     await cleanup();
     process.off("exit", cleanup);
   }
 }
 
-main().catch(error => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(error => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}

@@ -1,0 +1,40 @@
+# 0x2F TUI frame — ready-120x36
+# state: ready   mode: work   terminal: 120x36
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                                                        
+  0x2F ~/ws                          │ #001  Inspect the submit path and add retry handling                             
+  ! 0  ✕ 0  ✓ 1  ▶ 0  · 0            │ ALPHA · run 1 · 0:00   result available · review                                 
+  ────────────────────────────────── │                                                                                  
+                                     │ RESULT   r full report                                                           
+  READY  1                           │                                                                                  
+  ❯ 001 Inspect the submit path and  │   Added retry-with-backoff to the submit path; honors Retry-After in whole       
+        add retry handling           │   seconds.                                                                       
+        ALPHA · 1 file changed       │                                                                                  
+                                     │ REPORTED CHECKS                                                                  
+                                     │   │ npm test -- submit                                                           
+                                     │                                                                                  
+                                     │ CHANGES   d inspect                                                              
+                                     │   src/app.ts                                                                     
+                                     │                                                                                  
+                                     │ TASK     1 run · 0 notes · open 0m                                               
+                                     │ ON       HHHHHHHHHHHHHHHHHHHHHHHHHHHH · ws                                       
+                                     │                                                                                  
+                                     │ TRACE    run 1 · 5 events · t expand                                             
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │ ───────────────────────────────────────────────────────────────────────────────  
+                                     │    ↵ ACCEPT    x SEND BACK   c NOTE                                              
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ✓ allowed · #001 continues in the same run                                                                            
+  n new task   j/k select   tab all   ? help   q detach   / search                                                      
+                                                                                                                        

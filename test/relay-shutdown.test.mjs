@@ -28,18 +28,18 @@ test("agent stop awaits its replay-cache write and is an idempotent barrier", { 
   const release = deferred();
   const finished = deferred();
   const readFile = fs.readFile;
-  const writeFile = fs.writeFile;
+  const rename = fs.rename;
   t.mock.method(fs, "readFile", async (...args) => {
     const result = await readFile(...args);
     if (args[0] === cachePath) loaded.resolve();
     return result;
   });
-  t.mock.method(fs, "writeFile", async (...args) => {
-    if (args[0] !== cachePath) return writeFile(...args);
+  t.mock.method(fs, "rename", async (...args) => {
+    if (args[1] !== cachePath) return rename(...args);
     entered.resolve();
     await release.promise;
     try {
-      return await writeFile(...args);
+      return await rename(...args);
     } finally {
       finished.resolve();
     }

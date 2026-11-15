@@ -1,0 +1,28 @@
+  0x2F / first-use / #001 · RUN 2 · opencode · ready
+  [ ] other runs · i exact input · esc back to task
+
+  ORIGINAL REQUEST
+  Fix add in sum.mjs so check.mjs passes. Run node check.mjs. Only edit sum.mjs. Do not delegate
+  or use network access.
+
+  PROJECT CHECK arithmetic · passed · exit 0
+
+  PROVIDER-REPORTED CHECKS
+  - node check.mjs → arithmetic check passed (exit 0).
+  - git status --short → only M sum.mjs.
+  - git diff → single-line operator change a - b → a + b, confirming scope and signature
+  preservation.
+  4 recorded tool receipt(s); provider output and exit codes are evidence, not independent proof
+  of task acceptance.
+
+  WRITTEN RESULT · PROVIDER REPORT
+  Result
+  The earlier fix is correct and complete. sum.mjs defines add(a, b) as a + b, so node check.mjs
+  passes with no further changes needed.
+
+  Evidence
+  - check.mjs:3 asserts add(2,3) === 5; sum.mjs:1 now returns a + b instead of a - b.
+  - Function name and arguments are preserved exactly: export const add = (a, b) => ....
+  ────────────────────────────────────────────────────────────────────────────────────────────────
+  › Saved run report · review the outcome and checks
+  j/k scroll · g/G ends · [ ] run · i input/result · esc back · 25/84

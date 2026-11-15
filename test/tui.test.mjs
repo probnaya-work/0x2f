@@ -14,6 +14,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
+import { stripVTControlCharacters } from "node:util";
 
 import { createRuntime } from "../src/runtime.mjs";
 import { applyOutcome } from "../src/core/lifecycle.mjs";
@@ -27,12 +28,18 @@ import {
   secondaryAction
 } from "../src/tui/state.mjs";
 import { projectTask, snapshot, STATE_KEY } from "../src/tui/model.mjs";
-import { ruleCells, frame, wrap, cut, pad, oneline, shortPath, cellWord } from "../src/tui/view.mjs";
+import { ruleCells, frame, wrap, cut, pad, oneline, shortPath, cellWord, buildHelp } from "../src/tui/view.mjs";
 import { renderLine, renderFrame, createPainter, colorSupport } from "../src/tui/screen.mjs";
 import { providerSignature, palette } from "../src/tui/theme.mjs";
 import { createApp } from "../src/tui/app.mjs";
 
 const ESC = "\u001b";
+
+test("TUI text removes OSC clipboard sequences and C1 cursor controls", () => {
+  const text = "before\x1b]52;c;YXVkaXQ=\x07after\x9b2J";
+  assert.equal(oneline(text), "beforeafter");
+  assert.deepEqual(wrap(text, 80), ["beforeafter"]);
+});
 
 // --- fixtures -----------------------------------------------------------------
 
@@ -497,7 +504,7 @@ test("current-run clock, trace and activity stay scoped across providers and a f
   assert.deepEqual(quiet.history.map(r => [r.provider, r.state]), [["CODEX", "READY"], ["GEMINI", "FAILED"]]);
   assert.deepEqual(quiet.notes.map(n => n.text), ["Keep this constraint"]);
   const quietScreen = screen(quiet);
-  assert.match(quietScreen, /RUN 3\s+OC OPENCODE\s+0:30/);
+  assert.match(quietScreen, /OPENCODE · run 3 · 0:30/);
   assert.match(quietScreen, /run 3 · 0 events/);
   assert.match(quietScreen, /run has not reported yet/);
   assert.doesNotMatch(quietScreen, /old-command|old-file|old failure|old activity/);
@@ -590,6 +597,21 @@ test("a permission halt carries the operation, the path and whether it resumes i
   assert.equal(task.halt.plan, "derive the ingest key in one place");
   assert.match(task.halt.note, /same run continues/);
   assert.equal(task.hasChanges, true, "a planned write is something to look at");
+});
+
+test("permission targets are relative to their execution checkout while outside paths stay explicit", async t => {
+  const { runtime, base } = await makeRuntime();
+  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const task = await blockTask(runtime, "Inspect the isolated write", { type: "permission", tool: "Edit a long named operation without losing its meaning", file: "/isolated/execution/src/app.ts" });
+  task.checkout = { path: "/isolated/execution" };
+  await runtime.store.updateTask(task);
+  assert.equal((await snapshot(runtime)).tasks[0].halt.path, "src/app.ts");
+  task.blockedOn.file = "/outside/other-project/src/app.ts";
+  await runtime.store.updateTask(task);
+  const model = await snapshot(runtime);
+  assert.equal(model.tasks[0].halt.path, "/outside/other-project/src/app.ts");
+  const rendered = renderFrame(frame(model, initialState(), { cols: 120, rows: 36, palette: palette("light") }).lines, 120, 36, { support: "none" }).join("\n");
+  assert.match(rendered, /EDIT A LONG NAMED OPERATION WITHOUT LOSING ITS MEANING/);
 });
 
 test("the human record is read from the event log, so NOTE, ANSWER and CORRECTION stay distinguishable", async () => {
@@ -1104,5 +1126,92 @@ test("the real TUI frame keeps the active end of a dense run visible after colum
     const lines = renderFrame(built.lines,cols,38,{support:"none"});
     assert.ok(lines.some(line=>line.includes("◆")), `${theme} ${cols}: live marker cropped`);
     assert.ok(lines.every(line=>line.length === cols));
+  }
+});
+
+test('saved report reading preserves code indentation, quoted spaces and terminal safety before long request context',async()=>{
+ const {buildResult}=await import('../src/tui/view.mjs');
+ const p=palette('dark'),T=(t,c,b=400)=>({t,c,b});
+ const result='## Result\nConclusion is available first.\n\n```python\nif ready:\n    run("a  b")\n        nested()\n```\n\nRun `echo "a  b"` before retrying.\n\n## Verification\nnpm test -- "a  b"\n\u001b]52;c;YQ==\u0007safe';
+ const review={taskId:1,run:1,provider:'fixture',outcome:'ready',brief:'Long original request. '.repeat(100),result,checks:[],events:[]};
+ const lines=buildResult({tasks:[],workspace:{label:'fixture'}},{...initialState(),review},76,p,T);
+ const text=lines.map(l=>l.cells.map(c=>c.t).join('')).join('\n');
+ assert.ok(text.indexOf('Conclusion is available first.')<text.indexOf('ORIGINAL REQUEST'));
+ assert.match(text,/│     run\("a  b"\)/);assert.match(text,/│         nested\(\)/);
+ assert.match(text,/echo "a  b"/);assert.match(text,/npm test -- "a  b"/);
+ assert.doesNotMatch(text,/```|\x1b|\x07/);
+ assert.ok(lines.some(l=>l.cells.some(c=>c.c===p.code&&c.t.includes('npm test'))));
+ assert.ok(lines.every(l=>l.cells.reduce((n,c)=>n+c.t.length,0)<=76),'code wrapping stays inside the reader');
+});
+
+test('wide and combining task text keeps every terminal row aligned in both palettes and all reading modes',async t=>{
+ const {displayWidth}=await import('../src/tui/text.mjs');
+ const {runtime,base}=await makeRuntime();t.after(()=>fs.rm(base,{recursive:true,force:true}));
+ await blockTask(runtime,'Проверь 检查 👩🏽‍💻 e\u0301 результат',{type:'decision',text:'Как обработать 界 и 👩🏽‍💻? Сохрани e\u0301 без потерь.'});
+ const model=await snapshot(runtime);model.node='机器👩🏽‍💻';model.workspace.label='Проверка界';
+ const content='检查 👩🏽‍💻 e\u0301 результат';
+ for(const theme of ['dark','light'])for(const [cols,rows]of [[60,18],[80,24],[132,38]])for(const mode of ['work','composer','result']){
+  const state={...initialState({provider:'claude-code'}),mode};
+  state.composer={...state.composer,text:content.repeat(12),cursor:content.repeat(12).length};
+  state.review={taskId:model.tasks[0].id,run:1,provider:'fixture',outcome:'ready',brief:content,result:'## Result\n'+content+'\n\n```js\n    const 名 = "👩🏽‍💻";\n```',checks:[],events:[]};
+  const built=frame(model,state,{cols,rows,palette:palette(theme)});
+  for(const support of ['none','256','truecolor']){
+   const output=renderFrame(built.lines,cols,rows,{support,bg:built.bg}).map(stripVTControlCharacters);
+   assert.equal(output.length,rows);
+   assert.ok(output.every(row=>displayWidth(row)===cols),`${theme} ${cols}x${rows} ${mode} ${support}`);
+  }
+ }
+});
+
+test('narrow help retains the full task and run explanations before the screen clips rows',async()=>{
+ const {displayWidth}=await import('../src/tui/text.mjs');
+ const p=palette('dark'),T=(t,c,b=400)=>({t,c,b});
+ for(const cols of [58,78,118]){
+  const rows=buildHelp(cols,p,T).map(line=>line.cells.map(c=>c.t).join(''));
+  assert.ok(rows.every(row=>displayWidth(row)<=cols),`help spills beyond ${cols} columns`);
+  const prose=rows.join(' ').replace(/\s+/g,' ');
+  assert.match(prose,/its whole run history/);
+  assert.match(prose,/a decision or a correction starts the next one/);
+  assert.match(prose,/the same tasks are in the CLI, the web client and the phone/);
+ }
+});
+
+test("a bordered draft retains its caret and recovery actions at every supported height", async t => {
+  const { displayWidth } = await import("../src/tui/text.mjs");
+  const { runtime, base } = await makeRuntime();
+  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const model = await snapshot(runtime);
+  const text = Array.from({ length: 40 }, (_, i) => `Line ${i}: 检查 👩🏽‍💻 é`).join("\n");
+  for (const theme of ["dark", "light"]) for (const [cols, rows] of [[60, 18], [80, 24], [120, 36]]) {
+    for (const cursor of [0, text.length]) {
+      const state = { ...initialState(), mode: "composer" };
+      state.composer = { ...state.composer, text, cursor };
+      const built = frame(model, state, { cols, rows, palette: palette(theme) });
+      assert.ok(built.lines.every(line => line.cells.reduce((n, c) => n + displayWidth(c.t), 0) <= cols), "field geometry fits before terminal clipping");
+      assert.equal(built.lines.flatMap(line => line.cells).filter(cell => cell.cur).length, 1, "the edit position stays visible");
+      const rendered = renderFrame(built.lines, cols, rows, { support: "none" });
+      assert.match(rendered.join("\n"), /↵ START.*esc keep draft/, "start and draft recovery remain on screen");
+      const field = rendered.filter(row => row.includes("│"));
+      assert.ok(field.length >= 1);
+      assert.ok(field.every(row => (row.match(/│/g) ?? []).length === 2), "both field edges remain visible without color");
+      assert.ok(field.every(row => row.indexOf("│") === field[0].indexOf("│") && row.lastIndexOf("│") === field[0].lastIndexOf("│")), "field edges align");
+    }
+  }
+});
+
+test("result precedes bookkeeping and a collapsed trace remains available on expansion", async t => {
+  const { runtime, base } = await makeRuntime();
+  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const task = await runtime.actions.createWork({ brief: "Review a result before its execution history" });
+  await runtime.store.updateTask(applyOutcome(task, { status: "ready", result: "## Result\nOUTCOME_SENTINEL" }));
+  await runtime.store.appendEvent(task.slug, { type: "tool.started", taskId: task.id, run: 1, at: new Date().toISOString(), name: "Read", input: { file_path: "TRACE_SENTINEL.mjs" } });
+  const model = await snapshot(runtime);
+  for (const theme of ["dark", "light"]) {
+    const draw = expand => renderFrame(frame(model, { ...initialState(), expand }, { cols: 120, rows: 36, palette: palette(theme) }).lines, 120, 36, { support: "none" }).join("\n");
+    const collapsed = draw(false);
+    assert.ok(collapsed.indexOf("OUTCOME_SENTINEL") < collapsed.indexOf("TASK     "), "the conclusion is above bookkeeping");
+    assert.doesNotMatch(collapsed, /TRACE_SENTINEL/);
+    assert.match(collapsed, /t expand/);
+    assert.match(draw(true), /TRACE_SENTINEL/);
   }
 });

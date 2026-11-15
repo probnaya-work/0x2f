@@ -142,6 +142,7 @@ test("both Web palettes provide contrast for prose, attention, selection and pri
     for (const [fg, bg] of [["ink", "selection"], ["on-solid", "ink"], ["on-accent", "accent"], ["fail", "paper"]]) {
       assert.ok(contrast(p[fg], p[bg]) >= 4.5, `${fg} on ${bg}`);
     }
+    for (const bg of ["code", "pre"]) assert.ok(contrast(p["code-ink"], p[bg]) >= 4.5, `code on ${bg}`);
     for (const bg of ["paper", "input", "attention"]) assert.ok(contrast(p.focus, p[bg]) >= 3);
   }
   // The original light surfaces, typography and primary ink remain available.
@@ -150,11 +151,12 @@ test("both Web palettes provide contrast for prose, attention, selection and pri
   assert.equal(palettes[0].ink, "#2f2f2f");
 });
 
-test("unchanged terminal palettes retain legible diff additions/removals and selected text", async () => {
+test("terminal palettes retain legible prose, code, diff additions/removals and selected text", async () => {
   const { PALETTES } = await import("../src/tui/theme.mjs");
   for (const p of Object.values(PALETTES)) {
-    for (const fg of ["fg", "dim", "accent", "ok", "bad"]) {
-      for (const bg of ["bg", "sel"]) assert.ok(contrast(p[fg], p[bg]) >= 4.5, `TUI ${fg} on ${bg}`);
+    for (const fg of ["title", "fg", "dim", "ghost", "heading", "code", "key", "accent", "ok", "bad"]) {
+      for (const bg of ["bg", "sel", "surface", "sidebar", "field"]) assert.ok(contrast(p[fg], p[bg]) >= 4.5, `TUI ${fg} on ${bg}`);
     }
+    assert.ok(contrast(p.bg, p.accent) >= 4.5, "TUI primary action label");
   }
 });

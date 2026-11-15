@@ -136,6 +136,7 @@ const ASSETS = {
   "/app/app.css": ["web/app.css", "text/css; charset=utf-8"],
   "/app/app.js": ["web/app.js", "text/javascript; charset=utf-8"],
   "/app/e2e.mjs": ["web/e2e.mjs", "text/javascript; charset=utf-8"],
+  "/app/kdf-worker.mjs": ["web/kdf-worker.mjs", "text/javascript; charset=utf-8"],
   "/app/pair.mjs": ["web/pair.mjs", "text/javascript; charset=utf-8"],
   "/app/pair.css": ["web/pair.css", "text/css; charset=utf-8"],
   "/app/remote.mjs": ["web/remote.mjs", "text/javascript; charset=utf-8"],
@@ -203,6 +204,7 @@ const AUTH_HEADER = "x-0x2f-auth";
 const CSP = [
   "default-src 'none'",
   "script-src 'self'",
+  "worker-src 'self'",
   "style-src 'self'",
   "img-src 'self' data:",
   "connect-src 'self' http: https: ws: wss:",
@@ -311,14 +313,14 @@ function guardFetchSite(req, res) {
 }
 
 // Layer 3: /api/* requires the per-runtime token, as cookie or header.
-function isAuthenticated(req, token) {
-  if (parseCookies(req)[AUTH_COOKIE] === token) return true;
+function isAuthenticated(req, token, cookieName) {
+  if (parseCookies(req)[cookieName] === token) return true;
   const header = req.headers[AUTH_HEADER];
   return typeof header === "string" && header === token;
 }
 
-function requireAuth(req, res, token) {
-  if (isAuthenticated(req, token)) return true;
+function requireAuth(req, res, token, cookieName) {
+  if (isAuthenticated(req, token, cookieName)) return true;
   json(res, { error: "Unauthorized — this is a local 0x2F API; open the 0x2F UI from this machine." }, 401);
   return false;
 }
@@ -519,6 +521,9 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
 
   // The per-runtime credential. Random per process (or injected by tests).
   const authToken = opts.authToken ?? crypto.randomBytes(32).toString("base64url");
+  // Cookies ignore ports. Distinct runtime ports must coexist in one browser
+  // without overwriting each other's token. Set after listen (also for port 0).
+  let authCookieName;
 
   // LAN mode: an in-process instance of the relay protocol, MOUNTED on this
   // server (it never listens on its own socket). The phone on the same Wi-Fi
@@ -605,7 +610,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
           "cache-control": "no-store",
           ...SECURITY_HEADERS,
           "set-cookie":
-            `${AUTH_COOKIE}=${authToken}; Path=/; HttpOnly; SameSite=Strict`
+            `${authCookieName}=${authToken}; Path=/; HttpOnly; SameSite=Strict`
         });
         res.end(await readShell(store.base));
         return;
@@ -886,7 +891,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
         return;
       }
       if (url.pathname.startsWith("/api/") && url.pathname !== "/api/health") {
-        if (!requireAuth(req, res, authToken)) return;
+        if (!requireAuth(req, res, authToken, authCookieName)) return;
         if (req.method === "POST") mutationPath = url.pathname;
       }
     }
@@ -962,6 +967,7 @@ export async function startServer(base = process.cwd(), port = 4242, opts = {}) 
     server.once("error", onError);
     server.listen(port, host, () => {
       server.off("error", onError);
+      authCookieName = `${AUTH_COOKIE}_${server.address().port}`;
       resolve();
     });
   });

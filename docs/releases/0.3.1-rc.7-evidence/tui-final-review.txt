@@ -1,0 +1,44 @@
+
+> 0x2f@0.3.1-rc.5 review:tui
+> node scripts/review-tui.mjs --no-ai
+
+0x2F TUI visual review — capturing deterministic frames
+frames → <CHECKOUT>/.review/frames
+captured composer-120x36 (composer, 120x36)
+captured working-120x36 (working, 120x36)
+captured needs-you-permission-120x36 (permission, 120x36)
+captured ready-120x36 (ready, 120x36)
+captured diff-120x36 (ready-diff, 120x36)
+captured decision-120x36 (decision, 120x36)
+captured help-120x36 (help, 120x36)
+captured failed-auth-120x36 (failed-auth, 120x36)
+captured overview-many-120x36 (overview, 120x36)
+captured decision-long-120x36 (decision-long, 120x36)
+captured overview-many-80x24 (overview, 80x24)
+captured decision-long-80x24 (decision-long, 80x24)
+captured composer-long-80x24 (composer, 80x24)
+captured composer-start-80x24 (composer, 80x24)
+captured help-80x24 (help, 80x24)
+captured help-end-80x24 (help, 80x24)
+captured composer-long-light-80x24 (composer, 80x24)
+check composer-120x36: PASS
+check working-120x36: PASS
+check needs-you-permission-120x36: PASS
+check ready-120x36: PASS
+check diff-120x36: PASS
+check decision-120x36: PASS
+check help-120x36: PASS
+check failed-auth-120x36: PASS
+check overview-many-120x36: PASS
+check decision-long-120x36: PASS
+check overview-many-80x24: PASS
+check decision-long-80x24: PASS
+check composer-long-80x24: PASS
+check composer-start-80x24: PASS
+check help-80x24: PASS
+check help-end-80x24: PASS
+check composer-long-light-80x24: PASS
+
+report → <CHECKOUT>/.review/report.md
+frames  → <CHECKOUT>/.review/frames (gallery: index.html)
+verdicts: 17 frames · 0 FAIL · 0 FINDINGS · 17 PASS

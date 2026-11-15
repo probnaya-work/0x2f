@@ -1,0 +1,90 @@
+TAP version 13
+# Subtest: a relay cannot forge a command: envelopes without the pairing key never execute
+ok 1 - a relay cannot forge a command: envelopes without the pairing key never execute # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.612792
+  ...
+# Subtest: a tampered envelope (bit flip in the ciphertext) is rejected
+ok 2 - a tampered envelope (bit flip in the ciphertext) is rejected # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.054042
+  ...
+# Subtest: remote mutations persist an uncertainty receipt before effects and a final ack before responding
+ok 3 - remote mutations persist an uncertainty receipt before effects and a final ack before responding
+  ---
+  duration_ms: 421.121542
+  ...
+# Subtest: an untrusted relay duplicating a frame while it is queued cannot repeat a mutation
+ok 4 - an untrusted relay duplicating a frame while it is queued cannot repeat a mutation # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.095542
+  ...
+# Subtest: restart refuses remote mutations with uncertain persisted command receipts
+ok 5 - restart refuses remote mutations with uncertain persisted command receipts # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.069875
+  ...
+# Subtest: restart refuses remote mutations with unreadable persisted command receipts
+ok 6 - restart refuses remote mutations with unreadable persisted command receipts # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.106042
+  ...
+# Subtest: a failed receipt write refuses a remote mutation before execution
+ok 7 - a failed receipt write refuses a remote mutation before execution
+  ---
+  duration_ms: 299.146583
+  ...
+# Subtest: a failed final acknowledgement write keeps retries uncertain without repeating the effect
+ok 8 - a failed final acknowledgement write keeps retries uncertain without repeating the effect
+  ---
+  duration_ms: 371.329417
+  ...
+# Subtest: queued remote actions recheck revocation at their execution boundary
+ok 9 - queued remote actions recheck revocation at their execution boundary # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.160875
+  ...
+# Subtest: a captured command envelope cannot be replayed to execute twice
+ok 10 - a captured command envelope cannot be replayed to execute twice # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.062708
+  ...
+# Subtest: replay protection survives a Mac/runtime restart (persisted ack cache)
+ok 11 - replay protection survives a Mac/runtime restart (persisted ack cache) # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.086208
+  ...
+# Subtest: legitimate retries (same requestId) return the same ack without double execution
+ok 12 - legitimate retries (same requestId) return the same ack without double execution # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.036541
+  ...
+# Subtest: a re-paired (rotated) Mac rejects envelopes from the old phone key
+ok 13 - a re-paired (rotated) Mac rejects envelopes from the old phone key # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.029167
+  ...
+# Subtest: relay state and persisted state hold no task/source/result payloads
+ok 14 - relay state and persisted state hold no task/source/result payloads # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.074667
+  ...
+# Subtest: the remote projection drops raw inputs, diffs, session ids, absolute paths and base
+ok 15 - the remote projection drops raw inputs, diffs, session ids, absolute paths and base # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.155375
+  ...
+# Subtest: the full remote-control loop works end-to-end over the E2E channel
+ok 16 - the full remote-control loop works end-to-end over the E2E channel # SKIP test name does not match pattern
+  ---
+  duration_ms: 0.035584
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 13
+# todo 0
+# duration_ms 1210.278209

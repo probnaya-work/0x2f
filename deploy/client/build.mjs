@@ -39,6 +39,7 @@ export const CLIENT_ASSETS = [
   ["src/web/app.css", "/app/app.css", "text/css; charset=utf-8"],
   ["src/web/app.js", "/app/app.js", "text/javascript; charset=utf-8"],
   ["src/web/e2e.mjs", "/app/e2e.mjs", "text/javascript; charset=utf-8"],
+  ["src/web/kdf-worker.mjs", "/app/kdf-worker.mjs", "text/javascript; charset=utf-8"],
   ["src/web/pair.mjs", "/app/pair.mjs", "text/javascript; charset=utf-8"],
   ["src/web/pair.css", "/app/pair.css", "text/css; charset=utf-8"],
   ["src/web/remote.mjs", "/app/remote.mjs", "text/javascript; charset=utf-8"],
@@ -78,9 +79,11 @@ export async function buildClient(outDir = DEFAULT_OUT) {
   // MIME hints for hosts that need them (Netlify _headers). Harmless elsewhere.
   const headers = CLIENT_ASSETS
     .filter(([, , mime]) => mime.startsWith("text/javascript"))
-    .map(([, route]) => `  ${route}\n    Content-Type: text/javascript; charset=utf-8`)
+    .map(([, route]) => `${route}\n  Content-Type: text/javascript; charset=utf-8`)
     .join("\n");
-  await fs.writeFile(path.join(out, "_headers"), headers + "\n");
+  await fs.writeFile(path.join(out, "_headers"),
+    "/*\n  Cache-Control: no-store\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n" + headers + "\n");
+  await fs.writeFile(path.join(out, "_redirects"), "/pair /pair.html 200\n");
   return out;
 }
 
@@ -91,5 +94,5 @@ if (isMain) {
   const out = await buildClient(process.argv[2]);
   console.log(`Client bundle -> ${out}`);
   console.log("Upload this directory to your static host, or point Caddy at it:");
-  console.log("  app.0x2f.dev { root * " + out + "; file_server }");
+  console.log("  Use deploy/Caddyfile with root " + out + " (including its /pair rewrite).");
 }

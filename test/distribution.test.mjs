@@ -263,7 +263,7 @@ test("the packed artifact supports the full first-install journey", async t => {
   assert.deepEqual(health, { ok: true, mode: "local", base: await fsp.realpath(proj) });
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/tasks`)).status, 401);
   const shell = await fetch(`http://127.0.0.1:${port}/`);
-  assert.ok(shell.headers.get("set-cookie")?.includes("0x2f_auth="), "shell must set the auth cookie");
+  assert.ok(/^0x2f_auth_\d+=/.test(shell.headers.get("set-cookie") ?? ""), "shell must set the auth cookie");
   const cookie = shell.headers.get("set-cookie").split(";")[0];
   const tasks = await (
     await fetch(`http://127.0.0.1:${port}/api/tasks`, { headers: { cookie } })

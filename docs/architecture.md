@@ -1,6 +1,9 @@
 # 0x2F — Architecture
 
-> Development branch after published **0.2.0**: [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), [new commands and operations](engineering/2026-11-02/OPERATIONS.md), and [engineering report](engineering/2026-11-02/REPORT.md). The package version/tag remains unchanged; these candidate features require the integration source.
+> Published baseline **0.3.0**, local candidate **1.0.0**:
+> [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md),
+> [operations](releases/0.3.0-operations.md). Candidate command receipts and
+> browser authentication changes are recorded in the 2026-11-14 release audit.
 
 This document describes 0x2F as it is implemented: the object model, the
 lifecycle, the layers, the surfaces, and the boundaries. It is written from

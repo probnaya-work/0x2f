@@ -1,0 +1,9 @@
+{
+  "from": "0.3.0",
+  "to": "1.0.0-rc.1",
+  "sha256": "01e69a26dedf35c06daa11b992c488d817598374421bad3eca404296039cfdad",
+  "taskFiles": 14,
+  "allTaskBytesUnchanged": true,
+  "cliResultUnchanged": true,
+  "synthetic": true
+}

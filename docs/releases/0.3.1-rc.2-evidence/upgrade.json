@@ -1,0 +1,10 @@
+{
+  "from": "0.3.0",
+  "to": "0.3.1-rc.2",
+  "taskFiles": 14,
+  "taskBytesUnchanged": true,
+  "visibleResultUnchanged": true,
+  "taskStatus": "ready",
+  "execution": "synthetic command fixture",
+  "sha256": "e9f2ba531995fd9b2712d8c84ef23284f1f1a34a3f9cd3808109bf9fc9848115"
+}

@@ -1,0 +1,50 @@
+{
+  "node": "v26.11.1",
+  "inheritedCredentials": false,
+  "offline": true,
+  "results": [
+    {
+      "label": "final-check",
+      "start": "2026-11-15T00:57:59.232Z",
+      "end": "2026-11-15T00:58:10.036Z",
+      "code": 0
+    },
+    {
+      "label": "isolated-regression",
+      "start": "2026-11-15T00:58:10.036Z",
+      "end": "2026-11-15T01:13:52.492Z",
+      "code": 0
+    },
+    {
+      "label": "pack",
+      "start": "2026-11-15T01:13:52.493Z",
+      "end": "2026-11-15T01:13:52.862Z",
+      "code": 0
+    },
+    {
+      "label": "install-tarball",
+      "start": "2026-11-15T01:13:52.862Z",
+      "end": "2026-11-15T01:13:53.524Z",
+      "code": 0
+    },
+    {
+      "label": "installed-version",
+      "start": "2026-11-15T01:13:53.526Z",
+      "end": "2026-11-15T01:13:53.813Z",
+      "code": 0
+    },
+    {
+      "label": "installed-pty",
+      "start": "2026-11-15T01:13:53.846Z",
+      "end": "2026-11-15T01:14:08.203Z",
+      "code": 0
+    }
+  ],
+  "platform": "darwin",
+  "npm": "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js",
+  "version": "1.0.0-rc.1",
+  "sourceFilesMatched": 84,
+  "tarball": "0x2f-1.0.0-rc.1.tgz",
+  "sha256": "01e69a26dedf35c06daa11b992c488d817598374421bad3eca404296039cfdad",
+  "status": "passed"
+}

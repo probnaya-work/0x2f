@@ -24,7 +24,9 @@ the npm package.
 
 ## Deployment requirements
 
-- **Node.js ≥ 20** and the `ws` package (`npm install` inside this directory).
+- **Node.js ≥ 20** and the complete matching repository checkout. Run
+  `npm ci --ignore-scripts` at the repository root. Installing only inside
+  `relay/` cannot satisfy imports made by `src/relay/server.mjs`.
 - **TLS in front of it.** The relay itself speaks plain HTTP/WS; terminate
   TLS with Caddy/nginx (recommended) or any reverse proxy. The Mac connects
   **outbound**, so no inbound ports, NAT rules, or static IPs are needed.
@@ -51,9 +53,9 @@ the npm package.
 ## Run
 
 ```bash
-cd relay
-npm install
-node server.mjs --port 8080 --host 127.0.0.1 --data ./data/state.json
+# From the complete repository root:
+npm ci --ignore-scripts
+node relay/server.mjs --port 8080 --host 127.0.0.1 --data ./relay/data/state.json
 ```
 
 ## Pairing

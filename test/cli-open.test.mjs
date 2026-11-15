@@ -94,3 +94,22 @@ test("open: legacy tasks still read their sole result and untagged progress", as
   assert.match(active, /No written result for this run\./);
   assert.match(active, /Progress: Legacy current activity/);
 });
+
+test("CLI renders untrusted results, titles and errors as text without terminal controls", async t => {
+  const { store, task, dir, open } = await fixture(t);
+  const payload = "before\x1b[2J\x1b]52;c;YXVkaXQ=\x07after\x9b2J\rhidden\b!";
+  await store.writeText(path.join(dir, "runs", "3", "result.md"), payload);
+  await store.updateTask({ ...task, title: payload, status: "ready" });
+  for (const args of [[], ["--run", "3"]]) {
+    const shown = await open(...args);
+    assert.doesNotMatch(shown, /[\x00-\x08\x0b-\x1f\x7f-\x9f]/);
+    assert.match(shown, /before/);
+    assert.match(shown, /after/);
+  }
+  const listed = (await exec(process.execPath, [cli, "status"], { cwd: store.base })).stdout;
+  assert.doesNotMatch(listed, /[\x00-\x08\x0b-\x1f\x7f-\x9f]/);
+  const failed = await exec(process.execPath, [cli, payload], { cwd: store.base }).catch(error => error);
+  assert.equal(failed.code, 1);
+  assert.doesNotMatch(failed.stderr, /[\x00-\x08\x0b-\x1f\x7f-\x9f]/);
+  assert.equal(await store.readText(path.join(dir, "runs", "3", "result.md")), payload, "saved evidence is unchanged");
+});

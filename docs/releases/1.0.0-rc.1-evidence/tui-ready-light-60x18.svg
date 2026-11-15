@@ -1,0 +1,232 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12">
+<title>0x2F TUI frame — 60x18</title>
+<rect width="480" height="270" fill="#f2f4f6"/>
+<rect x="0" y="0" width="480" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="11" fill="#2b3646" xml:space="preserve" textLength="480" lengthAdjust="spacingAndGlyphs">                                                            </text>
+<rect x="0" y="15" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="26" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="15" width="48" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="26" fill="#10161c" xml:space="preserve" textLength="48" lengthAdjust="spacingAndGlyphs" font-weight="700"> 0x2F </text>
+<rect x="56" y="15" width="152" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="56" y="26" fill="#4d5760" xml:space="preserve" textLength="152" lengthAdjust="spacingAndGlyphs">~/ws               </text>
+<rect x="208" y="15" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="26" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="15" width="56" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="26" fill="#56616d" xml:space="preserve" textLength="56" lengthAdjust="spacingAndGlyphs"> #001  </text>
+<rect x="272" y="15" width="184" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="272" y="26" fill="#10161c" xml:space="preserve" textLength="184" lengthAdjust="spacingAndGlyphs" font-weight="700">Inspect the submit pat…</text>
+<rect x="456" y="15" width="16" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="456" y="26" fill="#4d5760" xml:space="preserve" textLength="16" lengthAdjust="spacingAndGlyphs">  </text>
+<rect x="472" y="15" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="26" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="30" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="41" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="30" width="72" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="41" fill="#56616d" xml:space="preserve" textLength="72" lengthAdjust="spacingAndGlyphs"> ! 0  ✕ 0</text>
+<rect x="80" y="30" width="40" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="80" y="41" fill="#1c6b4e" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs">  ✓ 1</text>
+<rect x="120" y="30" width="40" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="120" y="41" fill="#4d5760" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs">  ▶ 0</text>
+<rect x="160" y="30" width="40" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="160" y="41" fill="#56616d" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs">  · 0</text>
+<rect x="200" y="30" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="200" y="41" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="208" y="30" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="41" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="30" width="256" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="41" fill="#4d5760" xml:space="preserve" textLength="256" lengthAdjust="spacingAndGlyphs"> ALPHA · run 1 · 0:00           </text>
+<rect x="472" y="30" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="41" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="45" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="56" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="45" width="192" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="56" fill="#c4ccd3" xml:space="preserve" textLength="192" lengthAdjust="spacingAndGlyphs"> ───────────────────────</text>
+<rect x="200" y="45" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="200" y="56" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="208" y="45" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="56" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="45" width="256" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="56" fill="#4d5760" xml:space="preserve" textLength="256" lengthAdjust="spacingAndGlyphs">                                </text>
+<rect x="472" y="45" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="56" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="60" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="71" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="60" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="71" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="60" width="56" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="71" fill="#1c6b4e" xml:space="preserve" textLength="56" lengthAdjust="spacingAndGlyphs" font-weight="700"> RESULT</text>
+<rect x="272" y="60" width="24" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="272" y="71" fill="#4d5760" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="296" y="60" width="8" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="296" y="71" fill="#765220" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs" font-weight="700">r</text>
+<rect x="304" y="60" width="168" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="304" y="71" fill="#4d5760" xml:space="preserve" textLength="168" lengthAdjust="spacingAndGlyphs"> full report         </text>
+<rect x="472" y="60" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="71" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="75" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="86" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="75" width="48" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="86" fill="#1c6b4e" xml:space="preserve" textLength="48" lengthAdjust="spacingAndGlyphs" font-weight="700"> READY</text>
+<rect x="56" y="75" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="56" y="86" fill="#56616d" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">  1</text>
+<rect x="80" y="75" width="128" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="80" y="86" fill="#4d5760" xml:space="preserve" textLength="128" lengthAdjust="spacingAndGlyphs">                </text>
+<rect x="208" y="75" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="86" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="75" width="256" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="86" fill="#4d5760" xml:space="preserve" textLength="256" lengthAdjust="spacingAndGlyphs">                                </text>
+<rect x="472" y="75" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="86" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="90" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="101" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="90" width="24" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="8" y="101" fill="#1f4f9e" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs" font-weight="700"> ❯ </text>
+<rect x="32" y="90" width="32" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="32" y="101" fill="#56616d" xml:space="preserve" textLength="32" lengthAdjust="spacingAndGlyphs">001 </text>
+<rect x="64" y="90" width="88" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="64" y="101" fill="#10161c" xml:space="preserve" textLength="88" lengthAdjust="spacingAndGlyphs" font-weight="700">Inspect the</text>
+<rect x="152" y="90" width="56" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="152" y="101" fill="#4d5760" xml:space="preserve" textLength="56" lengthAdjust="spacingAndGlyphs">       </text>
+<rect x="208" y="90" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="101" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="90" width="216" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="101" fill="#2b3646" xml:space="preserve" textLength="216" lengthAdjust="spacingAndGlyphs">   Added retry-with-backoff</text>
+<rect x="432" y="90" width="40" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="432" y="101" fill="#4d5760" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs">     </text>
+<rect x="472" y="90" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="101" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="105" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="116" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="105" width="192" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="8" y="116" fill="#10161c" xml:space="preserve" textLength="192" lengthAdjust="spacingAndGlyphs" font-weight="700">       submit path and …</text>
+<rect x="200" y="105" width="8" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="200" y="116" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="208" y="105" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="116" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="105" width="232" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="116" fill="#2b3646" xml:space="preserve" textLength="232" lengthAdjust="spacingAndGlyphs">   to the submit path; honors</text>
+<rect x="448" y="105" width="24" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="448" y="116" fill="#4d5760" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="472" y="105" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="116" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="120" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="131" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="120" width="200" height="15" fill="#dfe6ed" shape-rendering="crispEdges"/>
+<text x="8" y="131" fill="#4d5760" xml:space="preserve" textLength="200" lengthAdjust="spacingAndGlyphs">       ALPHA · run 1     </text>
+<rect x="208" y="120" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="131" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="120" width="184" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="131" fill="#2b3646" xml:space="preserve" textLength="184" lengthAdjust="spacingAndGlyphs">   Retry-After in whole</text>
+<rect x="400" y="120" width="72" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="400" y="131" fill="#4d5760" xml:space="preserve" textLength="72" lengthAdjust="spacingAndGlyphs">         </text>
+<rect x="472" y="120" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="131" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="135" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="146" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="135" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="146" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="135" width="88" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="146" fill="#2b3646" xml:space="preserve" textLength="88" lengthAdjust="spacingAndGlyphs">   seconds.</text>
+<rect x="304" y="135" width="168" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="304" y="146" fill="#4d5760" xml:space="preserve" textLength="168" lengthAdjust="spacingAndGlyphs">                     </text>
+<rect x="472" y="135" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="146" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="150" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="161" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="150" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="161" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="150" width="256" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="161" fill="#4d5760" xml:space="preserve" textLength="256" lengthAdjust="spacingAndGlyphs">                                </text>
+<rect x="472" y="150" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="161" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="165" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="176" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="165" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="176" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="165" width="24" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="176" fill="#56616d" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="240" y="165" width="64" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="240" y="176" fill="#c4ccd3" xml:space="preserve" textLength="64" lengthAdjust="spacingAndGlyphs">────────</text>
+<rect x="304" y="165" width="72" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="304" y="176" fill="#56616d" xml:space="preserve" textLength="72" lengthAdjust="spacingAndGlyphs">  8/19 · </text>
+<rect x="376" y="165" width="24" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="376" y="176" fill="#765220" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs" font-weight="700">J K</text>
+<rect x="400" y="165" width="72" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="400" y="176" fill="#4d5760" xml:space="preserve" textLength="72" lengthAdjust="spacingAndGlyphs">         </text>
+<rect x="472" y="165" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="176" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="180" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="191" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="180" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="191" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="180" width="248" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="216" y="191" fill="#c4ccd3" xml:space="preserve" textLength="248" lengthAdjust="spacingAndGlyphs"> ──────────────────────────────</text>
+<rect x="464" y="180" width="8" height="15" fill="#ffffff" shape-rendering="crispEdges"/>
+<text x="464" y="191" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="472" y="180" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="191" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="195" width="208" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="206" fill="#4d5760" xml:space="preserve" textLength="208" lengthAdjust="spacingAndGlyphs">                          </text>
+<rect x="208" y="195" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="208" y="206" fill="#c4ccd3" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="216" y="195" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="216" y="206" fill="#4d5760" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="240" y="195" width="80" height="15" fill="#1f4f9e" shape-rendering="crispEdges"/>
+<text x="240" y="206" fill="#f2f4f6" xml:space="preserve" textLength="80" lengthAdjust="spacingAndGlyphs" font-weight="700"> ↵ ACCEPT </text>
+<rect x="320" y="195" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="320" y="206" fill="#c4ccd3" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="344" y="195" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="344" y="206" fill="#765220" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs" font-weight="700">x</text>
+<rect x="352" y="195" width="120" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="352" y="206" fill="#4d5760" xml:space="preserve" textLength="120" lengthAdjust="spacingAndGlyphs"> SEND BACK     </text>
+<rect x="472" y="195" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="472" y="206" fill="#2b3646" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="0" y="210" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="221" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="210" width="456" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="221" fill="#c4ccd3" xml:space="preserve" textLength="456" lengthAdjust="spacingAndGlyphs"> ────────────────────────────────────────────────────────</text>
+<rect x="464" y="210" width="16" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="464" y="221" fill="#2b3646" xml:space="preserve" textLength="16" lengthAdjust="spacingAndGlyphs">  </text>
+<rect x="0" y="225" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="236" fill="#4d5760" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs"> </text>
+<rect x="8" y="225" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="8" y="236" fill="#1c6b4e" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs" font-weight="700"> ✓ </text>
+<rect x="32" y="225" width="320" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="32" y="236" fill="#2b3646" xml:space="preserve" textLength="320" lengthAdjust="spacingAndGlyphs">allowed · #001 continues in the same run</text>
+<rect x="352" y="225" width="128" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="352" y="236" fill="#2b3646" xml:space="preserve" textLength="128" lengthAdjust="spacingAndGlyphs">                </text>
+<rect x="0" y="240" width="16" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="251" fill="#4d5760" xml:space="preserve" textLength="16" lengthAdjust="spacingAndGlyphs">  </text>
+<rect x="16" y="240" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="16" y="251" fill="#765220" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs" font-weight="700">n</text>
+<rect x="24" y="240" width="72" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="24" y="251" fill="#4d5760" xml:space="preserve" textLength="72" lengthAdjust="spacingAndGlyphs"> new task</text>
+<rect x="96" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="96" y="251" fill="#c4ccd3" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="120" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="120" y="251" fill="#765220" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs" font-weight="700">j/k</text>
+<rect x="144" y="240" width="56" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="144" y="251" fill="#4d5760" xml:space="preserve" textLength="56" lengthAdjust="spacingAndGlyphs"> select</text>
+<rect x="200" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="200" y="251" fill="#c4ccd3" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="224" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="224" y="251" fill="#765220" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs" font-weight="700">tab</text>
+<rect x="248" y="240" width="32" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="248" y="251" fill="#4d5760" xml:space="preserve" textLength="32" lengthAdjust="spacingAndGlyphs"> all</text>
+<rect x="280" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="280" y="251" fill="#c4ccd3" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="304" y="240" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="304" y="251" fill="#765220" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs" font-weight="700">?</text>
+<rect x="312" y="240" width="40" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="312" y="251" fill="#4d5760" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs"> help</text>
+<rect x="352" y="240" width="24" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="352" y="251" fill="#c4ccd3" xml:space="preserve" textLength="24" lengthAdjust="spacingAndGlyphs">   </text>
+<rect x="376" y="240" width="8" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="376" y="251" fill="#765220" xml:space="preserve" textLength="8" lengthAdjust="spacingAndGlyphs" font-weight="700">q</text>
+<rect x="384" y="240" width="56" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="384" y="251" fill="#4d5760" xml:space="preserve" textLength="56" lengthAdjust="spacingAndGlyphs"> detach</text>
+<rect x="440" y="240" width="40" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="440" y="251" fill="#2b3646" xml:space="preserve" textLength="40" lengthAdjust="spacingAndGlyphs">     </text>
+<rect x="0" y="255" width="480" height="15" fill="#f2f4f6" shape-rendering="crispEdges"/>
+<text x="0" y="266" fill="#2b3646" xml:space="preserve" textLength="480" lengthAdjust="spacingAndGlyphs">                                                            </text>
+</svg>

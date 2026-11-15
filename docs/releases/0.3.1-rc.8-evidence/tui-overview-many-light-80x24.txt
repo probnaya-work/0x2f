@@ -1,0 +1,28 @@
+# 0x2F TUI frame — overview-many-light-80x24
+# state: overview   mode: work   terminal: 80x24
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                
+  0x2F ~/ws                   │ #005  multi-region cache strategy               
+  ! 5  ✕ 4  ✓ 6  ▶ 6  · 5     │ CLAUDE CODE · run 1 · 0:00                      
+  ─────────────────────────── │                                                 
+                              │ NEEDS YOU · DECISION                            
+  NEEDS YOU  5                │                                                 
+  ❯ 005 multi-region cache    │   Which cache strategy should the ingest        
+        strategy              │   pipeline adopt for multi-region writes?       
+        CLAUDE CODE · run 1   │                                                 
+    004 queue backoff      CC │   The pipeline currently writes through a       
+      awaiting your answer    │   single-region Redis with a local              
+    003 flaky retry        CC │   read-through layer; the new multi-region      
+      wants edit · …/app.ts   │   topology means a writer in eu-west-1 must     
+    002 rate-limit headers CC │   see what a writer in us-east-1 just           
+      wants edit · …/app.ts   │   committed within seconds.                     
+    001 dedupe ingest      CC │                                                 
+      awaiting your answer    │   Option A: a global logical clock with         
+                              │   ────────────────────────  14/51 · J K         
+  FAILED  4                   │ ──────────────────────────────────────────────  
+      ▼ 31                    │    ↵ ANSWER & CONTINUE    x SAVE ONLY   c NOTE  
+  ────────────────────────────────────────────────────────────────────────────  
+  › This task is waiting for your decision                                      
+  n new task   j/k select   tab all   ? help   q detach                         
+                                                                                

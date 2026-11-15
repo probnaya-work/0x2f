@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-15",
+  "version": "1.0.0",
+  "published": false,
+  "pages": [
+    {
+      "page": "index.html",
+      "localLinksPass": true,
+      "duplicateIds": false
+    },
+    {
+      "page": "engineering-0.3.0.html",
+      "localLinksPass": true,
+      "duplicateIds": false
+    },
+    {
+      "page": "engineering.html",
+      "localLinksPass": true,
+      "duplicateIds": false
+    },
+    {
+      "page": "docs.html",
+      "localLinksPass": true,
+      "duplicateIds": false
+    }
+  ],
+  "syntax": "node --check app.js and docs.js passed",
+  "browser": "IAB desktop and current compact layout: docs/themes, release sections, compact INDEX open/close/navigation, homepage; clipboard read back the correct versioned command",
+  "clipboardObserved": "npm install -g 0x2f@1.0.0",
+  "physicalMobile": "NOT RUN",
+  "publicationGate": "matching npm artifact, GitHub release, versioned docs and successful GitHub CI",
+  "sourceFiles": {
+    ".gitignore": "471747b8b39852d43b65be39b216df651cb8ce9b698439fbd1c57d3b385caa88",
+    ".vercelignore": "f3a0f37827a96cd2ec58d7d876ad5755fb362c20de7d57691e5c4cac1812aee3",
+    "INDEPENDENT-REVIEW-20261102.md": "70047363c8f808da1dec93704c3580287250038dd8e4044dec61c0e53b779192",
+    "LICENSE": "3585aabe7e6fb6807c92adf9b030be3a66eba1a5a31e1879bcc5ac6618334c83",
+    "README.md": "25daab6b01b20a3950477b2e3f65ba777b92213b0ba6d7ea7d6fd8e70607981e",
+    "RELEASE-HANDOFF.md": "f6201ae78c33cfc01d63ea1e1911eeb5693f8e7290712572decc028d882b4d07",
+    "app.js": "dbfc79277a1545808c5ebaaf45a725193c3aea05854663617ce590a31873077a",
+    "assets/apple-touch-icon.png": "ab63a044457f6ba9049a8107cffdc7e374ab8ea077be1691e77164fc329b7957",
+    "assets/favicon.svg": "e174363e1b4371bc93fee7d0e6dbc67680f6a13cbdc382e56b47bf398a7b0071",
+    "assets/fonts/OFL.txt": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da",
+    "assets/fonts/plex-mono-400.woff2": "c36f509c0a8f9f85f29cb44bc8701d8a9e0b14c499e77a884f789ead7093a7ac",
+    "assets/fonts/plex-mono-500.woff2": "a76f53ca6612e7b3828eec2311098675b7f9849ae4169a8bcef6302aec02a6c0",
+    "assets/fonts/plex-serif-400.woff2": "9fbb32c4c07037bc1e9107ee9cbf3a84662449cb36511138d5adb80e195b9302",
+    "assets/fonts/plex-serif-500.woff2": "9750299e80ac5c1f06df6d9ede8272e5b6fc906c9835a0d5dc0447493952ed55",
+    "assets/mark.svg": "881c54723ba4156f2cb0b93df15699da7469831faeced7a22cd42de224f7c4e5",
+    "assets/tui/tui-ready-dark.png": "96c3022ae796910d268b99812fbbd4c74ac4a37cc3f7cd1ebd05a20f73a024ce",
+    "assets/tui/tui-ready-light.png": "9518f3d51a80a2c0014f67ec91d6e10133e8ac19de038e1bdf0d56d637a672f2",
+    "docs.css": "75e985dfd4cf2a5d3131aaa31522c99bd519ca213c98b8a6536ac56ebf15393e",
+    "docs.html": "403d22ff1abdbefb54a083cd21f3730e664734c82ee87c0a2f8e430bf1fde62b",
+    "docs.js": "8d74a611a855695f3984c679fa134cfdbd85b36ffe57ca0b1b3090b30976e733",
+    "engineering-0.3.0.html": "fba3b15551e8fcff4b624fd03a210ae62016ab17bd94970ead922ca46c1bd086",
+    "engineering.html": "d1874b3d26ae4d825f114974bae14b63f2da0150e2e755464c2d369edecc1f28",
+    "index.html": "a704bcd42ec6bdbc5022f146ea1e7e5f0e388f2e6488275ea5503abd22dfb341",
+    "robots.txt": "621f12e1587c424b263cae98dcc915ce686f383b8aaf0a1afa5dbdcd8bb8dfcc",
+    "sitemap.xml": "8c12f6b7ddcbe55a5e4e0cdf33d8442ea82e415ee68a7b0b235f957b54cf1f36",
+    "styles.css": "383f2826d1e66c5a36b3d34a042aa845ece263b044ee6783b353c20256e90cd9",
+    "vercel.json": "f57d62b48aebe9bf85cee38f320ec57f4163ec83ed80b7a6c50338998a878ee9"
+  },
+  "screenshots": [
+    "home.jpeg",
+    "docs-themes.jpeg",
+    "docs-narrow.jpeg"
+  ]
+}

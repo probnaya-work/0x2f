@@ -1,0 +1,437 @@
+[
+  {
+    "path": "LICENSE",
+    "size": 1074,
+    "mode": 420
+  },
+  {
+    "path": "README.md",
+    "size": 27734,
+    "mode": 420
+  },
+  {
+    "path": "package.json",
+    "size": 1270,
+    "mode": 420
+  },
+  {
+    "path": "src/backup.mjs",
+    "size": 10160,
+    "mode": 420
+  },
+  {
+    "path": "src/cli.mjs",
+    "size": 27841,
+    "mode": 493
+  },
+  {
+    "path": "src/core/acceptance.mjs",
+    "size": 4281,
+    "mode": 420
+  },
+  {
+    "path": "src/core/actions.mjs",
+    "size": 40102,
+    "mode": 420
+  },
+  {
+    "path": "src/core/context.mjs",
+    "size": 6795,
+    "mode": 420
+  },
+  {
+    "path": "src/core/diff.mjs",
+    "size": 4545,
+    "mode": 420
+  },
+  {
+    "path": "src/core/errors.mjs",
+    "size": 471,
+    "mode": 420
+  },
+  {
+    "path": "src/core/events.mjs",
+    "size": 4342,
+    "mode": 420
+  },
+  {
+    "path": "src/core/execution.mjs",
+    "size": 2412,
+    "mode": 420
+  },
+  {
+    "path": "src/core/isolation.mjs",
+    "size": 10701,
+    "mode": 420
+  },
+  {
+    "path": "src/core/lifecycle.mjs",
+    "size": 11372,
+    "mode": 420
+  },
+  {
+    "path": "src/core/limits.mjs",
+    "size": 1252,
+    "mode": 420
+  },
+  {
+    "path": "src/core/lock.mjs",
+    "size": 2411,
+    "mode": 420
+  },
+  {
+    "path": "src/core/paths.mjs",
+    "size": 1673,
+    "mode": 420
+  },
+  {
+    "path": "src/core/permission-scope.mjs",
+    "size": 4154,
+    "mode": 420
+  },
+  {
+    "path": "src/core/router.mjs",
+    "size": 5257,
+    "mode": 420
+  },
+  {
+    "path": "src/core/runs.mjs",
+    "size": 6472,
+    "mode": 420
+  },
+  {
+    "path": "src/core/store.mjs",
+    "size": 13922,
+    "mode": 420
+  },
+  {
+    "path": "src/core/terminal.mjs",
+    "size": 630,
+    "mode": 420
+  },
+  {
+    "path": "src/core/title.mjs",
+    "size": 7449,
+    "mode": 420
+  },
+  {
+    "path": "src/core/worktree.mjs",
+    "size": 3152,
+    "mode": 420
+  },
+  {
+    "path": "src/hosts.mjs",
+    "size": 4968,
+    "mode": 420
+  },
+  {
+    "path": "src/nodes/local.mjs",
+    "size": 4503,
+    "mode": 420
+  },
+  {
+    "path": "src/project.mjs",
+    "size": 7627,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/acp.mjs",
+    "size": 29511,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/claude-code.mjs",
+    "size": 15923,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/codex.mjs",
+    "size": 14760,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/command.mjs",
+    "size": 4698,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/deepseek-harness.mjs",
+    "size": 6427,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/gemini.mjs",
+    "size": 15164,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/index.mjs",
+    "size": 7673,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/manifests.mjs",
+    "size": 7983,
+    "mode": 420
+  },
+  {
+    "path": "src/providers/opencode.mjs",
+    "size": 551,
+    "mode": 420
+  },
+  {
+    "path": "src/recover.mjs",
+    "size": 9523,
+    "mode": 420
+  },
+  {
+    "path": "src/refine.mjs",
+    "size": 10436,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/agent.mjs",
+    "size": 28836,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/defaults.mjs",
+    "size": 537,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/lan.mjs",
+    "size": 2138,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/pair.mjs",
+    "size": 21593,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/project.mjs",
+    "size": 16477,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/protocol.mjs",
+    "size": 4518,
+    "mode": 420
+  },
+  {
+    "path": "src/relay/server.mjs",
+    "size": 29119,
+    "mode": 420
+  },
+  {
+    "path": "src/render.mjs",
+    "size": 4302,
+    "mode": 420
+  },
+  {
+    "path": "src/runtime.mjs",
+    "size": 2942,
+    "mode": 420
+  },
+  {
+    "path": "src/serve.mjs",
+    "size": 5604,
+    "mode": 420
+  },
+  {
+    "path": "src/server-entry.mjs",
+    "size": 1719,
+    "mode": 420
+  },
+  {
+    "path": "src/server.mjs",
+    "size": 43313,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/app.mjs",
+    "size": 11217,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/editor.mjs",
+    "size": 3037,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/index.mjs",
+    "size": 6268,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/keys.mjs",
+    "size": 6328,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/model.mjs",
+    "size": 12513,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/screen.mjs",
+    "size": 6638,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/state.mjs",
+    "size": 17485,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/text.mjs",
+    "size": 1932,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/theme.mjs",
+    "size": 2699,
+    "mode": 420
+  },
+  {
+    "path": "src/tui/view.mjs",
+    "size": 54531,
+    "mode": 420
+  },
+  {
+    "path": "src/ui.mjs",
+    "size": 8272,
+    "mode": 420
+  },
+  {
+    "path": "src/web/app.css",
+    "size": 53675,
+    "mode": 420
+  },
+  {
+    "path": "src/web/app.js",
+    "size": 152432,
+    "mode": 420
+  },
+  {
+    "path": "src/web/e2e.mjs",
+    "size": 11772,
+    "mode": 420
+  },
+  {
+    "path": "src/web/index.html",
+    "size": 392,
+    "mode": 420
+  },
+  {
+    "path": "src/web/kdf-worker.mjs",
+    "size": 708,
+    "mode": 420
+  },
+  {
+    "path": "src/web/ledger.mjs",
+    "size": 53256,
+    "mode": 420
+  },
+  {
+    "path": "src/web/pair.css",
+    "size": 1648,
+    "mode": 420
+  },
+  {
+    "path": "src/web/pair.html",
+    "size": 1353,
+    "mode": 420
+  },
+  {
+    "path": "src/web/pair.mjs",
+    "size": 4844,
+    "mode": 420
+  },
+  {
+    "path": "src/web/remote.mjs",
+    "size": 9899,
+    "mode": 420
+  },
+  {
+    "path": "src/web/result-evidence.mjs",
+    "size": 1720,
+    "mode": 420
+  },
+  {
+    "path": "src/web/sound-policy.mjs",
+    "size": 5046,
+    "mode": 420
+  },
+  {
+    "path": "src/web/sound.mjs",
+    "size": 3944,
+    "mode": 420
+  },
+  {
+    "path": "src/web/theme.css",
+    "size": 26950,
+    "mode": 420
+  },
+  {
+    "path": "src/web/theme.js",
+    "size": 2216,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/ciphers/_polyval.js",
+    "size": 7976,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/ciphers/aes.js",
+    "size": 37163,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/ciphers/utils.js",
+    "size": 12563,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/_md.js",
+    "size": 6192,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/_u64.js",
+    "size": 3081,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/crypto.js",
+    "size": 146,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/hmac.js",
+    "size": 2944,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/pbkdf2.js",
+    "size": 3867,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/sha2.js",
+    "size": 16832,
+    "mode": 420
+  },
+  {
+    "path": "src/web/vendor/@noble/hashes/utils.js",
+    "size": 10529,
+    "mode": 420
+  },
+  {
+    "path": "src/worker.mjs",
+    "size": 20532,
+    "mode": 420
+  }
+]

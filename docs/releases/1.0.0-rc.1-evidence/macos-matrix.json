@@ -1,0 +1,17 @@
+[
+  {
+    "node": "v20.20.2",
+    "exitCode": 0,
+    "seconds": 38.7
+  },
+  {
+    "node": "v24.22.3",
+    "exitCode": 0,
+    "seconds": 36.5
+  },
+  {
+    "node": "v26.13.1",
+    "exitCode": 0,
+    "seconds": 35.7
+  }
+]

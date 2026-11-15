@@ -1,0 +1,18 @@
+{
+  "platform": "darwin",
+  "arch": "arm64",
+  "node": "v26.11.1",
+  "packageVersion": "0.3.1-rc.1",
+  "id": 4,
+  "status": "ready",
+  "elapsedSeconds": 11.49,
+  "markerVerified": true,
+  "checks": [
+    {
+      "id": "arithmetic",
+      "status": "passed",
+      "exitCode": 0
+    }
+  ],
+  "result": "passed"
+}

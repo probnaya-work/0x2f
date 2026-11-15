@@ -441,9 +441,14 @@ export async function startTui({
     // break collapsed to single spaces. Wrapped text that spans rows (a
     // decision question, a wrapped failure sentence) reads as one stream,
     // which is what a human reads — the visual wrap is not content.
-    textFlat() {
-      return term
-        .text()
+    textFlat({ pane = "all" } = {}) {
+      let text = term.text();
+      if (pane === "detail") {
+        const rows = text.split("\n");
+        const divider = rows.find(row => row.includes("│"))?.indexOf("│") ?? -1;
+        text = divider < 0 ? "" : rows.filter(row => row[divider] === "│").map(row => row.slice(divider + 1)).join("\n");
+      }
+      return text
         .replace(/[│]/g, " ")
         .replace(/\s+/g, " ")
         .trim();
@@ -487,9 +492,10 @@ export async function startTui({
     },
     // For prose that the pane wraps: match against the flattened screen.
     async waitForFlatText(regex, opts = {}) {
-      return session.waitFor(s => regex.test(s.textFlat()), {
+      const { pane = "all", ...waitOpts } = opts;
+      return session.waitFor(s => regex.test(s.textFlat({ pane })), {
         label: `screen prose matching ${regex}`,
-        ...opts
+        ...waitOpts
       });
     },
     // Wait for the frame at `rows`x`cols` to be painted and stay stable —

@@ -1,0 +1,11 @@
+✔ remote mutations persist an uncertainty receipt before effects and a final ack before responding (149.377375ms)
+✔ a failed receipt write refuses a remote mutation before execution (121.484541ms)
+✔ a failed final acknowledgement write keeps retries uncertain without repeating the effect (127.891375ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 498.755542

@@ -1,6 +1,7 @@
-# Commands and troubleshooting — 0.3.0
+# Commands and troubleshooting — 1.0.0 release candidate
 
-> **0.3.0**: [release scope and upgrade/rollback](releases/0.3.0.md), [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md), and [commands](usage.md).
+> **1.0.0**: [release scope and upgrade/rollback](releases/1.0.0.md) and
+> [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md).
 
 `2f --help` is the command reference. Run commands in the Task's workspace.
 
@@ -37,6 +38,7 @@ the composer, task actions, help, search and review screens.
 | Permission | `2f allow <id>` / `2f reject <id>`; bound to the actual recorded occurrence, where the harness supports it |
 | Decision | `2f answer <id> "answer"`; saves context, then rerun to continue |
 | Close | `2f close <id>`; DONE, never starts or resumes execution |
+| Cancel | `2f cancel <id>`; stop the current execution and retain partial work; wait for its receipt |
 | Browser | `2f ui [port] [--no-browser]`; launch/reuse workspace runtime |
 | Service | `2f serve [port]`; foreground runtime, useful under systemd/launchd |
 | Phone | `2f pair [--port <n>]`; trusted same-LAN control; `2f pair --off` revokes it |
@@ -44,14 +46,17 @@ the composer, task actions, help, search and review screens.
 CLOSE is not cancellation. An active worker may finish or remain blocked on a
 permission after its Task is closed. Stopping/restarting the runtime also leaves
 detached workers running; `KillMode=process` is required under systemd. Do not
-use CLOSE as an emergency stop. No new general cancel command is advertised in
-this release. Overlap protection refuses a new run while the previous execution
+use CLOSE as an emergency stop. Use `2f cancel <id>` to request cancellation,
+then inspect the recorded outcome. Overlap protection refuses a new run while the previous execution
 group still exists, including surviving descendants of a crashed worker.
 
 READY is provider completion with a written result. Provider-reported checks,
 observed command invocations, independent successful receipts and human
-acceptance are separate evidence. A working-tree diff reflects the files at
-viewing time, including later edits; it is not an immutable per-run patch.
+acceptance are separate evidence. The TUI changes view uses saved run change
+evidence where available; legacy tasks without a saved patch may fall back to
+the current working-tree diff, which can include later edits. The view labels
+that source. `2f changes <id> [--run <n>]` reads the saved immutable run patch;
+`2f apply <id>` explicitly transfers isolated changes.
 
 | Symptom | Action |
 | --- | --- |

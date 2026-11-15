@@ -80,6 +80,31 @@ function rawRequest({ port, path: p, method = "GET", headers = {}, body }) {
 
 // --- layer 1: per-runtime authentication -------------------------------------
 
+test("two workspaces stay authenticated in one browser cookie jar without sharing authority", async t => {
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-cookie-isolation-"));
+  const handles = [];
+  t.after(async () => {
+    await Promise.all(handles.map(h => h.close()));
+    await fs.rm(base, { recursive: true, force: true });
+  });
+  const jar = new Map();
+  for (const name of ["first", "second"]) {
+    const handle = await startServer(path.join(base, name), 0, { authToken: `token-${name}` });
+    handles.push(handle);
+    const shell = await fetch(handle.url);
+    const pair = shell.headers.get("set-cookie").split(";")[0];
+    const equals = pair.indexOf("=");
+    jar.set(pair.slice(0, equals), pair.slice(equals + 1));
+  }
+  const cookie = [...jar].map(([name, value]) => `${name}=${value}`).join("; ");
+  for (const handle of handles) {
+    assert.equal((await fetch(handle.url + "/api/tasks", { headers: { cookie } })).status, 200);
+  }
+  assert.equal(jar.size, 2, "opening the second runtime must not replace the first cookie");
+  const foreignCookie = [...jar].slice(1).map(([name, value]) => `${name}=${value}`).join("; ");
+  assert.equal((await fetch(handles[0].url + "/api/tasks", { headers: { cookie: foreignCookie } })).status, 401);
+});
+
 test("idempotency replay still requires authentication and the local browser boundary", async () => {
   const { base, node, handle } = await startTestServer();
   try {
@@ -189,14 +214,14 @@ test("the shell issues the per-runtime auth cookie, and the cookie authenticates
     const page = await fetch(handle.url + "/");
     assert.equal(page.status, 200);
     const setCookie = page.headers.get("set-cookie") ?? "";
-    assert.match(setCookie, new RegExp(`^0x2f_auth=${TEST_AUTH_TOKEN}`));
+    assert.match(setCookie, new RegExp(`^0x2f_auth_${handle.port}=${TEST_AUTH_TOKEN}`));
     assert.match(setCookie, /HttpOnly/);
     assert.match(setCookie, /SameSite=Strict/);
     assert.match(setCookie, /Path=\//);
 
     // A browser would now attach that cookie to same-origin requests —
     // including the SSE stream, which cannot carry custom headers.
-    const cookie = "0x2f_auth=" + TEST_AUTH_TOKEN;
+    const cookie = setCookie.split(";")[0];
     const created = await fetch(handle.url + "/api/tasks", {
       method: "POST",
       headers: { "content-type": "application/json", cookie },

@@ -15,6 +15,9 @@
 // `renderFrame` is pure: cells in, array of ANSI strings out. That is what
 // lets the entire visual layer be asserted in tests without a tty.
 
+import { displayWidth, takeCells } from "./text.mjs";
+import { stripVTControlCharacters } from "node:util";
+
 const ESC = "\x1b[";
 
 export const RESET = ESC + "0m";
@@ -88,11 +91,11 @@ export function renderLine(cells, cols, opts = {}) {
   let width = 0;
   for (const cell of cells ?? []) {
     if (width >= cols) break;
-    const text = String(cell.t ?? "");
+    const text = stripVTControlCharacters(String(cell.t ?? "")).replace(/[\u0000-\u001f\u007f-\u009f]/g, "");
     if (!text.length) continue;
     const room = cols - width;
-    const slice = text.length > room ? text.slice(0, room) : text;
-    width += slice.length;
+    const slice = takeCells(text, room);
+    width += displayWidth(slice);
 
     const codes = [];
     if (cell.cur) {
@@ -115,6 +118,7 @@ export function renderLine(cells, cols, opts = {}) {
       if (support !== "none" && Number(cell.b) >= 600) codes.push("1");
     }
     out += codes.length ? ESC + codes.join(";") + "m" + slice + RESET : slice;
+    if (slice.length < text.length) break;
   }
   if (width < cols) {
     // The pad is ground too — an unpainted tail would stripe every short

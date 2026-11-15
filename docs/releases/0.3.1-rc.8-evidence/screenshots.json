@@ -1,0 +1,31 @@
+{
+  "candidate": "0.3.1-rc.8",
+  "artifactSha256": "c3bc75e58b8785f8688507b3dca97a9376f80a72fd111a564e7c7bc599b4947a",
+  "capture": "Browser screenshots of actual installed-package PTY cell captures; clocks and hostname normalized; original JPEG capture re-encoded to PNG without resizing; no native terminal GUI claim",
+  "screenshots": [
+    {
+      "file": "tui-ready-dark.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "96c3022ae796910d268b99812fbbd4c74ac4a37cc3f7cd1ebd05a20f73a024ce"
+    },
+    {
+      "file": "tui-ready-light.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "9518f3d51a80a2c0014f67ec91d6e10133e8ac19de038e1bdf0d56d637a672f2"
+    },
+    {
+      "file": "tui-composer-dark.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "c1eeee21e4cfeabee6758685b9148c1e5b1949511438bf8eed5bbd101a0eeb1c"
+    },
+    {
+      "file": "tui-composer-light.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "62c9f929ef35ea960288d98ea6214b8cc4871321f7705879d59655c90eec88a1"
+    }
+  ]
+}
