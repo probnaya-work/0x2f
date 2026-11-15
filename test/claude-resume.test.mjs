@@ -21,6 +21,7 @@ import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
 import { createRuntime } from "../src/runtime.mjs";
+import { processGroupAlive } from "../src/recover.mjs";
 
 const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
@@ -94,7 +95,17 @@ async function fakeClaudeBin(dir, { resume = "ok" } = {}) {
 
 async function makeRun(t, { resume = "ok" } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-claude-resume-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  t.after(async () => {
+    // A terminal task status precedes the worker's final event/cache writes.
+    // Do not remove its workspace while that execution still owns it.
+    const tasks = await createStore(base).listTasks();
+    const deadline = Date.now() + 5000;
+    while (tasks.some(task => processGroupAlive(task.processGroupId)) && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    assert.equal(tasks.some(task => processGroupAlive(task.processGroupId)), false, "fixture workers must exit before cleanup");
+    await fs.rm(base, { recursive: true, force: true });
+  });
   const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "work-claude-resume-bin-"));
   t.after(() => fs.rm(binDir, { recursive: true, force: true }));
   const bin = await fakeClaudeBin(binDir, { resume });

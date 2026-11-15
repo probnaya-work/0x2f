@@ -38,6 +38,7 @@ export function initialState(opts = {}) {
     diff: null,
     review: null,
     continuation: null,
+    continuationInvalid: false,
     composer: { text: "", original: null, provider: opts.provider ?? null },
     busy: false
   };
@@ -93,13 +94,13 @@ export function primaryAction(task, state, ctx = {}) {
   if (task.state === "failed") {
     return {
       label: target === task.provider ? "RETRY" : "RETRY ON " + name,
-      intent: { type: "rerun", id: task.id, provider: target }
+      intent: { type: "preview", id: task.id, options: { provider: target } }
     };
   }
   if (task.state === "done") {
     return {
       label: "REOPEN ON " + name,
-      intent: { type: "rerun", id: task.id, provider: target }
+      intent: { type: "preview", id: task.id, options: { provider: target } }
     };
   }
   return null;
@@ -126,10 +127,10 @@ export const INPUT_LABELS = {
 };
 
 export const INPUT_NOTES = {
-  answer: "recorded on the task · the next run continues with it",
+  answer: "preview first · saved only when you start the next run",
   "answer-save": "recorded on the task · the task stays NEEDS YOU",
   note: "saved for the next run · the current run does not receive it",
-  sendback: "recorded on the task · the next run is rebuilt with it"
+  sendback: "preview first · saved only when you start the next run"
 };
 
 function commitInput(state, task) {
@@ -137,16 +138,16 @@ function commitInput(state, task) {
   const kind = state.input;
   const cleared = { ...state, input: null, draft: "" };
   if (!task || !text) return { state: cleared, intent: null };
-  if (kind === "answer") {
-    return { state: cleared, intent: { type: "answer", id: task.id, text, continue: true } };
+  if (["answer", "sendback"].includes(kind)) {
+    return { state, intent: { type: "preview", id: task.id, options: {
+      provider: rerunTarget(task, state),
+      input: { kind: kind === "answer" ? "answer" : "correction", text }
+    } } };
   }
   if (kind === "answer-save") {
     return { state: cleared, intent: { type: "answer", id: task.id, text, continue: false } };
   }
   if (kind === "note") return { state: cleared, intent: { type: "note", id: task.id, text } };
-  if (kind === "sendback") {
-    return { state: cleared, intent: { type: "sendback", id: task.id, text } };
-  }
   return { state: cleared, intent: null };
 }
 
@@ -245,11 +246,11 @@ export function apply(state, key, ctx = {}) {
 
   if (state.mode === "continuation") {
     const preview = state.continuation;
-    if (key.name === "escape") return { state: { ...state, mode: "work", continuation: null, dscroll: 0 }, intent: null };
+    if (key.name === "escape") return { state: { ...state, mode: "work", continuation: null, continuationInvalid: false, dscroll: 0 }, intent: null };
     if (key.name === "char" && key.ch === "u" && preview) return { state, intent: {
       type: "preview", id: preview.taskId, options: preview.options
     } };
-    if (key.name === "enter" && preview) return { state, intent: { type: "preview-start" } };
+    if (key.name === "enter" && preview && !state.continuationInvalid) return { state, intent: { type: "preview-start" } };
     return none;
   }
 

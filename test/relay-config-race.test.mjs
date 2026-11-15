@@ -58,11 +58,18 @@ async function waitFor(condition, message, timeout = 6000) {
 // the pairing ceremony is the thing under test.
 async function makeHarness(t, { configPollMs = 40, afterAgentStart } = {}) {
   const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-relay-race-"));
-  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  let agent, handle;
+  t.after(async () => {
+    // Stop accepted writes and the live socket before closing its server or
+    // deleting state. Separate FIFO hooks could delete a still-owned file,
+    // then wait for a socket whose stop hook had not run yet.
+    await agent?.stop();
+    await handle?.close();
+    await fs.rm(base, { recursive: true, force: true });
+  });
 
   const relay = createRelayServer({ dataFile: path.join(base, "state.json"), log: quiet });
-  const handle = await relay.start();
-  t.after(() => handle.close());
+  handle = await relay.start();
 
   const configPath = path.join(base, ".work", "relay.json");
   const deviceId = "device-" + Math.random().toString(36).slice(2, 10);
@@ -81,8 +88,7 @@ async function makeHarness(t, { configPollMs = 40, afterAgentStart } = {}) {
   await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
 
   const runtime = createRuntime(base, { node: fakeNode() });
-  const agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
-  t.after(() => agent.stop());
+  agent = createRelayAgent({ runtime, configPath, log: quiet, configPollMs });
   agent.start();
   await afterAgentStart?.({ agent, handle, deviceId });
   await waitFor(() => handle.state.devices.get(deviceId)?.online === true, "agent to connect");

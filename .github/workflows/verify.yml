@@ -36,6 +36,7 @@ jobs:
           npm install --global --prefix "$RUNNER_TEMP/0x2f-prefix" "$PWD/$archive" --ignore-scripts
           "$RUNNER_TEMP/0x2f-prefix/bin/2f" version
           "$RUNNER_TEMP/0x2f-prefix/bin/2f" --help
+          node scripts/verify-continuation-installed.mjs --package-root "$RUNNER_TEMP/0x2f-prefix/lib/node_modules/0x2f"
 
   hosted-deployment:
     runs-on: ubuntu-latest

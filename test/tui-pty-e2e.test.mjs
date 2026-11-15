@@ -198,7 +198,10 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     await session.waitForText(/SEND BACK/, { label: "the send-back input" });
     session.type(markers.correction);
     session.press("enter");
-    await session.waitForText(/sent back · run 2 of #001/, { label: "the send-back flash" });
+    await session.waitForText(/CONTINUATION PREVIEW/);
+    assert.equal((await storeOf(base).findTask(1)).runs.length, 1);
+    session.press("enter");
+    await session.waitForText(/run 2 started with the reviewed input/, { label: "the send-back flash" });
     task = await waitForTaskState(base, 1, t => t.runs?.length === 2);
     assert.equal(task.runs[1].provider, "alpha");
     assert.ok(
@@ -232,7 +235,10 @@ test("GOLDEN PATH: launch -> create (multi-line brief) -> WORKING -> permission 
     await session.waitForText(/ANSWER & CONTINUE/, { label: "the answer input" });
     session.type(markers.answer);
     session.press("enter");
-    await session.waitForText(/answer recorded · run 3 of #001/, { label: "the answer flash" });
+    await session.waitForText(/CONTINUATION PREVIEW/);
+    assert.equal((await storeOf(base).findTask(1)).runs.length, 2);
+    session.press("enter");
+    await session.waitForText(/run 3 started with the reviewed input/, { label: "the answer flash" });
     task = await waitForTask(base, 1, "ready", { tolerate: ["needs_you"] });
     assert.equal(task.runs.length, 3, "a decision continues as a NEW run");
     assert.equal(task.runs[2].provider, "alpha");
@@ -316,7 +322,11 @@ test("RETRY: a normalized provider-auth failure shows the auth band; p switches 
     // RETRY — a retry, not a send-back: the intent has not changed, only the
     // environment did; the new run goes to charlie.
     session.press("enter");
-    await session.waitForText(/run 2 of #001 started on CHARLIE/, { label: "the rerun flash" });
+    await session.waitForText(/CONTINUATION PREVIEW/);
+    await session.waitForText(/RUN 2 · charlie/);
+    assert.equal((await storeOf(base).findTask(1)).runs.length, 1);
+    session.press("enter");
+    await session.waitForText(/run 2 started with the reviewed input/, { label: "the rerun flash" });
     task = await waitForTask(base, 1, "ready", { tolerate: ["failed"] });
     assert.equal(task.runs.length, 2);
     assert.equal(task.runs[0].provider, "bravo", "run 01 stayed on bravo");

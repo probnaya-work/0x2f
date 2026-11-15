@@ -733,7 +733,7 @@ export function buildContinuation(state, cols, p, T) {
     }
   };
   text(`CONTINUATION PREVIEW · #${String(preview.taskId).padStart(3, "0")} · RUN ${preview.run} · ${preview.provider}`);
-  text("No run started. New answers and corrections stay drafts until you start.");
+  text(state.continuationInvalid ? "Start unavailable. Refresh the preview or return to the task." : "No run started. New answers and corrections stay drafts until you start.");
   text(`Original request: full · ${preview.context.userInputs} user inputs in full`);
   text(`${preview.context.characters} / ${preview.context.maxChars} characters (not model tokens)`);
   const delivery = { full: "included in full", excerpt: "excerpt; middle omitted", "reference-only": "reference only; result text omitted" };
@@ -935,7 +935,7 @@ const KEYS = [
   ["c", "note or correct — kept on the task, carried into every later run"],
   ["p", "point the next run at another provider"],
   ["v", "preview the next run without starting; ↵ starts, u refreshes, Esc returns"],
-  ["⌥↵ in send back / answer", "preview with the unsaved correction or answer"],
+  ["↵ in send back / answer", "preview the draft; another ↵ starts the reviewed run"],
   ["t", "expand the trace of the current run"],
   ["n", "new task — ⇧↵ inserts a newline (⌃n where your terminal cannot send ⇧↵), ⌥↵ expands your note into a brief, ↵ starts it"],
   ["F1 / ⌃g", "help from any text field; return without losing your draft"],
@@ -1059,7 +1059,7 @@ export function frame(model, state, opts = {}) {
     const max = Math.max(0, all.length - avail);
     const off = Math.min(state.dscroll, max);
     lines = all.slice(off, off + avail);
-    hint = [["↵", "start next run", true], ["u", "refresh"], ["j/k", "scroll"], ["esc", "back"]];
+    hint = [...(state.continuationInvalid ? [] : [["↵", "start next run", true]]), ["u", "refresh"], ["j/k", "scroll"], ["esc", "back"]];
     if (max) hint.push([null, Math.min(all.length, off + avail) + "/" + all.length]);
   } else if (state.mode === "result") {
     const all = buildResult(model, state, cols, p, T);
@@ -1179,7 +1179,7 @@ export function frame(model, state, opts = {}) {
       ]
     });
     lines.push({
-      cells: bindings([["↵", "commit", true], ...(["sendback", "answer"].includes(state.input) ? [["⌥↵", "preview"]] : []), ["ctrl-n", "newline"], ["F1", "review/help"], ["esc", "cancel"]], cols, p, T)
+      cells: bindings([["↵", ["sendback", "answer"].includes(state.input) ? "preview" : "save", true], ["ctrl-n", "newline"], ["F1", "review/help"], ["esc", "cancel"]], cols, p, T)
     });
   } else if (state.searching && state.mode === "work") {
     lines.push({
@@ -1197,7 +1197,7 @@ export function frame(model, state, opts = {}) {
     const flash = state.flash;
     const task = selected(model.tasks, state);
     const context = state.mode === "composer" ? "Draft · nothing has started"
-      : state.mode === "continuation" ? "Next run input · Enter starts, u refreshes, Esc returns"
+      : state.mode === "continuation" ? (state.continuationInvalid ? "Preview needs refresh · u refreshes, Esc returns" : "Next run input · Enter starts, u refreshes, Esc returns")
       : state.mode === "result" ? "Saved run report · review the outcome and checks"
         : state.mode === "diff" ? "Change review · inspect the saved evidence"
           : state.mode === "help" ? "Keyboard reference"

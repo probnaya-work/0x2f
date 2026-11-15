@@ -308,6 +308,9 @@ async function scenarioJourney(light = false) {
     await session.waitForText(/SEND BACK/, { label: "the send-back input" });
     session.type(markers.correction);
     session.press("enter");
+    await session.waitForText(/CONTINUATION PREVIEW/);
+    await capture(session, "continuation-120x36", { state: "continuation", mode: "continuation" });
+    session.press("enter");
     await session.waitForText(/NEEDS YOU · DECISION/, { timeout: 15000, label: "the decision halt" });
     await capture(session, "decision-120x36", { state: "decision", mode: "work" });
 
@@ -494,6 +497,7 @@ const EXPECT = {
   "ready-60x18": { cols: 60, rows: 18, mode: "work", landmarks: ["RESULT", "ACCEPT", "SEND BACK"], focus: 1 },
   "composer-long-60x18": { cols: 60, rows: 18, mode: "composer", landmarks: ["FINAL AUDIT REQUIREMENT", "START", "esc keep draft"], focus: 0 },
   "diff-120x36": { cols: 120, rows: 36, mode: "diff", landmarks: ["CHANGES", "SAVED RUN CHANGE EVIDENCE", "retry with backoff"], focus: 0 },
+  "continuation-120x36": { cols: 120, rows: 36, mode: "continuation", landmarks: ["CONTINUATION PREVIEW", "No run started", "start next run", "refresh", "esc back"], focus: 0 },
   "decision-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · DECISION", "ANSWER & CONTINUE", "503 policy"], focus: 1 },
   "failed-auth-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["FAILED", "authentication is no longer valid", "RETRY"], focus: 1 },
   "overview-many-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["! 5", "✕ 4", "✓ 6", "▶ 6", "· 5", "NEEDS YOU", "FAILED"], focus: 1 },

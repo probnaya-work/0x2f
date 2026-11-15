@@ -124,8 +124,8 @@ See the [verified Codex → OpenCode example](docs/task-continuity.md).
 This branch adds a [next-run preview](docs/continuation-preview.md), beyond
 published 1.0.0. Inspect the exact task input, your recorded instructions and
 which prior results are full, excerpted or reference-only before starting.
-Local Web continuation opens the preview; TUI `v` and `2f preview <id>` open
-it explicitly. If the task or its context changes after review, a guarded
+Local Web and TUI continuation open the preview before starting; TUI `v`
+and `2f preview <id>` also open it explicitly. If the task or its context changes after review, a guarded
 start refuses and asks for a refreshed preview. Draft corrections are saved
 only when that reviewed continuation starts.
 
@@ -325,6 +325,9 @@ The keymap is the surface's own, not a file manager's:
 ANSWER & CONTINUE, on a READY task it ACCEPTS, on a FAILED one it RETRIES. The
 alternative under `x` is the other half of the same pair. Both go through the
 shared actions, so the TUI can never allow something the CLI would refuse.
+In this development branch, retry, reopen, send back and answer-and-continue
+first show the next-run input. Another `↵` starts it; Escape returns to the
+task with an unsaved correction or answer still editable.
 
 READY means a result is available for review. `r` reads the provider's saved
 Evidence/Verification and their limitations, including investigations with no

@@ -176,7 +176,7 @@ test("TUI preview keeps an unsaved correction on cancel; refresh and explicit st
   await app.refresh();
   await app.key({ name: "char", ch: "x" });
   await app.key({ name: "paste", text: "Keep the offline path." });
-  await app.key({ name: "enter", alt: true });
+  await app.key({ name: "enter" });
   assert.equal(app.state.mode, "continuation");
   assert.match(app.state.continuation.prompt, /Keep the offline path\./);
   assert.equal(launches.length, 1);
@@ -184,16 +184,57 @@ test("TUI preview keeps an unsaved correction on cancel; refresh and explicit st
   await app.key({ name: "escape" });
   assert.equal(app.state.input, "sendback");
   assert.equal(app.state.draft, "Keep the offline path.");
-  await app.key({ name: "enter", alt: true });
+  await app.key({ name: "enter" });
   await rt.actions.noteWork(task.id, { note: "An intervening note" });
   await app.key({ name: "enter" });
   assert.equal(launches.length, 1);
   assert.match(app.state.lastError, /changed since this preview/);
+  assert.equal(app.state.continuationInvalid, true);
+  assert.equal(await app.key({ name: "enter" }), null, "an invalid review cannot be retried with Enter");
   await app.key({ name: "char", ch: "u" });
+  assert.equal(app.state.continuationInvalid, false);
   const prompt = app.state.continuation.prompt;
   assert.match(prompt, /An intervening note/);
   await app.key({ name: "enter" });
   assert.equal(launches.length, 2);
   assert.equal(app.state.mode, "work");
   assert.equal(await rt.store.readRunPrompt(await rt.store.findTask(task.id), 2), prompt);
+});
+
+test("TUI refresh cannot silently review a different run after another client starts", async t => {
+  const { rt, task, launches } = await fixture(t);
+  const app = createApp(rt);
+  t.after(() => app.dispose());
+  await app.refresh();
+  await app.key({ name: "char", ch: "v" });
+  const other = await rt.actions.rerunWork(task.id);
+  await rt.store.updateTask({ ...other, status: "ready", runs: other.runs.map(r => ({ ...r, outcome: "ready" })) });
+  await app.key({ name: "char", ch: "u" });
+  assert.match(app.state.lastError, /advanced to another run/);
+  assert.equal(app.state.continuation.run, 2);
+  assert.equal(app.state.continuationInvalid, true);
+  await app.key({ name: "enter" });
+  assert.equal(launches.length, 2);
+  await app.key({ name: "escape" });
+  await app.key({ name: "char", ch: "v" });
+  assert.equal(app.state.continuation.run, 3, "a new review requires returning to the task");
+});
+
+test("TUI launch failure keeps the saved correction on the task without reoffering it as a draft", async t => {
+  const { rt, task } = await fixture(t);
+  const app = createApp(rt);
+  t.after(() => app.dispose());
+  await app.refresh();
+  await app.key({ name: "char", ch: "x" });
+  await app.key({ name: "paste", text: "Keep the offline path." });
+  await app.key({ name: "enter" });
+  rt.node.startExecution = async () => { throw Error("Worker unavailable"); };
+  await app.key({ name: "enter" });
+  assert.match(app.state.lastError, /Worker unavailable/);
+  const stored = await rt.store.findTask(task.id);
+  assert.equal(stored.status, "failed");
+  assert.equal(stored.context.notes.length, 1);
+  assert.equal(app.state.draft, "");
+  assert.equal(app.state.input, null);
+  assert.equal(app.state.continuationInvalid, true);
 });

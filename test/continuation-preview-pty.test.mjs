@@ -10,16 +10,20 @@ test("PTY: review next input, cancel without a run, reject stale review, refresh
   const task = await rt.actions.createWork({ brief: "PREVIEW_ORIGINAL_SENTINEL" });
   await waitForTask(base, task.id, "ready");
   const s = await startTui({ workspace: base, cols: 100, rows: 30 });
+  // The painter streams rows. Wait for both the new heading and footer,
+  // excluding the previous view, before sending another key.
+  const previewFrame = () => s.waitFor(() => /CONTINUATION PREVIEW/.test(s.text()) &&
+    /start next run/.test(s.text()) && !/↵ ACCEPT/.test(s.text()), { label: "complete preview frame" });
   try {
     await s.waitForText(/ACCEPT/);
     s.press("v");
-    await s.waitForText(/CONTINUATION PREVIEW/);
+    await previewFrame();
     await s.waitForText(/No run started/);
     assert.equal((await storeOf(base).findTask(task.id)).runs.length, 1);
     s.press("escape");
-    await s.waitForText(/ACCEPT/);
+    await s.waitFor(() => /↵ ACCEPT/.test(s.text()) && !/CONTINUATION PREVIEW/.test(s.text()), { label: "complete task frame after cancel" });
     s.press("v");
-    await s.waitForText(/CONTINUATION PREVIEW/);
+    await previewFrame();
     await rt.actions.noteWork(task.id, { note: "PREVIEW_NEW_NOTE_SENTINEL" });
     s.press("enter");
     await s.waitForText(/changed since this preview/);

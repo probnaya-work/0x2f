@@ -396,8 +396,9 @@ function remoteBlocked() {
   return false;
 }
 
-function post(path, body) {
+function post(path, body, options = {}) {
   return api(path, {
+    ...options,
     method: "POST",
     ...(body !== undefined ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {})
   });
@@ -648,6 +649,7 @@ async function loadAll() {
 async function reloadTasks() {
   if (!state.loaded) return loadAll();
   state.tasks = remoteClient ? await remoteClient.api("/api/tasks") : await api("/api/tasks");
+  reconcileContinuationDrafts(state.tasks);
   policy.seed(state.tasks);
   render();
   // State changed — re-read any selected runs so their details (outcome,
@@ -729,6 +731,23 @@ function cancelButton(id) {
 // so it is the "continue with my correction" gesture of the control loop.
 const nextProviders = new Map();
 let continuationDialog = null;
+const pendingContinuationStarts = new Map();
+
+// A failed response can follow a successful server-side start. Clear only
+// the exact consumed draft, after authoritative task state proves it was
+// saved; preserve anything the user has edited since pressing Start.
+function reconcileContinuationDrafts(tasks) {
+  for (const [id, reviewed] of pendingContinuationStarts) {
+    const task = tasks.find(item => item.id === id);
+    if (!task?.runs?.some(run => run.run >= reviewed.run)) continue;
+    const input = reviewed.options.input;
+    if (input && task.context?.notes?.some(note => note.at === input.at && note.kind === input.kind && note.text === input.text)) {
+      const drafts = input.kind === "answer" ? state.answers : noteInputs;
+      if (drafts.get(id)?.trim() === input.text) drafts.delete(id);
+    }
+    pendingContinuationStarts.delete(id);
+  }
+}
 const sendBack = (id, input) => {
   if (remoteBlocked()) return Promise.resolve(false);
   const options = nextProviders.has(id) ? { provider: nextProviders.get(id) } : {};
@@ -747,6 +766,7 @@ function previewContinuation(id, options) {
   const dialog = el("dialog", { class: "continuation-dialog", "aria-labelledby": "continuation-title" });
   continuationDialog = dialog;
   let preview = null;
+  let reviewedRun = null;
   let busy = false;
   let started = false;
   const title = el("h2", { id: "continuation-title", text: "Preview next run" });
@@ -780,8 +800,12 @@ function previewContinuation(id, options) {
     status.textContent = "Loading next run input…";
     content.replaceChildren();
     try {
-      const next = await post("/api/tasks/" + id + "/preview", options);
+      const next = await post("/api/tasks/" + id + "/preview", options, { signal: AbortSignal.timeout(30000) });
       if (!dialog.isConnected) return;
+      if (reviewedRun !== null && next.run !== reviewedRun) {
+        throw new Error("The task has advanced to another run. Return to the task before continuing.");
+      }
+      reviewedRun = next.run;
       preview = next;
       status.textContent = "#" + id + " · Run " + next.run + " · " + next.provider +
         " · " + next.context.characters.toLocaleString() + " / " + next.context.maxChars.toLocaleString() + " characters";
@@ -800,7 +824,7 @@ function previewContinuation(id, options) {
       content.append(inputs, results, exact, el("p", { class: "continuation-scope", text: "Starts a fresh session with this recorded context. Hidden agent state and full transcripts are not transferred. Character counts are not model tokens." }));
     } catch (cause) {
       if (!dialog.isConnected) return;
-      status.textContent = "Preview unavailable. No run started.";
+      status.textContent = "Preview unavailable. This request did not start a run.";
       error.textContent = cause.message;
     } finally { if (dialog.isConnected) loading(false); }
   }
@@ -820,16 +844,17 @@ function previewContinuation(id, options) {
     error.textContent = "";
     status.textContent = "Starting reviewed continuation…";
     try {
-      await post("/api/tasks/" + id + "/rerun", { ...reviewed.options, previewId: reviewed.previewId });
-      noteInputs.delete(id);
+      await post("/api/tasks/" + id + "/rerun", { ...reviewed.options, previewId: reviewed.previewId }, { signal: AbortSignal.timeout(30000) });
+      if (reviewed.options.input?.kind === "correction") noteInputs.delete(id);
       if (reviewed.options.input?.kind === "answer") state.answers.delete(id);
       dialog.close("started");
-      await reloadTasks();
+      reloadTasks().catch(() => {});
     } catch (cause) {
       // Never retry a launch automatically, even if its response was lost.
+      pendingContinuationStarts.set(id, reviewed);
       preview = null;
       started = false;
-      status.textContent = "Start was not confirmed. Refresh the task and preview before trying again.";
+      status.textContent = "Start was not confirmed. Return to the task to check its latest run before trying again.";
       error.textContent = cause.message;
       reloadTasks().catch(() => {});
     } finally { if (dialog.isConnected) loading(false); }

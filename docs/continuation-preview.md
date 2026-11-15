@@ -3,6 +3,8 @@
 Development branch feature, based on published 1.0.0. It is not included in
 the 1.0.0 registry package. Use this checkout to evaluate it.
 
+[Qualification and release boundary](releases/continuation-preview-qualification-2026-11-15.md).
+
 Review the task input before continuing through the same or another agent.
 The preview includes the original request, recorded instructions, current
 project context, prior outcomes and the exact text the next fresh session
@@ -31,14 +33,15 @@ a live-model performance claim.
 ## TUI
 
 - `v`: preview the selected task's next run; `p` on the task selects its next agent.
-- `Alt+Enter` while entering SEND BACK or ANSWER & CONTINUE: preview with the
+- `Enter` while entering SEND BACK or ANSWER & CONTINUE: preview with the
   unsaved correction or answer. Escape returns to the editable draft.
 - In the preview, arrows or `j/k`, PgUp/PgDn and `g/G` scroll; `u` refreshes;
   Enter starts the reviewed continuation; Escape returns without starting.
 
-Existing direct retry, correction and answer actions remain available.
-The preview is an explicit TUI action. It does not replace the saved-run
-reader (`r`, then `i`), which inspects an already executed run.
+RETRY and REOPEN also open the preview before starting. SAVE ONLY and notes
+still save without starting a run. `Alt+Enter` in the correction/answer editor
+remains an alias for preview. This does not replace the saved-run reader
+(`r`, then `i`), which inspects an already executed run.
 
 ## CLI
 
@@ -69,7 +72,13 @@ concurrent starts cannot replay the reviewed run.
 The preview ID is a freshness check, not an authorization credential. Normal
 authentication, provider availability, execution admission and sequential-run
 guards still apply. There are no automatic launch retries. If a launch response
-is lost, inspect the authoritative task before attempting another run.
+is lost, inspect the authoritative task before attempting another run. Web
+requests time out after 30 seconds; timeout does not prove the server refused
+the start. Authoritative task state clears only the exact consumed draft,
+preserving a newer edit. A failed TUI start likewise checks whether its draft
+was already saved. Confirmation stays disabled until a successful refresh.
+Refreshing an open preview cannot silently advance it to a different run:
+return to the task to review a later attempt.
 
 This is the exact task prompt, not a capture of every input to the model.
 Harness configuration, its own system instructions and files it reads remain

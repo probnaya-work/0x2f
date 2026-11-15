@@ -1,0 +1,160 @@
+{
+  "date": "2026-11-15",
+  "branch": "feat/continuation-preview-20261115",
+  "baseFeatureCommit": "3f61194",
+  "published": false,
+  "githubCI": "not run on this branch; installed verifier added to prepared workflow",
+  "sourceManifestSha256": "de3b2c8701c8ee7bef4ce4a8927e7d14f809c252d046d4c167c3b2e8b59425ca",
+  "macOS": {
+    "architecture": "arm64",
+    "fullSuite": [
+      {
+        "node": "v20.20.2",
+        "exitCode": 0,
+        "seconds": 54.7,
+        "total": 904,
+        "passed": 902,
+        "failed": 0,
+        "skipped": 2
+      },
+      {
+        "node": "v24.22.3",
+        "exitCode": 0,
+        "seconds": 55.9,
+        "total": 904,
+        "passed": 902,
+        "failed": 0,
+        "skipped": 2
+      },
+      {
+        "node": "v26.11.1",
+        "exitCode": 0,
+        "seconds": 54.6,
+        "total": 904,
+        "passed": 902,
+        "failed": 0,
+        "skipped": 2
+      }
+    ],
+    "installed": {
+      "shippedSourceFiles": 84,
+      "allMatch": true,
+      "sha256": "f8b5b1dfc2e7396e96347b5ee7623e8e296a8a5b009924d39bf4597c12e7d623",
+      "version": "1.0.0 development branch, unpublished"
+    },
+    "installedEmptyHomeSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "bfae65d80c3c5b66709ac3f08e40149b2e0405bc53425856cd252f62df17b750",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "linux": {
+    "architecture": "x86_64",
+    "fullSuite": [
+      {
+        "node": "v20.20.2",
+        "exitCode": 0,
+        "seconds": 55.6,
+        "total": 904,
+        "passed": 899,
+        "failed": 0,
+        "skipped": 5
+      },
+      {
+        "node": "v24.22.3",
+        "exitCode": 0,
+        "seconds": 52.1,
+        "total": 904,
+        "passed": 899,
+        "failed": 0,
+        "skipped": 5
+      },
+      {
+        "node": "v26.13.1",
+        "exitCode": 0,
+        "seconds": 51.2,
+        "total": 904,
+        "passed": 899,
+        "failed": 0,
+        "skipped": 5
+      }
+    ],
+    "syntaxCheck": 0,
+    "installed": {
+      "shippedSourceFiles": 84,
+      "allMatch": true,
+      "sha256": "f8b5b1dfc2e7396e96347b5ee7623e8e296a8a5b009924d39bf4597c12e7d623"
+    },
+    "installedEmptyHomeSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "c4445a24fd12102abeec0f50f89c89bb49c39b9ec4572c8e178f99e8ef15e1c3",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "localSyntaxCheck": "pass",
+  "staticClientBuild": "pass",
+  "tuiStructuralReview": {
+    "frames": 39,
+    "failed": 0,
+    "manualScope": "Structural captures; no native terminal/font matrix"
+  },
+  "browser": {
+    "scope": "local in-app browser, deterministic demonstration agents",
+    "palettes": [
+      "dark",
+      "light"
+    ],
+    "compactActualViewport": {
+      "width": 354,
+      "height": 767
+    },
+    "cancelPreservesDraft": true,
+    "providerSwitch": true,
+    "staleRejected": true,
+    "refresh": true,
+    "multilineUnicodeDraft": true,
+    "persistedPromptEqualsDOMText": true,
+    "correctionSavedOnce": true,
+    "consoleErrorsAndWarnings": [],
+    "physicalPhoneAndFullAccessibility": "not qualified"
+  },
+  "liveHandoff": {
+    "providers": [
+      "codex 0.166.0",
+      "opencode 2.2.5"
+    ],
+    "taskId": 1,
+    "runs": [
+      {
+        "run": 1,
+        "provider": "codex",
+        "outcome": "ready"
+      },
+      {
+        "run": 2,
+        "provider": "opencode",
+        "outcome": "ready"
+      }
+    ],
+    "reviewedPromptSha256": "1717ab12f1f946ee14b1ad2af89a3b541451e25893582ea161698a830525ce2e",
+    "exactDeliveredPrompt": true,
+    "sentinelInResult": true,
+    "correctionSavedOnce": true,
+    "workspaceUnchanged": true,
+    "scope": "Live read-only handoff in a synthetic fixture; not an engineering-performance benchmark"
+  },
+  "initialQualificationFailures": {
+    "newPTYFixture": "required a complete new frame before sending the next key",
+    "claudeResumeFixture": "cleanup raced final worker writes; now waits for execution-group exit",
+    "relayFixture": "FIFO teardown deleted state and closed server before stopping connected agent; now closes in explicit order",
+    "lanCryptoFixture": "agent connection timed out under concurrent full-suite load; final sequential matrices pass without timeout changes"
+  }
+}
