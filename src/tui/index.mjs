@@ -116,7 +116,7 @@ export async function runTui(opts = {}) {
         continue; // Actions whose target and consequence cannot be seen are disabled.
       }
       const before = app.state.mode;
-      await app.key(key);
+      await app.key(key, size());
       if (app.state.mode === "quit") {
         // The design's quit is a DETACH: runs keep executing without you.
         // Show the frame that says so, then leave.

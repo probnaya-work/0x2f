@@ -25,7 +25,7 @@ import {
 } from "./state.mjs";
 import { fmtDuration, isCommandLine } from "../web/ledger.mjs";
 import { resultEvidence, reportedSection } from "../web/result-evidence.mjs";
-import { editorRows } from "./editor.mjs";
+import { editorRows, composerTextWidth } from "./editor.mjs";
 import { displayWidth, takeCells, tailCells, cellRows, firstGrapheme } from "./text.mjs";
 import { MAX_BRIEF } from "../core/limits.mjs";
 import { stripVTControlCharacters } from "node:util";
@@ -835,7 +835,7 @@ export function buildComposer(model, state, cols, p, T, height = 1000) {
   const c = state.composer;
   const lines = [];
   const fieldWidth = Math.min(cols - 2, 102);
-  const w = fieldWidth - 6;
+  const w = composerTextWidth(cols);
   const briefed = c.original !== null;
   const info = model.lookup(c.provider);
   const available = model.providers?.[c.provider]?.available;

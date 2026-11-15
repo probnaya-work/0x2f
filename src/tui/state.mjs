@@ -13,7 +13,7 @@
 
 import { FILTER_KEYS } from "./model.mjs";
 import { isPrintable } from "./keys.mjs";
-import { editText } from "./editor.mjs";
+import { editText, composerTextWidth } from "./editor.mjs";
 
 export function initialState(opts = {}) {
   return {
@@ -189,7 +189,7 @@ function composerKey(state, key, ctx) {
   }
   if (key.name === "page-up") return { state: set({ scroll: (c.scroll ?? 0) + 8 }), intent: null };
   if (key.name === "page-down") return { state: set({ scroll: Math.max(0, (c.scroll ?? 0) - 8) }), intent: null };
-  const edited = editText(c.text, c.cursor, key);
+  const edited = editText(c.text, c.cursor, key, composerTextWidth((ctx.cols ?? 132) - 2));
   if (edited) return { state: set(edited), intent: null };
   return { state, intent: null };
 }
