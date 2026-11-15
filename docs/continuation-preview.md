@@ -1,9 +1,6 @@
 # Preview the next run
 
-Development branch feature, based on published 1.0.0. It is not included in
-the 1.0.0 registry package. Use this checkout to evaluate it.
-
-[Qualification and release boundary](releases/continuation-preview-qualification-2026-11-15.md).
+Available in **1.1.0**. [Release scope and qualification](releases/1.1.0.md).
 
 Review the task input before continuing through the same or another agent.
 The preview includes the original request, recorded instructions, current
@@ -100,5 +97,4 @@ start the reviewed continuation. Preserve the returned draft timestamp when
 submitting; do not reconstruct the options from the displayed prose.
 
 Preview and guarded start use the same read-only compiler. Run/task storage
-layout is unchanged, and the published package and existing installations
-are not modified by this branch.
+layout is unchanged, and upgrading does not migrate existing task data.

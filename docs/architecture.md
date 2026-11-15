@@ -1,9 +1,8 @@
 # 0x2F — Architecture
 
-> Published baseline **0.3.0**, local candidate **1.0.0**:
+> **1.1.0**: [release scope and qualification](releases/1.1.0.md),
 > [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md),
-> [operations](releases/0.3.0-operations.md). Candidate command receipts and
-> browser authentication changes are recorded in the 2026-11-14 release audit.
+> and [operations](releases/0.3.0-operations.md).
 
 This document describes 0x2F as it is implemented: the object model, the
 lifecycle, the layers, the surfaces, and the boundaries. It is written from

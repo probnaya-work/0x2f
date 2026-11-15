@@ -1,6 +1,6 @@
-# Commands and troubleshooting — 1.0.0 release candidate
+# Commands and troubleshooting — 1.1.0
 
-> **1.0.0**: [release scope and upgrade/rollback](releases/1.0.0.md) and
+> **1.1.0**: [release scope and upgrade/rollback](releases/1.1.0.md) and
 > [execution/isolation/context contracts](engineering/2026-11-02/FOUNDATIONS.md).
 
 `2f --help` is the command reference. Run commands in the Task's workspace.
@@ -33,7 +33,8 @@ the composer, task actions, help, search and review screens.
 | --- | --- |
 | Create | `2f new "brief" --provider <id>`; prints the persisted ID and reopen command |
 | Inspect | `2f open <id> [--run <n>]`; TUI `r` reads, `i` shows exact saved input |
-| Continue | `2f rerun <id> --provider <id>`; prior results, decisions and notes become fresh input |
+| Preview | `2f preview <id> [--provider <id>]`; inspect the next input and use its printed guarded start command |
+| Continue | `2f rerun <id> [--provider <id>] [--preview <preview-id>]`; direct CLI rerun remains available |
 | Save a constraint | `2f note <id> "text"`; next run only, starts nothing |
 | Permission | `2f allow <id>` / `2f reject <id>`; bound to the actual recorded occurrence, where the harness supports it |
 | Decision | `2f answer <id> "answer"`; saves context, then rerun to continue |
@@ -42,6 +43,11 @@ the composer, task actions, help, search and review screens.
 | Browser | `2f ui [port] [--no-browser]`; launch/reuse workspace runtime |
 | Service | `2f serve [port]`; foreground runtime, useful under systemd/launchd |
 | Phone | `2f pair [--port <n>]`; trusted same-LAN control; `2f pair --off` revokes it |
+
+Local Web and TUI continuation opens a preview before starting. Enter in a
+correction or answer editor reviews the draft; another Enter in the preview
+starts the guarded run. Escape returns to the draft, `u` refreshes in TUI.
+A stale review refuses without starting. [Full preview behavior](continuation-preview.md).
 
 CLOSE is not cancellation. An active worker may finish or remain blocked on a
 permission after its Task is closed. Stopping/restarting the runtime also leaves
