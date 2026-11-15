@@ -34,6 +34,7 @@ import { taskDiff } from "./diff.mjs";
 import { unavailableMessage } from "../providers/index.mjs";
 import { pidAlive, processGroupAlive } from "../recover.mjs";
 import { remotePermissionScope } from "./permission-scope.mjs";
+import { planContinuation, persistContinuation, digest } from "./context.mjs";
 
 export function createActions(ctx) {
   const { store, node, providers, router } = ctx;
@@ -322,7 +323,24 @@ export function createActions(ctx) {
   // yet), so a rerun refuses while the task is working. A blocked (needs_you)
   // task whose provider has exited may be rerun. A live permission still
   // owns an execution and must finish first.
-  async function rerunWork(id, { provider, model } = {}) {
+  function continuationInput(task, input) {
+    if (input === undefined) return null;
+    if (!input || !["correction", "answer"].includes(input.kind)) {
+      throw new WorkError("Continuation input must be a correction or answer.");
+    }
+    requireWithin(input.text, input.kind === "answer" ? MAX_ANSWER : MAX_NOTE, "Continuation input");
+    if (!input.text?.trim()) throw new WorkError("Continuation input is required.");
+    if (input.kind === "answer" && (task.status !== "needs_you" || task.blockedOn?.type !== "decision")) {
+      throw new WorkError("This task is not waiting for a decision answer.", 409);
+    }
+    const at = input.at ?? new Date().toISOString();
+    if (typeof at !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(at) || !Number.isFinite(Date.parse(at))) {
+      throw new WorkError("Invalid continuation input time.");
+    }
+    return { kind: input.kind, text: input.text.trim(), at };
+  }
+
+  async function prepareContinuation(id, { provider, model, input } = {}) {
     requireWithin(provider, MAX_SELECTOR, "Provider id");
     requireWithin(model, MAX_SELECTOR, "Model id");
     const task = await store.findTask(id);
@@ -340,6 +358,7 @@ export function createActions(ctx) {
     // provider; `--provider auto` re-routes deterministically.
     const target = resolveTarget(provider ?? task.execution?.provider);
     requireModelSupport(target.provider, model);
+    const pendingInput = continuationInput(task, input);
 
     // Materialize run history for legacy tasks BEFORE replacing execution:
     // the legacy run's provider would otherwise be lost when execution is
@@ -349,6 +368,10 @@ export function createActions(ctx) {
       const events = await store.readEvents(current.slug);
       current = { ...current, runs: [legacyRun(current, events)] };
     }
+
+    if (pendingInput) current = { ...current, context: {
+      ...(current.context ?? {}), notes: [...(current.context?.notes ?? []), pendingInput]
+    } };
 
     const runNumber = (current.runs.at(-1)?.run ?? 0) + 1;
     const startedAt = new Date().toISOString();
@@ -383,6 +406,51 @@ export function createActions(ctx) {
     delete current.failure;
     delete current.pid;
     delete current.processGroupId;
+    return { task, current, runNumber, target, pendingInput, model };
+  }
+
+  async function continuationPlan(prepared) {
+    return planContinuation({ task: prepared.current, base: store.base, store });
+  }
+
+  function continuationId(prepared, plan) {
+    // Bind the review to its task revision, target and exact delivered input.
+    // This is a freshness check, not an authorization token or code sandbox.
+    return digest(JSON.stringify({ task: prepared.task, target: prepared.target,
+      model: prepared.model ?? null, input: prepared.pendingInput, context: plan.receipt }));
+  }
+
+  async function previewRerunWork(id, options = {}) {
+    const prepared = await prepareContinuation(id, options);
+    const plan = await continuationPlan(prepared);
+    return {
+      taskId: prepared.task.id, title: prepared.task.title, run: prepared.runNumber,
+      provider: prepared.target.provider, model: prepared.model ?? null,
+      previewId: continuationId(prepared, plan), prompt: plan.prompt, context: plan.receipt,
+      userInputs: prepared.current.context?.notes ?? [],
+      options: { provider: options.provider ?? prepared.task.execution?.provider,
+        ...(prepared.model ? { model: prepared.model } : {}),
+        ...(prepared.pendingInput ? { input: prepared.pendingInput } : {}) }
+    };
+  }
+
+  async function rerunWork(id, { previewId, ...options } = {}) {
+    if (previewId !== undefined && (typeof previewId !== "string" || !/^[a-f0-9]{64}$/.test(previewId))) {
+      throw new WorkError("Invalid continuation preview. Refresh the preview before starting.", 409);
+    }
+    if (options.input !== undefined && !previewId) {
+      throw new WorkError("Preview the continuation input before starting.", 409);
+    }
+    const prepared = await prepareContinuation(id, options);
+    let plan;
+    if (previewId) {
+      plan = await continuationPlan(prepared);
+      if (continuationId(prepared, plan) !== previewId) {
+        throw new WorkError("The task, target or context changed since this preview. Refresh the preview before starting. No run was started.", 409);
+      }
+    }
+    const { task, runNumber, pendingInput } = prepared;
+    let current = prepared.current;
     current = reserveExecution(current);
     await store.updateTask(current);
 
@@ -396,13 +464,21 @@ export function createActions(ctx) {
         path.join(store.taskDir(task.slug), "prompt.md"),
         ""
       );
-      const runPrompt = await ctx.buildRunPrompt({
+      const runPrompt = plan ? await persistContinuation(plan, store) : await ctx.buildRunPrompt({
         task: current,
         base: store.base,
         originalPrompt,
         store
       });
       await store.writeRunPrompt(current, runNumber, runPrompt);
+
+      if (pendingInput) {
+        if (pendingInput.kind === "answer") {
+          await store.writeDecisionAnswer(task, { answer: pendingInput.text, at: pendingInput.at });
+        }
+        await record(task, pendingInput.kind === "answer" ? "task.answered" : "task.corrected",
+          pendingInput.kind === "answer" ? { answer: pendingInput.text } : { correction: pendingInput.text });
+      }
 
       const pid = await node.startExecution({ task: current });
       if (pid) current = await store.updateTask(withWorkerPid(current, pid));
@@ -779,6 +855,7 @@ export function createActions(ctx) {
     cleanupWork: admission(lockedAction(cleanupWork)),
     restoreWork: admission(lockedAction(restoreWork)),
     rerunWork: admission(lockedAction(rerunWork)),
+    previewRerunWork: lockedAction(previewRerunWork),
     resumeWork: lockedResume,
     answerWork: lockedAction(answerWork),
     noteWork: lockedAction(noteWork),

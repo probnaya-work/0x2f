@@ -5,11 +5,11 @@ Independent Computational Laboratory
 
 # 0x2F
 
-> **1.0.0 — local CLI, TUI and desktop Web.**
+> **1.1.0 — review the context before continuing a task.**
 > Install the versioned package using [Install](#install).
 > Local CLI, TUI and desktop Web are the release scope on macOS and Linux.
 > Phone companion and self-hosted remote access remain experimental.
-> [Release changes, support and qualification](docs/releases/1.0.0.md).
+> [Release changes, support and qualification](docs/releases/1.1.0.md).
 
 0x2F is a local work router for coding agents. Give it engineering work —
 "Inspect why retries restart the whole run" — and it routes the task to a
@@ -57,7 +57,7 @@ piece of work.
 Tasks support cancellation/recovery, isolated worktrees and saved patches, independent checks, bounded continuation receipts, pinned remote-host execution and private backup/restore. Checks and human acceptance remain separate.
 [Quickstart](docs/quickstart.md) · [Commands and troubleshooting](docs/usage.md) ·
 [Observed harness compatibility](docs/harness-compatibility.md) ·
-[Release scope and verification](docs/releases/1.0.0.md) · [Roadmap](docs/roadmap.md).
+[Release scope and verification](docs/releases/1.1.0.md) · [Roadmap](docs/roadmap.md).
 Supported execution hosts are macOS and Linux/POSIX with Node.js ≥20; the
 release qualification covers macOS arm64 and Linux x86_64. Windows
 execution and an operated remote execution service are not qualified.
@@ -84,20 +84,18 @@ can be added per project (see [Providers](#providers)). 0x2F itself is one
 small package with WebSocket and cryptography dependencies, no build step,
 no accounts. The Web runtime and task workers run as background processes.
 
-Install a supplied release archive into a separate prefix to use one exact
-version. This also preserves the previous executable for rollback:
+Install the versioned package into a separate prefix. This preserves the
+previous executable for rollback:
 
 ```bash
-npm install -g --prefix "$HOME/.local/0x2f-1.0-review" /absolute/path/0x2f-1.0.0.tgz
-export PATH="$HOME/.local/0x2f-1.0-review/bin:$PATH"
-2f version                       # 1.0.0
+npm install -g --prefix "$HOME/.local/0x2f-1.1" 0x2f@1.1.0
+export PATH="$HOME/.local/0x2f-1.1/bin:$PATH"
+2f version                       # 1.1.0
 ```
 
-At the preparation check on 2026-11-15, the public registry served 0.3.0.
-The archive above contains the security and interface changes described in
-this release. Once 1.0.0 is available in the registry, use
-`npm install -g --prefix "$HOME/.local/0x2f-1.0-review" 0x2f@1.0.0`.
-Verify `2f version` after either path; [upgrade and rollback](docs/releases/1.0.0.md#install-upgrade-and-rollback)
+A supplied `0x2f-1.1.0.tgz` can be installed in the same way by using its
+absolute path instead of `0x2f@1.1.0`. Verify `2f version` after either path;
+[upgrade and rollback](docs/releases/1.1.0.md#install-upgrade-and-rollback)
 cover an existing installation.
 
 ## Quick start
@@ -118,6 +116,15 @@ for example `Created #014: …` followed by `Open: 2f open 14`. Reopen it from
 a separate CLI process; inspect a run with `2f open 14 --run 1`, or continue
 the same task with `2f rerun 14 --provider opencode` once its run has ended.
 See the [verified Codex → OpenCode example](docs/task-continuity.md).
+
+### Preview a continuation
+
+[Preview the next run](docs/continuation-preview.md). Inspect the exact task input, your recorded instructions and
+which prior results are full, excerpted or reference-only before starting.
+Local Web and TUI continuation open the preview before starting; TUI `v`
+and `2f preview <id>` also open it explicitly. If the task or its context changes after review, a guarded
+start refuses and asks for a refreshed preview. Draft corrections are saved
+only when that reviewed continuation starts.
 
 To run a task with the built-in Codex provider, install the
 [Codex CLI](https://github.com/openai/codex), sign in, and select it explicitly:
@@ -315,6 +322,9 @@ The keymap is the surface's own, not a file manager's:
 ANSWER & CONTINUE, on a READY task it ACCEPTS, on a FAILED one it RETRIES. The
 alternative under `x` is the other half of the same pair. Both go through the
 shared actions, so the TUI can never allow something the CLI would refuse.
+Retry, reopen, send back and answer-and-continue
+first show the next-run input. Another `↵` starts it; Escape returns to the
+task with an unsaved correction or answer still editable.
 
 READY means a result is available for review. `r` reads the provider's saved
 Evidence/Verification and their limitations, including investigations with no
@@ -433,12 +443,12 @@ work first. Uninstalling the npm package leaves project state in place.
 ## Updating and uninstalling
 
 For an archive installation, install the next versioned archive into a fresh
-prefix and follow the [upgrade procedure](docs/releases/1.0.0.md#install-upgrade-and-rollback).
-Registry update commands select the earlier public version until publication.
-Remove the review installation explicitly from its own prefix:
+prefix and follow the [upgrade procedure](docs/releases/1.1.0.md#install-upgrade-and-rollback).
+Use the versioned installation command above for a reproducible upgrade.
+Remove an installation explicitly from its own prefix:
 
 ```bash
-npm uninstall -g --prefix "$HOME/.local/0x2f-1.0-review" 0x2f
+npm uninstall -g --prefix "$HOME/.local/0x2f-1.1" 0x2f
 ```
 
 Project `.work/` state survives uninstalls — it belongs to the project, not
@@ -603,4 +613,4 @@ Use the matching executable to inspect/export/apply its isolated
 tasks; an old 0.2.0 executable must not execute them against the original checkout. Restore
 uses a new directory and disables credentials, host profiles and execution
 authority; it never replays a run. Review before configuring trust again.
-See [release upgrade/rollback](docs/releases/1.0.0.md#install-upgrade-and-rollback).
+See [release upgrade/rollback](docs/releases/1.1.0.md#install-upgrade-and-rollback).

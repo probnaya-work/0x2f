@@ -37,6 +37,8 @@ export function initialState(opts = {}) {
     // on a git walk.
     diff: null,
     review: null,
+    continuation: null,
+    continuationInvalid: false,
     composer: { text: "", original: null, provider: opts.provider ?? null },
     busy: false
   };
@@ -92,13 +94,13 @@ export function primaryAction(task, state, ctx = {}) {
   if (task.state === "failed") {
     return {
       label: target === task.provider ? "RETRY" : "RETRY ON " + name,
-      intent: { type: "rerun", id: task.id, provider: target }
+      intent: { type: "preview", id: task.id, options: { provider: target } }
     };
   }
   if (task.state === "done") {
     return {
       label: "REOPEN ON " + name,
-      intent: { type: "rerun", id: task.id, provider: target }
+      intent: { type: "preview", id: task.id, options: { provider: target } }
     };
   }
   return null;
@@ -125,10 +127,10 @@ export const INPUT_LABELS = {
 };
 
 export const INPUT_NOTES = {
-  answer: "recorded on the task · the next run continues with it",
+  answer: "preview first · saved only when you start the next run",
   "answer-save": "recorded on the task · the task stays NEEDS YOU",
   note: "saved for the next run · the current run does not receive it",
-  sendback: "recorded on the task · the next run is rebuilt with it"
+  sendback: "preview first · saved only when you start the next run"
 };
 
 function commitInput(state, task) {
@@ -136,16 +138,16 @@ function commitInput(state, task) {
   const kind = state.input;
   const cleared = { ...state, input: null, draft: "" };
   if (!task || !text) return { state: cleared, intent: null };
-  if (kind === "answer") {
-    return { state: cleared, intent: { type: "answer", id: task.id, text, continue: true } };
+  if (["answer", "sendback"].includes(kind)) {
+    return { state, intent: { type: "preview", id: task.id, options: {
+      provider: rerunTarget(task, state),
+      input: { kind: kind === "answer" ? "answer" : "correction", text }
+    } } };
   }
   if (kind === "answer-save") {
     return { state: cleared, intent: { type: "answer", id: task.id, text, continue: false } };
   }
   if (kind === "note") return { state: cleared, intent: { type: "note", id: task.id, text } };
-  if (kind === "sendback") {
-    return { state: cleared, intent: { type: "sendback", id: task.id, text } };
-  }
   return { state: cleared, intent: null };
 }
 
@@ -231,14 +233,25 @@ export function apply(state, key, ctx = {}) {
 
   if (state.mode === "quit") return { state, intent: { type: "quit" } };
 
-  if (["help", "result", "diff"].includes(state.mode)) {
+  if (["help", "result", "diff", "continuation"].includes(state.mode)) {
+    const max = state.mode === "continuation" ? (ctx.continuationMaxScroll ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER;
     const delta = key.name === "page-down" ? 10 : key.name === "page-up" ? -10
       : key.name === "down" ? 1 : key.name === "up" ? -1
       : key.name === "char" && key.ch === "j" ? 1 : key.name === "char" && key.ch === "k" ? -1 : 0;
-    if (delta) return { state: { ...state, dscroll: Math.max(0, state.dscroll + delta) }, intent: null };
+    if (delta) return { state: { ...state, dscroll: Math.max(0, Math.min(max, Math.min(max, state.dscroll) + delta)) }, intent: null };
     if (key.name === "home" || (key.name === "char" && key.ch === "g")) return { state: { ...state, dscroll: 0 }, intent: null };
-    if (key.name === "end" || (key.name === "char" && key.ch === "G")) return { state: { ...state, dscroll: Number.MAX_SAFE_INTEGER }, intent: null };
+    if (key.name === "end" || (key.name === "char" && key.ch === "G")) return { state: { ...state, dscroll: max }, intent: null };
     if (state.mode === "help") return { state: { ...state, mode: state.helpReturn ?? "work", helpReturn: null, dscroll: state.helpScroll ?? 0 }, intent: null };
+  }
+
+  if (state.mode === "continuation") {
+    const preview = state.continuation;
+    if (key.name === "escape") return { state: { ...state, mode: "work", continuation: null, continuationInvalid: false, dscroll: 0 }, intent: null };
+    if (key.name === "char" && key.ch === "u" && preview) return { state, intent: {
+      type: "preview", id: preview.taskId, options: preview.options
+    } };
+    if (key.name === "enter" && preview && !state.continuationInvalid) return { state, intent: { type: "preview-start" } };
+    return none;
   }
 
   if (state.mode === "result") {
@@ -284,6 +297,12 @@ export function apply(state, key, ctx = {}) {
 
   if (state.input) {
     const target = state.inputTaskId == null ? task : tasks.find(t => t.id === state.inputTaskId);
+    if (target && key.name === "enter" && key.alt && ["sendback", "answer"].includes(state.input) && state.draft.trim()) {
+      return { state, intent: { type: "preview", id: target.id, options: {
+        provider: rerunTarget(target, state),
+        input: { kind: state.input === "answer" ? "answer" : "correction", text: state.draft.trim() }
+      } } };
+    }
     const edited = editText(state.draft, state.draftCursor,
       (key.name === "enter" && key.shift) || (key.ctrl && key.ch === "n") ? { name: "paste", text: "\n" } : key);
     if (edited) return { state: { ...state, draft: edited.text, draftCursor: edited.cursor }, intent: null };
@@ -329,6 +348,8 @@ export function apply(state, key, ctx = {}) {
   if (key.name !== "char" || key.ctrl || key.alt) return none;
 
   switch (key.ch) {
+    case "v":
+      return task ? { state, intent: { type: "preview", id: task.id, options: { provider: rerunTarget(task, state) } } } : none;
     case "j": return move(1);
     case "k": return move(-1);
     case "J": return { state: { ...state, rscroll: state.rscroll + 4 }, intent: null };

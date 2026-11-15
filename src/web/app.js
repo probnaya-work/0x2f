@@ -396,8 +396,9 @@ function remoteBlocked() {
   return false;
 }
 
-function post(path, body) {
+function post(path, body, options = {}) {
   return api(path, {
+    ...options,
     method: "POST",
     ...(body !== undefined ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {})
   });
@@ -648,6 +649,7 @@ async function loadAll() {
 async function reloadTasks() {
   if (!state.loaded) return loadAll();
   state.tasks = remoteClient ? await remoteClient.api("/api/tasks") : await api("/api/tasks");
+  reconcileContinuationDrafts(state.tasks);
   policy.seed(state.tasks);
   render();
   // State changed — re-read any selected runs so their details (outcome,
@@ -728,10 +730,146 @@ function cancelButton(id) {
 // input is rebuilt from current Task state (answers, notes, prior results),
 // so it is the "continue with my correction" gesture of the control loop.
 const nextProviders = new Map();
-const sendBack = id => {
+let continuationDialog = null;
+const pendingContinuationStarts = new Map();
+
+// A failed response can follow a successful server-side start. Clear only
+// the exact consumed draft, after authoritative task state proves it was
+// saved; preserve anything the user has edited since pressing Start.
+function reconcileContinuationDrafts(tasks) {
+  for (const [id, reviewed] of pendingContinuationStarts) {
+    const task = tasks.find(item => item.id === id);
+    if (!task?.runs?.some(run => run.run >= reviewed.run)) continue;
+    const input = reviewed.options.input;
+    if (input && task.context?.notes?.some(note => note.at === input.at && note.kind === input.kind && note.text === input.text)) {
+      const drafts = input.kind === "answer" ? state.answers : noteInputs;
+      if (drafts.get(id)?.trim() === input.text) drafts.delete(id);
+    }
+    pendingContinuationStarts.delete(id);
+  }
+}
+const sendBack = (id, input) => {
   if (remoteBlocked()) return Promise.resolve(false);
-  return act(() => post("/api/tasks/" + id + "/rerun", nextProviders.has(id) ? { provider: nextProviders.get(id) } : {}));
+  const options = nextProviders.has(id) ? { provider: nextProviders.get(id) } : {};
+  if (state.remote) return act(() => post("/api/tasks/" + id + "/rerun", options));
+  const draft = (noteInputs.get(id) ?? "").trim();
+  if (input) options.input = input;
+  else if (draft) options.input = { kind: "correction", text: draft };
+  return previewContinuation(id, options);
 };
+
+// Keep this native dialog outside the live ledger: SSE paints must not reset
+// the reader's scroll, focus or in-flight preview. Nothing is saved by preview.
+function previewContinuation(id, options) {
+  if (continuationDialog) return Promise.resolve(false);
+  const previousFocus = document.activeElement;
+  const dialog = el("dialog", { class: "continuation-dialog", "aria-labelledby": "continuation-title" });
+  continuationDialog = dialog;
+  let preview = null;
+  let reviewedRun = null;
+  let busy = false;
+  let started = false;
+  const title = el("h2", { id: "continuation-title", text: "Preview next run" });
+  const explanation = el("p", { text: "Review what the next agent will receive. A new correction or answer stays a draft until you start." });
+  const provider = el("select", { "aria-label": "Agent for next run", class: "composer-provider" }, [
+    el("option", { value: "auto", text: "Auto · project routing" }),
+    ...state.providers.map(item => el("option", { value: item.id, text: item.displayName ?? item.id, disabled: !item.available }))
+  ]);
+  provider.value = options.provider ?? state.tasks.find(task => task.id === id)?.execution?.provider ?? "auto";
+  const providerLabel = el("label", {}, [el("span", { text: "Next agent " }), provider]);
+  const status = el("p", { role: "status", "aria-live": "polite", text: "Loading next run input…" });
+  const error = el("p", { class: "continuation-error", role: "alert" });
+  const content = el("div", { class: "continuation-content" });
+  const cancel = el("button", { class: "act act-quiet", text: "BACK TO TASK", type: "button", autofocus: "" });
+  const refresh = el("button", { class: "act act-outline", text: "REFRESH PREVIEW", type: "button" });
+  const start = el("button", { class: "act act-primary", text: "START NEXT RUN", type: "button", disabled: true });
+  dialog.append(title, explanation, providerLabel, status, error, content,
+    el("div", { class: "continuation-actions" }, [cancel, refresh, start]));
+  const loading = value => {
+    busy = value;
+    dialog.setAttribute("aria-busy", String(value));
+    refresh.disabled = value;
+    provider.disabled = value;
+    cancel.disabled = value && started;
+    start.disabled = value || !preview;
+  };
+  async function load() {
+    loading(true);
+    preview = null;
+    error.textContent = "";
+    status.textContent = "Loading next run input…";
+    content.replaceChildren();
+    try {
+      const next = await post("/api/tasks/" + id + "/preview", options, { signal: AbortSignal.timeout(30000) });
+      if (!dialog.isConnected) return;
+      if (reviewedRun !== null && next.run !== reviewedRun) {
+        throw new Error("The task has advanced to another run. Return to the task before continuing.");
+      }
+      reviewedRun = next.run;
+      preview = next;
+      status.textContent = "#" + id + " · Run " + next.run + " · " + next.provider +
+        " · " + next.context.characters.toLocaleString() + " / " + next.context.maxChars.toLocaleString() + " characters";
+      const delivery = { full: "included in full", excerpt: "excerpt; middle omitted", "reference-only": "reference only; result text omitted" };
+      const inputs = el("section", {}, [el("h3", { text: "Your instructions · included in full" })]);
+      if (!next.userInputs.length) inputs.append(el("p", { text: "No additional instructions. The original request is included in full." }));
+      for (const note of next.userInputs) inputs.append(el("div", {}, [
+        el("strong", { text: note.kind ?? "Instruction" }), el("pre", { text: note.text })
+      ]));
+      const results = el("section", {}, [el("h3", { text: "Previous results" })]);
+      if (!next.context.artifacts.length) results.append(el("p", { text: "No previous results." }));
+      for (const artifact of next.context.artifacts) results.append(el("p", {
+        text: "Run " + artifact.run + " · " + (artifact.outcome ?? "unknown") + " · " + delivery[artifact.delivery]
+      }));
+      const exact = el("details", {}, [el("summary", { text: "Exact next run input" }), el("pre", { class: "continuation-prompt", text: next.prompt })]);
+      content.append(inputs, results, exact, el("p", { class: "continuation-scope", text: "Starts a fresh session with this recorded context. Hidden agent state and full transcripts are not transferred. Character counts are not model tokens." }));
+    } catch (cause) {
+      if (!dialog.isConnected) return;
+      status.textContent = "Preview unavailable. This request did not start a run.";
+      error.textContent = cause.message;
+    } finally { if (dialog.isConnected) loading(false); }
+  }
+  refresh.addEventListener("click", load);
+  provider.addEventListener("change", () => {
+    options.provider = provider.value;
+    nextProviders.set(id, provider.value);
+    load();
+  });
+  cancel.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("cancel", event => { if (busy && started) event.preventDefault(); });
+  start.addEventListener("click", async () => {
+    if (!preview || busy) return;
+    const reviewed = preview;
+    started = true;
+    loading(true);
+    error.textContent = "";
+    status.textContent = "Starting reviewed continuation…";
+    try {
+      await post("/api/tasks/" + id + "/rerun", { ...reviewed.options, previewId: reviewed.previewId }, { signal: AbortSignal.timeout(30000) });
+      if (reviewed.options.input?.kind === "correction") noteInputs.delete(id);
+      if (reviewed.options.input?.kind === "answer") state.answers.delete(id);
+      dialog.close("started");
+      reloadTasks().catch(() => {});
+    } catch (cause) {
+      // Never retry a launch automatically, even if its response was lost.
+      pendingContinuationStarts.set(id, reviewed);
+      preview = null;
+      started = false;
+      status.textContent = "Start was not confirmed. Return to the task to check its latest run before trying again.";
+      error.textContent = cause.message;
+      reloadTasks().catch(() => {});
+    } finally { if (dialog.isConnected) loading(false); }
+  });
+  const result = new Promise(resolve => dialog.addEventListener("close", () => {
+    continuationDialog = null;
+    dialog.remove();
+    if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    resolve(dialog.returnValue === "started");
+  }, { once: true }));
+  document.body.append(dialog);
+  dialog.showModal();
+  load();
+  return result;
+}
 
 // CLOSE tells 0x2F this Work is no longer active — the same closeWork action
 // the ACCEPT button uses. It never touches the provider: no resume, no new
@@ -2481,6 +2619,7 @@ function visibleRows() {
 }
 
 function onKeyDown(event) {
+  if (continuationDialog?.open) return;
   // ESC cancels an in-flight BRIEF regardless of where focus landed (a click
   // on the BRIEF button itself moves focus off the textarea, whose own
   // keydown handler would otherwise be the only thing listening for this).
@@ -2741,6 +2880,7 @@ async function answerAndContinue(id) {
   if (remoteBlocked()) return false;
   const answer = (state.answers.get(id) ?? "").trim();
   if (!answer) return false;
+  if (!state.remote) return sendBack(id, { kind: "answer", text: answer });
   // Never continue past a failed save: rerunning without the recorded answer
   // would spend a run on the same question the agent already asked.
   if (!(await answerDecision(id))) return false;
@@ -2756,6 +2896,10 @@ async function submitCorrection(id, { rerun } = {}) {
   if (remoteBlocked()) return;
   const note = (noteInputs.get(id) ?? "").trim();
   if (!note) return;
+  if (rerun && !state.remote) {
+    if (await sendBack(id, { kind: "correction", text: note })) closeCorrection();
+    return;
+  }
   const correction = ["ready", "failed"].includes(state.tasks.find(t => t.id === id)?.status);
   try {
     await api("/api/tasks/" + id + (correction ? "/correct" : "/note"), {

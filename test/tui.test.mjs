@@ -242,12 +242,15 @@ test("Enter on a permission fires immediately; Enter on a decision asks for text
   assert.equal(decision.state.input, "answer");
 });
 
-test("an input commits to an intent, and esc throws the draft away", () => {
+test("a continuation input previews its draft, and esc in the editor throws the draft away", () => {
   let state = apply(initialState(), { name: "enter" }, CTX).state;
   for (const ch of "hash it") state = apply(state, KEY(ch), CTX).state;
   const committed = apply(state, { name: "enter" }, CTX);
-  assert.deepEqual(committed.intent, { type: "answer", id: 3, text: "hash it", continue: true });
-  assert.equal(committed.state.input, null);
+  assert.deepEqual(committed.intent, { type: "preview", id: 3, options: {
+    provider: TASKS[0].provider, input: { kind: "answer", text: "hash it" }
+  } });
+  assert.equal(committed.state.input, "answer");
+  assert.equal(committed.state.draft, "hash it");
 
   const cancelled = apply(state, { name: "escape" }, CTX);
   assert.equal(cancelled.intent, null);
@@ -996,6 +999,10 @@ test("ANSWER & CONTINUE persists the answer and starts the next run; SAVE ONLY d
   for (const ch of "and log it") await app.key({ name: "char", ch });
   await app.key({ name: "enter" });
 
+  assert.equal(app.state.mode, "continuation");
+  assert.deepEqual((await runtime.actions.getWork(task.id)).context.notes.map(n => n.text), ["hash it"]);
+  await app.key({ name: "enter" });
+
   stored = await runtime.actions.getWork(task.id);
   assert.equal(stored.status, "working");
   assert.equal(stored.runs.length, 2, "a decision continues as a NEW run");
@@ -1014,6 +1021,10 @@ test("SEND BACK records the correction on the task, then rebuilds the next run f
 
   await app.key({ name: "char", ch: "x" }); // SEND BACK
   for (const ch of "retry-after in whole seconds") await app.key({ name: "char", ch });
+  await app.key({ name: "enter" });
+
+  assert.equal(app.state.mode, "continuation");
+  assert.equal((await runtime.actions.getWork(task.id)).runs.length, 1);
   await app.key({ name: "enter" });
 
   const stored = await runtime.actions.getWork(task.id);
@@ -1041,6 +1052,10 @@ test("RETRY reruns a failed task on the same provider; the intent has not change
   await app.refresh();
   assert.equal(app.selected().state, "failed");
   await app.key({ name: "enter" }); // RETRY
+
+  assert.equal(app.state.mode, "continuation");
+  assert.equal((await runtime.actions.getWork(task.id)).runs.length, 1);
+  await app.key({ name: "enter" });
 
   const stored = await runtime.actions.getWork(task.id);
   assert.equal(stored.runs.length, 2);
@@ -1073,7 +1088,7 @@ test("a refusal from the shared action is surfaced verbatim, never swallowed or 
   const app = createApp(runtime);
   await app.refresh();
 
-  await app.run({ type: "rerun", id: task.id });
+  await app.run({ type: "preview", id: task.id });
   assert.equal(app.state.flash.tone, "warn");
   assert.match(app.state.flash.text, /is working/);
   assert.equal((await runtime.actions.getWork(task.id)).runs.length, 1, "nothing happened");

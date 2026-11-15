@@ -1,15 +1,14 @@
-# Quickstart — 1.0.0 release candidate
+# Quickstart — 1.1.0
 
-Install the supplied **1.0.0** archive. This candidate is unpublished;
-the registry version 0.3.0 is the earlier public baseline.
+Install **0x2f 1.1.0** from npm, or use the matching release archive.
 
 Use macOS or Linux/POSIX, Node.js ≥20, npm, and an installed coding harness.
 The harness owns its authentication and model access; 0x2F has no account.
 
 ```sh
-npm install -g --prefix "$HOME/.local/0x2f-1.0-review" /absolute/path/0x2f-1.0.0.tgz
-export PATH="$HOME/.local/0x2f-1.0-review/bin:$PATH"
-2f version                   # 1.0.0
+npm install -g --prefix "$HOME/.local/0x2f-1.1" 0x2f@1.1.0
+export PATH="$HOME/.local/0x2f-1.1/bin:$PATH"
+2f version                   # 1.1.0
 cd /path/to/your/repository
 2f init
 2f providers
@@ -34,7 +33,8 @@ requests/results and previous runs (`[` / `]`).
 
 ```sh
 2f note 1 "Preserve the command-line interface"
-2f rerun 1 --provider opencode
+2f preview 1 --provider opencode
+# Review the input, then run the printed rerun command with its --preview ID.
 2f open 1 --run 2
 2f close 1
 ```
@@ -43,6 +43,10 @@ Notes are included in the next run's input, including notes saved while another
 run is working. They do not reach that already-running worker. Rerun keeps the
 Task ID/history and creates a fresh provider session. This is task-context
 handoff, not native session resume. Runs of a Task cannot overlap.
+
+In local Web and TUI, correction, answer-and-continue, retry and reopen
+first show the next-run input. Confirm explicitly to start, or return to the
+task with your draft still editable. See [continuation preview](continuation-preview.md).
 
 Web, phone and pairing screens offer Light / Dark / System in SETTINGS. System
 is the initial default; the preference is saved on that browser origin. Theme
@@ -53,4 +57,4 @@ See [commands and troubleshooting](usage.md), [host setup](host-setup.md),
 [remote control](remote-control.md), [compatibility](harness-compatibility.md),
 and [remaining work](roadmap.md).
 
-[1.0.0 scope, changes and qualification](releases/1.0.0.md).
+[1.1.0 scope, changes and qualification](releases/1.1.0.md).

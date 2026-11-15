@@ -23,7 +23,9 @@ export async function projectContext(base) {
   }
   return { files, version: digest(JSON.stringify(files)) };
 }
-export async function compileContinuation({task,base,originalPrompt,store}) {
+// Read-only projection, shared by preview and execution. No task/run files
+// are created until the caller explicitly persists this plan.
+export async function planContinuation({task,base,originalPrompt,store}) {
   let original=originalPrompt;
   if (!original) original=await store.readText(path.join(store.taskDir(task.slug),'prompt.md'),'');
   if (!original) original=task.brief??task.title??'';
@@ -86,8 +88,14 @@ export async function compileContinuation({task,base,originalPrompt,store}) {
   if(prompt.length>maxChars) throw new WorkError('Context framing exceeds its budget; no run was started.',409);
   const receipt={version:CONTEXT_VERSION,maxChars,characters:prompt.length,sha256:digest(prompt),projectVersion:project.version,
     userInputs:notes.length,userInputDelivery:'full; next-run only',originalDelivery:'full',artifacts:projections};
-  await store.writeJson(path.join(root,'context.json'),receipt);
-  await store.writeJson(path.join(root,'project-context.json'),project);
-  await store.writeText(indexPath,index);
-  return prompt;
+  return {prompt,receipt,project,root,index,indexPath};
+}
+export async function persistContinuation(plan,store) {
+  await store.writeJson(path.join(plan.root,'context.json'),plan.receipt);
+  await store.writeJson(path.join(plan.root,'project-context.json'),plan.project);
+  await store.writeText(plan.indexPath,plan.index);
+  return plan.prompt;
+}
+export async function compileContinuation(options) {
+  return persistContinuation(await planContinuation(options),options.store);
 }

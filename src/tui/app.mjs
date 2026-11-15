@@ -6,11 +6,11 @@
 // design resolves to shared actions:
 //
 //   ALLOW / REJECT        resumeWork(id, grant)      — same run, same session
-//   ANSWER & CONTINUE     answerWork + rerunWork     — answer, then next run
+//   ANSWER & CONTINUE     previewRerunWork → guarded rerunWork
 //   SAVE ONLY             answerWork                 — answer, stay NEEDS YOU
-//   SEND BACK             noteWork + rerunWork       — correction, next run
+//   SEND BACK             previewRerunWork → guarded rerunWork
 //   ACCEPT / DROP         closeWork
-//   RETRY / REOPEN        rerunWork({ provider })
+//   RETRY / REOPEN        previewRerunWork → guarded rerunWork
 //   NOTE                  noteWork
 //   NEW TASK              createWork({ brief, provider })
 //   ⌥↵ brief              refine.refineTaskPrompt    — text only, no task
@@ -24,7 +24,7 @@
 
 import { initialState, apply, selected, visible } from "./state.mjs";
 import { snapshot } from "./model.mjs";
-import { frame } from "./view.mjs";
+import { frame, continuationScrollMax } from "./view.mjs";
 import { palette } from "./theme.mjs";
 
 const FLASH_MS = 3400;
@@ -100,6 +100,25 @@ export function createApp(runtime, opts = {}) {
     state = { ...state, busy: true };
     try {
       switch (intent.type) {
+        case "preview": {
+          const continuation = await actions.previewRerunWork(intent.id, intent.options);
+          if (state.mode === "continuation" && state.continuation?.run !== continuation.run) {
+            throw new Error("The task has advanced to another run. Return to the task before continuing.");
+          }
+          state = { ...state, mode: "continuation", continuation, continuationInvalid: false, lastError: null, dscroll: 0 };
+          setFlash("preview ready · no run started · Enter starts, Esc returns to the task");
+          break;
+        }
+        case "preview-start": {
+          const preview = state.continuation;
+          if (!preview || state.continuationInvalid) break;
+          const task = await actions.rerunWork(preview.taskId, { ...preview.options, previewId: preview.previewId });
+          state = { ...state, mode: "work", continuation: null, continuationInvalid: false, dscroll: 0,
+            input: null, inputTaskId: null, draft: "", draftCursor: null, rerunProvider: null };
+          preferredTaskId = task.id;
+          setFlash("run " + task.runs.at(-1).run + " started with the reviewed input");
+          break;
+        }
         case "cancel": {
           await actions.cancelWork(intent.id, { executionId: intent.executionId });
           setFlash("cancellation requested · partial work stays; wait for the worker receipt", "warn");
@@ -133,32 +152,12 @@ export function createApp(runtime, opts = {}) {
         }
         case "answer": {
           await actions.answerWork(intent.id, { answer: intent.text });
-          if (!intent.continue) {
-            setFlash("answer recorded on " + ref(intent.id) + " · it stays NEEDS YOU");
-            break;
-          }
-          // Never continue past a failed save: a run started without the
-          // recorded answer is a run spent on the wrong question.
-          const task = await actions.rerunWork(intent.id);
-          const run = task.runs?.at(-1)?.run ?? 1;
-          setFlash(
-            "answer recorded · run " + run + " of " + ref(intent.id) + " continues with it"
-          );
+          setFlash("answer recorded on " + ref(intent.id) + " · it stays NEEDS YOU");
           break;
         }
         case "note": {
           await actions.noteWork(intent.id, { note: intent.text });
           setFlash("note saved on " + ref(intent.id) + " · next run receives it; current run unchanged");
-          break;
-        }
-        case "sendback": {
-          await actions.correctWork(intent.id, { correction: intent.text });
-          const task = await actions.rerunWork(intent.id);
-          const run = task.runs?.at(-1)?.run ?? 1;
-          setFlash(
-            "sent back · run " + run + " of " + ref(intent.id) + " is rebuilt with your correction",
-            "warn"
-          );
           break;
         }
         case "accept": {
@@ -169,17 +168,6 @@ export function createApp(runtime, opts = {}) {
         case "drop": {
           await actions.closeWork(intent.id, { disposition: "drop" });
           setFlash("dropped " + ref(intent.id) + " · kept in closed with its whole run history", "warn");
-          break;
-        }
-        case "rerun": {
-          const task = await actions.rerunWork(intent.id, { provider: intent.provider });
-          const run = task.runs?.at(-1)?.run ?? 1;
-          const name = model.lookup(task.execution?.provider).name;
-          setFlash(
-            "run " + run + " of " + ref(intent.id) + " started on " + name +
-            " · notes and answers carried over"
-          );
-          state = { ...state, rerunProvider: null };
           break;
         }
         case "create": {
@@ -215,11 +203,27 @@ export function createApp(runtime, opts = {}) {
       }
       await refresh();
     } catch (error) {
+      if (intent.type === "preview-start") {
+        const reviewed = state.continuation;
+        const input = reviewed?.options.input;
+        if (input) {
+          try {
+            const task = await actions.getWork(reviewed.taskId);
+            if (task.runs.some(run => run.run >= reviewed.run) &&
+              task.context?.notes?.some(note => note.at === input.at && note.kind === input.kind && note.text === input.text) &&
+              state.draft.trim() === input.text) {
+              state = { ...state, input: null, inputTaskId: null, draft: "", draftCursor: null };
+            }
+          } catch { /* Keep the draft if the authoritative read is unavailable. */ }
+        }
+      }
       // WorkError carries the shared refusal message — the same words the
       // CLI and the Web show. Anything else is surfaced as-is rather than
       // swallowed; a TUI that hides a failure is worse than one that is ugly.
       const detail = String(error?.message ?? error);
-      state = { ...state, lastError: detail };
+      state = { ...state, lastError: detail,
+        ...(state.mode === "continuation" && ["preview", "preview-start"].includes(intent.type)
+          ? { continuationInvalid: true } : {}) };
       setFlash("Error · F1 details · " + detail.split("\n")[0], "warn");
       return false;
     } finally {
@@ -246,6 +250,7 @@ export function createApp(runtime, opts = {}) {
       const result = apply(state, key, {
         tasks: model.tasks,
         cols: size.cols,
+        continuationMaxScroll: state.mode === "continuation" ? continuationScrollMax(state, size) : undefined,
         providerOrder,
         lookup: model.lookup
       });
@@ -254,7 +259,7 @@ export function createApp(runtime, opts = {}) {
         const ok = await run(result.intent);
         // An unsuccessful save must leave the user's answer/correction
         // editable, still bound to the task it was written for.
-        if (!ok && previous.input) state = { ...state, input: previous.input,
+        if (!ok && previous.input && result.intent.type !== "preview-start") state = { ...state, input: previous.input,
           inputTaskId: previous.inputTaskId, draft: previous.draft, draftCursor: previous.draftCursor };
       }
       // Opening the diff view fetches the real hunks — the mode transition

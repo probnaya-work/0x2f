@@ -721,6 +721,33 @@ export function buildResult(model, state, cols, p, T) {
   return lines;
 }
 
+export function buildContinuation(state, cols, p, T) {
+  const preview = state.continuation;
+  if (!preview) return [{ cells: [T(" Loading continuation preview…", p.dim)] }];
+  const lines = [];
+  const text = value => { for (const line of wrap(value, Math.min(100, cols - 4))) lines.push({ cells: [T(" " + line, p.fg)] }); };
+  const source = value => {
+    const clean = stripVTControlCharacters(String(value ?? "")).replace(CONTROL_RE, "").replace(/\t/g, "    ");
+    for (const line of clean.split("\n")) {
+      for (const row of cellRows(line, Math.min(100, cols - 4))) lines.push({ cells: [T(" " + row, p.fg)] });
+    }
+  };
+  text(`CONTINUATION PREVIEW · #${String(preview.taskId).padStart(3, "0")} · RUN ${preview.run} · ${preview.provider}`);
+  text(state.continuationInvalid ? "Start unavailable. Refresh the preview or return to the task." : "No run started. New answers and corrections stay drafts until you start.");
+  text(`Original request: full · ${preview.context.userInputs} user inputs in full`);
+  text(`${preview.context.characters} / ${preview.context.maxChars} characters (not model tokens)`);
+  const delivery = { full: "included in full", excerpt: "excerpt; middle omitted", "reference-only": "reference only; result text omitted" };
+  for (const artifact of preview.context.artifacts) text(`Run ${artifact.run}: ${delivery[artifact.delivery]}`);
+  text("Fresh session with recorded context; hidden agent state and full transcripts are not transferred.");
+  if (preview.userInputs.length) {
+    lines.push({ cells: [T("")] }, { cells: [T(" YOUR INSTRUCTIONS · INCLUDED IN FULL", p.heading, 600)] });
+    for (const note of preview.userInputs) { text(note.kind ?? "Instruction"); source(note.text); }
+  }
+  lines.push({ cells: [T("")] }, { cells: [T(" EXACT NEXT RUN INPUT", p.heading, 600)] });
+  source(preview.prompt);
+  return lines;
+}
+
 export function buildChanges(model, state, cols, p, T) {
   const task = selected(model.tasks, state);
   if (!task) return [{ cells: [T(" no task selected", p.ghost)] }];
@@ -907,6 +934,8 @@ const KEYS = [
   ["r", "read full request/result/checks; [ ] selects run, i shows saved run input, j/k scrolls, g/G ends"],
   ["c", "note or correct — kept on the task, carried into every later run"],
   ["p", "point the next run at another provider"],
+  ["v", "preview the next run without starting; ↵ starts, u refreshes, Esc returns"],
+  ["↵ in send back / answer", "preview the draft; another ↵ starts the reviewed run"],
   ["t", "expand the trace of the current run"],
   ["n", "new task — ⇧↵ inserts a newline (⌃n where your terminal cannot send ⇧↵), ⌥↵ expands your note into a brief, ↵ starts it"],
   ["F1 / ⌃g", "help from any text field; return without losing your draft"],
@@ -968,6 +997,13 @@ export function buildHelp(cols, p, T, error = null, draft = null) {
 // the frame is built, rather than threading it through every column sum.
 const GUTTER_X = 1;
 const GUTTER_Y = 1;
+const FOOTER = 3;
+
+export function continuationScrollMax(state, opts = {}) {
+  const cols = (opts.cols ?? 132) - GUTTER_X * 2;
+  const available = (opts.rows ?? 38) - GUTTER_Y * 2 - FOOTER;
+  return Math.max(0, buildContinuation(state, cols, {}, t => ({ t })).length - available);
+}
 
 export function frame(model, state, opts = {}) {
   const trueCols = Math.max(1, opts.cols ?? 132);
@@ -982,7 +1018,6 @@ export function frame(model, state, opts = {}) {
   const p = opts.palette;
   const T = (t, c, b) => ({ t: String(t), c, b: b || 400, bg: "transparent" });
 
-  const FOOTER = 3;
   const avail = rows - FOOTER;
   let lines = [];
   let hint = [];
@@ -1019,6 +1054,13 @@ export function frame(model, state, opts = {}) {
   } else if (state.mode === "composer") {
     lines = buildComposer(model, state, cols, p, T, avail);
     hint = [["←/→", "edit"], ["Home/End", "line ends"], ["PgUp/PgDn", "review"], ["F1", "help"]];
+  } else if (state.mode === "continuation") {
+    const all = buildContinuation(state, cols, p, T);
+    const max = Math.max(0, all.length - avail);
+    const off = Math.min(state.dscroll, max);
+    lines = all.slice(off, off + avail);
+    hint = [...(state.continuationInvalid ? [] : [["↵", "start next run", true]]), ["u", "refresh"], ["j/k", "scroll"], ["esc", "back"]];
+    if (max) hint.push([null, Math.min(all.length, off + avail) + "/" + all.length]);
   } else if (state.mode === "result") {
     const all = buildResult(model, state, cols, p, T);
     const max = Math.max(0, all.length - avail);
@@ -1109,7 +1151,7 @@ export function frame(model, state, opts = {}) {
     // Task actions already have their own pinned band. The global footer
     // stays for navigation, reading and recovery, without a second copy.
     hint.push(["n", "new task"], ["j/k", "select"], ["tab", FILTERS[state.filter].toLowerCase()], ["?", "help"], ["q", "detach"]);
-    if (cols >= 100) hint.push(["/", "search"]);
+    if (cols >= 100) hint.push(["v", "preview next run"], ["/", "search"]);
   }
 
   while (lines.length < avail) lines.push({ cells: [T("")] });
@@ -1137,7 +1179,7 @@ export function frame(model, state, opts = {}) {
       ]
     });
     lines.push({
-      cells: bindings([["↵", "commit", true], ["ctrl-n", "newline"], ["F1", "review/help"], ["esc", "cancel"]], cols, p, T)
+      cells: bindings([["↵", ["sendback", "answer"].includes(state.input) ? "preview" : "save", true], ["ctrl-n", "newline"], ["F1", "review/help"], ["esc", "cancel"]], cols, p, T)
     });
   } else if (state.searching && state.mode === "work") {
     lines.push({
@@ -1155,6 +1197,7 @@ export function frame(model, state, opts = {}) {
     const flash = state.flash;
     const task = selected(model.tasks, state);
     const context = state.mode === "composer" ? "Draft · nothing has started"
+      : state.mode === "continuation" ? (state.continuationInvalid ? "Preview needs refresh · u refreshes, Esc returns" : "Next run input · Enter starts, u refreshes, Esc returns")
       : state.mode === "result" ? "Saved run report · review the outcome and checks"
         : state.mode === "diff" ? "Change review · inspect the saved evidence"
           : state.mode === "help" ? "Keyboard reference"

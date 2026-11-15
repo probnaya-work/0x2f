@@ -1,0 +1,17 @@
+✔ sectionOf extracts a result section up to the next heading (0.639709ms)
+✔ createWork persists run 1's input per run; the original prompt.md is untouched (11.404875ms)
+✔ run 1's result, verification and changed files appear in run 2's prompt — but never a transcript (11.081709ms)
+✔ a user constraint added after run 1 appears in run 2's prompt, not run 1's (10.048834ms)
+✔ noteWork records Task context without starting or resuming an execution (5.951166ms)
+✔ answerWork keeps existing decision behavior AND lands the answer in Task context (6.374208ms)
+✔ same-provider resume keeps the existing session: no new run, no new per-run prompt (6.829625ms)
+✔ previous run records, results and the original prompt stay immutable across reruns (13.090959ms)
+✔ DOGFOODING: Claude investigates, user constrains, Codex-class rerun continues the SAME task in a fresh session (1074.305958ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1227.252291

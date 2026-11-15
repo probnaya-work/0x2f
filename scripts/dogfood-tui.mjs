@@ -146,6 +146,8 @@ async function actOnHalt(session, task, step) {
     await sleep(300);
     session.type(answer);
     session.press("enter");
+    await session.waitForText(/CONTINUATION PREVIEW/);
+    session.press("enter");
     await sleep(600);
     return "answered";
   }
@@ -242,6 +244,8 @@ async function main() {
     session.press("x");
     await sleep(300);
     session.type(correction);
+    session.press("enter");
+    await session.waitForText(/CONTINUATION PREVIEW/);
     session.press("enter");
     await sleep(800);
     cycles = 0;
