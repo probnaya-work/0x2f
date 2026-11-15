@@ -282,6 +282,24 @@ test("creating a Task through the encrypted channel starts it on the Mac's node"
 test("redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac", async t => {
   const { runtime, phone } = await makeHarness(t);
   const task = await runtime.actions.createWork({ brief: "Events" });
+  const received = [];
+  const controller = new AbortController();
+  let opened = false;
+  let streamError;
+  const stream = phone.events(plaintext => received.push(plaintext), {
+    signal: controller.signal,
+    onOpen() { opened = true; }
+  }).catch(error => { streamError = error; });
+  t.after(async () => {
+    controller.abort();
+    await stream;
+  });
+  // Live events are not replayed to later subscribers. Establish the SSE
+  // subscription before the tailer can publish the event being asserted.
+  await waitFor(() => {
+    if (streamError) throw streamError;
+    return opened;
+  }, "phone event subscription to open");
   await runtime.store.appendEvent(task.slug, {
     type: "tool.started",
     taskId: task.id,
@@ -295,15 +313,12 @@ test("redacted encrypted events reach the phone; sensitive tool inputs stay on t
     }
   });
 
-  const received = [];
-  const controller = new AbortController();
-  const stream = phone.events(plaintext => received.push(plaintext), { signal: controller.signal });
-  await waitFor(
-    () => received.some(p => p.cmd === "event" && p.event?.type === "tool.started"),
-    "tool.started event to arrive"
-  );
+  await waitFor(() => {
+    if (streamError) throw streamError;
+    return received.some(p => p.cmd === "event" && p.event?.type === "tool.started");
+  }, "tool.started event to arrive");
   controller.abort();
-  await stream.catch(() => {});
+  await stream;
 
   const envelope = received.find(p => p.cmd === "event" && p.event?.type === "tool.started");
   const event = envelope.event;
