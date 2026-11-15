@@ -22,7 +22,7 @@ The preview stays mounted while the ledger updates. Refreshing it reads the
 current context. It does not start an agent, create a run, save a draft,
 create an isolated checkout or write future-run artifacts.
 
-![Local Web preview with deterministic demonstration agents](images/continuation-preview.png)
+![Local Web preview with deterministic demonstration agents](images/continuation-preview.jpg)
 
 Screenshot from the real local UI with deterministic test agents; it is not
 a live-model performance claim.

@@ -1,0 +1,134 @@
+{
+  "hosted-deployment": {},
+  "verify (ubuntu-latest, 26)": {
+    "tests": 904,
+    "pass": 893,
+    "fail": 0,
+    "skipped": 11,
+    "skipLines": [
+      "\u2139 skipped 11"
+    ],
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "57bd1d22616b7c3e4fabdb46693a35266e0b768527f5bba21d589eb8804b16e6",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "verify (ubuntu-latest, 24)": {
+    "tests": 904,
+    "pass": 893,
+    "fail": 0,
+    "skipped": 11,
+    "skipLines": [
+      "\u2139 skipped 11"
+    ],
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "c62bd81df3626ca0554821d4d6f984be8adac5badf612750fd624a200dcf0d7e",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "verify (macos-latest, 26)": {
+    "skipLines": [
+      "\ufe63 Linux unreaped zombies cannot keep an otherwise empty execution group active (0.476375ms) # SKIP",
+      "\u2139 skipped 12"
+    ],
+    "tests": 904,
+    "pass": 892,
+    "fail": 0,
+    "skipped": 12,
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "32950ee92237936af712761fb4198f9b844d03d70d137684fe7262b023ee1cdb",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "verify (macos-latest, 20)": {
+    "skipLines": [
+      "ok 124 - E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 125 - E2E: `2f providers` detects codex and a task runs to READY through the real CLI # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 126 - E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 127 - E2E: command_execution is recorded honestly as tool activity, never as file.changed # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 128 - E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 129 - E2E: the same task can switch away from codex to another provider without losing task context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 252 - E2E: `2f providers` detects gemini and a task runs to READY through the real CLI # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 253 - E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 254 - E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 255 - E2E: the same task can switch away from gemini to another provider without losing task context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 280 - shipped Caddy deployment serves pairing and modules, then proxies encrypted commands and SSE # SKIP Caddy not installed; set CADDY_BIN to run the deployment integration",
+      "ok 332 - Linux unreaped zombies cannot keep an otherwise empty execution group active # SKIP"
+    ],
+    "tests": 904,
+    "pass": 892,
+    "fail": 0,
+    "skipped": 12,
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "912c2f25c92864b7a31ac243f53c8beee993a15f421aa909a18356fd1873c24d",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "verify (ubuntu-latest, 20)": {
+    "skipLines": [
+      "ok 124 - E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 125 - E2E: `2f providers` detects codex and a task runs to READY through the real CLI # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 126 - E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 127 - E2E: command_execution is recorded honestly as tool activity, never as file.changed # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 128 - E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 129 - E2E: the same task can switch away from codex to another provider without losing task context # SKIP codex executable not available (set CODEX_BIN or install Codex CLI)",
+      "ok 252 - E2E: `2f providers` detects gemini and a task runs to READY through the real CLI # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 253 - E2E: a gemini auth failure is normalized (failure.kind=auth) and RETRY works # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 254 - E2E: a gemini decision needs_you is answered, and a rerun continues the task without losing context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 255 - E2E: the same task can switch away from gemini to another provider without losing task context # SKIP gemini executable not available (set GEMINI_BIN or install Gemini CLI)",
+      "ok 280 - shipped Caddy deployment serves pairing and modules, then proxies encrypted commands and SSE # SKIP Caddy not installed; set CADDY_BIN to run the deployment integration"
+    ],
+    "tests": 904,
+    "pass": 893,
+    "fail": 0,
+    "skipped": 11,
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "a1dce73e1f8257627b993287883286d5b4c6b9efd58bd7fb0fdf9f48b2b48f73",
+      "noCancelledDraftSaved": true
+    }
+  },
+  "verify (macos-latest, 24)": {
+    "skipLines": [
+      "\ufe63 Linux unreaped zombies cannot keep an otherwise empty execution group active (1.567875ms) # SKIP",
+      "\u2139 skipped 12"
+    ],
+    "tests": 904,
+    "pass": 892,
+    "fail": 0,
+    "skipped": 12,
+    "installedSmoke": {
+      "installedPackage": true,
+      "tuiPreviewAndCancel": true,
+      "cliGuardedStart": true,
+      "exactPrompt": true,
+      "provider": "beta",
+      "promptSha256": "99fc4af7c08061427dfd766e65f50ce76ddc154e32aec145b819d75926a2c7bd",
+      "noCancelledDraftSaved": true
+    }
+  }
+}

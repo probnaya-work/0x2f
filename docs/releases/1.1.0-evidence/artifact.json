@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "sourceCommit": "ddc6a2f81661f973b6ae5502706c87088a0692a1",
+  "archive": "0x2f-1.1.0.tgz",
+  "bytes": 330301,
+  "sha256": "39ee39b9c7d1f6f892a373da08af0f5b514bc68c648ac24d8d08795fd0a31ef4",
+  "files": 87,
+  "sourceFiles": 84,
+  "allPackedFilesMatchSource": true,
+  "macInstalledFilesMatch": true
+}
