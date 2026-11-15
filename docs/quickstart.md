@@ -1,14 +1,15 @@
-# Quickstart — 0.3.0
+# Quickstart — 1.0.0 release candidate
 
-Publication is pending npm authorization (401). The version below is the
-prepared target; stable npm latest remains0.1.4 until release.
+Install the supplied **1.0.0** archive. This candidate is unpublished;
+the registry version 0.3.0 is the earlier public baseline.
 
 Use macOS or Linux/POSIX, Node.js ≥20, npm, and an installed coding harness.
 The harness owns its authentication and model access; 0x2F has no account.
 
 ```sh
-npm install -g 0x2f@0.3.0
-2f version
+npm install -g --prefix "$HOME/.local/0x2f-1.0-review" /absolute/path/0x2f-1.0.0.tgz
+export PATH="$HOME/.local/0x2f-1.0-review/bin:$PATH"
+2f version                   # 1.0.0
 cd /path/to/your/repository
 2f init
 2f providers
@@ -51,3 +52,5 @@ selection is unchanged.
 See [commands and troubleshooting](usage.md), [host setup](host-setup.md),
 [remote control](remote-control.md), [compatibility](harness-compatibility.md),
 and [remaining work](roadmap.md).
+
+[1.0.0 scope, changes and qualification](releases/1.0.0.md).

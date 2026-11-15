@@ -37,8 +37,8 @@ function fakeNode() {
     id: "fake-node",
     displayName: "Fake node",
     resolveWorkspace: () => "/virtual/workspace",
-    async startExecution() { return 111; },
-    async resumeExecution() { return 222; },
+    async startExecution() { return null; },
+    async resumeExecution() { return null; },
     async cancelExecution() {}
   };
 }

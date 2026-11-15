@@ -145,15 +145,19 @@ E2E key, and retires the previous phone — that is how you switch phones.
 
 ## Step 7 — Hosted relay (future/remote, or your own deployment)
 
-LAN is the default. The hosted path is preserved and unchanged:
+LAN is the default. Hosted pairing uses two operator-configured origins:
 
 ```bash
 2f pair --relay https://relay.example.com --client https://app.example.com
 ```
 
-or via environment: `0X2F_RELAY_URL` / `0X2F_CLIENT_ORIGIN`. A future release
-can make `2f pair` choose the transport automatically — the pairing semantics
-(URL + one-time code, token, session, E2E key) are identical.
+Both are required the first time. No hosted service address is supplied.
+The client origin must use HTTPS (except loopback development) and differ
+from the relay origin. Flags override environment, which overrides saved
+hosted configuration. For the legacy variable names use
+`env 0X2F_RELAY_URL=https://relay.example.com 0X2F_CLIENT_ORIGIN=https://app.example.com 2f pair`;
+shells reject `export` because the names start with a digit. Pairing semantics
+(URL + one-time code, token, session, E2E key) remain identical.
 
 ---
 
@@ -203,5 +207,29 @@ other LAN devices. Plain `http://` on the LAN is the documented same-Wi-Fi
 tradeoff: an active attacker on the network could intercept the pairing page
 (the pairing code is typed into it), so LAN pairing is for trusted networks.
 The hosted relay remains HTTPS-only.
+
+### Candidate 0.3.1-rc.1 command recovery
+
+Remote mutations save an owner-only, atomic uncertainty receipt before their
+action and save the final acknowledgement before replying. A repeated request
+waits behind the first command and returns its recorded answer. After a process
+crash between those writes, the same request is refused with 409: inspect the
+authoritative task on the host before starting another action. Failure to write
+the admission receipt prevents execution. A failed final acknowledgement write
+retains uncertainty, since its action may have happened. An unreadable receipt file disables remote mutations while
+read-only inspection remains available. Fresh receipts are not evicted to make
+room: 1,000 retained mutations in 24 hours temporarily refuse new ones with 503.
+This is process-crash recovery, not a guarantee against disk loss or power failure.
+
+The local runtime cookie is named per listening port, so separate workspaces
+can remain open in the same browser. Tokens still rotate on runtime restart;
+reload the shell to obtain the current token.
+
+Pairing authorizes the phone to read the projected task content and control
+that workspace. The projection removes raw tool inputs and internal metadata;
+it is not a general secret scrubber for text a task or model includes. Local
+task evidence and backups are private plaintext files. The browser stores its
+remote session, encryption key and last-known projected content in localStorage;
+protect that browser profile and revoke access with `2f pair --off` when done.
 
 For a persistent Linux host, explicit service PATH, logging and supervisor-aware pairing, see [host setup](host-setup.md). A LAN is a trusted-network boundary; use operator-managed TLS infrastructure for other networks. The0.3.0 controls and API0.8 are described in [release operations](releases/0.3.0-operations.md).

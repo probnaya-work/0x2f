@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "synthetic": true,
+  "firstTask": "ready",
+  "savedResultPersists": true,
+  "localWeb": true,
+  "apiUnauthenticatedStatus": 401,
+  "authenticatedTaskMatches": true
+}

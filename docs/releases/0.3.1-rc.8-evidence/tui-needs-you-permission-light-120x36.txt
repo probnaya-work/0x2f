@@ -1,0 +1,40 @@
+# 0x2F TUI frame — needs-you-permission-light-120x36
+# state: permission   mode: work   terminal: 120x36
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                                                        
+  0x2F ~/ws                          │ #001  Inspect the submit path and add retry handling                             
+  ! 1  ✕ 0  ✓ 0  ▶ 0  · 0            │ ALPHA · run 1 · 0:00   halted on you                                             
+  ────────────────────────────────── │                                                                                  
+                                     │ NEEDS YOU · PERMISSION                                                           
+  NEEDS YOU  1                       │                                                                                  
+  ❯ 001 Inspect the submit path and  │   EDIT SUBMIT-CAPTURE.TS                                                         
+        add retry handling           │   path    src/app.ts                                                             
+        ALPHA · permission needed    │                                                                                  
+                                     │   options Allow once · Reject                                                    
+                                     │           resumable — the same run continues the moment you allow                
+                                     │                                                                                  
+                                     │ TASK     1 run · 0 notes · open 0m                                               
+                                     │ ON       HHHHHHHHHHHHHHHHHHHHHHHHHHHH · ws                                       
+                                     │                                                                                  
+                                     │ TRACE    run 1 · 3 events                                                        
+                                     │   TOOL     EDIT S… src/app.ts                                              0:00  
+                                     │   CHANGE   CHANGED src/app.ts                                              0:00  
+                                     │   HALT     HALT    waiting on your permission                              0:00  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │                                                                                  
+                                     │ ───────────────────────────────────────────────────────────────────────────────  
+                                     │    ↵ ALLOW    x REJECT   c NOTE                                                  
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ✓ #001 opened · run 1 on ALPHA — Inspect the submit path and add retry handling                                       
+  n new task   j/k select   tab all   ? help   q detach   / search                                                      
+                                                                                                                        

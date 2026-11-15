@@ -11,11 +11,15 @@
 export const PALETTES = {
   dark: {
     bg: "#121923",
+    surface: "#121923",
+    sidebar: "#0f151d",
+    field: "#182230",
     title: "#f1f5fb",
     fg: "#c9d3e1",
     dim: "#a0adc0",
     ghost: "#8c9ab0",
-    heading: "#bcaee0",
+    heading: "#b5c3d4",
+    code: "#7dd9b6",
     rule: "#344158",
     accent: "#9bbcff",
     key: "#e8d19d",
@@ -25,17 +29,21 @@ export const PALETTES = {
   },
   light: {
     bg: "#f2f4f6",
+    surface: "#ffffff",
+    sidebar: "#f2f4f6",
+    field: "#ffffff",
     title: "#10161c",
     fg: "#2b3646",
     dim: "#4d5760",
-    heading: "#665080",
+    heading: "#2d4057",
+    code: "#1c6b4e",
     rule: "#c4ccd3",
     accent: "#1f4f9e",
     key: "#765220",
     ok: "#1c6b4e",
     bad: "#a33a1e",
     sel: "#dfe6ed",
-    ghost: "#5e6872"
+    ghost: "#56616d"
   }
 };
 

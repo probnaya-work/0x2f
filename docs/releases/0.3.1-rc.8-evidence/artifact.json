@@ -1,0 +1,13 @@
+{
+  "version": "0.3.1-rc.8",
+  "sha256": "c3bc75e58b8785f8688507b3dca97a9376f80a72fd111a564e7c7bc599b4947a",
+  "totalFiles": 87,
+  "sourceFiles": 84,
+  "installedMatch": true,
+  "changedSourceSinceRc7": [
+    "src/providers/acp.mjs",
+    "src/tui/model.mjs",
+    "src/tui/theme.mjs",
+    "src/tui/view.mjs"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "sourceFiles": 84,
+  "readmeMatches": true,
+  "allSourcesMatch": true,
+  "host": "darwin",
+  "architecture": "arm64",
+  "node": "v24.14.0"
+}

@@ -164,18 +164,23 @@ for (const replacement of ["newer run", "different worker PID"]) {
     const f = await fixture(t);
     const task = await f.start();
     await f.started();
-    let next = await f.runtime.store.findTask(task.id);
-    if (replacement === "newer run") {
-      next = { ...next, status: "ready", runs: [...next.runs, {
-        ...makeRunRecord({ run: 2, provider: "newer-provider", startedAt: new Date().toISOString() }),
-        outcome: "ready"
-      }], execution: { provider: "newer-provider", node: "local", workspace: "local" } };
-    } else {
-      next = { ...next, pid: process.pid };
-    }
-    await f.runtime.store.updateTask(next);
-    next = await f.runtime.store.findTask(task.id);
-    await f.runtime.store.writeText(path.join(f.runtime.store.taskDir(task.slug), "result.md"), "Result of current owner");
+    // Supersede through the same lock as real clients. The provider gate can
+    // open while its process-observed callback is still persisting metadata;
+    // an unlocked fixture write would race that legitimate earlier owner.
+    const next = await f.runtime.store.withTaskLock(task.slug, async () => {
+      let current = await f.runtime.store.findTask(task.id);
+      if (replacement === "newer run") {
+        current = { ...current, status: "ready", runs: [...current.runs, {
+          ...makeRunRecord({ run: 2, provider: "newer-provider", startedAt: new Date().toISOString() }),
+          outcome: "ready"
+        }], execution: { provider: "newer-provider", node: "local", workspace: "local" } };
+      } else {
+        current = { ...current, pid: process.pid };
+      }
+      await f.runtime.store.updateTask(current);
+      await f.runtime.store.writeText(path.join(f.runtime.store.taskDir(task.slug), "result.md"), "Result of current owner");
+      return f.runtime.store.findTask(task.id);
+    });
     const before = await f.runtime.store.readEvents(task.slug);
     await f.release();
     await waitFor(() => !pidAlive(task.pid), "superseded worker exit");

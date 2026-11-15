@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { WorkError } from './core/errors.mjs';
+import { terminalText } from './core/terminal.mjs';
 const exec = promisify(execFile);
 export async function hostIdentity() {
   let raw, source;
@@ -59,7 +60,7 @@ export async function runOnHost(base,id,args,{stdio='inherit'}={}) {
   const actual=await inspectHost(h);
   if(!args.length) args=['status'];
   const command=hostCommand(h,args);
-  if(stdio==='inherit') process.stdout.write(`Host ${h.id} · ${actual.label} · ${actual.id.slice(0,12)} · ${h.workspace}\n`);
+  if(stdio==='inherit') process.stdout.write(terminalText(`Host ${h.id} · ${actual.label} · ${actual.id.slice(0,12)} · ${h.workspace}\n`));
   return new Promise((resolve,reject)=>{
     const child=spawn('ssh',[...sshArgs(h),command],{stdio});
     child.once('error',reject);child.once('close',(code,signal)=>resolve({code:code??1,signal,host:actual}));

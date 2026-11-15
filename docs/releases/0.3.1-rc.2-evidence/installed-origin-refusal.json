@@ -1,0 +1,6 @@
+{
+  "installedVersion": "0.3.1-rc.2",
+  "invalidPairExit": 1,
+  "message": "Client origin is required — pass --client <https://client.example.com>; no hosted service is supplied.",
+  "stateUnchanged": true
+}

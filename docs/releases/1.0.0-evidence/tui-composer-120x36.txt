@@ -1,0 +1,40 @@
+# 0x2F TUI frame — composer-120x36
+# state: composer   mode: composer   terminal: 120x36
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                                                        
+  NEW TASK                                                                                                              
+  Nothing runs until you choose Start.                                                                                  
+                                                                                                                        
+  Provider    AL ALPHA    tab change                                                                                    
+                                                                                                                        
+  WHAT NEEDS DOING?                                                                                                     
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐                
+  │  Inspect the submit path and add retry handling                                                    │                
+  │  Use whole seconds for Retry-After.                                                                │                
+  │  Cover the offline queue.                                                                          │                
+  │                                                                                                    │                
+  │                                                                                                    │                
+  │                                                                                                    │                
+  └────────────────────────────────────────────────────────────────────────────────────────────────────┘                
+  106/16000 characters                                                                                                  
+                                                                                                                        
+   ↵ START    ctrl-n newline   F1 help   esc keep draft                                                                 
+  0x2F names the task from what you write.                                                                              
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  › Draft · nothing has started                                                                                         
+  ←/→ edit   Home/End line ends   PgUp/PgDn review   F1 help                                                            
+                                                                                                                        

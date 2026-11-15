@@ -1,0 +1,4 @@
+
+> 0x2f@1.0.0 check
+> node scripts/check.mjs
+

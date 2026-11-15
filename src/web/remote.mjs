@@ -172,7 +172,18 @@ export async function createRemoteClient(state, opts = {}) {
     async api(path, { method = "GET", body } = {}) {
       const mapped = mapPath(path, method);
       if (!mapped) throw new Error(`Unsupported remote path: ${path}`);
-      return sendCommand(mapped.op, { taskId: mapped.taskId, body: body ?? mapped.body });
+      // app.js uses the Fetch signature: POST bodies are JSON strings. The
+      // encrypted command contract carries the decoded object, just as the
+      // local HTTP server does after parsing a request body.
+      let payload = body ?? mapped.body;
+      if (typeof payload === "string") {
+        try { payload = JSON.parse(payload); }
+        catch { throw new Error("Invalid JSON request body; no remote command was sent."); }
+      }
+      if (payload !== undefined && (!payload || typeof payload !== "object" || Array.isArray(payload))) {
+        throw new Error("Remote request body must be a JSON object; no command was sent.");
+      }
+      return sendCommand(mapped.op, { taskId: mapped.taskId, body: payload });
     },
 
     // The initial/reconnect state pull (redacted projection from the Mac).

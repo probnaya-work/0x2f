@@ -1,0 +1,6 @@
+{
+  "rootInstall": 0,
+  "startAndPairingProbe": 0,
+  "offline": true,
+  "source": "complete checkout, npm ci at root"
+}

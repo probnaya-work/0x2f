@@ -36,10 +36,10 @@ function fakeNode() {
     displayName: "Fake node",
     resolveWorkspace: () => "/virtual/workspace",
     async startExecution() {
-      return 111;
+      return null;
     },
     async resumeExecution() {
-      return 222;
+      return null;
     },
     async cancelExecution() {}
   };
@@ -298,6 +298,10 @@ test("LAN hosts get the client + relay protocol only; the local API stays loopba
   const vendor = await lanReq(port, "/app/vendor/@noble/hashes/pbkdf2.js");
   assert.equal(vendor.status, 200);
   assert.ok(vendor.body.includes("pbkdf2"));
+  const worker = await lanReq(port, "/app/kdf-worker.mjs");
+  assert.equal(worker.status, 200);
+  assert.match(worker.headers["content-type"], /javascript/);
+  assert.match(worker.body, /pbkdf2/);
 
   // LAN host: the relay protocol is mounted (claim answers with the relay's
   // own error for an unknown token, not the local API's 404 shape).
@@ -402,7 +406,7 @@ test("LAN peers cannot obtain local credentials or call the local API with a for
     const local = await lanReq(port, "/api/tasks", { host: "127.0.0.1", headers: authHeaders() });
     assert.equal(local.status, 200, peer);
     const shell = await lanReq(port, "/", { host: "localhost" });
-    assert.ok(shell.headers["set-cookie"]?.some(cookie => cookie.includes("0x2f_auth=")), peer);
+    assert.ok(shell.headers["set-cookie"]?.some(cookie => /^0x2f_auth_\d+=/.test(cookie)), peer);
   }
 });
 

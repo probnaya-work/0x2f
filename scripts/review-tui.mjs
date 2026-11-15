@@ -20,6 +20,7 @@
 //   npm run review:tui -- --ai deepseek# force `dsh --profile headless`
 //   npm run review:tui -- --strict     # exit 1 when the AI reports findings too
 //   npm run review:tui -- --keep       # keep the scratch workspaces
+//   npm run review:tui -- --no-ai --cli /path/to/installed/0x2f/src/cli.mjs
 //
 // Reviewer contract (both backends): the frames are inlined in the prompt as
 // fixed-width text, the prompt restricts the review to the visual categories
@@ -47,8 +48,6 @@ const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const OUT_DIR = path.join(REPO, ".review");
 const FRAMES_DIR = path.join(OUT_DIR, "frames");
 
-const P = palette("dark"); // the frames are captured in the default dark theme
-
 // --- flags ----------------------------------------------------------------------
 
 function flag(name) {
@@ -61,6 +60,8 @@ function value(name, fallback) {
 const AI_MODE = flag("--no-ai") ? "none" : value("--ai", "auto");
 const STRICT = flag("--strict");
 const KEEP = flag("--keep");
+const REVIEW_CLI = value("--cli", null);
+const reviewTui = options => startTui({ ...options, ...(REVIEW_CLI ? { cli: path.resolve(REVIEW_CLI) } : {}) });
 
 // --- deterministic capture ------------------------------------------------------
 
@@ -110,6 +111,8 @@ const frames = [];
 const framesByDir = new Map();
 
 async function capture(session, id, { state, mode = "work" }) {
+  const theme = session.reviewTheme ?? "dark";
+  if (theme === "light" && !id.includes("-light-")) id = id.replace(/-(\d+x\d+)$/, "-light-$1");
   await sleep(160); // let the latest paint settle on the wire
   const term = session.term;
   // The frame's own painted dimensions. Rows can carry stale blank tails
@@ -133,8 +136,8 @@ async function capture(session, id, { state, mode = "work" }) {
   const scrubbed = rawRows.map(scrubRow);
 
   const txt = buildTxt(id, state, mode, cols, rows, scrubbed);
-  const svg = buildSvg(scrubbed, styleRows, cols, rows);
-  const frame = { id, state, mode, cols, rows, scrubbed, styleRows, txt, svg };
+  const svg = buildSvg(scrubbed, styleRows, cols, rows, palette(theme));
+  const frame = { id, state, mode, theme, cols, rows, scrubbed, styleRows, txt, svg };
   frames.push(frame);
   framesByDir.set(id, frame);
   await Promise.all([
@@ -167,7 +170,7 @@ function xml(s) {
 // Colored SVG at fixed cell metrics — a deterministic rendering of the same
 // cells a real terminal would show, independent of any developer's font or
 // screenshot tooling.
-function buildSvg(scrubbed, styleRows, cols, rows) {
+function buildSvg(scrubbed, styleRows, cols, rows, P) {
   const CW = 8;
   const CH = 15;
   const W = cols * CW;
@@ -241,9 +244,10 @@ async function quit(session) {
   if (outcome.code !== 0) throw new Error("the TUI exited " + outcome.code + " on q");
 }
 
-async function scenarioJourney() {
+async function scenarioJourney(light = false) {
   const { base, markers } = await makeWorkspace({ name: "ws" });
-  const session = await startTui({ workspace: base, cols: 120, rows: 36 });
+  const session = await reviewTui({ workspace: base, cols: 120, rows: 36, args: light ? ["tui", "--light"] : ["tui"] });
+  session.reviewTheme = light ? "light" : "dark";
   try {
     await session.waitForText(/0x2F/, { timeout: 15000, label: "the product frame" });
 
@@ -277,6 +281,19 @@ async function scenarioJourney() {
     session.press("enter");
     await session.waitForText(/result available · review/, { label: "the ready detail" });
     await capture(session, "ready-120x36", { state: "ready", mode: "work" });
+    for (const [cols, rows] of [[80, 24], [60, 18]]) {
+      session.resize(rows, cols);
+      await session.waitForFrame(rows, cols);
+      await capture(session, `ready-${cols}x${rows}`, { state: "ready", mode: "work" });
+    }
+    session.resize(36, 120);
+    await session.waitForFrame(36, 120);
+
+    session.press("r");
+    await session.waitForText(/WRITTEN RESULT · PROVIDER REPORT/);
+    await capture(session, "report-120x36", { state: "report", mode: "result" });
+    session.press("escape");
+    await session.waitForText(/ACCEPT/);
 
     // CHANGES / the real diff.
     session.press("d");
@@ -310,9 +327,10 @@ async function scenarioJourney() {
   }
 }
 
-async function scenarioFailed() {
+async function scenarioFailed(light = false) {
   const { base } = await makeWorkspace({ name: "ws", routingDefault: "bravo" });
-  const session = await startTui({ workspace: base, cols: 120, rows: 36 });
+  const session = await reviewTui({ workspace: base, cols: 120, rows: 36, args: light ? ["tui", "--light"] : ["tui"] });
+  session.reviewTheme = light ? "light" : "dark";
   try {
     await session.waitForText(/0x2F/, { timeout: 15000, label: "the product frame" });
     session.press("n");
@@ -373,10 +391,11 @@ async function seedOverview(base) {
   }
 }
 
-async function scenarioOverview() {
+async function scenarioOverview(light = false) {
   const { base } = await makeWorkspace({ name: "ws", providerRoles: {}, routingDefault: "auto" });
   await seedOverview(base);
-  const session = await startTui({ workspace: base, cols: 120, rows: 36 });
+  const session = await reviewTui({ workspace: base, cols: 120, rows: 36, args: light ? ["tui", "--light"] : ["tui"] });
+  session.reviewTheme = light ? "light" : "dark";
   try {
     await session.waitForText(/0x2F/, { timeout: 15000, label: "the product frame" });
     await session.waitForText(/multi-region cache strategy/, { label: "the selected task" });
@@ -417,8 +436,9 @@ async function scenarioOverview() {
 
 async function scenarioDrafts(light = false) {
   const { base } = await makeWorkspace({ name: "ws" });
-  const session = await startTui({ workspace: base, cols: 80, rows: 24,
+  const session = await reviewTui({ workspace: base, cols: 80, rows: 24,
     args: light ? ["tui", "--light"] : ["tui"] });
+  session.reviewTheme = light ? "light" : "dark";
   try {
     await session.waitForText(/no task selected/, { timeout: 15000 });
     await session.press("n");
@@ -431,6 +451,11 @@ async function scenarioDrafts(light = false) {
     await session.write("\x1b[200~" + request + "\x1b[201~");
     await session.waitForText(/FINAL AUDIT REQUIREMENT/);
     await capture(session, light ? "composer-long-light-80x24" : "composer-long-80x24", { state: "composer", mode: "composer" });
+    session.resize(18, 60);
+    await session.waitForFrame(18, 60);
+    await capture(session, "composer-long-60x18", { state: "composer", mode: "composer" });
+    session.resize(24, 80);
+    await session.waitForFrame(24, 80);
     if (!light) {
       for (let i = 0; i < 5; i++) await session.write("\x1b[5~");
       await session.waitForText(/FIRST AUDIT REQUIREMENT/);
@@ -464,6 +489,10 @@ const EXPECT = {
   "working-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["WORKING", "executing"], focus: 1 },
   "needs-you-permission-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · PERMISSION", "ALLOW", "REJECT", "src/app.ts"], focus: 1 },
   "ready-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["result available · review", "ACCEPT", "SEND BACK"], focus: 1 },
+  "report-120x36": { cols: 120, rows: 36, mode: "result", landmarks: ["WRITTEN RESULT · PROVIDER REPORT", "Added retry-with-backoff", "npm test -- submit", "esc back"], focus: 0 },
+  "ready-80x24": { cols: 80, rows: 24, mode: "work", landmarks: ["RESULT", "ACCEPT", "SEND BACK"], focus: 1 },
+  "ready-60x18": { cols: 60, rows: 18, mode: "work", landmarks: ["RESULT", "ACCEPT", "SEND BACK"], focus: 1 },
+  "composer-long-60x18": { cols: 60, rows: 18, mode: "composer", landmarks: ["FINAL AUDIT REQUIREMENT", "START", "esc keep draft"], focus: 0 },
   "diff-120x36": { cols: 120, rows: 36, mode: "diff", landmarks: ["CHANGES", "SAVED RUN CHANGE EVIDENCE", "retry with backoff"], focus: 0 },
   "decision-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["NEEDS YOU · DECISION", "ANSWER & CONTINUE", "503 policy"], focus: 1 },
   "failed-auth-120x36": { cols: 120, rows: 36, mode: "work", landmarks: ["FAILED", "authentication is no longer valid", "RETRY"], focus: 1 },
@@ -729,6 +758,7 @@ async function writeReport({ reviewer, aiStatus, aiNote, aiRaw, localFailures, a
     aiStatus,
     frames: frames.map(frame => ({
       id: frame.id,
+      theme: frame.theme,
       state: frame.state,
       mode: frame.mode,
       cols: frame.cols,
@@ -755,13 +785,13 @@ async function main() {
     console.log("0x2F TUI visual review — capturing deterministic frames");
     console.log("frames →", FRAMES_DIR);
 
-    const journey = await scenarioJourney();
-    if (journey.base) bases.push(journey.base);
-    const failed = await scenarioFailed();
-    if (failed.base) bases.push(failed.base);
-    const overview = await scenarioOverview();
-    if (overview.base) bases.push(overview.base);
     for (const light of [false, true]) {
+      const journey = await scenarioJourney(light);
+      if (journey.base) bases.push(journey.base);
+      const failed = await scenarioFailed(light);
+      if (failed.base) bases.push(failed.base);
+      const overview = await scenarioOverview(light);
+      if (overview.base) bases.push(overview.base);
       const drafts = await scenarioDrafts(light);
       if (drafts.base) bases.push(drafts.base);
     }
@@ -774,6 +804,7 @@ async function main() {
         {
           frames: frames.map(frame => ({
             id: frame.id,
+            theme: frame.theme,
             state: frame.state,
             mode: frame.mode,
             cols: frame.cols,
@@ -789,7 +820,7 @@ async function main() {
 
     // Local checks.
     for (const frame of frames) {
-      const expect = EXPECT[frame.id] ?? { landmarks: [], focus: -1 };
+      const expect = EXPECT[frame.id] ?? EXPECT[frame.id.replace("-light-", "-")] ?? { landmarks: [], focus: -1 };
       frame.checks = runChecks(frame, expect);
       frame.verdict = frame.checks.length ? "FAIL" : "PASS";
       frame.aiVerdict = null;

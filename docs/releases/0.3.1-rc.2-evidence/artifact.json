@@ -1,0 +1,15 @@
+{
+  "version": "0.3.1-rc.2",
+  "sha256": "e9f2ba531995fd9b2712d8c84ef23284f1f1a34a3f9cd3808109bf9fc9848115",
+  "files": 85,
+  "sourceFiles": 82,
+  "installedMatch": true,
+  "changedSinceRc1": [
+    "package.json",
+    "README.md",
+    "src/providers/acp.mjs",
+    "src/cli.mjs",
+    "src/relay/defaults.mjs",
+    "src/relay/pair.mjs"
+  ]
+}

@@ -1,0 +1,31 @@
+✔ encrypted cancellation binds the displayed attempt and refuses stale or missing nonces (155.663209ms)
+✔ the Mac authenticates outbound; unpaired and mismatched hellos are rejected (2.578ms)
+✔ a pairing token is one-time: a second claim fails (120.874ms)
+✔ an expired pairing token cannot be claimed (2.135209ms)
+✔ the phone pairs end-to-end and pulls a redacted snapshot (118.001542ms)
+✔ creating a Task through the encrypted channel starts it on the Mac's node (122.760834ms)
+✔ redacted encrypted events reach the phone; sensitive tool inputs stay on the Mac (136.107667ms)
+✔ ALLOW / REJECT / NOTE / ACCEPT work remotely through the shared actions (126.5385ms)
+✔ remote permission commands refuse stale or missing displayed occurrence IDs (146.424917ms)
+✔ a duplicate requestId returns the cached acknowledgement and never executes twice (121.580042ms)
+✔ the actual browser transport decodes serialized JSON bodies for create, answer and notes (127.012708ms)
+✔ encrypted remote ALLOW cannot bypass insufficient scope, even with a fresh occurrence (126.600084ms)
+✔ encrypted mutation acknowledgements and their retries never export hidden permission input (122.7325ms)
+✔ the Mac is offline: status reports offline and commands answer 503 — never queued (116.490875ms)
+✔ a relay restart loses no session and keeps the phone paired (1290.946208ms)
+✔ the relay holds no task content — state and state.json are content-free (222.612875ms)
+✔ the relay is a broker: it serves no client or pairing page (114.924ms)
+✔ pairing claims and command forwarding are rate limited (3.790333ms)
+0x2F UI: http://127.0.0.1:55320
+✔ the local server reports mode 'local' — the client keeps its local behavior (16.255041ms)
+✔ a remote command whose response is lost settles with an honest error (never hangs forever) (258.691459ms)
+✔ the timeout error is surfaced, not silently retried into a double action (601.859041ms)
+✔ an offline mutating action fails immediately and is never replayed after reconnect (48.025667ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3289.873875

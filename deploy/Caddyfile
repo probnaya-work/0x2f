@@ -9,8 +9,7 @@
 #
 # Replace both hostnames with your own, then point the CLI at them:
 #
-#   export 0X2F_RELAY_URL=https://relay.your.domain
-#   export 0X2F_CLIENT_ORIGIN=https://app.your.domain
+#   2f pair --relay https://relay.your.domain --client https://app.your.domain
 #
 # Caddy terminates TLS (Let's Encrypt) and serves the static client; the relay
 # process only ever sees plain HTTP on 127.0.0.1. The Mac connects outbound,
@@ -19,6 +18,13 @@
 app.0x2f.dev {
 	root * /srv/0x2f/client
 	encode gzip
+	# The CLI prints /pair; the bundle stores that page as pair.html.
+	rewrite /pair /pair.html
+	header {
+		Cache-Control "no-store"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
 	file_server
 }
 

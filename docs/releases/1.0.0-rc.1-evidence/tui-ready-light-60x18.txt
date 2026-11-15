@@ -1,0 +1,22 @@
+# 0x2F TUI frame — ready-light-60x18
+# state: ready   mode: work   terminal: 60x18
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                            
+  0x2F ~/ws               │ #001  Inspect the submit pat…   
+  ! 0  ✕ 0  ✓ 1  ▶ 0  · 0 │ ALPHA · run 1 · 0:00            
+  ─────────────────────── │                                 
+                          │ RESULT   r full report          
+  READY  1                │                                 
+  ❯ 001 Inspect the       │   Added retry-with-backoff      
+        submit path and … │   to the submit path; honors    
+        ALPHA · run 1     │   Retry-After in whole          
+                          │   seconds.                      
+                          │                                 
+                          │   ────────  8/19 · J K          
+                          │ ──────────────────────────────  
+                          │    ↵ ACCEPT    x SEND BACK      
+  ────────────────────────────────────────────────────────  
+  ✓ allowed · #001 continues in the same run                
+  n new task   j/k select   tab all   ? help   q detach     
+                                                            

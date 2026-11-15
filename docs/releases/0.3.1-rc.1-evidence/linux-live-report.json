@@ -1,0 +1,106 @@
+{
+  "platform": "linux",
+  "arch": "x64",
+  "node": "v26.13.0",
+  "version": "0.3.1-rc.1",
+  "checks": {
+    "codex": {
+      "status": "ready",
+      "seconds": 23.849,
+      "checks": [
+        {
+          "id": "arithmetic",
+          "argv": [
+            "/home/bogart/.local/share/0x2f/runtime/bin/node",
+            "check.mjs"
+          ],
+          "cwd": "/tmp/0x2f-audit-20261114/live-first-use/.work/worktrees/001-fix-add-in-sum-mjs-so-node-check-mjs-passes",
+          "startedAt": "2026-11-14T14:47:17.064Z",
+          "durationMs": 34,
+          "environment": {
+            "platform": "linux",
+            "node": "v26.13.0",
+            "keys": [
+              "PATH",
+              "HOME",
+              "LANG",
+              "TMPDIR"
+            ],
+            "home": "private empty check home"
+          },
+          "truncated": false,
+          "status": "passed",
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "fee8943fe227613f9c6a1f312dcb441a556ba53debe656c48d180dab932f8fdf",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifacts": "checks/arithmetic/",
+          "authority": "explicit project configuration; local OS user; not provider sandbox"
+        }
+      ]
+    },
+    "handoff": {
+      "status": "ready",
+      "runs": [
+        {
+          "run": 1,
+          "provider": "codex",
+          "outcome": "ready"
+        },
+        {
+          "run": 2,
+          "provider": "opencode",
+          "outcome": "ready"
+        }
+      ],
+      "checks": [
+        {
+          "id": "arithmetic",
+          "argv": [
+            "/home/bogart/.local/share/0x2f/runtime/bin/node",
+            "check.mjs"
+          ],
+          "cwd": "/tmp/0x2f-audit-20261114/live-first-use/.work/worktrees/001-fix-add-in-sum-mjs-so-node-check-mjs-passes",
+          "startedAt": "2026-11-14T14:47:29.623Z",
+          "durationMs": 52,
+          "environment": {
+            "platform": "linux",
+            "node": "v26.13.0",
+            "keys": [
+              "PATH",
+              "HOME",
+              "LANG",
+              "TMPDIR"
+            ],
+            "home": "private empty check home"
+          },
+          "truncated": false,
+          "status": "passed",
+          "exitCode": 0,
+          "signal": null,
+          "stdoutSha256": "fee8943fe227613f9c6a1f312dcb441a556ba53debe656c48d180dab932f8fdf",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifacts": "checks/arithmetic/",
+          "authority": "explicit project configuration; local OS user; not provider sandbox"
+        }
+      ]
+    },
+    "applied": "arithmetic check passed",
+    "installedApi": {
+      "unauthenticated": 401,
+      "authenticated": 200
+    },
+    "cancellation": {
+      "status": "failed",
+      "failure": {
+        "kind": "cancelled"
+      },
+      "runs": 1
+    },
+    "restore": {
+      "readable": true,
+      "remoteDisabled": true
+    }
+  },
+  "result": "passed"
+}

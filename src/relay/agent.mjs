@@ -60,7 +60,7 @@ const CONFIG_POLL_MS = 2000;
 const TS_WINDOW_MS = 5 * 60 * 1000; // commands older than this are stale
 const ACK_MAX = 1000; // bounded ack cache
 const ACK_TTL_MS = 24 * 60 * 60 * 1000; // retries/duplicates within a day
-const ACK_SAVE_DEBOUNCE_MS = 500;
+const READ_OPS = new Set(["list", "get", "getRun", "providers", "routing", "snapshot"]);
 
 const SNAPSHOT_EVENTS_PER_TASK = 200; // recent remote events in a snapshot
 
@@ -105,7 +105,7 @@ export function createRelayAgent({
   let seenConfig = ""; // connection-relevant config fingerprint
   let sessionKey = null; // CryptoKey derived from code + token (AES-GCM)
   let ackCache = null; // Map requestId -> { ack, at } (persisted)
-  let ackSaveTimer = null;
+  let ackLoadError = null;
   let ackSaveChain = Promise.resolve();
   let ackLoad = Promise.resolve();
   let commandChain = Promise.resolve();
@@ -119,53 +119,37 @@ export function createRelayAgent({
   async function loadAckCache() {
     try {
       const raw = JSON.parse(await fs.readFile(ackCachePath(), "utf8"));
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid command receipt map");
       const map = new Map();
       for (const [id, entry] of Object.entries(raw ?? {})) {
+        if (!id || !entry || !Number.isFinite(entry.at) || typeof entry.ack?.ok !== "boolean" ||
+            !Number.isInteger(entry.ack?.status)) throw new Error("Invalid command receipt");
         if (entry && typeof entry.at === "number" && now() - entry.at <= ACK_TTL_MS) {
           map.set(id, entry);
         }
       }
       return map;
-    } catch {
+    } catch (err) {
+      if (err.code !== "ENOENT") {
+        ackLoadError = "Remote command receipts could not be read. Inspect relay-acks.json on the host before authorizing more remote actions.";
+        error(`relay: ${ackLoadError}`);
+      }
       return new Map();
     }
   }
 
   function saveAckCache() {
-    ackSaveChain = ackSaveChain.then(persistAckCache);
+    ackSaveChain = ackSaveChain.then(persistAckCache, persistAckCache);
     return ackSaveChain;
   }
 
   async function persistAckCache() {
-    try {
-      const obj = Object.fromEntries([...ackCache.entries()].map(([id, e]) => [id, e]));
-      await fs.mkdir(path.dirname(ackCachePath()), { recursive: true });
-      await fs.writeFile(ackCachePath(), JSON.stringify(obj) + "\n", {
-        encoding: "utf8",
-        mode: 0o600
-      });
-      await fs.chmod(ackCachePath(), 0o600);
-    } catch (err) {
-      error(`relay: could not persist the ack cache: ${err.message}`);
-    }
-  }
-
-  function scheduleAckSave() {
-    if (stopped || ackSaveTimer) return;
-    ackSaveTimer = setTimeout(() => {
-      ackSaveTimer = null;
-      saveAckCache();
-    }, ACK_SAVE_DEBOUNCE_MS);
+    const obj = Object.fromEntries([...ackCache.entries()].map(([id, e]) => [id, e]));
+    await writeJson(ackCachePath(), obj);
   }
 
   function rememberAck(requestId, ack) {
     ackCache.set(requestId, { ack, at: now() });
-    if (ackCache.size > ACK_MAX) {
-      // Drop the oldest entries beyond the bound.
-      const oldest = [...ackCache.entries()].sort((a, b) => a[1].at - b[1].at);
-      for (const [id] of oldest.slice(0, ackCache.size - ACK_MAX)) ackCache.delete(id);
-    }
-    scheduleAckSave();
   }
 
   // --- config ---------------------------------------------------------------
@@ -482,6 +466,7 @@ export function createRelayAgent({
 
   function queueCommand(frame, plaintext) {
     const { requestId, op, taskId, body, ts } = plaintext;
+    const generation = cfg?.token;
     if (!confirmed()) {
       // A command arriving while the pairing is not confirmed used to be
       // silently dropped — the phone's request then hung until the relay's
@@ -501,30 +486,53 @@ export function createRelayAgent({
     }
     if (frame.from !== cfg.phoneId) return; // envelope not from our phone
 
-    const cached = ackCache.get(requestId);
-    if (cached) {
-      // Duplicate delivery (retry, double tap, reconnect) — the action already
-      // ran; answer with the stored acknowledgement, never execute again.
-      sendEnvelope({ cmd: "ack", ...projectAck(cached.ack, runtime.store.base) }, requestId);
-      return;
-    }
-    if (typeof ts !== "number" || Math.abs(now() - ts) > TS_WINDOW_MS) {
-      // A command with an old timestamp cannot be a fresh legitimate request —
-      // this is the replay bound once the ack cache evicts the requestId.
-      sendEnvelope(
-        { cmd: "ack", ok: false, status: 400, error: "Command is stale or replayed." },
-        requestId
-      );
-      return;
-    }
     commandChain = commandChain
       .then(async () => {
+        // Authorization and replay admission must be checked inside the serial
+        // executor: a compromised relay can deliver duplicates while an earlier
+        // command is still awaiting its action or disk write.
+        const live = await loadConfig();
+        if (stopped || !confirmed() || cfg.token !== generation ||
+            live?.token !== generation || live?.phoneId !== frame.from) {
+          throw new WorkError("Remote access changed; this queued command was refused.", 401);
+        }
+        const prior = ackCache.get(requestId);
+        if (prior) {
+          await sendEnvelope({ cmd: "ack", ...projectAck(prior.ack, runtime.store.base) }, requestId);
+          return;
+        }
+        if (!Number.isFinite(ts) || Math.abs(now() - ts) > TS_WINDOW_MS) throw new WorkError("Command is stale or replayed.", 400);
+        const mutating = !READ_OPS.has(op);
+        if (mutating) {
+          if (ackLoadError) throw new WorkError(ackLoadError, 409);
+          for (const [id, entry] of ackCache) if (now() - entry.at > ACK_TTL_MS) ackCache.delete(id);
+          // Never evict a fresh mutation receipt to make room for a replay.
+          if (ackCache.size >= ACK_MAX) throw new WorkError("Remote command receipt capacity reached; inspect on the computer and retry later.", 503);
+          rememberAck(requestId, {
+            ok: false, status: 409,
+            error: "A previous command with this request ID may already have executed. Inspect the task on the host before starting another action; this request will not execute again."
+          });
+          // Fail closed on write failure. If the process dies after this write
+          // but before the final ack, a restart preserves the uncertain receipt.
+          await saveAckCache();
+        }
         const result = projectAck(await runCommand({ op, taskId, body }), runtime.store.base);
-        rememberAck(requestId, result);
+        if (mutating) {
+          const uncertain = ackCache.get(requestId);
+          rememberAck(requestId, result);
+          try { await saveAckCache(); }
+          catch (error) {
+            // The effect may have happened, but the final receipt did not
+            // commit. In-process retries must keep the same uncertain state
+            // that a restarted host would read, rather than claim success.
+            ackCache.set(requestId, uncertain);
+            throw error;
+          }
+        }
         await sendEnvelope({ cmd: "ack", ...result }, requestId);
       })
       .catch(async error => {
-        const result = { ok: false, status: 500, error: String(error?.message ?? error) };
+        const result = { ok: false, status: error.status ?? 500, error: String(error?.message ?? error) };
         await sendEnvelope({ cmd: "ack", ...result }, requestId);
       });
   }
@@ -763,10 +771,6 @@ export function createRelayAgent({
     clearInterval(configTimer);
     clearInterval(keepaliveTimer);
     clearTimeout(reconnectTimer);
-    if (ackSaveTimer) {
-      clearTimeout(ackSaveTimer);
-      ackSaveTimer = null;
-    }
     if (unsubscribe) unsubscribe();
     const socket = ws;
     const disconnected = !socket || socket.readyState === WebSocket.CLOSED
@@ -788,7 +792,7 @@ export function createRelayAgent({
       await Promise.allSettled([...pendingFrames]);
       await commandChain;
       await ackLoad;
-      if (ackCache) await saveAckCache();
+      if (ackCache && !ackLoadError) await saveAckCache();
       await disconnected;
     })();
     return stopPromise;

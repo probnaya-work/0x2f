@@ -1,0 +1,27 @@
+
+> 0x2f@0.3.1-rc.2 verify:phone
+> node scripts/verify-phone.mjs --local-tls
+
+Workspace: /var/folders/f8/tlxp54cx22ngqflyh25cvvkc0000gn/T/0x2f-verify-6GVkai/ws
+Runtime port: 4343
+Local relay on :65263
+  relay:  https://localhost:65264 (TLS proxy -> :65263)
+  client: https://localhost:65265
+
+[1] Running `2f pair` against the public endpoints…
+  pairing URL: https://localhost:65265/pair?relay=https%3A%2F%2Flocalhost%3A65264&token=REDACTED&device=REDACTED
+[2] Driving the phone-side client through the public relay…
+  paired; Mac is online
+  task #1 created; first event: task.created
+  snapshot reflects the task — E2E command/content path verified
+
+[3] Fresh pairing for your physical phone…
+Open this URL on your phone and type the code (one-time):
+  https://localhost:65265/pair?relay=https%3A%2F%2Flocalhost%3A65264&token=REDACTED&device=REDACTED
+  Pairing code:  REDACTED
+
+[4] Revoking with `2f pair --off`…
+  phone session dead at the relay. ✓
+
+Local TLS protocol verification passed with synthetic task execution.
+HTTPS pairing, E2E commands, encrypted events and revocation passed; physical device behavior requires a separate run.

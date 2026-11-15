@@ -1,0 +1,11 @@
+{
+  "candidate": "1.0.0",
+  "artifactSha256": "cb0e32d079df52107f27fcd897790e3fd001060520a6a50e6fe800d3be58447f",
+  "runtimeInstalled": false,
+  "physicalObservation": "NOT RUN",
+  "reason": "Owner reported the phone unavailable on 2026-11-15; earlier visual approval retains its original candidate attribution",
+  "browserVersion": "not recorded",
+  "android": "NOT RUN",
+  "operatedHttps": "NOT RUN",
+  "updatedAt": "2026-11-15"
+}

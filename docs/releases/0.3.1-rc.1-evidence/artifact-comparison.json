@@ -1,0 +1,39 @@
+{
+  "publishedVersion": "0.3.0",
+  "publishedSha256": "7cf66322908f446fcd777c62664b425e000a9a752e50d8cbc3e5e84f4285c1be",
+  "candidateVersion": "0.3.1-rc.1",
+  "candidateSha256": "d0ecef174828e7bf27953525854fcb49d60eb471d69350facdc805a4d4f95962",
+  "publishedFiles": 83,
+  "candidateFiles": 85,
+  "changed": [
+    "README.md",
+    "package.json",
+    "src/cli.mjs",
+    "src/hosts.mjs",
+    "src/providers/acp.mjs",
+    "src/providers/manifests.mjs",
+    "src/recover.mjs",
+    "src/relay/agent.mjs",
+    "src/render.mjs",
+    "src/runtime.mjs",
+    "src/serve.mjs",
+    "src/server.mjs",
+    "src/tui/app.mjs",
+    "src/tui/index.mjs",
+    "src/tui/keys.mjs",
+    "src/tui/model.mjs",
+    "src/tui/screen.mjs",
+    "src/tui/state.mjs",
+    "src/tui/theme.mjs",
+    "src/tui/view.mjs",
+    "src/web/app.js",
+    "src/web/ledger.mjs",
+    "src/web/remote.mjs"
+  ],
+  "added": [
+    "src/core/terminal.mjs",
+    "src/tui/editor.mjs"
+  ],
+  "signaturesPresent": true,
+  "attestationsPresent": false
+}

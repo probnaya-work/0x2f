@@ -28,6 +28,7 @@ import fsSync from "node:fs";
 import path from "node:path";
 import { createAcpProvider } from "./acp.mjs";
 import { createCommandProvider } from "./command.mjs";
+import { terminalText } from "../core/terminal.mjs";
 
 export const KNOWN_PLACEHOLDERS = ["{prompt}", "{workspace}"];
 
@@ -94,7 +95,7 @@ export function loadManifestProviders(base, { nativeIds = [] } = {}) {
     }
     seen.add(manifest.id);
     const warning = providerTrustWarning(manifest);
-    if (warning) console.warn(`0x2F: ${warning}`);
+    if (warning) console.warn(terminalText(`0x2F: ${warning}`));
     providers.push(
       manifest.transport === "acp"
         ? createAcpProvider(manifest)

@@ -7,10 +7,12 @@
 > with `2f pair --relay https://… --client https://…` or the
 > `0X2F_RELAY_URL` / `0X2F_CLIENT_ORIGIN` env vars.
 
-This is the minimal deployment that makes **`2f pair` just work on a real
-phone**: the command prints a phone-openable **https** URL and a one-time
-pairing code, no LAN IPs, no Caddy/nginx knowledge, no manual setup on the
-user's side.
+This is an **operator-managed integration**, not a hosted 0x2F service.
+The example `*.0x2f.dev` names are placeholders; configure two origins you
+control. The local TLS protocol has been tested, but an operated public
+deployment and physical-phone interruptions need separate qualification.
+After setup, `2f pair --relay … --client …` prints an HTTPS URL and a
+one-time pairing code for the phone.
 
 ```text
 Phone browser ── https ──► app.your.domain (client origin: static web client)
@@ -48,24 +50,33 @@ E2E key derivation, session/revocation, and `pair --off`.
    page served by the client origin (not the relay); the key is derived
    in-browser; the relay routes AES-GCM ciphertext and correlates requestIds
    only. A compromised relay still cannot read or forge.
-2. **HTTPS everywhere.** Both defaults are `https://`. The Mac's
+2. **HTTPS for remote access.** Both origins must use `https://`. The Mac's
    `deviceSecret` crosses TLS only. Plain `http://` remains blocked for
-   anything but explicit loopback (`validateRelayUrl`) — insecure LAN HTTP is
-   not re-enabled.
+   anything but explicit loopback and private-LAN pairing (`validateRelayUrl`).
+   Same-Wi-Fi pairing is a separate trusted-network HTTP mode.
 3. **The relay stays private.** It is not part of the npm package
    (`package.json` ships only `src/`); it is deployed separately, behind TLS.
 4. **Revocation intact.** `2f pair --off` and credential rotation hit the
    relay over the network exactly as before; sessions still expire on their
    own (30 days) and re-pairing still retires the previous phone.
 5. **The default flow stays `2f pair`.** Plain `2f pair` pairs over the local
-   network (LAN-first); the hosted endpoints (`src/relay/defaults.mjs`) are
-   used when `--relay` / `--client` or the `0X2F_RELAY_URL` /
-   `0X2F_CLIENT_ORIGIN` env vars are given.
+   network (LAN-first). Hosted pairing requires both operator-configured
+   origins: flags override environment, which overrides saved hosted config.
+   The client and relay origins must differ; the client must use HTTPS except
+   for loopback development. No example service address is substituted.
 
 ## Deploy (≈5 minutes, one small VPS)
 
-1. **Build the client bundle** and upload it to your static host (or the
-   VPS):
+1. **Install from the complete matching repository checkout**, not just the
+   `relay/` directory. The relay entry imports `src/relay/server.mjs`, which
+   resolves dependencies from the repository root:
+
+   ```bash
+   # In the complete 0x2F checkout, on the deployment host:
+   npm ci --ignore-scripts
+   ```
+
+   **Build the client bundle** and upload it to your static host (or the VPS):
 
    ```bash
    node deploy/client/build.mjs        # -> deploy/client/dist/
@@ -73,12 +84,16 @@ E2E key derivation, session/revocation, and `pair --off`.
    # self-host:   scp -r deploy/client/dist root@vps:/srv/0x2f/client
    ```
 
-2. **Run the relay** on the VPS (install `relay/`'s deps first): pick one of
+   Serve `/pair` as `pair.html` without changing the query string, and serve
+   `.mjs` files as JavaScript. The supplied Caddyfile includes this rewrite;
+   the bundle includes Netlify `_redirects` and `_headers`. Other static hosts
+   need equivalent rules. Uploading files alone does not configure their routes.
+
+2. **Run the relay** on the VPS from that checkout: pick one of
 
    ```bash
    # systemd (deploy/relay.service) + Caddy, or manually:
-   cd relay && npm install
-   node server.mjs --port 8080 --host 127.0.0.1 --data /srv/0x2f/relay/state.json
+   node relay/server.mjs --port 8080 --host 127.0.0.1 --data /srv/0x2f/relay/state.json
    ```
 
 3. **TLS**: edit `deploy/Caddyfile` (replace `app.0x2f.dev` /
@@ -87,16 +102,27 @@ E2E key derivation, session/revocation, and `pair --off`.
    The static client is served by Caddy; the relay process only ever sees
    `127.0.0.1`.
 
-4. **Point the CLI at your deployment** (per machine, or bake your hostnames
-   into `src/relay/defaults.mjs`):
+4. **Point the CLI at your deployment**:
 
    ```bash
-   export 0X2F_RELAY_URL=https://relay.your.domain
-   export 0X2F_CLIENT_ORIGIN=https://app.your.domain
-   2f pair
+   2f pair --relay https://relay.your.domain --client https://app.your.domain
    ```
 
    Open the printed URL on your phone, type the code — done. Nothing else.
+
+   The legacy environment names start with a digit, so shells reject `export`
+   or assignment syntax for them. If needed, use `env` for one invocation:
+
+   ```bash
+   env 0X2F_RELAY_URL=https://relay.your.domain \
+       0X2F_CLIENT_ORIGIN=https://app.your.domain 2f pair
+   ```
+
+Before offering the deployment to users, check `/pair?token=synthetic` returns
+HTML (200), all imported modules return JavaScript, and the client and relay
+have different origins. Then run the physical-phone checklist in
+[`docs/releases/mobile-qualification.md`](../docs/releases/mobile-qualification.md).
+Do not retain pairing query strings or authorization headers in access logs.
 
 ## Verify without a phone (or with one)
 
@@ -109,6 +135,16 @@ runs (`--manual` waits until the phone claims it). If the free tunnel
 services are rate-limited or unavailable, `--local-tls` runs the identical
 flow deterministically over local https (self-signed cert, two distinct
 origins) — the same code paths minus the public DNS leg.
+
+This protocol fixture serves routes itself; it does not validate a static
+host's rewrite configuration. To exercise the supplied Caddyfile locally:
+
+```bash
+CADDY_BIN=/absolute/path/to/caddy node --test test/hosted-deployment.test.mjs
+```
+
+That test binds loopback HTTP ports only and leaves the system trust store
+unchanged. Neither automated fixture establishes physical-device qualification.
 
 ## Running the runtime on a dedicated always-on host
 

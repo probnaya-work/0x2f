@@ -240,11 +240,12 @@ export function createApp(runtime, opts = {}) {
     flash: setFlash,
     // One key press: fold it through the pure keymap, then execute whatever
     // intent it produced.
-    async key(key) {
+    async key(key, size = {}) {
       if (!model) return null;
       const previous = state;
       const result = apply(state, key, {
         tasks: model.tasks,
+        cols: size.cols,
         providerOrder,
         lookup: model.lookup
       });

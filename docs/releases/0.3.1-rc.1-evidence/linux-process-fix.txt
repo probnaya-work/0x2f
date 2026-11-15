@@ -1,0 +1,34 @@
+✔ E2E: codex saved-session resume preserves its id, prior context and workspace-write sandbox (1544.389877ms)
+✔ E2E: `2f providers` detects codex and a task runs to READY through the real CLI (1608.911569ms)
+✔ E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY works (10329.372545ms)
+✔ E2E: command_execution is recorded honestly as tool activity, never as file.changed (5157.111125ms)
+✔ E2E: a codex decision needs_you is answered, and a rerun continues the task without losing context (12445.271248ms)
+✔ E2E: the same task can switch away from codex to another provider without losing task context (1635.926536ms)
+✔ Linux unreaped zombies cannot keep an otherwise empty execution group active (26.03732ms)
+✔ recovery refuses a rerun while an orphan command still writes, then allows it after the group exits (2828.269803ms)
+✔ a terminal worker can drain its POSIX group before normal rerun admission (444.998967ms)
+✔ a saved-session permission cannot resume while the previous group still owns a descendant (2696.10641ms)
+✔ retry waits for a short-lived descendant after the terminal worker itself has exited (759.414157ms)
+✔ pidAlive: signal-0 existence probe with EPERM treated as alive (1.926302ms)
+✔ an orphaned working run is failed with the crashed classification, preserving history and session (24.388712ms)
+✔ an interrupted run's completedAt/durationMs anchor to the last event the worker persisted, not the sweep time (8.018487ms)
+✔ a task with no recorded pid is also recovered (worker died before pid persisted) (5.589626ms)
+✔ a working task whose worker is alive is never touched (3.198213ms)
+✔ completed tasks and non-live human stops are left alone even with a dead pid (7.607943ms)
+✔ a dead live-permission worker is recovered while its saved session survives (5.122003ms)
+✔ a live-permission worker that is still alive is never recovered (4.320017ms)
+✔ recovery finalizes a closed task's interrupted run without reopening the task (4.62887ms)
+✔ recovery merges fresh input and skips a replaced worker from an older snapshot (4.570377ms)
+✔ concurrent recovery sweeps finalize an interrupted run only once (10.153481ms)
+✔ legacy tasks (no run records) are recovered without crashing (4.961992ms)
+✔ failInterruptedRun with no startedAt writes no duration (6.054834ms)
+✔ a recovered task can be rerun normally (the working guard no longer blocks it) (17.575057ms)
+✔ recovery is idempotent: a second sweep leaves the failed task alone (7.633767ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32829.220787

@@ -132,7 +132,7 @@ function haltOf(task, base) {
         "a decision is not resumable in place — your answer is recorded on the task and the next run continues with it"
     };
   }
-  const path = relativePath(base, blocked.file);
+  const path = relativePath(task.checkout?.path ?? base, blocked.file);
   const description =
     blocked.description && blocked.description !== blocked.tool
       ? String(blocked.description)

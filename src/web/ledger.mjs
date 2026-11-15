@@ -133,6 +133,15 @@ const FENCE_RE = /^```(\S*)\s*$/;
 const HEADING_RE = /^(#{1,6})\s+(.+)$/;
 const BULLET_RE = /^\s*[-*+]\s+(.+)$/;
 const ORDERED_RE = /^\s*\d+[.)]\s+(.+)$/;
+// A bare, single-line check often arrives without Markdown from a provider.
+// Give common command invocations code typography; never interpret or run it.
+const COMMAND_RE = /^(?:\$\s+)?(?:npm\s+(?:test|run|ci|install|exec)|npx|pnpm\s+(?:test|run|install|exec)|yarn\s+(?:test|run|install)|bun\s+(?:test|run|install)|node\s+--test|(?:cargo|go)\s+(?:test|build|check|clippy|fmt)|(?:python3?|uv)\s+-m\s+pytest|pytest|make\s+(?:test|check|build)|2f\s+(?:status|open|changes|apply))\b[^\r\n]*$/;
+
+export function isCommandLine(text) { return COMMAND_RE.test(String(text)); }
+
+function proseInline(text) {
+  return isCommandLine(text) ? [{ code: text }] : parseInline(text);
+}
 
 // Inline pass: balanced **bold** and `code` spans, earliest construct first.
 // Code content is verbatim — it never re-enters inline parsing. Anything
@@ -203,7 +212,7 @@ export function parseRich(text) {
       while (i < lines.length) {
         const item = (ordered ? ORDERED_RE : BULLET_RE).exec(lines[i]);
         if (!item) break;
-        items.push(parseInline(item[1].trim()));
+        items.push(proseInline(item[1].trim()));
         i++;
       }
       blocks.push({ type: "list", ordered, items });
@@ -230,7 +239,7 @@ export function parseRich(text) {
       para.push(t);
       i++;
     }
-    blocks.push({ type: "paragraph", inline: parseInline(para.join(" ")) });
+    blocks.push({ type: "paragraph", inline: para.length === 1 ? proseInline(para[0]) : parseInline(para.join(" ")) });
   }
 
   return blocks;

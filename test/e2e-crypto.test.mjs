@@ -6,6 +6,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { Worker as NodeWorker } from "node:worker_threads";
 import {
   deriveKeyRaw,
   importKey,
@@ -19,6 +20,36 @@ import {
 const CODE = "TESTCODE12345";
 const TOKEN = "sometoken";
 
+test("the actual KDF worker derives the same key off-thread and terminates after reply", async () => {
+  const expected = await deriveKeyRaw(CODE, TOKEN);
+  const previous = globalThis.Worker;
+  const pending = [];
+  let stopped = 0;
+  globalThis.Worker = class {
+    constructor(url) {
+      const bootstrap = `import {parentPort} from 'node:worker_threads';
+        globalThis.self={postMessage:(data,transfer)=>parentPort.postMessage(data,transfer)};
+        await import(${JSON.stringify(new URL("../src/web/kdf-worker.mjs", import.meta.url).href)});
+        parentPort.on('message',data=>self.onmessage({data}));`;
+      assert.equal(url.pathname.endsWith("/kdf-worker.mjs"), true);
+      this.thread = new NodeWorker(new URL("data:text/javascript," + encodeURIComponent(bootstrap)));
+      this.thread.on("message", data => this.onmessage?.({ data }));
+      this.thread.on("error", error => this.onerror?.(error));
+    }
+    postMessage(data) { this.thread.postMessage(data); }
+    terminate() { stopped++; pending.push(this.thread.terminate()); }
+  };
+  _forceNobleFallback(true);
+  try {
+    assert.deepEqual(await deriveKeyRaw(CODE, TOKEN), expected);
+    assert.equal(stopped, 1);
+  } finally {
+    _forceNobleFallback(false);
+    if (previous === undefined) delete globalThis.Worker; else globalThis.Worker = previous;
+    await Promise.all(pending);
+  }
+});
+
 test("WebCrypto and the pure-JS fallback derive the identical key", async () => {
   const viaSubtle = await deriveKeyRaw(CODE, TOKEN);
   _forceNobleFallback(true);
@@ -28,6 +59,18 @@ test("WebCrypto and the pure-JS fallback derive the identical key", async () => 
     assert.equal(viaNoble.length, 32);
   } finally {
     _forceNobleFallback(false);
+  }
+});
+
+test("a browser that refuses module workers still derives the compatible key", async () => {
+  const expected = await deriveKeyRaw(CODE, TOKEN);
+  const previous = globalThis.Worker;
+  globalThis.Worker = class { constructor() { throw new Error("Worker refused by browser policy"); } };
+  _forceNobleFallback(true);
+  try { assert.deepEqual(await deriveKeyRaw(CODE, TOKEN), expected); }
+  finally {
+    _forceNobleFallback(false);
+    if (previous === undefined) delete globalThis.Worker; else globalThis.Worker = previous;
   }
 });
 

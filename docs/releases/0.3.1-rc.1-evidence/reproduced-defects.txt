@@ -1,0 +1,88 @@
+✔ open: an eventless new run shows no old result or activity; current progress follows only its events (676.082333ms)
+✔ open: a failed run after success shows its own error and leaves the old result accessible explicitly (395.897041ms)
+✔ open: the current run's written result takes precedence over the task-level cached result (214.681292ms)
+✔ open: legacy tasks still read their sole result and untagged progress (206.10375ms)
+✖ CLI renders untrusted results, titles and errors as text without terminal controls (128.744042ms)
+0x2F UI: http://127.0.0.1:49395
+0x2F UI: http://127.0.0.1:49397
+✖ two workspaces stay authenticated in one browser cookie jar without sharing authority (44.559917ms)
+0x2F UI: http://127.0.0.1:49399
+✔ idempotency replay still requires authentication and the local browser boundary (43.291875ms)
+0x2F UI: http://127.0.0.1:49411
+✔ unauthenticated /api requests are refused with 401 — no task can be started (9.7915ms)
+0x2F UI: http://127.0.0.1:49414
+✔ a wrong or absent token is refused; the correct token is accepted (5.472417ms)
+0x2F UI: http://127.0.0.1:49417
+✔ the shell issues the per-runtime auth cookie, and the cookie authenticates the API (the browser flow) (21.260125ms)
+0x2F UI: http://127.0.0.1:49420
+✔ a foreign Host header (DNS rebinding) is refused on every route (4.27ms)
+0x2F UI: http://127.0.0.1:49428
+✔ cross-origin requests are refused even with a valid token (17.877875ms)
+0x2F UI: http://127.0.0.1:49432
+✔ Sec-Fetch-Site: cross-site and same-site browser requests are refused (15.254959ms)
+0x2F UI: http://127.0.0.1:49435
+✔ the full C1 chain: no unauthenticated or cross-site path starts agent work (9.321ms)
+0x2F UI: http://127.0.0.1:49438
+✔ request bodies over the cap are refused with 413 (declared and streamed) (4.323125ms)
+0x2F UI: http://127.0.0.1:49441
+✔ oversized inputs are refused by the shared actions — the CLI and the API share the caps (18.839958ms)
+0x2F UI: http://127.0.0.1:49443
+✔ the health probe is unauthenticated but Host-guarded; static assets carry the CSP (11.333625ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 15
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1757.64825
+
+✖ failing tests:
+
+test at test/cli-open.test.mjs:98:1
+✖ CLI renders untrusted results, titles and errors as text without terminal controls (128.744042ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /[\x00-\x08\x0b-\x1f\x7f-\x9f]/. Input:
+  
+  '#001 before\x1B[2J\x1B]52;c;YXVkaXQ=\x07after\x9B2J\rhidden\b!\n' +
+    '\n' +
+    'Status: ready\n' +
+    '\n' +
+    'Execution: provider opencode · node local\n' +
+    '\n' +
+    'RUNS\n' +
+    '\n' +
+    '  01   codex          5m   READY\n' +
+    '  02   gemini         1s   FAILED\n' +
+    '  03   opencode        —   WORKING\n' +
+    '\n' +
+    'before\x1B[2J\x1B]52;c;YXVkaXQ=\x07after\x9B2J\rhidden\b!\n'
+  
+      at TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/cli-open.test.mjs:105:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '#001 before\x1B[2J\x1B]52;c;YXVkaXQ=\x07after\x9B2J\rhidden\b!\n\nStatus: ready\n\nExecution: provider opencode · node local\n\nRUNS\n\n  01   codex          5m   READY\n  02   gemini         1s   FAILED\n  03   opencode        —   WORKING\n\nbefore\x1B[2J\x1B]52;c;YXVkaXQ=\x07after\x9B2J\rhidden\b!\n',
+    expected: /[\x00-\x08\x0b-\x1f\x7f-\x9f]/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at test/security.test.mjs:83:1
+✖ two workspaces stay authenticated in one browser cookie jar without sharing authority (44.559917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  401 !== 200
+  
+      at TestContext.<anonymous> (file:///Users/bogart/Dev/PROBNAYA/0x2f-prerelease-20261114/test/security.test.mjs:101:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

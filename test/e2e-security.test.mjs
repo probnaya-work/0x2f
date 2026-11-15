@@ -28,6 +28,7 @@ import { deriveKeyRaw, importKey, encrypt, decrypt } from "../src/web/e2e.mjs";
 import { pairPhone, createPhoneClient } from "./e2e-phone.mjs";
 import { projectTask, projectEvent } from "../src/relay/project.mjs";
 import { closeSecurityStack } from "./e2e-security-cleanup.mjs";
+import { makeRelayFrame } from "../src/relay/protocol.mjs";
 
 const quiet = { log() {}, warn() {}, error() {} };
 const TEST_CODE = "PAIRCODE-TEST-014";
@@ -40,11 +41,11 @@ function fakeNode() {
     resolveWorkspace: () => "/virtual/workspace",
     async startExecution({ task }) {
       calls.push(["start", task.slug]);
-      return 111;
+      return null;
     },
     async resumeExecution({ task, grant }) {
       calls.push(["resume", task.slug, grant]);
-      return 222;
+      return null;
     },
     async cancelExecution() {},
     calls
@@ -222,6 +223,123 @@ test("a tampered envelope (bit flip in the ciphertext) is rejected", async t => 
 });
 
 // --- 3. captured commands cannot be replayed ---------------------------------
+
+test("remote mutations persist an uncertainty receipt before effects and a final ack before responding", async t => {
+  const { base, runtime, phone } = await makeStack(t, { pair: true });
+  const requestId = "durable-mutation";
+  const cachePath = path.join(base, ".work", "relay-acks.json");
+  const create = runtime.actions.createWork;
+  runtime.actions.createWork = async args => {
+    const cache = JSON.parse(await fs.readFile(cachePath, "utf8"));
+    assert.equal(cache[requestId]?.ack.status, 409, "crash recovery must refuse to execute an uncertain mutation twice");
+    return create(args);
+  };
+  const task = await phone.command("create", { body: { brief: "Persist before execution" } }, { requestId });
+  const cache = JSON.parse(await fs.readFile(cachePath, "utf8"));
+  assert.equal(cache[requestId].ack.body.id, task.id);
+  assert.equal(cache[requestId].ack.ok, true);
+});
+
+test("an untrusted relay duplicating a frame while it is queued cannot repeat a mutation", async t => {
+  const { handle, runtime, phone, deviceId } = await makeStack(t, { pair: true });
+  let count = 0;
+  const create = runtime.actions.createWork;
+  runtime.actions.createWork = async args => {
+    count++;
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return create(args);
+  };
+  const requestId = "parallel-duplicate";
+  const encrypted = await encrypt(phone.key, {
+    cmd: "command", op: "create", body: { brief: "Only once" }, requestId, ts: Date.now()
+  }, { from: phone.phoneId, requestId });
+  const frame = JSON.stringify(makeRelayFrame(phone.phoneId, requestId, encrypted));
+  const socket = handle.state.devices.get(deviceId).ws;
+  socket.send(frame);
+  socket.send(frame);
+  await waitFor(() => count > 0, "first execution");
+  // A sentinel read runs after both already-delivered mutations on the host.
+  await phone.command("list");
+  assert.equal(count, 1);
+  assert.equal((await runtime.actions.listWork()).length, 1);
+});
+
+for (const corrupt of [false, true]) {
+  test(`restart refuses remote mutations with ${corrupt ? "unreadable" : "uncertain"} persisted command receipts`, async t => {
+    const { base, agent, configPath, runtime, phone, node, cleanup, handle } = await makeStack(t, { pair: true });
+    await agent.stop();
+    await waitFor(() => !handle.state.devices.get(phone.deviceId)?.online, "old agent disconnect");
+    const requestId = "interrupted-mutation";
+    const ack = { ok: false, status: 409, error: "Command outcome uncertain; inspect task on host." };
+    const raw = corrupt ? "{partial" : JSON.stringify({ [requestId]: { at: Date.now(), ack } });
+    const cachePath = path.join(base, ".work", "relay-acks.json");
+    await fs.writeFile(cachePath, raw);
+    const next = createRelayAgent({ runtime, configPath, log: quiet, configPollMs: 40 });
+    cleanup.agents.push(next);
+    next.start();
+    await waitFor(() => handle.state.devices.get(phone.deviceId)?.online, "new agent connect");
+    await assert.rejects(phone.command("create", { body: { brief: "Never replay" } }, { requestId }), error => error.status === 409);
+    assert.equal(node.calls.length, 0);
+    assert.deepEqual(await phone.command("list"), [], "read-only recovery remains available");
+    await next.stop();
+    if (corrupt) assert.equal(await fs.readFile(cachePath, "utf8"), raw, "retain unreadable evidence for inspection");
+  });
+}
+
+test("a failed receipt write refuses a remote mutation before execution", async t => {
+  const { base, node, phone } = await makeStack(t, { pair: true });
+  const cachePath = path.join(base, ".work", "relay-acks.json");
+  await fs.mkdir(cachePath); // Real filesystem refusal, no mocked action or network.
+  await assert.rejects(phone.command("create", { body: { brief: "Do not execute" } }), error => error.status === 500);
+  assert.equal(node.calls.length, 0);
+  await fs.rmdir(cachePath); // Restore writable state before normal shutdown.
+});
+
+test("a failed final acknowledgement write keeps retries uncertain without repeating the effect", async t => {
+  const {base,node,phone}=await makeStack(t,{pair:true});
+  const cachePath=path.join(base,'.work','relay-acks.json');
+  const rename=fs.rename;let commits=0;
+  t.mock.method(fs,'rename',async(...args)=>{
+    if(args[1]===cachePath && ++commits===2)throw Object.assign(new Error('Synthetic final receipt write failure'),{code:'ENOSPC'});
+    return rename(...args);
+  });
+  const requestId='failed-final-ack';
+  await assert.rejects(phone.command('create',{body:{brief:'One recorded effect'}},{requestId}),e=>e.status===500);
+  await assert.rejects(phone.command('create',{body:{brief:'Must not repeat'}},{requestId}),e=>e.status===409);
+  assert.equal(node.calls.length,1);
+  assert.equal(JSON.parse(await fs.readFile(cachePath,'utf8'))[requestId].ack.status,409);
+});
+
+test("queued remote actions recheck revocation at their execution boundary", async t => {
+  const { handle, runtime, phone, deviceId, configPath } = await makeStack(t, { pair: true });
+  let entered;
+  const started = new Promise(resolve => { entered = resolve; });
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  let executions = 0;
+  const create = runtime.actions.createWork;
+  runtime.actions.createWork = async args => {
+    executions++;
+    entered();
+    await gate;
+    return create(args);
+  };
+  const socket = handle.state.devices.get(deviceId).ws;
+  const send = async id => {
+    const envelope = await encrypt(phone.key, {cmd:"command",op:"create",body:{brief:id},requestId:id,ts:Date.now()}, {from:phone.phoneId,requestId:id});
+    socket.send(JSON.stringify(makeRelayFrame(phone.phoneId,id,envelope)));
+  };
+  try {
+    await send("accepted-before-revocation");
+    await started;
+    await send("queued-before-revocation");
+    const cfg = JSON.parse(await fs.readFile(configPath,"utf8"));
+    await writeRelayConfig(configPath,{...cfg,enabled:false});
+  } finally { release(); }
+  await waitFor(async () => (await runtime.actions.listWork()).length === 1, "first action to finish");
+  await new Promise(resolve => setTimeout(resolve,150));
+  assert.equal(executions,1,"the queued command has no authority after revocation");
+});
 
 test("a captured command envelope cannot be replayed to execute twice", async t => {
   const { node, phone } = await makeStack(t, { pair: true });

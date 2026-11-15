@@ -29,6 +29,7 @@ import {
 } from "../src/core/runs.mjs";
 import { eventsForRun } from "../src/web/ledger.mjs";
 import { withFakeBin } from "./helpers.mjs";
+import { processGroupAlive } from "../src/recover.mjs";
 
 // --- fixtures ---------------------------------------------------------------
 
@@ -528,8 +529,11 @@ async function waitForStatus(runtime, id, expected, opts = {}) {
   const start = Date.now();
   while (true) {
     const task = await runtime.store.findTask(id);
-    if (task.status === expected) return task;
-    if (!ok.has(task.status)) {
+    // The fixture CLI exits at every outcome. A saved terminal state can
+    // precede the worker's final writes and process exit; wait before resume,
+    // rerun or removing its directory, especially on Node 20 under load.
+    if (task.status === expected && !processGroupAlive(task.processGroupId)) return task;
+    if (task.status !== expected && !ok.has(task.status)) {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }
     if (Date.now() - start > timeout) throw new Error("timed out waiting for task " + id);

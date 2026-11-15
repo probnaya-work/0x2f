@@ -36,8 +36,8 @@
 // Cheat Sheet). The code is 14 characters from a 32-character unambiguous
 // alphabet (no 0/O/1/I/L) = ~70 bits of entropy; with 600k PBKDF2 iterations,
 // offline brute force of a captured envelope is infeasible. Key derivation
-// happens once per pairing on each side, so the iteration cost (~0.2–1 s) is
-// paid only at pairing time.
+// happens once per pairing on each side. Plain-HTTP phones use the JS
+// fallback; their latency must be measured on the physical device.
 
 import { PROTOCOL_VERSION } from "../relay/protocol.mjs";
 import { hmac } from "./vendor/@noble/hashes/hmac.js";
@@ -136,6 +136,10 @@ export async function deriveKeyRaw(code, token) {
     );
     return new Uint8Array(bits);
   }
+  if (typeof g.Worker === "function") {
+    try { return await deriveInWorker(code, token); }
+    catch { /* Older browsers/CSP can refuse workers; keep the responsive fallback. */ }
+  }
   // Pure-JS fallback (plain-http LAN page): standard PBKDF2-HMAC-SHA256 —
   // identical bytes to the WebCrypto path above (pinned by tests). The loop
   // yields to a REAL macrotask every `yieldEvery` iterations, so the phone's
@@ -147,6 +151,32 @@ export async function deriveKeyRaw(code, token) {
   });
 }
 
+function deriveInWorker(code, token) {
+  return new Promise((resolve, reject) => {
+    const worker = new g.Worker(new URL("./kdf-worker.mjs", import.meta.url), { type: "module" });
+    let timer;
+    let settled = false;
+    const finish = (error, key) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      worker.onmessage = worker.onerror = null;
+      worker.terminate();
+      if (error) reject(error); else resolve(key);
+    };
+    worker.onmessage = event => {
+      const key = event.data?.key;
+      if (!(key instanceof Uint8Array) || key.length !== 32) {
+        finish(new Error("Key derivation worker failed"));
+      } else finish(null, key);
+    };
+    worker.onerror = () => finish(new Error("Key derivation worker unavailable"));
+    timer = setTimeout(() => finish(new Error("Key derivation worker timed out")), 120_000);
+    try { worker.postMessage({ code, token }); }
+    catch (error) { finish(error); }
+  });
+}
+
 // PBKDF2-HMAC-SHA256 over the vendored hmac primitive, yielding to the event
 // loop between batches. RFC 2898: U1 = PRF(P, S || INT_32_BE(i)); Ui =
 // PRF(P, U(i-1)); T_i = U1 ^ U2 ^ … ^ Uc. SHA-256 output is 32 bytes.
@@ -155,19 +185,32 @@ async function pbkdf2WithYield(password, salt, { c, dkLen, yieldEvery = 2048 }) 
   const block = new Uint8Array(salt.length + 4);
   block.set(salt);
   const view = new DataView(block.buffer);
-  for (let i = 1, pos = 0; pos < dkLen; i++, pos += 32) {
-    view.setUint32(salt.length, i, false);
-    const t = hmac(sha256, password, block); // U1
-    let prev = t;
-    for (let j = 1; j < c; j++) {
-      const next = hmac(sha256, password, prev); // Uj
-      for (let k = 0; k < t.length; k++) t[k] ^= next[k];
-      prev = next;
-      if (j % yieldEvery === 0) await new Promise(r => setTimeout(r, 0));
+  // The password is constant throughout PBKDF2. Reuse its keyed HMAC
+  // state instead of allocating and hashing both key pads 600,000 times.
+  // This is the same clone/update/digestInto contract used by the pinned
+  // vendored noble PBKDF2, with real macrotask yields for browser painting.
+  const prf = hmac.create(sha256, password);
+  const u = new Uint8Array(prf.outputLen);
+  let working;
+  try {
+    for (let i = 1, pos = 0; pos < dkLen; i++, pos += prf.outputLen) {
+      view.setUint32(salt.length, i, false);
+      (working = prf._cloneInto(working)).update(block).digestInto(u);
+      const t = out.subarray(pos, Math.min(pos + prf.outputLen, dkLen));
+      t.set(u.subarray(0, t.length));
+      for (let j = 1; j < c; j++) {
+        (working = prf._cloneInto(working)).update(u).digestInto(u);
+        for (let k = 0; k < t.length; k++) t[k] ^= u[k];
+        if (j % yieldEvery === 0) await new Promise(r => setTimeout(r, 0));
+      }
     }
-    out.set(t.subarray(0, Math.min(t.length, dkLen - pos)), pos);
+    return out;
+  } finally {
+    prf.destroy();
+    working?.destroy();
+    u.fill(0);
+    block.fill(0);
   }
-  return out;
 }
 
 // Wrap raw key bytes for encrypt/decrypt. Returns { subtle } when WebCrypto

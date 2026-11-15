@@ -1,0 +1,40 @@
+# 0x2F TUI frame — report-120x36
+# state: report   mode: result   terminal: 120x36
+# captured from `2f tui` on a real PTY with deterministic fake providers
+# timestamps, durations, machine hostname and scratch paths are scrubbed for stability
+                                                                                                                        
+  0x2F / ws / #001 · RUN 1 · alpha · ready                                                                              
+  [ ] other runs   i exact input   esc back to task                                                                     
+                                                                                                                        
+  WRITTEN RESULT · PROVIDER REPORT                                                                                      
+  Verified the change after the human allowed.                                                                          
+                                                                                                                        
+  Result                                                                                                                
+  Added retry-with-backoff to the submit path; honors Retry-After in whole seconds.                                     
+                                                                                                                        
+  Evidence                                                                                                              
+  src/app.ts — the new retry block.                                                                                     
+                                                                                                                        
+  Changes                                                                                                               
+  src/app.ts                                                                                                            
+                                                                                                                        
+  Verification                                                                                                          
+  │ npm test -- submit                                                                                                  
+                                                                                                                        
+  Needs human decision                                                                                                  
+  REQUIRED: no                                                                                                          
+                                                                                                                        
+                                                                                                                        
+  PROVIDER-REPORTED CHECKS                                                                                              
+  │ npm test -- submit                                                                                                  
+  Separate successful check receipt: not recorded.                                                                      
+                                                                                                                        
+  ORIGINAL REQUEST                                                                                                      
+  Inspect the submit path and add retry handling                                                                        
+  Use whole seconds for Retry-After.                                                                                    
+  Cover the offline queue.                                                                                              
+                                                                                                                        
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+  ✓ allowed · #001 continues in the same run                                                                            
+  j/k scroll   g/G ends   [ ] run   i input/result   esc back   31/37                                                   
+                                                                                                                        

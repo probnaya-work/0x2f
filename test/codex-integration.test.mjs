@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
 import { executableAvailable } from "../src/providers/index.mjs";
 import { codexProvider } from "../src/providers/codex.mjs";
+import { processGroupAlive } from "../src/recover.mjs";
 import {
   startCodexResponsesMock,
   messageStream,
@@ -37,7 +38,27 @@ function codexExecutable() {
       : null;
 }
 
-function runCli(base, args, env = {}) {
+async function runCli(base, args, env = {}) {
+  if (args[0] === "rerun") {
+    // A saved terminal outcome precedes OS process-group quiescence. The real
+    // Codex binary can still drain helpers on Linux; wait for the documented
+    // admission prerequisite instead of treating a safe 409 as a product fault.
+    const task = await createStore(base).findTask(args[1]);
+    const deadline = Date.now() + 15000;
+    while (processGroupAlive(task.processGroupId)) {
+      if (Date.now() >= deadline) {
+        const members=[];
+        if(process.platform==='linux')for(const pid of await fs.readdir('/proc')){
+          if(!/^\d+$/.test(pid))continue;
+          try{const stat=await fs.readFile(`/proc/${pid}/stat`,'utf8');const fields=stat.slice(stat.lastIndexOf(')')+2).split(' ');
+            if(Number(fields[2])===task.processGroupId)members.push({pid:Number(pid),state:fields[0],parent:Number(fields[1]),name:stat.slice(stat.indexOf('(')+1,stat.lastIndexOf(')'))});
+          }catch{}
+        }
+        throw new Error(`Codex fixture process group ${task.processGroupId} did not drain before retry: ${JSON.stringify(members)}`);
+      }
+      await new Promise(resolve => setTimeout(resolve,50));
+    }
+  }
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [CLI, ...args], {
       cwd: base,
@@ -84,7 +105,10 @@ async function makeCodexProject(mock) {
   const codexHome = await fs.mkdtemp(path.join(os.tmpdir(), "work-codex-int-home-"));
   await fs.writeFile(
     path.join(codexHome, "config.toml"),
-    `model = "gpt-5.1-codex"\nmodel_provider = "mock"\n\n[model_providers.mock]\nname = "Mock Responses API"\nbase_url = "${mock.url}/v1"\nwire_api = "responses"\n`
+    // A cold Codex profile otherwise synchronizes its public plugin catalog
+    // in background git children. Keep this local-API fixture independent of
+    // that network operation and leave the execution sandbox unchanged.
+    `model = "gpt-5.1-codex"\nmodel_provider = "mock"\n\n[features]\nplugins = false\nremote_plugin = false\n\n[model_providers.mock]\nname = "Mock Responses API"\nbase_url = "${mock.url}/v1"\nwire_api = "responses"\n`
   );
   const codex = codexExecutable();
   const codexEnv = {
@@ -218,7 +242,7 @@ test("E2E: a codex auth failure is normalized (failure.kind=auth) and RETRY work
         `model = "gpt-5.1-codex"\nmodel_provider = "mock"\n\n[model_providers.mock]\nname = "Mock Responses API"\nbase_url = "${mock2.url}/v1"\nwire_api = "responses"\n`
       );
       const rerun = await runCli(base, ["rerun", "1", "--provider", "codex"], codexEnv);
-      assert.equal(rerun.code, 0);
+      assert.equal(rerun.code, 0, rerun.err || rerun.out);
       const done = await waitForStatus(base, 1, "ready");
       assert.equal(done.runs.length, 2);
       assert.equal(done.runs[1].provider, "codex");
@@ -325,7 +349,7 @@ test("E2E: a codex decision needs_you is answered, and a rerun continues the tas
     // The NEXT run is a fresh session that continues the task WITH the
     // answer in context (the prompt is rebuilt from task state).
     const rerun = await runCli(base, ["rerun", "1", "--provider", "codex"], codexEnv);
-    assert.equal(rerun.code, 0);
+    assert.equal(rerun.code, 0, rerun.err || rerun.out);
     const done = await waitForStatus(base, 1, "ready");
     assert.equal(done.runs.length, 2);
     assert.equal(done.runs[1].outcome, "ready");
@@ -384,7 +408,7 @@ test("E2E: the same task can switch away from codex to another provider without 
     // Rerun the SAME task through a different provider: run 2 under the same
     // task, codex's result preserved in history.
     const rerun = await runCli(base, ["rerun", "1", "--provider", "other"], codexEnv);
-    assert.equal(rerun.code, 0);
+    assert.equal(rerun.code, 0, rerun.err || rerun.out);
     const done = await waitForStatus(base, 1, "ready");
     assert.equal(done.runs.length, 2);
     assert.equal(done.runs[0].provider, "codex");

@@ -1,0 +1,18 @@
+{
+  "platform": "linux",
+  "arch": "x64",
+  "node": "v26.13.0",
+  "packageVersion": "0.3.1-rc.1",
+  "id": 7,
+  "status": "ready",
+  "elapsedSeconds": 9.468,
+  "markerVerified": true,
+  "checks": [
+    {
+      "id": "arithmetic",
+      "status": "passed",
+      "exitCode": 0
+    }
+  ],
+  "result": "passed"
+}

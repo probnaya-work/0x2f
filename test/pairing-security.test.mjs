@@ -16,12 +16,10 @@ import path from "node:path";
 import { WebSocket } from "ws";
 import { createRelayServer } from "../relay/server.mjs";
 import { createRelayAgent } from "../src/relay/agent.mjs";
-import { pairDevice, pairOff, validateRelayUrl } from "../src/relay/pair.mjs";
+import { pairDevice, pairOff, validateRelayUrl, validateClientOrigin } from "../src/relay/pair.mjs";
 import {
   defaultRelayUrl,
-  defaultClientOrigin,
-  DEFAULT_RELAY_URL,
-  DEFAULT_CLIENT_ORIGIN
+  defaultClientOrigin
 } from "../src/relay/defaults.mjs";
 import { createRuntime } from "../src/runtime.mjs";
 import { createTailer } from "../src/core/events.mjs";
@@ -34,10 +32,10 @@ function fakeNode() {
     displayName: "Fake node",
     resolveWorkspace: () => "/virtual/workspace",
     async startExecution() {
-      return 111;
+      return null;
     },
     async resumeExecution() {
-      return 222;
+      return null;
     },
     async cancelExecution() {}
   };
@@ -413,6 +411,7 @@ test("2f pair falls back to a fresh identity when the relay rejects the old cred
   const result = await pairDevice({
     base,
     url: handle.url,
+    client: "http://localhost",
     waitMs: 1500,
     pollMs: 50,
     ensure: async () => ({ status: "reused", url: handle.url })
@@ -499,6 +498,7 @@ test("relay.json and the relay state file are written with mode 0600", async t =
   await pairDevice({
     base,
     url: handle.url,
+    client: "http://localhost",
     waitMs: 800,
     pollMs: 50,
     ensure: async () => ({ status: "reused", url: handle.url })
@@ -513,12 +513,67 @@ test("relay.json and the relay state file are written with mode 0600", async t =
 
 // --- hosted defaults (the `2f pair` real-phone flow) -------------------------
 
-test("hosted defaults are https and pass the relay transport policy", () => {
-  assert.match(DEFAULT_RELAY_URL, /^https:\/\//);
-  assert.match(DEFAULT_CLIENT_ORIGIN, /^https:\/\//);
-  assert.equal(validateRelayUrl(DEFAULT_RELAY_URL), null);
-  // The phone's pairing page is served from the client origin — it must be TLS.
-  assert.equal(new URL(DEFAULT_CLIENT_ORIGIN).protocol, "https:");
+test("hosted pairing has no implicit operated-service origin", t => {
+  const saved = [process.env["0X2F_RELAY_URL"], process.env["0X2F_CLIENT_ORIGIN"]];
+  t.after(() => ["0X2F_RELAY_URL", "0X2F_CLIENT_ORIGIN"].forEach((key, i) => {
+    if (saved[i] === undefined) delete process.env[key]; else process.env[key] = saved[i];
+  }));
+  delete process.env["0X2F_RELAY_URL"];
+  delete process.env["0X2F_CLIENT_ORIGIN"];
+  assert.equal(defaultRelayUrl(), "");
+  assert.equal(defaultClientOrigin(), "");
+});
+
+test("hosted pairing refuses missing or unsafe client origins before changing config or contacting a runtime", async t => {
+  const saved = [process.env["0X2F_RELAY_URL"], process.env["0X2F_CLIENT_ORIGIN"]];
+  t.after(() => ["0X2F_RELAY_URL", "0X2F_CLIENT_ORIGIN"].forEach((key, i) => {
+    if (saved[i] === undefined) delete process.env[key]; else process.env[key] = saved[i];
+  }));
+  delete process.env["0X2F_RELAY_URL"];
+  delete process.env["0X2F_CLIENT_ORIGIN"];
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-pair-origin-"));
+  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const configPath = path.join(base, ".work", "relay.json");
+  const original = JSON.stringify({ transport: "lan", enabled: false, url: "http://192.168.1.5:4242", clientOrigin: "http://192.168.1.5:4242" });
+  await fs.mkdir(path.dirname(configPath), { recursive: true });
+  await fs.writeFile(configPath, original);
+  const forbidden = async () => { throw new Error("unexpected external effect"); };
+  for (const [options, message] of [
+    [{ url: "https://relay.example.com" }, /Client origin is required/],
+    [{ client: "https://client.example.com" }, /Relay URL is required/],
+    [{ url: "https://relay.example.com", client: "https://relay.example.com/" }, /separate origins/],
+    ...["http://client.example.com", "http://192.168.1.6"].map(client => [{ url: "https://relay.example.com", client }, /must use https/]),
+    ...["https://user:password@client.example.com", "https://client.example.com/subpath", "https://client.example.com/?key=synthetic", "https://client.example.com/#fragment"].map(client => [{ url: "https://relay.example.com", client }, /without credentials, path, query or fragment/])
+  ]) {
+    await assert.rejects(pairDevice({ base, ...options, ensure: forbidden, fetchImpl: forbidden, killImpl: forbidden }), message);
+    assert.equal(await fs.readFile(configPath, "utf8"), original);
+  }
+  assert.equal(validateClientOrigin("http://localhost:4242"), null);
+  assert.equal(validateClientOrigin("http://192.168.1.5:4242", { lan: true }), null);
+});
+
+test("hosted environment overrides saved origins, while explicit flags override the environment", async t => {
+  const saved = [process.env["0X2F_RELAY_URL"], process.env["0X2F_CLIENT_ORIGIN"]];
+  t.after(() => ["0X2F_RELAY_URL", "0X2F_CLIENT_ORIGIN"].forEach((key, i) => {
+    if (saved[i] === undefined) delete process.env[key]; else process.env[key] = saved[i];
+  }));
+  process.env["0X2F_RELAY_URL"] = "https://env-relay.example.com";
+  process.env["0X2F_CLIENT_ORIGIN"] = "https://env-client.example.com";
+  const base = await fs.mkdtemp(path.join(os.tmpdir(), "work-pair-origin-"));
+  t.after(() => fs.rm(base, { recursive: true, force: true }));
+  const configPath = path.join(base, ".work", "relay.json");
+  await writeRelayConfig(configPath, { transport: "hosted", url: "https://saved-relay.example.com", clientOrigin: "https://saved-client.example.com" });
+  const calls = [];
+  const opts = { base, ensure: async () => ({}), fetchImpl: async url => {
+    calls.push(url); return { ok: true, json: async () => ({ registered: true }) };
+  } };
+  const envResult = await pairDevice(opts);
+  assert.equal(new URL(envResult.url).origin, "https://env-client.example.com");
+  assert.ok(calls.every(url => url.startsWith("https://env-relay.example.com/")));
+  calls.length = 0;
+  const flagResult = await pairDevice({ ...opts, url: "https://flag-relay.example.com", client: "https://flag-client.example.com" });
+  assert.equal(new URL(flagResult.url).origin, "https://flag-client.example.com");
+  assert.ok(calls.every(url => url.startsWith("https://flag-relay.example.com/")));
 });
 
 test("0X2F_RELAY_URL / 0X2F_CLIENT_ORIGIN override the hosted defaults", t => {

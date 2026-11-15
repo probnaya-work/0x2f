@@ -23,10 +23,12 @@ import {
   secondaryAction,
   INPUT_LABELS
 } from "./state.mjs";
-import { fmtDuration } from "../web/ledger.mjs";
+import { fmtDuration, isCommandLine } from "../web/ledger.mjs";
 import { resultEvidence, reportedSection } from "../web/result-evidence.mjs";
-import { editorRows } from "./editor.mjs";
+import { editorRows, composerTextWidth } from "./editor.mjs";
+import { displayWidth, takeCells, tailCells, cellRows, firstGrapheme } from "./text.mjs";
 import { MAX_BRIEF } from "../core/limits.mjs";
+import { stripVTControlCharacters } from "node:util";
 
 export const MIN_TUI_COLS = 60;
 export const MIN_TUI_ROWS = 18;
@@ -44,12 +46,10 @@ export const MIN_TUI_ROWS = 18;
 // collapsing those would silently reflow the design's own spacing. ANSI
 // sequences are stripped because provider output is arbitrary text: an
 // escape code that reached a cell would repaint the rest of the row.
-const ANSI_RE = /\u001b\[[0-9;?]*[ -/]*[@-~]/g;
-const CONTROL_RE = /[\u0000-\u0008\u000b-\u001f\u007f]/g;
+const CONTROL_RE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f]/g;
 
 export function oneline(value) {
-  return String(value ?? "")
-    .replace(ANSI_RE, "")
+  return stripVTControlCharacters(String(value ?? ""))
     .replace(/[\r\n\t]+/g, " ")
     .replace(CONTROL_RE, "")
     .trim();
@@ -58,19 +58,21 @@ export function oneline(value) {
 export function pad(value, n) {
   const s = oneline(value);
   const width = Math.max(0, n | 0);
-  return s.length >= width ? s.slice(0, width) : s + " ".repeat(width - s.length);
+  const clipped = takeCells(s, width);
+  return clipped + " ".repeat(width - displayWidth(clipped));
 }
 
 export function padl(value, n) {
   const s = oneline(value);
   const width = Math.max(0, n | 0);
-  return s.length >= width ? s.slice(0, width) : " ".repeat(width - s.length) + s;
+  const clipped = takeCells(s, width);
+  return " ".repeat(width - displayWidth(clipped)) + clipped;
 }
 
 export function cut(value, n) {
   const s = oneline(value);
   const width = Math.max(1, n | 0);
-  return s.length <= width ? s : s.slice(0, Math.max(1, width - 1)) + "…";
+  return displayWidth(s) <= width ? s : takeCells(s, Math.max(0, width - 1)) + "…";
 }
 
 // A fixed-width cell for provider-authored WORDS — a tool verb, an action
@@ -91,33 +93,34 @@ export function cellWord(value, n) {
 export function shortPath(value, n) {
   const width = Math.max(6, n | 0);
   const p = oneline(value);
-  if (p.length <= width) return p;
+  if (displayWidth(p) <= width) return p;
   const parts = p.split("/");
   let out = parts[parts.length - 1];
   for (let i = parts.length - 2; i >= 0; i--) {
     const next = parts[i] + "/" + out;
-    if (next.length + 2 > width) break;
+    if (displayWidth(next) + 2 > width) break;
     out = next;
   }
-  return "…/" + out;
+  return "…/" + tailCells(out, width - 2);
 }
 
 export function wrap(value, n) {
   const width = Math.max(8, n | 0);
   const out = [];
-  for (const paragraph of String(value ?? "").replace(ANSI_RE, "").replace(CONTROL_RE, "").split("\n")) {
+  for (const paragraph of stripVTControlCharacters(String(value ?? "")).replace(CONTROL_RE, "").split("\n")) {
     if (!paragraph.trim()) {
       out.push("");
       continue;
     }
     let line = "";
     for (let word of paragraph.split(/\s+/).filter(Boolean)) {
-      if (word.length > width) {
+      if (displayWidth(word) > width) {
         if (line) { out.push(line); line = ""; }
-        while (word.length > width) { out.push(word.slice(0, width)); word = word.slice(width); }
+        const pieces = cellRows(word, width);
+        word = pieces.pop(); out.push(...pieces);
       }
       if (!line.length) line = word;
-      else if ((line + " " + word).length <= width) line += " " + word;
+      else if (displayWidth(line + " " + word) <= width) line += " " + word;
       else {
         out.push(line);
         line = word;
@@ -128,19 +131,22 @@ export function wrap(value, n) {
   return out;
 }
 
-const len = cells => cells.reduce((total, cell) => total + String(cell.t ?? "").length, 0);
+const len = cells => cells.reduce((total, cell) => total + displayWidth(cell.t), 0);
 
-// One visual grammar for every key hint: warm, bold keys; neutral action
-// labels; quiet separators. Keep whole bindings when space runs out.
-function bindings(entries, width, p, T, prefix = " ") {
+// Keep the next action distinct from the keyboard reference. Whole bindings
+// stay together when space runs out; help retains every omitted shortcut.
+function bindings(entries, width, p, T, prefix = " ", overflowHelp = true) {
   const groups = [];
-  let used = prefix.length;
+  let used = displayWidth(prefix);
   for (const [key, label, primary = false] of entries) {
     const cells = key
-      ? [T(key, p.key, 600), T(" " + label, primary ? p.title : p.dim, primary ? 600 : 400)]
+      ? primary
+        ? [{ ...T(" " + key + " " + cut(label, Math.max(4, width - displayWidth(prefix) - displayWidth(key) - 3)) + " ", p.bg, 600), bg: p.accent }]
+        : [T(key, p.key, 600), T(" " + label, p.dim)]
       : [T(label, p.ghost)];
     const size = len(cells) + (groups.length ? 3 : 0);
     if (used + size > width) {
+      if (!overflowHelp) break;
       const more = groups.some(cells => cells[0]?.t === "?")
         ? [T("…", p.ghost)] : [T("… ", p.ghost), T("?", p.key, 600), T(" help", p.dim)];
       while (groups.length > 1 && used + len(more) + 3 > width) {
@@ -153,7 +159,7 @@ function bindings(entries, width, p, T, prefix = " ") {
     groups.push(cells);
     used += size;
   }
-  return [T(prefix, p.dim)].concat(groups.flatMap((cells, i) => i ? [T(" · ", p.rule), ...cells] : cells));
+  return [T(prefix, p.dim)].concat(groups.flatMap((cells, i) => i ? [T("   ", p.rule), ...cells] : cells));
 }
 
 // Provider prose keeps its saved source intact; only the presentation turns
@@ -161,11 +167,17 @@ function bindings(entries, width, p, T, prefix = " ") {
 function proseRows(value, width, p, T, indent = "   ") {
   const lines = [];
   let fenced = false;
-  for (const raw of String(value ?? "").replace(ANSI_RE, "").replace(CONTROL_RE, "").split(/\r?\n/)) {
-    if (!raw.trim()) { lines.push({ cells: [T("")] }); continue; }
+  const codeRows = raw => {
+    const text = raw.replace(/\t/g, "    ");
+    const room = Math.max(8, width - 2);
+    for (const row of cellRows(text, room)) lines.push({ cells: [T(indent + "│ ", p.rule), T(row, p.code)] });
+  };
+  for (const raw of stripVTControlCharacters(String(value ?? "")).replace(CONTROL_RE, "").split(/\r?\n/)) {
     const fence = /^\s*(```|~~~)/.test(raw);
-    if (fence) fenced = !fenced;
-    const heading = !fenced && !fence && raw.match(/^#{1,6}\s+(.+)$/);
+    if (fence) { fenced = !fenced; continue; }
+    if (fenced || isCommandLine(raw.trim())) { codeRows(raw); continue; }
+    if (!raw.trim()) { lines.push({ cells: [T("")] }); continue; }
+    const heading = raw.match(/^#{1,6}\s+(.+)$/);
     const text = heading ? heading[1] : raw;
     const spans = [];
     let at = 0;
@@ -173,21 +185,36 @@ function proseRows(value, width, p, T, indent = "   ") {
       for (const match of text.matchAll(/\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g)) {
         if (match.index > at) spans.push([text.slice(at, match.index), p.fg, 400]);
         const link = match[3] && (match[3] === match[4] ? match[3] : match[3] + " (" + match[4] + ")");
-        spans.push([match[1] ?? match[2] ?? link, match[1] ? p.title : p.heading, match[1] ? 600 : 400]);
+        spans.push([match[1] ?? match[2] ?? link, match[1] ? p.title : match[2] ? p.code : p.heading, match[1] ? 600 : 400, match[2] !== undefined]);
         at = match.index + match[0].length;
       }
     }
     spans.push([text.slice(at), heading ? p.heading : fence ? p.ghost : p.fg, heading ? 600 : 400]);
     let cells = [], used = 0, space = false;
     const flush = () => { lines.push({ cells: [T(indent, p.fg), ...cells] }); cells = []; used = 0; space = false; };
-    for (const [text, color, weight] of spans) {
+    for (const [text, color, weight, literal] of spans) {
       for (const word of text.match(/\s+|\S+/g) ?? []) {
-        if (/^\s+$/.test(word)) { space = used > 0; continue; }
-        if (used && used + Number(space) + word.length > width) flush();
+        if (/^\s+$/.test(word)) {
+          if (literal) {
+            for (const c of (space ? " " : "") + word.replace(/\t/g, "    ")) {
+              if (used === width) flush();
+              cells.push(T(c, color, weight)); used++;
+            }
+            space = false;
+          } else space = used > 0;
+          continue;
+        }
+        if (used && used + Number(space) + displayWidth(word) > width) flush();
         if (space) { cells.push(T(" ", p.fg)); used++; space = false; }
         for (let at = 0; at < word.length;) {
-          const part = word.slice(at, at + width - used);
-          cells.push(T(part, color, weight)); used += part.length; at += part.length;
+          let part = takeCells(word.slice(at), width - used);
+          if (!part.length) { flush(); part = takeCells(word.slice(at), width); }
+          if (!part.length) {
+            at += firstGrapheme(word.slice(at)).length;
+            cells.push(T("�", color, weight)); used++;
+            continue;
+          }
+          cells.push(T(part, color, weight)); used += displayWidth(part); at += part.length;
           if (used === width && at < word.length) flush();
         }
       }
@@ -266,7 +293,7 @@ function stateColor(task, p) {
 // explicit ellipsis so a narrow pane clips honestly instead of silently.
 function permissionSubLine(task, w, p, T) {
   const path = shortPath(task.halt.path, Math.max(8, w - 26));
-  const opMax = Math.max(4, w - 16 - path.length);
+  const opMax = Math.max(4, w - 16 - displayWidth(path));
   // cut() trims, so the indent lives outside the bounded body.
   const body = cut("wants " + cut(task.halt.op.toLowerCase(), opMax) + " · " + path, w - 7);
   return [T("     " + body, p.accent)];
@@ -277,20 +304,15 @@ function permissionSubLine(task, w, p, T) {
 export function buildLeft(model, state, w, p, T) {
   const lines = [];
   const counts = model.counts;
-  const now = new Date(model.at);
-  const two = v => String(v).padStart(2, "0");
-  const clock = two(now.getHours()) + ":" + two(now.getMinutes()) + ":" + two(now.getSeconds());
   const searching = state.searching || state.search;
   const label = searching ? "/" + state.search : "~/" + model.workspace.label;
 
   lines.push({
     cells: [
       T(" 0x2F ", p.title, 600),
-      T(pad(cut(label, w - 12 - clock.length), w - 10 - clock.length),
+      T(cut(label, w - 7),
         searching ? p.accent : p.dim,
-        state.searching ? 600 : 400),
-      T("● ", p.ok),
-      T(clock, p.dim)
+        state.searching ? 600 : 400)
     ]
   });
   lines.push({
@@ -313,26 +335,27 @@ export function buildLeft(model, state, w, p, T) {
     lines.push({ cells: [T("")] });
     lines.push({
       cells: [
-        T(" " + heading + " ", key === "needs" ? p.accent : key === "failed" ? p.bad : key === "ready" ? p.ok : p.heading, 600),
-        T("─".repeat(Math.max(1, w - 4 - heading.length)) + " " + items.length, p.rule)
+        T(" " + heading, key === "needs" ? p.accent : key === "failed" ? p.bad : key === "ready" ? p.ok : p.heading, 600),
+        T("  " + items.length, p.ghost)
       ]
     });
 
     for (const task of items) {
       const isSelected = current && task.id === current.id;
       const bg = isSelected ? p.sel : "transparent";
-      const g = glyph(task, p);
-      const tag = task.providerSig + (task.run > 1 ? "·r" + task.run : "");
-      const titleW = Math.max(10, w - 9 - tag.length - 2);
+      const titleW = Math.max(10, w - (isSelected ? 8 : 11));
+      const titleRows = isSelected ? wrap(oneline(task.title), titleW) : [];
       const cells = [
-        T(isSelected ? " ❯" : "  ", p.accent, 600),
-        { t: g.t, c: g.c, b: g.b, bg },
-        T(" " + task.idLabel + " ", p.ghost),
-        T(pad(cut(task.title, titleW), titleW), task.state === "done" ? p.ghost : isSelected ? p.title : p.fg, isSelected ? 600 : 400),
-        T(" " + tag + " ", task.state === "done" ? p.ghost : p.dim, 500)
+        T(isSelected ? " ❯ " : "   ", p.accent, 600),
+        T(task.idLabel + " ", p.ghost),
+        T(isSelected ? titleRows[0] : pad(cut(task.title, titleW), titleW), task.state === "done" ? p.ghost : isSelected ? p.title : p.fg, isSelected ? 600 : 400),
+        ...(!isSelected ? [T(" " + task.providerSig, p.dim)] : [])
       ];
       for (const cell of cells) cell.bg = bg;
       lines.push({ cells, bg, selected: isSelected });
+      if (titleRows.length > 1) {
+        lines.push({ cells: [T("       " + cut(titleRows.slice(1).join(" "), titleW), p.title, 600)], bg });
+      }
 
       // A second line for the rows that carry an obligation, and for
       // whatever is selected. Everything else stays one row — the ledger's
@@ -354,6 +377,12 @@ export function buildLeft(model, state, w, p, T) {
           .concat([T("  " + cut(last ? last.verb.toLowerCase() + " · " + last.arg : task.activity || "starting", Math.max(6, w - 22)), p.dim)]);
       }
       if (sub && (isSelected || task.state === "needs" || task.state === "failed")) {
+        if (isSelected) {
+          const summary = task.state === "ready" ? task.files.length + (task.files.length === 1 ? " file changed" : " files changed")
+            : task.state === "needs" ? task.halt?.kind === "decision" ? "answer needed" : "permission needed"
+              : task.state === "failed" ? task.fail?.at ?? "stopped" : "executing";
+          sub = [T("       " + cut(task.providerName + " · " + (w < 32 ? "run " + task.run : summary), w - 8), p.dim)];
+        }
         for (const cell of sub) cell.bg = bg;
         lines.push({ cells: sub, bg });
       }
@@ -382,52 +411,36 @@ export function buildRight(model, state, w, p, T) {
     ];
   }
 
-  const word = stateWord(task);
   const head = [
     T(" #" + task.idLabel + "  ", p.ghost),
-    T(cut(task.title, Math.max(8, w - 10 - word.length)), p.title, 600)
+    T(cut(task.title, Math.max(8, w - 9)), p.title, 600)
   ];
-  head.push(T(" ".repeat(Math.max(1, w - 1 - len(head) - word.length)), p.dim));
-  head.push(T(word, stateColor(task, p), 600));
   lines.push({ cells: head });
-  lines.push({ cells: [T(" " + "─".repeat(Math.max(1, w - 2)), p.rule)] });
 
   const field = (label, cells, color = p.ghost) =>
     lines.push({ cells: [T(" " + pad(label, 9), color, 500)].concat(cells) });
 
   const runCount = task.runs.length || 1;
   const noteCount = task.notes.length;
-  field("TASK", [
-    T(
-      "open " + Math.round(task.opened) + "m · " +
-      runCount + (runCount === 1 ? " run" : " runs") + " · " +
-      noteCount + (noteCount === 1 ? " note" : " notes"),
-      p.dim
-    )
-  ]);
-  field("RUN " + task.run, [
-    T(task.providerSig + " ", p.fg, 600),
-    T(pad(task.providerName, 17), p.fg, 500),
-    T(padl(fmtDuration(task.elapsed), 7) + "  ", p.dim),
-    T(
-      task.state === "needs" ? "halted on you"
-        : task.state === "working" ? "executing"
-          : task.state === "failed" ? "stopped"
-            : task.state === "ready" ? "result available · review"
-              : "closed",
-      task.state === "needs" ? p.accent : task.state === "failed" ? p.bad : p.dim
-    )
-  ]);
-  // Which machine ran it. One task can outlive the terminal it was started
-  // from, and a run's node is persisted per run, never assumed.
-  field("ON", [T(model.node + " · " + model.workspace.label, p.ghost)]);
+  const runStatus = task.state === "needs" ? "halted on you"
+    : task.state === "working" ? "executing"
+      : task.state === "failed" ? "stopped"
+        : task.state === "ready" ? "result available · review" : "closed";
+  const runMeta = " · run " + task.run + " · " + fmtDuration(task.elapsed);
+  const nameWidth = Math.max(6, w - 2 - displayWidth(runMeta) - (w >= 60 ? 3 + displayWidth(runStatus) : 0));
+  lines.push({ cells: [T(" " + cut(task.providerName, nameWidth) + runMeta, p.dim),
+    ...(w >= 60 ? [T("   " + runStatus, p.ghost)] : [])] });
 
   // The current question, failure or result is the reading priority. The
   // activity record follows it, so old events cannot bury the next action.
   lines.push({ cells: [T("")] });
   const current = stateBlock(task, w, p, T);
-  if (current.length) current[0].bg = p.sel;
   lines.push(...current);
+
+  lines.push({ cells: [T("")] });
+  field("TASK", [T(cut(runCount + (runCount === 1 ? " run" : " runs") + " · " +
+    noteCount + (noteCount === 1 ? " note" : " notes") + " · open " + Math.round(task.opened) + "m", w - 11), p.ghost)]);
+  field("ON", [T(cut(model.node + " · " + model.workspace.label, Math.max(8, w - 11)), p.ghost)]);
 
   if (task.history.length) {
     lines.push({ cells: [T("")] });
@@ -454,14 +467,14 @@ export function buildRight(model, state, w, p, T) {
   lines.push({ cells: [T("")] });
   const log = task.steps;
   const traceLimit = ["ready", "done"].includes(task.state) ? 2 : 6;
-  const shown = state.expand ? log : log.slice(-traceLimit);
+  const shown = state.expand ? log : ["ready", "done"].includes(task.state) ? [] : log.slice(-traceLimit);
   const hidden = log.length - shown.length;
   field("TRACE", [
     T(
       "run " + task.run + " · " + log.length + (log.length === 1 ? " event" : " events"),
       p.ghost
     ),
-    ...(hidden > 0 ? [T(" · " + hidden + " earlier hidden · ", p.ghost), T("t", p.key, 600), T(" expand", p.dim)]
+    ...(hidden > 0 ? [T(shown.length ? " · " + hidden + " earlier hidden · " : " · ", p.ghost), T("t", p.key, 600), T(" expand", p.dim)]
       : state.expand && log.length > traceLimit ? [T(" · ", p.ghost), T("t", p.key, 600), T(" collapse", p.dim)] : [])
   ], p.heading);
   if (!log.length) {
@@ -517,27 +530,28 @@ export function buildRight(model, state, w, p, T) {
   if (secondary) actions.push(["x", secondary.label]);
   if (task.state === "working") actions.push(["s", "STOP"]);
   actions.push(["c", "NOTE"]);
-  const acts = bindings(actions, w, p, T, "   ");
-  lines.push({ cells: acts, pin: true, bg: p.sel });
+  const acts = bindings(actions, w, p, T, "   ", false);
+  lines.push({ cells: acts, pin: true, bg: p.sidebar });
   return lines;
 }
 
 // The band that says what this task wants from you right now.
 function stateBlock(task, w, p, T) {
   const lines = [];
-  const row = (label, value, color, weight) =>
-    lines.push({
-      cells: [T("   " + cellWord(label, 8), p.dim), T(cut(value, Math.max(6, w - 14)), color, weight)]
-    });
+  const row = (label, value, color, weight) => {
+    wrap(value, Math.max(8, w - 14)).forEach((text, i) => lines.push({
+      cells: [T("   " + cellWord(i ? "" : label, 8), p.dim), T(text, color, weight)]
+    }));
+  };
 
   if (task.state === "needs" && task.halt.kind === "permission") {
     lines.push({ cells: [T(" NEEDS YOU · PERMISSION", p.accent, 600)] });
-    lines.push({
-      cells: [
-        T("   " + cellWord(task.halt.op.toLowerCase(), 8), p.dim),
-        T(shortPath(task.halt.path, Math.max(8, w - 14)), p.fg, 600)
-      ]
-    });
+    lines.push({ cells: [T("")] });
+    for (const text of wrap(task.halt.op, Math.max(10, w - 6))) {
+      lines.push({ cells: [T("   " + text, p.title, 600)] });
+    }
+    row("path", shortPath(task.halt.path, Math.max(8, w - 14)), p.fg);
+    lines.push({ cells: [T("")] });
     if (task.halt.plan) row("plan", task.halt.plan, p.fg);
     if (task.halt.why) row("why", task.halt.why, p.dim);
     if (task.halt.options.length) row("options", task.halt.options.join(" · "), p.dim);
@@ -547,14 +561,18 @@ function stateBlock(task, w, p, T) {
     row("", task.halt.note, p.ghost);
   } else if (task.state === "needs") {
     lines.push({ cells: [T(" NEEDS YOU · DECISION", p.accent, 600)] });
+    lines.push({ cells: [T("")] });
     // The question in full — it is prose a human has to actually answer, not
     // a label. core/lifecycle.mjs preserves it verbatim; nothing truncates
     // it on the way here.
     for (const rowText of wrap(task.halt.question, Math.max(10, w - 6))) {
       lines.push({ cells: [T("   " + rowText, p.title, 600)] });
     }
-    for (const rowText of wrap(task.halt.detail, Math.max(10, w - 6))) {
-      lines.push({ cells: [T("   " + rowText, p.dim)] });
+    for (const paragraph of String(task.halt.detail || "").split(/\r?\n/).filter(text => text.trim())) {
+      lines.push({ cells: [T("")] });
+      for (const rowText of wrap(paragraph, Math.max(10, w - 6))) {
+        lines.push({ cells: [T("   " + rowText, p.fg)] });
+      }
     }
     lines.push({ cells: [T("")] });
     for (const rowText of wrap(task.halt.note, Math.max(10, w - 6))) {
@@ -564,7 +582,7 @@ function stateBlock(task, w, p, T) {
     lines.push({
       cells: [
         T(" FAILED", p.bad, 600),
-        T("   run " + task.run + " on " + task.providerName + " stopped at " + fmtDuration(task.elapsed), p.dim)
+        T("   " + cut("run " + task.run + " on " + task.providerName + " stopped at " + fmtDuration(task.elapsed), Math.max(8, w - 11)), p.dim)
       ]
     });
     row("at", task.fail.at, p.fg);
@@ -597,20 +615,9 @@ function stateBlock(task, w, p, T) {
     lines.push({
       cells: [
         T(" RESULT", p.ok, 600),
-        T("   ", p.dim), T("r", p.key, 600), T(" reads the full report", p.dim)
+        T("   ", p.dim), T("r", p.key, 600), T(" full report", p.dim)
       ]
     });
-    if (task.files.length) {
-      for (const file of task.files) {
-        lines.push({ cells: [T("   " + shortPath(file, Math.max(8, w - 6)), p.heading)] });
-      }
-    } else {
-      lines.push({
-        cells: [T("   " + (task.coarse
-          ? "this provider does not report which files it changed"
-          : "no file changes reported"), p.ghost)]
-      });
-    }
     if (typeof task.result === "string" && task.result.trim()) {
       lines.push({ cells: [T("")] });
       // The ledger is a decision surface, not a second log viewer. Show
@@ -629,6 +636,17 @@ function stateBlock(task, w, p, T) {
         if (rows.length > 6) lines.push({ cells: bindings([["r", "all check details"]], w, p, T, "   ") });
       }
     }
+    lines.push({ cells: [T("")] });
+    lines.push({ cells: [T(" CHANGES", p.heading, 600), T("   ", p.dim), T("d", p.key, 600), T(" inspect", p.dim)] });
+    if (task.files.length) {
+      for (const file of task.files) {
+        lines.push({ cells: [T("   " + shortPath(file, Math.max(8, w - 6)), p.dim)] });
+      }
+    } else {
+      lines.push({ cells: [T("   " + (task.coarse
+        ? "this provider does not report which files it changed"
+        : "no file changes reported"), p.ghost)] });
+    }
   } else if (task.state === "working") {
     const last = [...task.steps].reverse().find(s => s.kind === "tool" || s.kind === "command");
     const ruleW = Math.min(28, Math.max(6, w - 22));
@@ -646,7 +664,7 @@ function stateBlock(task, w, p, T) {
     lines.push({
       cells: [
         T(" CLOSED", p.ghost, 600),
-        T("   closed after " + task.run + (task.run === 1 ? " run" : " runs"), p.ghost)
+        T("   " + cut("closed after " + task.run + (task.run === 1 ? " run" : " runs"), Math.max(8, w - 11)), p.ghost)
       ]
     });
   }
@@ -667,8 +685,9 @@ export function buildResult(model, state, cols, p, T) {
   const task = model.tasks.find(t => t.id === review?.taskId) ?? selected(model.tasks, state);
   if (!review) return [{ cells: [T(" Loading saved run…", p.dim)] }];
   const lines = [];
+  const measure = Math.min(96, Math.max(12, cols - 4));
   const text = value => {
-    for (const line of wrap(value, Math.max(12, cols - 4))) lines.push({ cells: [T(" " + line, p.fg)] });
+    for (const line of wrap(value, measure)) lines.push({ cells: [T(" " + line, p.fg)] });
   };
   const heading = value => { lines.push({ cells: [T("")] }); lines.push({ cells: [T(" " + value, p.heading, 600)] }); };
   text(`0x2F / ${model.workspace.label} / #${task?.idLabel ?? ""} · RUN ${review.run} · ${review.provider ?? "unknown"} · ${review.outcome ?? "unknown"}`);
@@ -676,16 +695,16 @@ export function buildResult(model, state, cols, p, T) {
   if (review.input) {
     heading("EXACT SAVED RUN INPUT"); text(review.inputTransport || "Historical saved prompt"); text(review.prompt || "Not recorded.");
   } else {
-    heading("ORIGINAL REQUEST"); text(review.brief);
     const evidence = resultEvidence(review.result, review.events);
+    heading("WRITTEN RESULT · PROVIDER REPORT");
+    lines.push(...proseRows(review.result || review.error || "Not recorded.", measure, p, T, " "));
     for (const r of review.checks ?? []) {
       heading(`PROJECT CHECK ${r.id} · ${r.status} · exit ${r.exitCode ?? "unknown"}`);
     }
     heading("PROVIDER-REPORTED CHECKS");
-    lines.push(...proseRows(evidence.verification, Math.max(12, cols - 4), p, T, " "));
+    lines.push(...proseRows(evidence.verification, measure, p, T, " "));
     text(evidence.receipt);
-    heading("WRITTEN RESULT · PROVIDER REPORT");
-    lines.push(...proseRows(review.result || review.error || "Not recorded.", Math.max(12, cols - 4), p, T, " "));
+    heading("ORIGINAL REQUEST"); text(review.brief);
     // Detailed command output is an appendix. A real audit can produce
     // thousands of receipt lines; they must never bury its written result.
     for (const r of review.checks ?? []) {
@@ -815,68 +834,61 @@ function diffLineStyle(line, p) {
 export function buildComposer(model, state, cols, p, T, height = 1000) {
   const c = state.composer;
   const lines = [];
-  const w = Math.min(cols - 6, 96);
-
-  lines.push({
-    cells: [
-      T(" NEW TASK", p.title, 600),
-      T("   a task is permanent — the run you are about to start is not", p.ghost)
-    ]
-  });
-  lines.push({ cells: [T(" " + "─".repeat(Math.max(1, cols - 2)), p.rule)] });
-  lines.push({ cells: [T("")] });
-
+  const fieldWidth = Math.min(cols - 2, 102);
+  const w = composerTextWidth(cols);
+  const briefed = c.original !== null;
   const info = model.lookup(c.provider);
   const available = model.providers?.[c.provider]?.available;
-  lines.push({ cells: [T(" " + pad("PROVIDER", 11), p.ghost, 500), {
-    t: " " + info.sig + " " + cut(info.name, Math.max(8, cols - 47)) + " ",
-    c: p.bg, b: 600, bg: p.accent
-  }, T("  " + (model.providerOrder.indexOf(c.provider) + 1) + "/" + model.providerOrder.length, p.dim),
-  T(available === false ? "  executable missing" : available === true ? "  executable found" : "", available === false ? p.bad : p.dim)] });
-  lines.push({ cells: bindings([["tab", "next"], ["shift-tab", "previous"]], cols, p, T, "             ") });
+
+  lines.push({ cells: [T(" NEW TASK", p.title, 600)] });
+  lines.push({ cells: [T(" Nothing runs until you choose Start.", p.dim)] });
   lines.push({ cells: [T("")] });
+  lines.push({ cells: [T(" Provider   ", p.dim), {
+    t: " " + info.sig + " " + cut(info.name, Math.max(8, cols - 46)) + " ",
+    c: p.title, b: 600, bg: p.sel
+  }, T("   ", p.dim), T("tab", p.key, 600), T(" change", p.dim),
+  ...(available === false ? [T(" · executable missing", p.bad)] : [])] });
+  lines.push({ cells: [T("")] });
+  lines.push({ cells: [T(briefed ? " EXPANDED BRIEF" : " WHAT NEEDS DOING?", p.heading, 600),
+    ...(briefed ? [T("   ", p.dim), T("⌃z", p.key, 600), T(" revert", p.dim)] : [])] });
 
-  const briefed = c.original !== null;
-  lines.push({
-    cells: [
-      T(" " + pad(briefed ? "BRIEF" : "TASK", 11), briefed ? p.accent : p.heading, 600),
-      T(briefed
-        ? "expanded from your note"
-        : "type or paste your task · nothing runs until Enter", p.ghost),
-      ...(briefed ? [T(" · ", p.rule), T("⌃z", p.key, 600), T(" reverts", p.dim)] : [])
-    ]
-  });
-
+  const border = (left, right) => ({ cells: [T(" " + left + "─".repeat(fieldWidth - 2) + right, p.rule)] });
+  lines.push(border("┌", "┐"));
   const { rows: body, caret } = editorRows(c.text, c.cursor, w);
   const bottom = [
     { cells: [T("")] },
     { cells: bindings([["↵", "START", true], ["ctrl-n", "newline"], ["F1", "help"], ["esc", "keep draft"]], cols, p, T) },
     { cells: [T(" 0x2F names the task from what you write.", p.ghost)] }
   ];
-  const capacity = Math.max(1, height - lines.length - bottom.length - 1);
+  // Reserve the field's bottom edge and its position cue before choosing a
+  // window. Even 60×18 keeps the caret, Start and draft recovery visible.
+  const capacity = Math.max(1, height - lines.length - bottom.length - 2);
   const anchor = Math.max(0, Math.min(body.length - capacity, caret.row - capacity + 1));
   const offset = Math.max(0, Math.min(Math.max(0, body.length - capacity), anchor - (c.scroll ?? 0)));
-  if (!c.text.length) {
-    lines.push({
-      cells: [
-        T("   ", p.fg),
-        { t: " ", c: p.accent, cur: true, bg: "transparent" },
-        T(" what should the machine do?", p.ghost)
-      ]
-    });
-  } else {
-    body.slice(offset, offset + capacity).forEach((row, i) => {
-      if (offset + i !== caret.row) lines.push({ cells: [T("   " + row, p.fg)] });
-      else {
-        const tail = row.slice(caret.col);
-        const grapheme = [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(tail)][0]?.segment ?? " ";
-        lines.push({ cells: [T("   " + row.slice(0, caret.col), p.fg),
-          { t: grapheme, c: p.accent, cur: true, bg: "transparent" }, T(tail.slice(grapheme.length), p.fg)] });
-      }
-    });
+  const visibleRows = body.slice(offset, offset + capacity);
+  const count = Math.min(capacity, Math.max(6, visibleRows.length));
+  for (let i = 0; i < count; i++) {
+    const row = visibleRows[i] ?? "";
+    const cells = [T(" │", p.rule), { ...T("  ", p.fg), bg: p.field }];
+    if (offset + i === caret.row) {
+      const tail = row.slice(caret.col);
+      const grapheme = firstGrapheme(tail) || " ";
+      cells.push(T(row.slice(0, caret.col), p.fg),
+        { t: grapheme, c: p.accent, cur: true, bg: p.field }, T(tail.slice(grapheme.length), p.fg));
+    } else cells.push(T(row, p.fg));
+    if (!c.text.length && i === 0) cells.push(T(" Describe the outcome you want…", p.ghost));
+    const contentWidth = len(cells) - 2;
+    cells.push(T(" ".repeat(Math.max(0, w + 4 - contentWidth)), p.fg), T("│", p.rule));
+    // Only the editable interior gets the input surface. Its border and
+    // outside margin remain on the canvas in both truecolor and no-color.
+    for (let j = 1; j < cells.length - 1; j++) cells[j].bg = p.field;
+    lines.push({ cells });
   }
-  lines.push({ cells: [T("   " + c.text.length + "/" + MAX_BRIEF + " characters" + (body.length > capacity
-    ? " · lines " + (offset + 1) + "–" + Math.min(body.length, offset + capacity) + "/" + body.length + " · PgUp/PgDn review" : ""), c.text.length > MAX_BRIEF ? p.bad : p.dim)] });
+  lines.push(border("└", "┘"));
+  const cue = body.length > capacity
+    ? "Lines " + (offset + 1) + "–" + Math.min(body.length, offset + capacity) + "/" + body.length + " · PgUp/PgDn review · "
+    : "";
+  lines.push({ cells: [T(" " + cue + c.text.length + "/" + MAX_BRIEF + " characters", c.text.length > MAX_BRIEF ? p.bad : p.ghost)] });
   lines.push(...bottom);
   return lines;
 }
@@ -940,7 +952,9 @@ export function buildHelp(cols, p, T, error = null, draft = null) {
   }
   lines.push({ cells: [T("")] });
   lines.push({ cells: [T("   MODEL", p.fg, 600)] });
-  for (const note of MODEL_NOTES) lines.push({ cells: [T("   " + note, p.dim)] });
+  for (const note of MODEL_NOTES) {
+    for (const row of wrap(note, Math.max(1, cols - 6))) lines.push({ cells: [T("   " + row, p.dim)] });
+  }
   return lines;
 }
 
@@ -978,16 +992,13 @@ export function frame(model, state, opts = {}) {
       ...cell,
       bg: cell.bg && cell.bg !== "transparent" ? cell.bg : bg || "transparent"
     }));
-    let room = w - len(out);
-    if (room < 0) {
-      let over = -room;
-      for (let i = out.length - 1; i >= 0 && over > 0; i--) {
-        const take = Math.min(over, out[i].t.length);
-        out[i] = { ...out[i], t: out[i].t.slice(0, out[i].t.length - take) };
-        over -= take;
-      }
-      room = 0;
+    let used = 0;
+    for (let i = 0; i < out.length; i++) {
+      const original = out[i].t, text = takeCells(original, w - used);
+      out[i] = { ...out[i], t: text }; used += displayWidth(text);
+      if (text.length < original.length) { out.splice(i + 1); break; }
     }
+    const room = w - used;
     if (room > 0) out.push({ t: " ".repeat(room), c: p.dim, b: 400, bg: bg || "transparent" });
     return out;
   };
@@ -1026,13 +1037,13 @@ export function frame(model, state, opts = {}) {
     // Two panes. The left width is a fixed reading measure at normal sizes
     // and a fraction only when the terminal is too narrow to afford it.
     const narrow = cols < 110;
-    const Lw = narrow ? Math.round(cols * 0.42) : cols <= 140 ? 46 : 54;
+    const Lw = narrow ? Math.max(25, Math.round(cols * 0.37)) : cols <= 140 ? 36 : 42;
     const Rw = cols - Lw - 1;
     const left = buildLeft(model, state, Lw, p, T);
     const right = buildRight(model, state, Rw, p, T);
 
     // Window the ledger around the selection, keeping its three-row header
-    // pinned — the counts and the clock must never scroll away.
+    // pinned — workspace identity and counts must never scroll away.
     let leftWindow = left;
     if (left.length > avail) {
       // One row of the window is the orientation cue, exactly where the
@@ -1084,11 +1095,11 @@ export function frame(model, state, opts = {}) {
     for (let i = 0; i < avail; i++) {
       const l = leftWindow[i];
       const r = rightWindow[i];
-      const bg = l?.bg ?? "transparent";
+      const bg = l?.bg ?? p.sidebar;
       lines.push({
         cells: padTo(l ? l.cells : [T("")], Lw, bg)
           .concat([{ t: "│", c: p.rule, b: 400, bg: "transparent" }])
-          .concat(padTo(r ? r.cells : [T("")], Rw, r?.bg ?? "transparent"))
+          .concat(padTo(r ? r.cells : [T("")], Rw, r?.bg ?? p.surface))
       });
     }
 
@@ -1097,10 +1108,8 @@ export function frame(model, state, opts = {}) {
     const secondary = secondaryAction(task);
     // Task actions already have their own pinned band. The global footer
     // stays for navigation, reading and recovery, without a second copy.
-    hint.push(["n", "new task"], ["j/k", "select"]);
-    if (task) hint.push(["r", "result"]);
-    hint.push(["?", "help"], ["q", "detach"], ["J/K", "scroll"], ["/", "search"], ["tab", FILTERS[state.filter].toLowerCase()]);
-    if (task?.hasChanges) hint.push(["d", "changes"]);
+    hint.push(["n", "new task"], ["j/k", "select"], ["tab", FILTERS[state.filter].toLowerCase()], ["?", "help"], ["q", "detach"]);
+    if (cols >= 100) hint.push(["/", "search"]);
   }
 
   while (lines.length < avail) lines.push({ cells: [T("")] });
@@ -1113,17 +1122,18 @@ export function frame(model, state, opts = {}) {
     const label = INPUT_LABELS[state.input] + (task ? " #" + task.idLabel : "");
     const flat = state.draft.replace(/\n/g, "↵").replace(/\t/g, " ");
     const cursor = Math.min(state.draftCursor ?? flat.length, flat.length);
-    const width = Math.max(1, cols - label.length - 5);
-    const offset = Math.max(0, cursor - width + 1);
-    const tail = flat.slice(cursor, offset + width);
+    const width = Math.max(1, cols - displayWidth(label) - 5);
+    const tail = flat.slice(cursor);
     const grapheme = [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(tail)][0]?.segment ?? " ";
+    const before = tailCells(flat.slice(0, cursor), width - displayWidth(grapheme));
+    const after = takeCells(tail.slice(grapheme.length), width - displayWidth(before) - displayWidth(grapheme));
     lines.push({
       cells: [
         T(" " + label + " ", p.accent, 600),
         T("› ", p.ghost),
-        T(flat.slice(offset, cursor), p.fg),
+        T(before, p.fg),
         { t: grapheme, c: p.accent, cur: true, bg: "transparent" },
-        T(tail.slice(grapheme.length), p.fg)
+        T(after, p.fg)
       ]
     });
     lines.push({
@@ -1134,7 +1144,7 @@ export function frame(model, state, opts = {}) {
       cells: [
         T(" SEARCH ", p.accent, 600),
         T("/ ", p.ghost),
-        T(state.search, p.fg),
+        T(tailCells(state.search, Math.max(1, cols - 11)), p.fg),
         { t: " ", c: p.accent, cur: true, bg: "transparent" }
       ]
     });
