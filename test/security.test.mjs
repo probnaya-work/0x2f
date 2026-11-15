@@ -543,7 +543,9 @@ test("the health probe is unauthenticated but Host-guarded; static assets carry 
     // surface serves the relay protocol, not this route). `2f pair` uses
     // `base` to tell a same-workspace runtime from a foreign one when it must
     // choose a LAN port.
-    assert.deepEqual(await health.json(), { ok: true, mode: "local", base });
+    const { supervised, ...identity } = await health.json();
+    assert.deepEqual(identity, { ok: true, mode: "local", base });
+    assert.ok(supervised === undefined || supervised === true, "supervision reveals only an optional boolean");
 
     const rebound = await rawRequest({
       port: handle.port,

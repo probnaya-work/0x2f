@@ -260,7 +260,9 @@ test("the packed artifact supports the full first-install journey", async t => {
       await new Promise(r => setTimeout(r, 250));
     }
   }
-  assert.deepEqual(health, { ok: true, mode: "local", base: await fsp.realpath(proj) });
+  const { supervised, ...identity } = health;
+  assert.deepEqual(identity, { ok: true, mode: "local", base: await fsp.realpath(proj) });
+  assert.ok(supervised === undefined || supervised === true, "supervision is an optional boolean signal");
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/tasks`)).status, 401);
   const shell = await fetch(`http://127.0.0.1:${port}/`);
   assert.ok(/^0x2f_auth_\d+=/.test(shell.headers.get("set-cookie") ?? ""), "shell must set the auth cookie");

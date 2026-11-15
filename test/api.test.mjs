@@ -21,11 +21,11 @@ function fakeNode() {
     resolveWorkspace: () => "/virtual/workspace",
     async startExecution({ task }) {
       calls.push(["start", task.slug]);
-      return 111;
+      return null;
     },
     async resumeExecution({ task, grant }) {
       calls.push(["resume", task.slug, grant]);
-      return 222;
+      return null;
     },
     async cancelExecution() {},
     calls
@@ -98,7 +98,7 @@ test("POST /api/tasks creates a task through the shared action and starts it on 
     assert.equal(task.execution.provider, "claude-code");
     assert.equal(task.execution.node, "fake-node");
     assert.equal(task.execution.workspace, "local");
-    assert.equal(task.pid, 111);
+    assert.equal(task.pid, null, "the inert node starts no OS process");
     assert.deepEqual(node.calls, [["start", task.slug]]);
     assert.match(task.slug, /^001-api-task$/);
   } finally {

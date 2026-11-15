@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn, execFile } from "node:child_process";
 import { createStore } from "../src/core/store.mjs";
+import { pidAlive } from "../src/recover.mjs";
 
 const CLI = fileURLToPath(new URL("../src/cli.mjs", import.meta.url));
 
@@ -48,8 +49,10 @@ async function waitForStatus(base, id, expected, timeout = 15000) {
   const start = Date.now();
   while (true) {
     const task = await store.findTask(id);
-    if (task.status === expected) return task;
-    if (task.status !== "working") {
+    // READY is persisted before the worker finishes its final bookkeeping.
+    // Keep the workspace intact until its writer has actually exited.
+    if (task.status === expected && !pidAlive(task.pid)) return task;
+    if (task.status !== expected && task.status !== "working") {
       throw new Error(`task went ${task.status} instead of ${expected}: ${task.error ?? ""}`);
     }
     if (Date.now() - start > timeout) throw new Error("timed out waiting for task " + id);

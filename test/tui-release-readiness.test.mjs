@@ -190,7 +190,9 @@ test("PTY: provider selection, long draft review, help return and tiny-window re
     await session.waitForText(/BRAVO/);
     const request = "FIRST REQUIREMENT\n" + "Review authentication.\n".repeat(30) + "FINAL REQUIREMENT";
     await session.write("\x1b[200~" + request + "\x1b[201~");
-    await session.waitForText(/FINAL REQUIREMENT/);
+    // A PTY can deliver the editor rows before the footer of the same paint.
+    await session.waitFor(s => /FINAL REQUIREMENT/.test(s.text()) && /↵ START/.test(s.text()),
+      { label: "complete composer with visible Start action" });
     assert.match(session.text(), /↵ START/);
     await session.write("\x1bOP");
     await session.waitForText(/KEYS/);
